@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, Text, ForeignKey, Numeric, JSON,
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.mysql import LONGTEXT  # เพิ่มตัวนี้เพื่อรองรับ Base64 ยาวๆ
-from database import Base
+from app.database import Base
 
 class Category(Base):
     __tablename__ = "categories"

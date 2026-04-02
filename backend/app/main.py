@@ -1,9 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-import models
-from database import engine
-from app.routes import users, places, reviews, admin
+from app import models
+from app.database import engine
+from app.api.routes import users, places, reviews, admin
 
 # สร้างตารางใน DB
 models.Base.metadata.create_all(bind=engine)

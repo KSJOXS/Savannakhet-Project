@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import desc, func
-from database import get_db
-import models
+from app.database import get_db
+from app import models
 from app import schemas
 
 router = APIRouter(tags=["Reviews & Recommendations"])

@@ -1,6 +1,6 @@
 import torch
 from torch_geometric.data import HeteroData
-import models
+from app import models
 
 def build_graph_from_db(interactions):
     data = HeteroData()
