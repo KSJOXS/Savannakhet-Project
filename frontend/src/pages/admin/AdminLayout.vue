@@ -1,0 +1,165 @@
+<template>
+    <div class="admin-wrapper">
+        <aside class="admin-sidebar">
+            <div class="sidebar-logo">
+                <i class="fas fa-tools"></i>
+                <span>SMART TRAVEL ADMIN</span>
+            </div>
+
+            <nav class="sidebar-nav">
+                <router-link to="/admin/places" class="nav-link" active-class="active">
+                    <i class="fas fa-map-marker-alt"></i> จัดการสถานที่
+                </router-link>
+
+                <router-link to="/admin/categories" class="nav-link" active-class="active">
+                    <i class="fas fa-tags"></i> จัดการหมวดหมู่
+                </router-link>
+
+                <router-link to="/admin/comments" class="nav-link" active-class="active">
+                    <i class="fas fa-comments"></i> จัดการคอมเมนต์
+                </router-link>
+
+                <router-link to="/admin/manage-users" class="nav-link" active-class="active">
+                    <i class="fas fa-users"></i> จัดการผู้ใช้งาน
+                </router-link>
+
+                <div class="nav-divider"></div>
+
+                <router-link to="/" class="nav-link back-home">
+                    <i class="fas fa-external-link-alt"></i> กลับสู่หน้าหลัก
+                </router-link>
+
+                <button @click="logout" class="nav-link btn-logout-action">
+                    <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
+                </button>
+            </nav>
+        </aside>
+
+        <main class="admin-content">
+            <header class="admin-top-bar">
+                <div class="user-info-admin">
+                    <span>ผู้ดูแลระบบ: <strong>Admin</strong></span>
+                </div>
+            </header>
+
+            <div class="content-view">
+                <router-view></router-view>
+            </div>
+        </main>
+    </div>
+</template>
+
+<script setup>
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+const logout = () => {
+    if (confirm('ยืนยันการออกจากระบบ?')) {
+        // ล้างข้อมูลการล็อกอิน
+        localStorage.removeItem('access_token')
+        localStorage.removeItem('user')
+
+        // ส่งกลับไปหน้า Login
+        router.push('/login')
+    }
+}
+</script>
+
+<style scoped>
+/* เพิ่มสไตล์เฉพาะให้ปุ่มให้ทำงานเหมือน router-link */
+.btn-logout-action {
+    background: transparent;
+    border: none;
+    width: 100%;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: inherit;
+    text-align: left;
+}
+
+.admin-wrapper {
+    display: flex;
+    min-height: 100vh;
+    background: #f8fafc;
+}
+
+/* Sidebar Style */
+.admin-sidebar {
+    width: 280px;
+    background: #1e293b;
+    color: white;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-logo {
+    padding: 30px;
+    font-size: 1.2rem;
+    font-weight: 800;
+    border-bottom: 1px solid #334155;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.sidebar-nav {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.nav-link {
+    color: #94a3b8;
+    text-decoration: none;
+    padding: 12px 20px;
+    border-radius: 12px;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.nav-link:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+}
+
+.nav-link.active {
+    background: #3498db;
+    color: white;
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+}
+
+.nav-divider {
+    height: 1px;
+    background: #334155;
+    margin: 20px 0;
+}
+
+.back-home {
+    color: #60a5fa;
+}
+
+/* Main Area Style */
+.admin-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-top-bar {
+    height: 70px;
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0 40px;
+}
+
+.content-view {
+    padding: 40px;
+}
+</style>

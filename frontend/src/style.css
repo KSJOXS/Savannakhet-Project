@@ -1,0 +1,27 @@
+/* src/style.css */
+:root {
+  font-family: 'Prompt', sans-serif;
+  /* แนะนำให้หา FontPrompt มาใส่ครับ ดูทันสมัย */
+  --primary-color: #2c3e50;
+  --accent-color: #42b983;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #f4f7f6;
+  color: #333;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+hr {
+  border: 0;
+  height: 1px;
+  background-color: #eee;
+  margin: 20px 0;
+}
