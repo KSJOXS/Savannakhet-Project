@@ -39,7 +39,7 @@
 
 <script setup>
 import { ref } from 'vue'
-import axios from 'axios'
+import { authRepository } from '@/repositories/authRepository'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
@@ -55,8 +55,8 @@ const form = ref({
 const handleRegister = async () => {
     loading.value = true
     try {
-        // ยิงไปที่ Endpoint /register ของ FastAPI
-        await axios.post('http://127.0.0.1:8000/register', form.value)
+        // ยิงไปที่ Endpoint /register ผ่าน repository
+        await authRepository.register(form.value)
         alert("สมัครสมาชิกสำเร็จ! กรุณาเข้าสู่ระบบ")
         router.push('/login')
     } catch (err) {

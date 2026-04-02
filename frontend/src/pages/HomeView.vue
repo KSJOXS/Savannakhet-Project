@@ -64,7 +64,8 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import axios from 'axios'
+import { placeRepository } from '@/repositories/placeRepository'
+import { categoryRepository } from '@/repositories/categoryRepository'
 import Navbar from '../components/Navbar.vue'
 
 const router = useRouter()
@@ -76,8 +77,8 @@ const fetchData = async () => {
     try {
         // ดึงข้อมูลสถานที่และหมวดหมู่พร้อมกัน
         const [resPlaces, resCats] = await Promise.all([
-            axios.get('http://127.0.0.1:8000/places'),
-            axios.get('http://127.0.0.1:8000/categories')
+            placeRepository.getAll(),
+            categoryRepository.getAll()
         ])
         // สุ่มหรือเลือกเฉพาะ 3 ที่แรกมาโชว์หน้า Home
         featuredPlaces.value = resPlaces.data.slice(0, 3)

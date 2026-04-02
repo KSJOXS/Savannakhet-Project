@@ -54,7 +54,8 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import { placeRepository } from '@/repositories/placeRepository'
+import { categoryRepository } from '@/repositories/categoryRepository'
 
 const places = ref([])
 const categories = ref([])
@@ -66,8 +67,8 @@ const fetchData = async () => {
     try {
         // ตรวจสอบว่า URL นี้สามารถเข้าถึงได้จริงผ่าน Browser
         const [p, c] = await Promise.all([
-            axios.get('http://127.0.0.1:8000/places?include_drafts=true'),
-            axios.get('http://127.0.0.1:8000/categories')
+            placeRepository.getAll(true),
+            categoryRepository.getAll()
         ])
         places.value = p.data
         categories.value = c.data
@@ -81,7 +82,7 @@ const fetchData = async () => {
 const handleDelete = async (id) => {
     if (confirm('คุณแน่ใจหรือไม่ว่าต้องการลบสถานที่นี้?')) {
         try {
-            await axios.delete(`http://127.0.0.1:8000/admin/places/${id}`)
+            await placeRepository.delete(id)
             alert('ลบข้อมูลสำเร็จ')
             await fetchData() // โหลดข้อมูลใหม่หลังจากลบ
         } catch (error) {

@@ -102,7 +102,8 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import axios from 'axios'
+import { placeRepository } from '@/repositories/placeRepository'
+import { categoryRepository } from '@/repositories/categoryRepository'
 
 const route = useRoute()
 const router = useRouter()
@@ -119,15 +120,15 @@ const fetchData = async () => {
     const id = route.params.id
     try {
         const [resPlace, resCats] = await Promise.all([
-            axios.get(`http://127.0.0.1:8000/places/${id}`),
-            axios.get('http://127.0.0.1:8000/categories')
+            placeRepository.getById(id),
+            categoryRepository.getAll()
         ])
         place.value = resPlace.data
         categories.value = resCats.data
 
         // ดึงคอมเมนต์แยกเพื่อป้องกัน 404
         try {
-            const resComm = await axios.get(`http://127.0.0.1:8000/places/${id}/comments`)
+            const resComm = await placeRepository.getComments(id)
             comments.value = resComm.data
         } catch (e) { comments.value = [] }
     } catch (err) { console.error(err) }
@@ -139,7 +140,7 @@ const submitComment = async () => {
 
     submitting.value = true
     try {
-        await axios.post(`http://127.0.0.1:8000/places/${route.params.id}/comments`, {
+        await placeRepository.addComment(route.params.id, {
             user_id: user.value.id,
             rating: newRating.value,
             comment_text: newComment.value

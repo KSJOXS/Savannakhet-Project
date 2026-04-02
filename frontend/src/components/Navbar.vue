@@ -35,31 +35,24 @@
 import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
+import { useAuth } from '@/composables/useAuth'
+
 const router = useRouter()
-const isLoggedIn = ref(false)
-const username = ref('')
+const { user, isAuthenticated, logout } = useAuth()
+const isLoggedIn = ref(isAuthenticated())
+const username = ref(user.value ? user.value.username : '')
 
 const checkAuth = () => {
-    const userData = localStorage.getItem('user')
-    if (userData) {
-        isLoggedIn.value = true
-        try {
-            username.value = JSON.parse(userData).username
-        } catch (e) {
-            username.value = 'User'
-        }
-    } else {
-        isLoggedIn.value = false
-    }
+    isLoggedIn.value = isAuthenticated()
+    username.value = user.value ? user.value.username : 'User'
 }
 
 onMounted(checkAuth)
 watch(() => router.currentRoute.value.path, checkAuth)
 
 const handleLogout = () => {
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
-    isLoggedIn.value = false
+    logout()
+    checkAuth()
     router.push('/login')
 }
 </script>

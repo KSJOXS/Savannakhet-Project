@@ -45,14 +45,14 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import { categoryRepository } from '@/repositories/categoryRepository'
 
 const categories = ref([])
 const newCatName = ref('')
 
 const fetchCats = async () => {
     try {
-        const res = await axios.get('http://127.0.0.1:8000/categories')
+        const res = await categoryRepository.getAll()
         categories.value = res.data
     } catch (error) {
         console.error("Fetch Error:", error)
@@ -63,7 +63,7 @@ const addCategory = async () => {
     const name = newCatName.value.trim()
     if (!name) return
     try {
-        await axios.post('http://127.0.0.1:8000/categories', { name: name })
+        await categoryRepository.create({ name: name })
         newCatName.value = ''
         await fetchCats()
     } catch (error) {
@@ -74,7 +74,7 @@ const addCategory = async () => {
 const deleteCategory = async (id) => {
     if (confirm('ยืนยันการลบหมวดหมู่นี้?')) {
         try {
-            await axios.delete(`http://127.0.0.1:8000/categories/${id}`)
+            await categoryRepository.delete(id)
             await fetchCats()
         } catch (error) {
             alert("ไม่สามารถลบได้ เนื่องจากหมวดหมู่นี้ถูกใช้งานอยู่")

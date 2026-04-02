@@ -32,7 +32,8 @@
 
 <script setup>
 import { ref } from 'vue'
-import axios from 'axios'
+import { authRepository } from '@/repositories/authRepository'
+import { useAuth } from '@/composables/useAuth'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
@@ -44,11 +45,11 @@ const handleLogin = async () => {
     loading.value = true
     error.value = ''
     try {
-        const res = await axios.post('http://127.0.0.1:8000/login', form.value)
+        const res = await authRepository.login(form.value)
 
-        // บันทึกข้อมูลลงเครื่อง
-        localStorage.setItem('user', JSON.stringify(res.data.user))
-        localStorage.setItem('access_token', res.data.access_token)
+        // เรียกใช้ composable
+        const { login } = useAuth()
+        login(res.data.user, res.data.access_token)
 
         // เช็คสิทธิ์ Admin
         if (res.data.user.role === 'admin') {

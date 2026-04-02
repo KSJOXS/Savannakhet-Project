@@ -29,14 +29,14 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import { placeRepository } from '@/repositories/placeRepository'
 
 const comments = ref([])
 
 const fetchComments = async () => {
     try {
         // หมายเหตุ: คุณต้องสร้าง API Endpoint นี้ที่ฝั่ง Backend (Laravel/FastAPI) ด้วย
-        const res = await axios.get('http://127.0.0.1:8000/admin/all-comments')
+        const res = await placeRepository.getAllComments()
         comments.value = res.data
     } catch (err) {
         console.error("Error fetching comments:", err)
@@ -46,7 +46,7 @@ const fetchComments = async () => {
 
 const deleteComment = async (id) => {
     if (confirm('ยืนยันการลบคอมเมนต์?')) {
-        await axios.delete(`http://127.0.0.1:8000/comments/${id}`)
+        await placeRepository.deleteComment(id)
         fetchComments()
     }
 }

@@ -86,7 +86,8 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import axios from 'axios'
+import { placeRepository } from '@/repositories/placeRepository'
+import { categoryRepository } from '@/repositories/categoryRepository'
 import { useRouter } from 'vue-router'
 import Navbar from '../components/Navbar.vue'
 
@@ -101,8 +102,8 @@ const fetchData = async () => {
     loading.value = true
     try {
         const [resPlaces, resCats] = await Promise.all([
-            axios.get('http://127.0.0.1:8000/places'),
-            axios.get('http://127.0.0.1:8000/categories')
+            placeRepository.getAll(),
+            categoryRepository.getAll()
         ])
         places.value = resPlaces.data
         categories.value = resCats.data

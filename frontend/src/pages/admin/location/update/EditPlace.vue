@@ -143,7 +143,8 @@
 /* global L */
 import { ref, onMounted, nextTick, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import axios from 'axios'
+import { placeRepository } from '@/repositories/placeRepository'
+import { categoryRepository } from '@/repositories/categoryRepository'
 
 const route = useRoute()
 const router = useRouter()
@@ -235,8 +236,8 @@ const fetchDetails = async () => {
     const id = route.params.id
     try {
         const [resPlace, resCats] = await Promise.all([
-            axios.get(`http://127.0.0.1:8000/places/${id}`),
-            axios.get('http://127.0.0.1:8000/categories')
+            placeRepository.getById(id),
+            categoryRepository.getAll()
         ])
         const data = resPlace.data
         form.value = {
@@ -257,7 +258,7 @@ const updatePlace = async () => {
     const id = route.params.id
     try {
         // ใช้ PUT ตามที่คุณต้องการ แก้ไข URL ให้ตรงกับ Backend ของคุณ
-        await axios.put(`http://127.0.0.1:8000/admin/places/${id}`, form.value)
+        await placeRepository.update(id, form.value)
         alert("✅ บันทึกเรียบร้อย")
         router.push('/admin/places')
     } catch (error) {

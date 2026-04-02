@@ -141,7 +141,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import axios from 'axios'
+import { userRepository } from '@/repositories/userRepository'
 
 const users = ref([])
 const searchQuery = ref('')
@@ -153,7 +153,7 @@ const userToDelete = ref(null)
 const fetchUsers = async () => {
     try {
         // ดึงข้อมูลทั้งหมด (รวมถึงคนที่ถูก Soft Delete)
-        const res = await axios.get('http://127.0.0.1:8000/users')
+        const res = await userRepository.getAll()
         users.value = res.data
     } catch (error) {
         console.error("Fetch Error:", error)
@@ -179,7 +179,7 @@ const openEditModal = (user) => {
 
 const updateUserRole = async () => {
     try {
-        await axios.put(`http://127.0.0.1:8000/users/${editingUser.value.id}`, {
+        await userRepository.update(editingUser.value.id, {
             role: editingUser.value.role
         })
         showEditModal.value = false
@@ -199,7 +199,7 @@ const executeSoftDelete = async () => {
     if (!userToDelete.value) return
     try {
         // ส่ง Patch หรือ Put ไปอัปเดต deleted_at ที่ Backend
-        await axios.patch(`http://127.0.0.1:8000/users/${userToDelete.value.id}/soft-delete`)
+        await userRepository.softDelete(userToDelete.value.id)
         showDeleteModal.value = false
         userToDelete.value = null
         await fetchUsers()
@@ -211,7 +211,7 @@ const executeSoftDelete = async () => {
 // ฟังก์ชันกู้คืน (ล้างค่า deleted_at ให้เป็น null)
 const restoreUser = async (user) => {
     try {
-        await axios.patch(`http://127.0.0.1:8000/users/${user.id}/restore`)
+        await userRepository.restore(user.id)
         await fetchUsers()
         alert(`กู้คืนผู้ใช้ ${user.username} สำเร็จ`)
     } catch (error) {
