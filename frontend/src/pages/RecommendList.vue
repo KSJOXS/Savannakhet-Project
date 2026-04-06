@@ -7,24 +7,24 @@
                 <aside class="sidebar">
                     <div class="filter-card">
                         <div class="filter-header">
-                            <h3>ค้นหาอัจฉริยะ</h3>
-                            <p>ระบุความต้องการของคุณ</p>
+                            <h3>Smart Search</h3>
+                            <p>Filter places by your preference</p>
                         </div>
 
                         <div class="filter-group">
-                            <label>ชื่อสถานที่</label>
+                            <label>Place Name</label>
                             <div class="input-with-icon">
                                 <i class="fas fa-search"></i>
-                                <input v-model="searchQuery" type="text" placeholder="เช่น วัด, ถ้ำ, ร้านอาหาร..." />
+                                <input v-model="searchQuery" type="text" placeholder="e.g. Temple, Cave, Restaurant..." />
                             </div>
                         </div>
 
                         <div class="filter-group">
-                            <label>ประเภทสถานที่</label>
+                            <label>Category</label>
                             <div class="category-grid">
                                 <button :class="['cat-btn', { active: !selectedCategory }]"
                                     @click="filterByCategory(null)">
-                                    ทั้งหมด
+                                    All
                                 </button>
                                 <button v-for="cat in categories" :key="cat.id"
                                     :class="['cat-btn', { active: selectedCategory === cat.id }]"
@@ -35,28 +35,32 @@
                         </div>
 
                         <button @click="resetFilters" class="btn-clear">
-                            ล้างค่าทั้งหมด
+                            Clear Filters
                         </button>
                     </div>
                 </aside>
 
                 <main class="content-area">
                     <div class="results-info">
-                        <h2>ผลการค้นหา <span class="count-badge">{{ filteredPlaces.length }} สถานที่</span></h2>
+                        <h2>Search Results <span class="count-badge">{{ filteredPlaces.length }} places</span></h2>
                     </div>
 
                     <div v-if="loading" class="loading-state">
                         <div class="spinner"></div>
-                        <p>กำลังค้นหาสถานที่...</p>
+                        <p>Finding places...</p>
                     </div>
 
                     <div v-else class="places-grid">
                         <div v-for="place in filteredPlaces" :key="place.id" class="modern-card"
                             @click="goToDetail(place.id)">
                             <div class="card-media">
-                                <img :src="place.image_url || 'https://via.placeholder.com/400x300?text=Savannakhet'"
-                                    :alt="place.name" />
+                                <img :src="getCoverImage(place)" :alt="place.name" />
+                                
                                 <div class="category-tag">{{ getCategoryName(place.category_id) }}</div>
+                                <button v-if="user && user.role !== 'admin'" :class="['btn-heart', { active: isFavorite(place.id) }]" 
+                                    @click.stop="toggleHeart(place.id)">
+                                    <i class="fas fa-heart"></i>
+                                </button>
                             </div>
 
                             <div class="card-details">
@@ -68,7 +72,7 @@
                                         <i class="fas fa-star"></i>
                                         <span>{{ place.rating_avg || '0.0' }}</span>
                                     </div>
-                                    <span class="view-link">รายละเอียด</span>
+                                <span class="view-link">View Details <i class="fas fa-arrow-right"></i></span>
                                 </div>
                             </div>
                         </div>
@@ -76,7 +80,7 @@
 
                     <div v-if="!loading && filteredPlaces.length === 0" class="empty-state">
                         <i class="fas fa-map-marked-alt"></i>
-                        <p>ไม่พบสถานที่ที่คุณต้องการ ลองเปลี่ยนคำค้นหาดูนะครับ</p>
+                        <p>No places found. Try a different search term.</p>
                     </div>
                 </main>
             </div>
@@ -86,26 +90,75 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import axios from 'axios'
+import { placeRepository } from '@/repositories/placeRepository'
+import { categoryRepository } from '@/repositories/categoryRepository'
 import { useRouter } from 'vue-router'
 import Navbar from '../components/Navbar.vue'
 
+import { favoriteRepository } from '@/repositories/favoriteRepository'
+import { useAuth } from '@/composables/useAuth'
+
 const router = useRouter()
+const { user } = useAuth()
 const places = ref([])
 const categories = ref([])
 const loading = ref(true)
 const searchQuery = ref('')
 const selectedCategory = ref(null)
+const favoriteIds = ref([])
+
+// 📷 เพิ่มฟังก์ชันจัดการปกรูปภาพ
+const getCoverImage = (place) => {
+    // กำหนด SVG กรณีไม่มีรูป
+    const noImageUrl = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22400%22%20height%3D%22300%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23e2e8f0%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20fill%3D%22%2364748b%22%20font-family%3D%22sans-serif%22%20font-size%3D%2220%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%3ENo%20Image%3C%2Ftext%3E%3C%2Fsvg%3E';
+
+    let targetUrl = null;
+
+    // 1. ถ้ามีหลายรูปใน array (ดึงรูปแรกมาโชว์)
+    if (place.images && Array.isArray(place.images) && place.images.length > 0) {
+        targetUrl = place.images[0].image_url || place.images[0].url || place.images[0];
+    } 
+    // 2. ถ้ามีรูปเดียว
+    else if (place.image_url) {
+        targetUrl = place.image_url;
+    }
+
+    if (!targetUrl) return noImageUrl;
+
+    // ดักจับ JSON Array ซ้อน String (แบบเดียวกับที่แก้ในหน้า Detail)
+    if (typeof targetUrl === 'string' && targetUrl.trim().startsWith('[')) {
+        try {
+            const parsed = JSON.parse(targetUrl);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                targetUrl = parsed[0];
+            }
+        } catch (e) {
+            targetUrl = targetUrl.replace(/^\["?|"?\]$/g, '').replace(/\\"/g, '');
+        }
+    }
+
+    // จัดการ URL ให้สมบูรณ์
+    if (targetUrl.startsWith('http://') || targetUrl.startsWith('https://') || targetUrl.startsWith('data:')) {
+        return targetUrl;
+    }
+
+    return `http://localhost:8000${targetUrl.startsWith('/') ? '' : '/'}${targetUrl}`;
+}
 
 const fetchData = async () => {
     loading.value = true
     try {
         const [resPlaces, resCats] = await Promise.all([
-            axios.get('http://127.0.0.1:8000/places'),
-            axios.get('http://127.0.0.1:8000/categories')
+            placeRepository.getAll(),
+            categoryRepository.getAll()
         ])
         places.value = resPlaces.data
         categories.value = resCats.data
+
+        if (user.value && user.value.role !== 'admin') {
+            const favRes = await favoriteRepository.getUserFavorites(user.value.id)
+            favoriteIds.value = favRes.data.map(f => f.place_id)
+        }
     } catch (err) {
         console.error("API Error:", err)
     } finally {
@@ -129,7 +182,7 @@ const resetFilters = () => {
 
 const getCategoryName = (id) => {
     const cat = categories.value.find(c => c.id === id)
-    return cat ? cat.name : 'ทั่วไป'
+    return cat ? cat.name : 'General'
 }
 
 const goToDetail = (id) => {
@@ -138,6 +191,21 @@ const goToDetail = (id) => {
         router.push('/login')
     } else {
         router.push(`/places/${id}`)
+    }
+}
+
+const isFavorite = (id) => favoriteIds.value.includes(id)
+
+const toggleHeart = async (placeId) => {
+    try {
+        const res = await favoriteRepository.toggleFavorite(user.value.id, placeId)
+        if (res.data.status === 'added') {
+            favoriteIds.value.push(placeId)
+        } else {
+            favoriteIds.value = favoriteIds.value.filter(id => id !== placeId)
+        }
+    } catch (err) {
+        console.error("Failed to toggle favorite:", err)
     }
 }
 
@@ -181,16 +249,17 @@ onMounted(fetchData)
 }
 
 .filter-header h3 {
-    font-size: 1.3rem;
+    font-size: 1.15rem;
     font-weight: 800;
     color: #1e293b;
     margin: 0;
 }
 
 .filter-header p {
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     color: #64748b;
-    margin-bottom: 20px;
+    margin-bottom: 18px;
+    margin-top: 4px;
 }
 
 .filter-group {
@@ -274,23 +343,23 @@ onMounted(fetchData)
 
 .places-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    /* ทำให้โชว์ 3 อันในแถวเดียวถ้าจอกว้าง */
-    gap: 25px;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 24px;
 }
 
 .modern-card {
     background: white;
-    border-radius: 24px;
+    border-radius: 20px;
     overflow: hidden;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-    transition: 0.3s ease;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
     cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.8);
 }
 
 .modern-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    transform: translateY(-6px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
 }
 
 .card-media {
@@ -317,6 +386,33 @@ onMounted(fetchData)
     font-weight: 800;
 }
 
+.btn-heart {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(255,255,255,0.9);
+    border: none;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    transition: 0.2s;
+    color: #94a3b8;
+    z-index: 10;
+}
+
+.btn-heart.active {
+    color: #ef4444;
+}
+
+.btn-heart:hover {
+    transform: scale(1.1);
+}
+
 .card-details {
     padding: 20px;
 }
@@ -330,10 +426,13 @@ onMounted(fetchData)
 .description {
     color: #64748b;
     font-size: 0.85rem;
-    line-height: 1.5;
-    margin-bottom: 15px;
-    height: 40px;
+    line-height: 1.55;
+    margin-bottom: 14px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
     overflow: hidden;
+    min-height: 2.7em;
 }
 
 .card-footer {
@@ -353,7 +452,16 @@ onMounted(fetchData)
 .view-link {
     color: #3498db;
     font-weight: 700;
-    font-size: 0.85rem;
+    font-size: 0.82rem;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: 0.2s;
+}
+
+.modern-card:hover .view-link {
+    color: #2980b9;
+    gap: 7px;
 }
 
 /* 📌 States */

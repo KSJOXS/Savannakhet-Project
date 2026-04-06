@@ -3,11 +3,11 @@
         <div class="header-section">
             <div class="header-content">
                 <button class="btn-back" @click="$router.push('/admin/places')">
-                    <i class="fas fa-arrow-left"></i> ย้อนกลับ
+                    <i class="fas fa-arrow-left"></i> Back
                 </button>
                 <div class="title-group">
-                    <h1>แก้ไขข้อมูลสถานที่</h1>
-                    <p class="subtitle">จัดการรายละเอียด พิกัด และรูปภาพของสถานที่</p>
+                    <h1>Edit Place</h1>
+                    <p class="subtitle">Manage details, coordinates, and images for this location.</p>
                 </div>
             </div>
         </div>
@@ -17,20 +17,20 @@
                 <div class="left-column">
                     <div class="card info-card" :class="{ 'is-locked': form.is_published }">
                         <div class="card-header">
-                            <i class="fas fa-edit"></i> <span>ข้อมูลทั่วไป</span>
+                            <i class="fas fa-edit"></i> <span>General Info</span>
                             <div v-if="form.is_published" class="lock-badge">
-                                <i class="fas fa-lock"></i> ข้อมูลถูกล็อค (ปิด Public เพื่อแก้ไข)
+                                <i class="fas fa-lock"></i> Locked (Change to Draft to edit)
                             </div>
                         </div>
                         <div class="card-body">
                             <div class="input-row">
                                 <div class="input-group">
-                                    <label>ชื่อสถานที่</label>
+                                    <label>Place Name</label>
                                     <input v-model="form.name" :disabled="form.is_published"
-                                        placeholder="ระบุชื่อสถานที่..." required>
+                                        placeholder="Enter place name..." required>
                                 </div>
                                 <div class="input-group">
-                                    <label>หมวดหมู่</label>
+                                    <label>Category</label>
                                     <select v-model="form.category_id" :disabled="form.is_published">
                                         <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}
                                         </option>
@@ -39,30 +39,29 @@
                             </div>
 
                             <div class="input-group" v-if="!form.is_published" style="margin-top: 10px;">
-                                <label style="color: #6366f1;"><i class="fas fa-paste"></i> วางที่อยู่/Plus Code จาก
-                                    Google Maps (Auto Lock)</label>
+                                <label style="color: #6366f1;"><i class="fas fa-paste"></i> Paste Google Maps Plus Code/Address</label>
                                 <div style="display: flex; gap: 10px;">
                                     <input v-model="addressPaste" @paste="handlePasteAddress"
-                                        placeholder="วาง Plus Code เช่น HP4W+G5V หรือชื่อสถานที่..."
+                                        placeholder="E.g., HP4W+G5V or Place Name..."
                                         style="border: 2px solid #6366f1; background: #f5f3ff;">
                                     <button type="button" @click="searchFromAddress"
                                         style="background: #6366f1; color: white; border: none; padding: 0 20px; border-radius: 10px; cursor: pointer;">
-                                        ตรวจจับ
+                                        Detect
                                     </button>
                                 </div>
                             </div>
 
                             <div class="input-group">
-                                <label>รายละเอียด</label>
+                                <label>Description</label>
                                 <textarea v-model="form.description" :disabled="form.is_published" rows="4"
-                                    placeholder="บรรยายรายละเอียดสถานที่..."></textarea>
+                                    placeholder="Place details..."></textarea>
                             </div>
                         </div>
                     </div>
 
                     <div class="card map-card">
                         <div class="card-header">
-                            <i class="fas fa-map-marked-alt"></i> <span>ตำแหน่งบนแผนที่</span>
+                            <i class="fas fa-map-marked-alt"></i> <span>Map Location</span>
                             <div class="coords-display">
                                 <span>LAT: {{ form.location_lat }}</span>
                                 <span>LNG: {{ form.location_lng }}</span>
@@ -72,7 +71,7 @@
                             <div class="map-wrapper-large">
                                 <div v-if="form.is_published" class="map-overlay-locked">
                                     <div class="overlay-msg">
-                                        <i class="fas fa-info-circle"></i> ปิดสถานะ Draft เพื่อแก้ไขพิกัด
+                                        <i class="fas fa-info-circle"></i> Change to Draft to edit coordinates
                                     </div>
                                 </div>
                                 <div id="map-container"></div>
@@ -82,40 +81,72 @@
                 </div>
 
                 <div class="right-column">
-                    <div class="card upload-card" :class="{ 'is-locked': form.is_published }">
+                    <div class="card upload-card">
                         <div class="card-header">
-                            <i class="fas fa-image"></i> รูปภาพหน้าปก
+                            <i class="fas fa-images"></i>
+                            <span>Place Images</span>
+                            <span class="img-count-badge">{{ images.length }} / 10</span>
                         </div>
                         <div class="card-body">
-                            <div class="upload-zone" :class="{ 'has-image': form.image_url }">
-                                <img v-if="form.image_url" :src="form.image_url" class="img-preview" alt="Preview">
+                            <div class="gallery-grid" v-if="images.length > 0">
+                                <div v-for="(img, index) in images" :key="index"
+                                    class="gallery-item"
+                                    :class="{ 'is-cover': index === 0 }">
+                                    <img :src="img" class="gallery-img" alt="Place image">
 
-                                <div v-if="!form.is_published" class="upload-overlay">
-                                    <label class="upload-btn-label">
-                                        <i class="fas fa-cloud-upload-alt"></i>
-                                        <span>{{ form.image_url ? 'เปลี่ยนรูปภาพ' : 'อัปโหลดรูปภาพ' }}</span>
-                                        <input type="file" @change="onFileChange" accept="image/*" hidden>
-                                    </label>
+                                    <div v-if="index === 0" class="cover-badge">
+                                        <i class="fas fa-star"></i> Cover
+                                    </div>
+
+                                    <div v-if="!form.is_published" class="gallery-overlay">
+                                        <button v-if="index !== 0" type="button"
+                                            class="img-action-btn set-cover-btn"
+                                            @click="setCover(index)"
+                                            title="Set as Cover">
+                                            <i class="fas fa-star"></i>
+                                        </button>
+                                        <button type="button"
+                                            class="img-action-btn delete-img-btn"
+                                            @click="removeImage(index)"
+                                            title="Remove">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
                                 </div>
 
-                                <div v-if="!form.image_url" class="empty-state">
-                                    <i class="fas fa-images"></i>
-                                    <p>ยังไม่มีรูปภาพประกอบ</p>
-                                </div>
+                                <label v-if="!form.is_published && images.length < 10" class="gallery-add-btn">
+                                    <i class="fas fa-plus"></i>
+                                    <span>Add</span>
+                                    <input type="file" @change="onFileChange" accept="image/*" multiple hidden>
+                                </label>
                             </div>
-                            <p class="upload-hint">* รองรับไฟล์ JPG, PNG (แนะนำ 1200x800px)</p>
+
+                            <div v-else class="upload-empty-state">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p>No images uploaded</p>
+                                <label v-if="!form.is_published" class="upload-first-btn">
+                                    <i class="fas fa-plus"></i> Upload Images
+                                    <input type="file" @change="onFileChange" accept="image/*" multiple hidden>
+                                </label>
+                                <span v-else class="locked-hint">Change to Draft to upload images</span>
+                            </div>
+
+                            <p class="upload-hint">
+                                <i class="fas fa-info-circle"></i>
+                                First image = Cover photo. Click ⭐ to set any image as cover. Max 10 images.
+                            </p>
                         </div>
                     </div>
 
                     <div class="card status-card">
                         <div class="card-header">
-                            <i class="fas fa-cog"></i> การตั้งค่าสถานะ
+                            <i class="fas fa-cog"></i> Publishing Status
                         </div>
                         <div class="card-body">
                             <div class="status-toggle-box" :class="form.is_published ? 'active' : 'draft'">
                                 <div class="toggle-info">
-                                    <strong>สถานะการแสดงผล</strong>
-                                    <span>{{ form.is_published ? 'Public (เปิดใช้งาน)' : 'Draft (กำลังร่าง)' }}</span>
+                                    <strong>Status</strong>
+                                    <span>{{ form.is_published ? 'Public (Published)' : 'Draft (Hidden)' }}</span>
                                 </div>
                                 <label class="switch">
                                     <input type="checkbox" v-model="form.is_published">
@@ -124,11 +155,12 @@
                             </div>
 
                             <div class="btn-group-vertical">
-                                <button type="submit" class="btn-submit-full">
-                                    <i class="fas fa-check-circle"></i> บันทึกข้อมูลทั้งหมด
+                                <button type="submit" class="btn-submit-full" :disabled="isSaving">
+                                    <i class="fas" :class="isSaving ? 'fa-spinner fa-spin' : 'fa-check-circle'"></i> 
+                                    {{ isSaving ? 'Saving...' : 'Save All Changes' }}
                                 </button>
                                 <button type="button" class="btn-cancel-full" @click="$router.push('/admin/places')">
-                                    ยกเลิก
+                                    Cancel
                                 </button>
                             </div>
                         </div>
@@ -143,24 +175,52 @@
 /* global L */
 import { ref, onMounted, nextTick, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import axios from 'axios'
+import { placeRepository } from '@/repositories/placeRepository'
+import { categoryRepository } from '@/repositories/categoryRepository'
 
 const route = useRoute()
 const router = useRouter()
 const categories = ref([])
 const map = ref(null)
 const marker = ref(null)
-const addressPaste = ref('') // ตัวแปรสำหรับรับค่าที่ Paste
+const addressPaste = ref('')
+const isSaving = ref(false)
+
+const images = ref([]) // เก็บ Base64 หรือ URL สำหรับโชว์ในหน้าเว็บ
+const rawFiles = ref([]) // เก็บก้อนไฟล์จริง (File object) เตรียมส่งให้ Backend
 
 const form = ref({
     name: '',
     category_id: 1,
-    image_url: '',
     description: '',
     location_lat: 16.5662,
     location_lng: 104.7525,
     is_published: true
 })
+
+// --- Parse image_url: ดึงข้อมูลจาก DB แล้วเติม localhost:8000 ให้อัตโนมัติ ---
+const parseImages = (imageUrl) => {
+    if (!imageUrl) return []
+    
+    let arr = []
+    if (typeof imageUrl === 'string' && imageUrl.trim().startsWith('[')) {
+        try { 
+            arr = JSON.parse(imageUrl) 
+        } catch { 
+            arr = [imageUrl.replace(/^\["?|"?\]$/g, '').replace(/\\"/g, '')] 
+        }
+    } else {
+        arr = [imageUrl]
+    }
+
+    return arr.map(url => {
+        if (!url) return null;
+        if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
+            return url;
+        }
+        return `http://localhost:8000${url.startsWith('/') ? '' : '/'}${url}`;
+    }).filter(Boolean);
+}
 
 watch(() => form.value.is_published, (newVal) => {
     if (marker.value) {
@@ -190,14 +250,12 @@ const initMap = () => {
     })
 }
 
-// ฟังก์ชันดักจับการวาง (Paste)
 const handlePasteAddress = (e) => {
     const pasteData = e.clipboardData.getData('text')
     addressPaste.value = pasteData
-    setTimeout(() => searchFromAddress(), 100) // ดีเลย์นิดหน่อยให้ Input อัปเดต
+    setTimeout(() => searchFromAddress(), 100)
 }
 
-// ฟังก์ชันแปลงที่อยู่เป็นพิกัดและล็อกหมุด
 const searchFromAddress = () => {
     if (!addressPaste.value) return
     const geocoder = L.Control.Geocoder.nominatim()
@@ -207,27 +265,62 @@ const searchFromAddress = () => {
             map.value.setView(center, 17)
             updateMarkerPosition(center.lat, center.lng)
         } else {
-            alert("ไม่พบตำแหน่งนี้ กรุณาลองระบุชื่อแขวงหรือเมืองเพิ่ม เช่น 'Savannakhet'")
+            alert('Location not found. Try adding city or country (e.g. Savannakhet, Laos)')
         }
     })
 }
 
 const updateMarkerPosition = (lat, lng) => {
-    // ป้องกันค่า NaN และปัดเศษทศนิยม
     const fixedLat = isNaN(lat) ? 16.5662 : parseFloat(parseFloat(lat).toFixed(6))
     const fixedLng = isNaN(lng) ? 104.7525 : parseFloat(parseFloat(lng).toFixed(6))
-
     if (marker.value) marker.value.setLatLng([fixedLat, fixedLng])
     form.value.location_lat = fixedLat
     form.value.location_lng = fixedLng
 }
 
+// --- Multi-image handlers ---
 const onFileChange = (e) => {
-    const file = e.target.files[0]
-    if (file) {
+    const files = Array.from(e.target.files)
+    files.forEach(file => {
+        if (images.value.length >= 10) return
+        
+        // เช็คขนาดไฟล์ (5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            alert(`File ${file.name} is too large (Max 5MB).`)
+            return
+        }
+
+        // 1. เก็บไฟล์จริงไว้เตรียมส่ง
+        rawFiles.value.push(file)
+
+        // 2. แปลงเป็น Base64 ไว้โชว์หน้าเว็บ
         const reader = new FileReader()
-        reader.onload = (ev) => { form.value.image_url = ev.target.result }
+        reader.onload = (ev) => {
+            images.value.push(ev.target.result)
+        }
         reader.readAsDataURL(file)
+    })
+    e.target.value = '' // reset
+}
+
+const removeImage = (index) => {
+    images.value.splice(index, 1)
+    
+    // ลบไฟล์จริงออกด้วย ถ้าหากเป็นรูปใหม่ที่เพิ่งเพิ่มเข้ามา
+    if (rawFiles.value[index]) {
+        rawFiles.value.splice(index, 1)
+    }
+}
+
+const setCover = (index) => {
+    // เลื่อนรูปพรีวิวมาเป็นปก
+    const [img] = images.value.splice(index, 1)
+    images.value.unshift(img) 
+
+    // เลื่อนไฟล์จริงมาเป็นปกด้วย (เพื่อส่งให้ API ตามลำดับ)
+    if (rawFiles.value[index]) {
+        const [file] = rawFiles.value.splice(index, 1)
+        rawFiles.value.unshift(file)
     }
 }
 
@@ -235,8 +328,8 @@ const fetchDetails = async () => {
     const id = route.params.id
     try {
         const [resPlace, resCats] = await Promise.all([
-            axios.get(`http://127.0.0.1:8000/places/${id}`),
-            axios.get('http://127.0.0.1:8000/categories')
+            placeRepository.getById(id),
+            categoryRepository.getAll()
         ])
         const data = resPlace.data
         form.value = {
@@ -245,6 +338,13 @@ const fetchDetails = async () => {
             location_lng: parseFloat(data.location_lng) || 104.7525,
             is_published: !!data.is_published
         }
+        
+        // โหลดรูปเก่ามาแสดง
+        images.value = parseImages(data.image_url)
+        // สำหรับรูปเก่า เราไม่รู้ว่าเป็นไฟล์อะไร (เพราะมันอยู่บนเซิร์ฟเวอร์แล้ว) 
+        // เราเลยเอาค่า URL ไปใส่ใน rawFiles ไว้ชั่วคราว เพื่อรักษาจำนวน index ให้เท่ากันกับ images
+        rawFiles.value = [...images.value] 
+
         categories.value = resCats.data
         await nextTick()
         initMap()
@@ -253,17 +353,44 @@ const fetchDetails = async () => {
     }
 }
 
+// --- บันทึกข้อมูลด้วย FormData (เหมือนหน้า Add) ---
 const updatePlace = async () => {
     const id = route.params.id
+    isSaving.value = true
+
     try {
-        // ใช้ PUT ตามที่คุณต้องการ แก้ไข URL ให้ตรงกับ Backend ของคุณ
-        await axios.put(`http://127.0.0.1:8000/admin/places/${id}`, form.value)
-        alert("✅ บันทึกเรียบร้อย")
+        const formData = new FormData()
+        formData.append('name', form.value.name)
+        formData.append('description', form.value.description)
+        formData.append('category_id', form.value.category_id)
+        formData.append('is_published', form.value.is_published ? 1 : 0)
+        formData.append('location_lat', form.value.location_lat)
+        formData.append('location_lng', form.value.location_lng)
+
+        // ตรวจสอบรูปภาพ
+        let hasNewImage = false;
+        rawFiles.value.forEach((fileOrUrl) => {
+            if (fileOrUrl instanceof File) {
+                // ถ้าเป็น File แสดงว่าเพิ่งอัปโหลดใหม่
+                formData.append('images', fileOrUrl)
+                hasNewImage = true;
+            }
+        })
+
+        // ถ้าไม่มีรูปใหม่เลย จะส่งแค่ข้อมูลทั่วไป (FastAPI จะรู้ว่าไม่ต้องอัปเดตไฟล์)
+        if (!hasNewImage) {
+            // เราอาจจะต้องทำระบบส่งรูปเก่าไปบอก FastAPI ด้วย แต่ในเบื้องต้นส่งแค่นี้ก่อน
+        }
+
+        await placeRepository.update(id, formData)
+        
+        alert('✅ Saved successfully')
         router.push('/admin/places')
     } catch (error) {
-        // แสดงรายละเอียด error ใน alert
-        const msg = error.response?.status === 405 ? "405 Method Not Allowed (ตรวจสอบ Backend PUT route)" : "บันทึกไม่สำเร็จ";
-        alert("❌ " + msg)
+        console.error("Update Error:", error)
+        alert('❌ Failed to save. ' + (error.response?.data?.detail || ''))
+    } finally {
+        isSaving.value = false
     }
 }
 
@@ -271,7 +398,6 @@ onMounted(fetchDetails)
 </script>
 
 <style scoped>
-/* CSS เดิมของคุณทั้งหมด */
 @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap');
 
 .edit-page-container {
@@ -348,6 +474,16 @@ onMounted(fetchDetails)
     border-radius: 20px 20px 0 0;
 }
 
+.img-count-badge {
+    margin-left: auto;
+    background: #e2e8f0;
+    color: #64748b;
+    font-size: 0.78rem;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+}
+
 .card-body {
     padding: 25px;
 }
@@ -370,14 +506,14 @@ label {
     color: #475569;
 }
 
-input,
-select,
-textarea {
+input, select, textarea {
     width: 100%;
     padding: 12px;
     border: 1px solid #cbd5e1;
     border-radius: 10px;
     outline: none;
+    font-family: 'Kanit', sans-serif;
+    box-sizing: border-box;
 }
 
 .map-wrapper-large {
@@ -387,10 +523,7 @@ textarea {
     overflow: hidden;
 }
 
-#map-container {
-    height: 100%;
-    width: 100%;
-}
+#map-container { height: 100%; width: 100%; }
 
 .coords-display {
     margin-left: auto;
@@ -398,6 +531,8 @@ textarea {
     background: #e2e8f0;
     padding: 4px 12px;
     border-radius: 15px;
+    display: flex;
+    gap: 12px;
 }
 
 .map-overlay-locked {
@@ -419,48 +554,154 @@ textarea {
     font-size: 0.9rem;
 }
 
-.upload-zone {
-    width: 100%;
-    height: 280px;
-    background: #f8fafc;
-    border: 2px dashed #cbd5e1;
-    border-radius: 15px;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
+/* ===================== GALLERY STYLES ===================== */
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 14px;
 }
 
-.img-preview {
+.gallery-item {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    aspect-ratio: 4/3;
+    border: 2px solid #e2e8f0;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.gallery-item.is-cover {
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+}
+
+.gallery-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    display: block;
 }
 
-.upload-overlay {
+.cover-badge {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    background: #f59e0b;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.gallery-overlay {
     position: absolute;
     inset: 0;
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(0, 0, 0, 0.45);
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 8px;
     opacity: 0;
-    transition: 0.3s;
+    transition: 0.25s;
 }
 
-.upload-zone:hover .upload-overlay {
-    opacity: 1;
+.gallery-item:hover .gallery-overlay { opacity: 1; }
+
+.img-action-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    transition: 0.2s;
 }
 
-.upload-btn-label {
-    background: white;
-    padding: 10px 20px;
+.set-cover-btn { background: #f59e0b; color: white; }
+.set-cover-btn:hover { background: #d97706; transform: scale(1.1); }
+
+.delete-img-btn { background: #f43f5e; color: white; }
+.delete-img-btn:hover { background: #e11d48; transform: scale(1.1); }
+
+.gallery-add-btn {
+    aspect-ratio: 4/3;
+    border: 2px dashed #cbd5e1;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    color: #94a3b8;
+    font-size: 0.85rem;
+    transition: 0.2s;
+    font-weight: 500;
+}
+
+.gallery-add-btn:hover {
+    border-color: #3b82f6;
+    color: #3b82f6;
+    background: #eff6ff;
+}
+
+.gallery-add-btn i { font-size: 1.4rem; }
+
+/* Empty upload state */
+.upload-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    background: #f8fafc;
+    border: 2px dashed #cbd5e1;
+    border-radius: 15px;
+    color: #94a3b8;
+    margin-bottom: 14px;
+    gap: 12px;
+}
+
+.upload-empty-state i { font-size: 2.5rem; }
+.upload-empty-state p { margin: 0; font-weight: 500; }
+
+.upload-first-btn {
+    background: #3b82f6;
+    color: white;
+    padding: 10px 22px;
     border-radius: 10px;
     cursor: pointer;
     font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Kanit', sans-serif;
+    transition: 0.2s;
+}
+.upload-first-btn:hover { background: #2563eb; }
+
+.locked-hint { font-size: 0.85rem; color: #94a3b8; }
+
+.upload-hint {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin: 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    line-height: 1.5;
 }
 
+/* ===================== STATUS CARD ===================== */
 .status-toggle-box {
     display: flex;
     align-items: center;
@@ -469,27 +710,23 @@ textarea {
     border-radius: 12px;
     margin-bottom: 20px;
 }
-
-.status-toggle-box.active {
-    background: #ecfdf5;
-    border: 1px solid #a7f3d0;
-}
-
-.status-toggle-box.draft {
-    background: #fff1f2;
-    border: 1px solid #fecdd3;
-}
+.status-toggle-box.active { background: #ecfdf5; border: 1px solid #a7f3d0; }
+.status-toggle-box.draft  { background: #fff1f2; border: 1px solid #fecdd3; }
 
 .btn-submit-full {
     background: #10b981;
     color: white;
-    border: 1px none;
+    border: none;
     padding: 15px;
     border-radius: 12px;
     width: 100%;
     font-weight: 700;
+    font-family: 'Kanit', sans-serif;
     cursor: pointer;
+    transition: 0.2s;
 }
+.btn-submit-full:hover:not(:disabled) { background: #059669; }
+.btn-submit-full:disabled { opacity: 0.7; cursor: not-allowed; }
 
 .btn-cancel-full {
     background: white;
@@ -500,46 +737,39 @@ textarea {
     cursor: pointer;
     margin-top: 10px;
     width: 100%;
+    font-family: 'Kanit', sans-serif;
+    transition: 0.2s;
 }
+.btn-cancel-full:hover { background: #f8fafc; }
 
-.switch {
-    position: relative;
-    width: 50px;
-    height: 26px;
-}
+.btn-group-vertical { display: flex; flex-direction: column; }
 
-.switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
+/* Switch Toggle */
+.switch { position: relative; width: 50px; height: 26px; }
+.switch input { opacity: 0; width: 0; height: 0; }
 .slider {
-    position: absolute;
-    cursor: pointer;
-    inset: 0;
-    background: #cbd5e1;
-    transition: .4s;
-    border-radius: 34px;
+    position: absolute; cursor: pointer; inset: 0;
+    background: #cbd5e1; transition: .4s; border-radius: 34px;
 }
-
 .slider:before {
-    position: absolute;
-    content: "";
-    height: 18px;
-    width: 18px;
-    left: 4px;
-    bottom: 4px;
-    background: white;
-    transition: .4s;
-    border-radius: 50%;
+    position: absolute; content: "";
+    height: 18px; width: 18px;
+    left: 4px; bottom: 4px;
+    background: white; transition: .4s; border-radius: 50%;
 }
+input:checked + .slider { background: #10b981; }
+input:checked + .slider:before { transform: translateX(24px); }
 
-input:checked+.slider {
-    background: #10b981;
-}
-
-input:checked+.slider:before {
-    transform: translateX(24px);
+/* Lock badge */
+.lock-badge {
+    margin-left: auto;
+    font-size: 0.78rem;
+    background: #fff7ed;
+    color: #c2410c;
+    padding: 3px 10px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 </style>

@@ -1,9 +1,9 @@
 <template>
     <div class="admin-page">
         <div class="page-header">
-            <h2>จัดการสถานที่ท่องเที่ยว</h2>
+            <h2>Place Management</h2>
             <button class="btn-primary" @click="$router.push('/admin/location/create')">
-                <i class="fas fa-plus"></i> เพิ่มสถานที่
+                <i class="fas fa-plus"></i> Add New Place
             </button>
         </div>
 
@@ -11,17 +11,17 @@
             <table class="admin-table">
                 <thead>
                     <tr>
-                        <th>รูป</th>
-                        <th>ชื่อสถานที่</th>
-                        <th>หมวดหมู่</th>
-                        <th>สถานะ</th>
-                        <th>จัดการ</th>
+                        <th>Image</th>
+                        <th>Place Name</th>
+                        <th>Category</th>
+                        <th>Status</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-for="place in places" :key="place.id">
                         <td>
-                            <img :src="place.image_url || 'https://via.placeholder.com/60x40'" class="thumb-img">
+                            <img :src="getThumbnail(place.image_url)" class="thumb-img" @error="e => e.target.src = PLACEHOLDER">
                         </td>
                         <td><strong>{{ place.name }}</strong></td>
                         <td><span class="badge">{{ getCategoryName(place.category_id) }}</span></td>
@@ -29,12 +29,12 @@
                             <span :class="Number(place.is_published) === 1 ? 'status-active' : 'status-draft'">
                                 <i class="fas"
                                     :class="Number(place.is_published) === 1 ? 'fa-check-circle' : 'fa-eye-slash'"></i>
-                                {{ Number(place.is_published) === 1 ? ' เผยแพร่แล้ว' : ' ฉบับร่าง' }}
+                                {{ Number(place.is_published) === 1 ? ' Published' : ' Draft' }}
                             </span>
                         </td>
                         <td>
                             <button @click="$router.push(`/admin/location/update/${place.id}`)" class="btn-edit">
-                                <i class="fas fa-edit"></i> แก้ไข
+                                <i class="fas fa-edit"></i> Edit
                             </button>
                             <button @click="handleDelete(place.id)" class="btn-delete">
                                 <i class="fas fa-trash"></i>
@@ -43,7 +43,7 @@
                     </tr>
                     <tr v-if="places.length === 0">
                         <td colspan="5" style="text-align: center; padding: 30px; color: #999;">
-                            ไม่พบข้อมูลสถานที่
+                            No places found.
                         </td>
                     </tr>
                 </tbody>
@@ -54,47 +54,73 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import { placeRepository } from '@/repositories/placeRepository'
+import { categoryRepository } from '@/repositories/categoryRepository'
 
 const places = ref([])
 const categories = ref([])
 
-// ฟังก์ชันดึงข้อมูล
-// ใน AdminPlaces.vue ส่วน <script setup>
+const PLACEHOLDER = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='70' height='45' viewBox='0 0 70 45'%3E%3Crect width='70' height='45' fill='%23f1f5f9'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%2394a3b8' font-size='9' font-family='sans-serif'%3ENo Image%3C/text%3E%3C/svg%3E`
+
+// 🛠️ ฟังก์ชัน getThumbnail ฉบับอัปเดต จัดการ JSON Array + เติม localhost ให้อัตโนมัติ
+const getThumbnail = (imageUrl) => {
+    if (!imageUrl) return PLACEHOLDER;
+    
+    let url = imageUrl;
+
+    // 1. แกะกล่อง JSON Array ออกมาก่อน (ถ้ามี)
+    if (typeof url === 'string' && url.trim().startsWith('[')) {
+        try {
+            const arr = JSON.parse(url);
+            if (Array.isArray(arr) && arr.length > 0) {
+                url = arr[0]; // เอารูปแรกมาเป็น Thumbnail
+            } else {
+                return PLACEHOLDER;
+            }
+        } catch {
+            // ถ้าแกะ JSON ไม่ได้ ให้พยายามลบสัญลักษณ์วงเล็บก้ามปูทิ้งเผื่อฟลุค
+            url = url.replace(/^\["?|"?\]$/g, '').replace(/\\"/g, '');
+        }
+    }
+
+    // 2. ถ้ารูปเป็น Placeholder, ลิงก์เว็บนอก หรือ Base64 อยู่แล้ว ก็ใช้ได้เลย
+    if (url === PLACEHOLDER || url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
+        return url;
+    }
+
+    // 3. ถ้าเป็นแค่ Path จาก Database ให้เติม URL ของ FastAPI (localhost:8000) เข้าไป
+    return `http://localhost:8000${url.startsWith('/') ? '' : '/'}${url}`;
+}
 
 const fetchData = async () => {
     try {
-        // ตรวจสอบว่า URL นี้สามารถเข้าถึงได้จริงผ่าน Browser
         const [p, c] = await Promise.all([
-            axios.get('http://127.0.0.1:8000/places?include_drafts=true'),
-            axios.get('http://127.0.0.1:8000/categories')
+            placeRepository.getAll(true),
+            categoryRepository.getAll()
         ])
         places.value = p.data
         categories.value = c.data
-        console.log("Response Data:", p.data) // ดูใน Console ว่ามี status is_published: false มาไหม
+        console.log("Response Data:", p.data)
     } catch (error) {
         console.error("Error:", error)
     }
 }
 
-// ฟังก์ชันลบข้อมูล
 const handleDelete = async (id) => {
-    if (confirm('คุณแน่ใจหรือไม่ว่าต้องการลบสถานที่นี้?')) {
+    if (confirm('Are you sure you want to delete this place?')) {
         try {
-            await axios.delete(`http://127.0.0.1:8000/admin/places/${id}`)
-            alert('ลบข้อมูลสำเร็จ')
+            await placeRepository.delete(id)
             await fetchData() // โหลดข้อมูลใหม่หลังจากลบ
         } catch (error) {
-            console.error("Delete Error:", error)
-            alert('เกิดข้อผิดพลาดในการลบข้อมูล')
+            console.error('Delete Error:', error)
+            alert('Failed to delete. Please try again.')
         }
     }
 }
 
-// แปลง ID หมวดหมู่เป็นชื่อ
 const getCategoryName = (id) => {
     const cat = categories.value.find(c => c.id === id)
-    return cat ? cat.name : 'ทั่วไป'
+    return cat ? cat.name : 'General'
 }
 
 onMounted(fetchData)

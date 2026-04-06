@@ -14,6 +14,11 @@ class UserLogin(BaseModel):
     username: str
     password: str
 
+class UserUpdate(BaseModel):
+    username: Optional[str] = None
+    email: Optional[EmailStr] = None
+    password: Optional[str] = None
+
 class UserResponse(UserBase):
     id: int
     role: str
@@ -38,6 +43,8 @@ class PlaceResponse(PlaceBase):
     id: int
     rating_avg: float
     class Config: from_attributes = True
+    location_lat: Optional[float] = None
+    location_lng: Optional[float] = None
 
 # --- Category & Review ---
 class CategoryCreate(BaseModel):
@@ -52,4 +59,18 @@ class ReviewCreate(BaseModel):
     place_id: int
     user_id: int
     rating: int
-    comment: Optional[str] = None
+    comment_text: Optional[str] = None
+
+# --- Favorite ---
+class FavoriteToggle(BaseModel):
+    user_id: int
+    place_id: int
+
+class FavoriteResponse(BaseModel):
+    id: int
+    user_id: int
+    place_id: int
+    created_at: datetime
+    place: PlaceResponse
+
+    class Config: from_attributes = True

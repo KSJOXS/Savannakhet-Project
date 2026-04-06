@@ -2,28 +2,35 @@
     <nav class="navbar">
         <div class="nav-container">
             <div class="brand" @click="router.push('/')" style="cursor: pointer;">
-                🏝️ <span class="brand-text">Savannakhet Smart Travel</span>
+                🌴 <span class="brand-text">Savannakhet Smart Travel</span>
             </div>
 
             <div class="nav-menu">
-                <router-link to="/" class="nav-item">หน้าแรก</router-link>
+                <router-link v-if="!isLoggedIn" to="/" class="nav-item">Home</router-link>
 
                 <router-link to="/explore" class="nav-btn-explore">
-                    <i class="fas fa-search"></i> ค้นหาสถานที่
+                    <i class="fas fa-search"></i> Explore
+                </router-link>
+
+                <router-link v-if="isLoggedIn && (!user || user.role !== 'admin')" to="/favorites" class="nav-item nav-fav">
+                    <i class="fas fa-heart"></i> Favorites
                 </router-link>
 
                 <div v-if="!isLoggedIn" class="auth-group">
-                    <router-link to="/login" class="link-login">เข้าสู่ระบบ</router-link>
-                    <router-link to="/register" class="btn-register-pill">สมัครสมาชิก</router-link>
+                    <router-link to="/login" class="link-login">Sign In</router-link>
+                    <router-link to="/register" class="btn-register-pill">Sign Up</router-link>
                 </div>
 
                 <div v-else class="user-control">
                     <div class="user-info">
-                        <span class="user-label">สวัสดี,</span>
+                        <span class="user-label">Hello,</span>
                         <span class="user-name">{{ username }}</span>
                     </div>
+                    <router-link to="/profile" class="btn-setting">
+                        <i class="fas fa-cog"></i> Settings
+                    </router-link>
                     <button @click="handleLogout" class="btn-logout-minimal">
-                        ออกจากระบบ
+                        Sign Out
                     </button>
                 </div>
             </div>
@@ -35,31 +42,24 @@
 import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
+import { useAuth } from '@/composables/useAuth'
+
 const router = useRouter()
-const isLoggedIn = ref(false)
-const username = ref('')
+const { user, isAuthenticated, logout } = useAuth()
+const isLoggedIn = ref(isAuthenticated())
+const username = ref(user.value ? user.value.username : '')
 
 const checkAuth = () => {
-    const userData = localStorage.getItem('user')
-    if (userData) {
-        isLoggedIn.value = true
-        try {
-            username.value = JSON.parse(userData).username
-        } catch (e) {
-            username.value = 'User'
-        }
-    } else {
-        isLoggedIn.value = false
-    }
+    isLoggedIn.value = isAuthenticated()
+    username.value = user.value ? user.value.username : 'User'
 }
 
 onMounted(checkAuth)
 watch(() => router.currentRoute.value.path, checkAuth)
 
 const handleLogout = () => {
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
-    isLoggedIn.value = false
+    logout()
+    checkAuth()
     router.push('/login')
 }
 </script>
@@ -112,6 +112,10 @@ const handleLogout = () => {
 
 .nav-item:hover {
     color: #3498db;
+}
+
+.nav-fav {
+    color: #ef4444 !important;
 }
 
 /* 🌟 ปุ่มไฮไลท์ "ค้นหา" ตามแบบมืออาชีพ */
@@ -194,6 +198,27 @@ const handleLogout = () => {
     font-weight: 700;
     color: #1e293b;
     font-size: 0.9rem;
+}
+
+.btn-setting {
+    background: #f1f5f9;
+    color: #475569;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.8rem;
+    transition: 0.2s;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-setting:hover {
+    background: #e2e8f0;
+    color: #1e293b;
 }
 
 .btn-logout-minimal {
