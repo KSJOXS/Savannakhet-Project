@@ -7,6 +7,9 @@ import Login from '../pages/Login.vue'
 import Register from '../pages/Register.vue'
 import PlaceDetail from '../pages/PlaceDetail.vue'
 import EditPlace from '../pages/admin/location/update/EditPlace.vue'
+import Favorites from '../pages/Favorites.vue'
+import Profile from '../pages/Profile.vue'
+import AddPlace from '../pages/admin/location/AddPlace.vue'
 
 // --- Admin Components (ต้องสร้างไฟล์เหล่านี้ในโฟลเดอร์ pages/admin/) ---
 import AdminLayout from '../pages/admin/AdminLayout.vue'     // ไฟล์หลักที่มี Sidebar
@@ -46,6 +49,21 @@ const routes = [
         path: '/admin/location/update/:id',
         name: 'EditPlace',
         component: EditPlace,
+    },
+    {
+        path: '/admin/location/create',
+        name: 'AddPlace',
+        component: AddPlace,
+    },
+    {
+        path: '/favorites',
+        name: 'Favorites',
+        component: Favorites
+    },
+    {
+        path: '/profile',
+        name: 'Profile',
+        component: Profile
     },
 
     // --- Admin Routes with Sidebar System ---
@@ -96,6 +114,13 @@ router.beforeEach((to, from, next) => {
         if (!user || user.role !== 'admin') {
             alert('สิทธิ์การเข้าถึงเฉพาะผู้ดูแลระบบเท่านั้น')
             next('/login')
+        } else {
+            next()
+        }
+    } else if (to.path === '/') {
+        // ให้ผู้ใช้ทั่วไปที่ล็อกอินแล้วข้ามหน้า Home (Dashboard) ไปหน้า Explore ทันที
+        if (user && user.role !== 'admin') {
+            next('/explore')
         } else {
             next()
         }

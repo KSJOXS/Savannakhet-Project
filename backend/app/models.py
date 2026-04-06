@@ -34,6 +34,7 @@ class Place(Base):
     # ความสัมพันธ์
     category = relationship("Category", back_populates="places")
     interactions = relationship("Interaction", back_populates="place")
+    favorites = relationship("Favorite", back_populates="place", cascade="all, delete")
 
 class User(Base):
     __tablename__ = "users"
@@ -48,7 +49,8 @@ class User(Base):
     deleted_at = Column(DateTime, nullable=True)
 
     # เชื่อมไปที่ Interactions
-    interactions = relationship("Interaction", back_populates="user")
+    interactions = relationship("Interaction", back_populates="user", cascade="all, delete")
+    favorites = relationship("Favorite", back_populates="user", cascade="all, delete")
 
 class Interaction(Base):
     __tablename__ = "user_interactions"
@@ -63,3 +65,15 @@ class Interaction(Base):
     # เชื่อมกลับ
     user = relationship("User", back_populates="interactions")
     place = relationship("Place", back_populates="interactions")
+
+class Favorite(Base):
+    __tablename__ = "favorites"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    place_id = Column(Integer, ForeignKey("places.id"))
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # เชื่อมกลับ
+    user = relationship("User", back_populates="favorites")
+    place = relationship("Place", back_populates="favorites")

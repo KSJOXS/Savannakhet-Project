@@ -1,14 +1,14 @@
 <template>
     <div class="admin-page">
-        <h3>จัดการคอมเมนต์</h3>
+        <h3><i class="fas fa-star"></i> Review Management</h3>
         <div class="table-container">
             <table class="admin-table">
                 <thead>
                     <tr>
-                        <th>ผู้ใช้</th>
-                        <th>ข้อความ</th>
-                        <th>คะแนน</th>
-                        <th>จัดการ</th>
+                        <th>User</th>
+                        <th>Comment</th>
+                        <th>Rating</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -17,12 +17,12 @@
                         <td>{{ comment.comment_text }}</td>
                         <td><i class="fas fa-star text-warning"></i> {{ comment.rating }}</td>
                         <td>
-                            <button @click="deleteComment(comment.id)" class="btn-delete">ลบ</button>
+                            <button @click="deleteComment(comment.id)" class="btn-delete">Delete</button>
                         </td>
                     </tr>
                 </tbody>
             </table>
-            <div v-if="comments.length === 0" class="no-data">ไม่มีข้อมูลคอมเมนต์</div>
+            <div v-if="comments.length === 0" class="no-data">No reviews found.</div>
         </div>
     </div>
 </template>
@@ -45,7 +45,7 @@ const fetchComments = async () => {
 }
 
 const deleteComment = async (id) => {
-    if (confirm('ยืนยันการลบคอมเมนต์?')) {
+    if (confirm('Delete this review?')) {
         await placeRepository.deleteComment(id)
         fetchComments()
     }

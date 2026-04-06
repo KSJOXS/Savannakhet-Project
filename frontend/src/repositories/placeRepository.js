@@ -7,12 +7,25 @@ export const placeRepository = {
     getById(id) {
         return api.get(`/places/${id}`)
     },
+
+    // 🛠️ ส่ง FormData ผ่าน POST ได้ปกติ
     create(data) {
-        return api.post('/places', data)
+        return api.post('/admin/places', data, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        })
     },
+
+    // 🛠️ สำหรับ FastAPI สามารถส่ง FormData ผ่าน PUT ได้โดยตรงเลยครับ 🎉
     update(id, data) {
-        return api.put(`/places/${id}`, data)
+        const isFormData = data instanceof FormData;
+
+        return api.put(`/admin/places/${id}`, data, {
+            headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : {}
+        })
     },
+
     delete(id) {
         return api.delete(`/admin/places/${id}`)
     },
@@ -20,7 +33,7 @@ export const placeRepository = {
         return api.get(`/places/${placeId}/comments`)
     },
     addComment(placeId, data) {
-        return api.post(`/places/${placeId}/comments`, data)
+        return api.post('/reviews', { place_id: parseInt(placeId), ...data })
     },
     getAllComments() {
         return api.get('/admin/all-comments')

@@ -5,9 +5,9 @@ export const categoryRepository = {
         return api.get('/categories')
     },
     create(data) {
-        return api.post('/categories', data)
+        return api.post('/admin/categories', data)
     },
     delete(id) {
-        return api.delete(`/categories/${id}`)
+        return api.delete(`/admin/categories/${id}`)
     }
 }

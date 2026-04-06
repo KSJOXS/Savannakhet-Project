@@ -1,30 +1,44 @@
 <template>
     <div class="auth-page">
         <div class="auth-card">
-            <button @click="router.push('/')" class="btn-back">← กลับหน้าหลัก</button>
+            <div class="auth-brand">
+                <span class="auth-brand-icon">🌴</span>
+                <span class="auth-brand-name">Savannakhet Smart Travel</span>
+            </div>
+
+            <button @click="router.push('/')" class="btn-back">
+                <i class="fas fa-chevron-left"></i> Back to Home
+            </button>
+
             <div class="auth-header">
-                <h2>เข้าสู่ระบบ</h2>
-                <p>ยินดีต้อนรับสู่ Savannakhet Smart Travel</p>
+                <h2>Sign In</h2>
+                <p>Welcome back! Please enter your credentials.</p>
             </div>
 
             <form @submit.prevent="handleLogin" class="auth-form">
                 <div class="input-group">
-                    <label>ชื่อผู้ใช้</label>
-                    <input v-model="form.username" type="text" placeholder="ระบุชื่อผู้ใช้" required>
+                    <label>Username</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-user"></i>
+                        <input v-model="form.username" type="text" placeholder="Enter your username" required>
+                    </div>
                 </div>
                 <div class="input-group">
-                    <label>รหัสผ่าน</label>
-                    <input v-model="form.password" type="password" placeholder="ระบุรหัสผ่าน" required>
+                    <label>Password</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-lock"></i>
+                        <input v-model="form.password" type="password" placeholder="Enter your password" required>
+                    </div>
                 </div>
+                <p v-if="error" class="error-msg">⚠️ {{ error }}</p>
                 <button type="submit" :disabled="loading" class="btn-submit">
-                    {{ loading ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ' }}
+                    {{ loading ? 'Signing in...' : 'Sign In' }}
                 </button>
             </form>
 
-            <p v-if="error" class="error-msg">⚠️ {{ error }}</p>
             <div class="auth-footer">
-                <span>ยังไม่มีบัญชี? </span>
-                <router-link to="/register">สมัครสมาชิกฟรี</router-link>
+                <span>Don't have an account?</span>
+                <router-link to="/register">Create one free</router-link>
             </div>
         </div>
     </div>
@@ -39,26 +53,22 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 const error = ref('')
 const loading = ref(false)
-const form = ref({ username: '', password: '' }) // ใช้ชื่อ form ให้ตรงกับ v-model
+const form = ref({ username: '', password: '' })
 
 const handleLogin = async () => {
     loading.value = true
     error.value = ''
     try {
         const res = await authRepository.login(form.value)
-
-        // เรียกใช้ composable
         const { login } = useAuth()
         login(res.data.user, res.data.access_token)
-
-        // เช็คสิทธิ์ Admin
         if (res.data.user.role === 'admin') {
-            router.push('/admin/places') // ไปหน้าหลังบ้าน
+            router.push('/admin/places')
         } else {
-            router.push('/') // ไปหน้าแรก
+            router.push('/explore')
         }
     } catch (err) {
-        error.value = err.response?.data?.detail || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง'
+        error.value = err.response?.data?.detail || 'Invalid username or password'
     } finally {
         loading.value = false
     }

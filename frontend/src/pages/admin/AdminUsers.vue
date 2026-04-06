@@ -2,13 +2,13 @@
     <div class="admin-page">
         <div class="header-content">
             <div class="title-section">
-                <h3><i class="fas fa-users-cog"></i> จัดการผู้ใช้งาน</h3>
-                <p class="subtitle">ตรวจสอบรายชื่อ กำหนดสิทธิ์ และจัดการบัญชีผู้ใช้งานในระบบ Savannakhet Smart Travel
+                <h3><i class="fas fa-users-cog"></i> User Management</h3>
+                <p class="subtitle">Manage accounts, roles, and user access in Savannakhet Smart Travel.
                 </p>
             </div>
             <div class="user-stats">
                 <div class="stat-item">
-                    <span class="stat-label">จำนวนผู้ใช้ทั้งหมด</span>
+                    <span class="stat-label">Active Users</span>
                     <span class="stat-value">{{ activeUsersCount }}</span>
                 </div>
             </div>
@@ -18,7 +18,7 @@
             <div class="search-form">
                 <div class="input-wrapper">
                     <i class="fas fa-search"></i>
-                    <input v-model="searchQuery" placeholder="ค้นหาด้วยชื่อผู้ใช้ (Username) หรืออีเมล...">
+                    <input v-model="searchQuery" placeholder="Search by username or email...">
                 </div>
             </div>
         </div>
@@ -28,11 +28,11 @@
                 <thead>
                     <tr>
                         <th class="col-id">ID</th>
-                        <th class="col-user">ชื่อผู้ใช้งาน</th>
-                        <th class="col-email">อีเมล</th>
-                        <th class="col-role">ระดับสิทธิ์</th>
-                        <th class="col-deleted">ลบเมื่อ</th>
-                        <th class="col-action">จัดการ</th>
+                        <th class="col-user">Username</th>
+                        <th class="col-email">Email</th>
+                        <th class="col-role">Role</th>
+                        <th class="col-deleted">Suspended At</th>
+                        <th class="col-action">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -50,7 +50,7 @@
                         <td class="col-role">
                             <span :class="['role-badge', user.role === 'admin' ? 'admin' : 'user']">
                                 <i :class="user.role === 'admin' ? 'fas fa-user-shield' : 'fas fa-user'"></i>
-                                {{ user.role === 'admin' ? 'ผู้ดูแลระบบ' : 'สมาชิก' }}
+                                {{ user.role === 'admin' ? 'Administrator' : 'Member' }}
                             </span>
                         </td>
                         <td class="col-deleted">
@@ -64,19 +64,19 @@
                                 <template v-if="!user.deleted_at">
                                     <button @click="openEditModal(user)" class="btn-manage btn-edit">
                                         <i class="fas fa-edit"></i>
-                                        <span>แก้ไข</span>
+                                        <span>Edit</span>
                                     </button>
                                     <button v-if="user.role !== 'admin'" @click="confirmDelete(user)"
                                         class="btn-manage btn-delete">
                                         <i class="fas fa-trash-alt"></i>
-                                        <span>ลบ</span>
+                                        <span>Suspend</span>
                                     </button>
                                 </template>
 
                                 <template v-else>
                                     <button @click="restoreUser(user)" class="btn-manage btn-undo-inline">
                                         <i class="fas fa-undo"></i>
-                                        <span>กู้คืนข้อมูล</span>
+                                        <span>Restore</span>
                                     </button>
                                 </template>
                             </div>
@@ -87,25 +87,25 @@
 
             <div v-if="filteredUsers.length === 0" class="empty-state">
                 <i class="fas fa-user-slash"></i>
-                <p>ไม่พบข้อมูลผู้ใช้งาน</p>
+                <p>No users found.</p>
             </div>
         </div>
 
         <div v-if="showDeleteModal" class="modal-overlay">
             <div class="modal-content delete-modal">
                 <div class="modal-header">
-                    <h4 class="text-danger"><i class="fas fa-exclamation-triangle"></i> ยืนยันการลบข้อมูล</h4>
+                    <h4 class="text-danger"><i class="fas fa-exclamation-triangle"></i> Confirm Suspension</h4>
                 </div>
                 <div class="modal-body text-center">
-                    <p>คุณต้องการลบผู้ใช้งาน <strong>{{ userToDelete?.username }}</strong> ใช่หรือไม่?</p>
-                    <p class="sub-text">ข้อมูลจะถูกระงับการใช้งาน แต่ ID จะยังคงเดิมและสามารถกู้คืนได้ภายหลัง</p>
+                    <p>Suspend user <strong>{{ userToDelete?.username }}</strong>?</p>
+                    <p class="sub-text">The account will be disabled but can be restored later.</p>
                 </div>
                 <div class="modal-footer">
                     <button @click="showDeleteModal = false" class="btn-secondary">
-                        <i class="fas fa-arrow-left"></i> ย้อนกลับ
+                        <i class="fas fa-arrow-left"></i> Cancel
                     </button>
                     <button @click="executeSoftDelete" class="btn-danger-confirm">
-                        ยืนยันลบข้อมูล
+                        Confirm Suspend
                     </button>
                 </div>
             </div>
@@ -114,25 +114,25 @@
         <div v-if="showEditModal" class="modal-overlay">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4><i class="fas fa-user-edit"></i> แก้ไขระดับสิทธิ์</h4>
+                    <h4><i class="fas fa-user-edit"></i> Edit User Role</h4>
                     <button @click="showEditModal = false" class="close-btn">&times;</button>
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label>ชื่อผู้ใช้งาน:</label>
+                        <label>Username:</label>
                         <input type="text" v-model="editingUser.username" disabled class="disabled-input">
                     </div>
                     <div class="form-group">
-                        <label>ระดับสิทธิ์ (Role):</label>
+                        <label>Role:</label>
                         <select v-model="editingUser.role" class="form-select">
-                            <option value="user">สมาชิก (User)</option>
-                            <option value="admin">ผู้ดูแลระบบ (Admin)</option>
+                            <option value="user">Member (User)</option>
+                            <option value="admin">Administrator (Admin)</option>
                         </select>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button @click="showEditModal = false" class="btn-secondary">ยกเลิก</button>
-                    <button @click="updateUserRole" class="btn-primary">บันทึกข้อมูล</button>
+                    <button @click="showEditModal = false" class="btn-secondary">Cancel</button>
+                    <button @click="updateUserRole" class="btn-primary">Save Changes</button>
                 </div>
             </div>
         </div>
@@ -185,7 +185,7 @@ const updateUserRole = async () => {
         showEditModal.value = false
         await fetchUsers()
     } catch (error) {
-        alert("อัปเดตล้มเหลว")
+        alert('Failed to update role.')
     }
 }
 
@@ -194,35 +194,31 @@ const confirmDelete = (user) => {
     showDeleteModal.value = true
 }
 
-// ฟังก์ชันลบแบบ Soft Delete (อัปเดต deleted_at)
 const executeSoftDelete = async () => {
     if (!userToDelete.value) return
     try {
-        // ส่ง Patch หรือ Put ไปอัปเดต deleted_at ที่ Backend
         await userRepository.softDelete(userToDelete.value.id)
         showDeleteModal.value = false
         userToDelete.value = null
         await fetchUsers()
     } catch (error) {
-        alert("ลบไม่สำเร็จ")
+        alert('Failed to suspend user.')
     }
 }
 
-// ฟังก์ชันกู้คืน (ล้างค่า deleted_at ให้เป็น null)
 const restoreUser = async (user) => {
     try {
         await userRepository.restore(user.id)
         await fetchUsers()
-        alert(`กู้คืนผู้ใช้ ${user.username} สำเร็จ`)
+        alert(`User ${user.username} restored successfully.`)
     } catch (error) {
-        alert("กู้คืนล้มเหลว")
+        alert('Restore failed.')
     }
 }
 
-// ฟังก์ชันจัดรูปแบบวันที่
 const formatDate = (dateString) => {
     const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }
-    return new Date(dateString).toLocaleDateString('th-TH', options)
+    return new Date(dateString).toLocaleDateString('en-US', options)
 }
 
 onMounted(fetchUsers)

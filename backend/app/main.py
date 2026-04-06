@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app import models
 from app.database import engine
-from app.api.routes import users, places, reviews, admin
+from app.api.routes import users, places, reviews, admin, favorites
 
 # สร้างตารางใน DB
 models.Base.metadata.create_all(bind=engine)
@@ -27,6 +27,7 @@ app.include_router(users.router)
 app.include_router(places.router)
 app.include_router(reviews.router)
 app.include_router(admin.router)
+app.include_router(favorites.router)
 
 @app.get("/")
 def home():

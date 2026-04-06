@@ -8,29 +8,29 @@
 
             <nav class="sidebar-nav">
                 <router-link to="/admin/places" class="nav-link" active-class="active">
-                    <i class="fas fa-map-marker-alt"></i> จัดการสถานที่
+                    <i class="fas fa-map-marker-alt"></i> Places
                 </router-link>
 
                 <router-link to="/admin/categories" class="nav-link" active-class="active">
-                    <i class="fas fa-tags"></i> จัดการหมวดหมู่
+                    <i class="fas fa-tags"></i> Categories
                 </router-link>
 
                 <router-link to="/admin/comments" class="nav-link" active-class="active">
-                    <i class="fas fa-comments"></i> จัดการคอมเมนต์
+                    <i class="fas fa-comments"></i> Reviews
                 </router-link>
 
                 <router-link to="/admin/manage-users" class="nav-link" active-class="active">
-                    <i class="fas fa-users"></i> จัดการผู้ใช้งาน
+                    <i class="fas fa-users"></i> Users
                 </router-link>
 
                 <div class="nav-divider"></div>
 
                 <router-link to="/" class="nav-link back-home">
-                    <i class="fas fa-external-link-alt"></i> กลับสู่หน้าหลัก
+                    <i class="fas fa-external-link-alt"></i> Back to Site
                 </router-link>
 
                 <button @click="logout" class="nav-link btn-logout-action">
-                    <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
+                    <i class="fas fa-sign-out-alt"></i> Sign Out
                 </button>
             </nav>
         </aside>
@@ -38,7 +38,7 @@
         <main class="admin-content">
             <header class="admin-top-bar">
                 <div class="user-info-admin">
-                    <span>ผู้ดูแลระบบ: <strong>Admin</strong></span>
+                    <span>Administrator: <strong>Admin</strong></span>
                 </div>
             </header>
 
@@ -55,7 +55,7 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 
 const logout = () => {
-    if (confirm('ยืนยันการออกจากระบบ?')) {
+    if (confirm('Confirm sign out?')) {
         // ล้างข้อมูลการล็อกอิน
         localStorage.removeItem('access_token')
         localStorage.removeItem('user')
