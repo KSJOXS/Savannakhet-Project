@@ -1,4 +1,5 @@
-import { createRouter, createWebHistory } from 'vue-router'
+// 💡 แก้ไข: นำเข้า createWebHashHistory แทนของเดิมเพื่อรองรับ GitHub Pages
+import { createRouter, createWebHashHistory /* , createWebHistory */ } from 'vue-router'
 
 // --- Public Components ---
 import HomeView from '../pages/HomeView.vue'
@@ -11,12 +12,12 @@ import Favorites from '../pages/Favorites.vue'
 import Profile from '../pages/Profile.vue'
 import AddPlace from '../pages/admin/location/AddPlace.vue'
 
-// --- Admin Components (ต้องสร้างไฟล์เหล่านี้ในโฟลเดอร์ pages/admin/) ---
-import AdminLayout from '../pages/admin/AdminLayout.vue'     // ไฟล์หลักที่มี Sidebar
-import AdminPlaces from '../pages/admin/AdminPlaces.vue'     // หน้าจัดการสถานที่
-import AdminCategories from '../pages/admin/AdminCategories.vue' // หน้าจัดการหมวดหมู่
-import AdminComments from '../pages/admin/AdminComments.vue'   // หน้าจัดการรีวิว
-import AdminUsers from '../pages/admin/AdminUsers.vue'       // หน้าจัดการผู้ใช้งาน (ต้องสร้างไฟล์นี้ด้วย)
+// --- Admin Components ---
+import AdminLayout from '../pages/admin/AdminLayout.vue'
+import AdminPlaces from '../pages/admin/AdminPlaces.vue'
+import AdminCategories from '../pages/admin/AdminCategories.vue'
+import AdminComments from '../pages/admin/AdminComments.vue'
+import AdminUsers from '../pages/admin/AdminUsers.vue'
 
 const routes = [
     {
@@ -69,7 +70,7 @@ const routes = [
     // --- Admin Routes with Sidebar System ---
     {
         path: '/admin',
-        component: AdminLayout, // ใช้ Layout นี้เป็นตัวคุม Sidebar
+        component: AdminLayout,
         children: [
             {
                 path: 'places',
@@ -87,29 +88,36 @@ const routes = [
                 component: AdminComments
             },
             {
-                path: '', // Default path เมื่อเข้า /admin
-                redirect: '/admin/places'
-            },
-            {
                 path: 'manage-users',
                 name: 'AdminManageUsers',
-                component: AdminUsers // Lazy load หน้าจัดการผู้ใช้งาน
+                component: AdminUsers
+            },
+            {
+                path: '',
+                redirect: '/admin/places'
             }
-
         ]
     }
 ]
 
 const router = createRouter({
-    history: createWebHistory(),
+    /** * 💡 โค้ดเก่า: history: createWebHistory() 
+     * สาเหตุที่คอมเมนต์: GitHub Pages ไม่รองรับการจัดการ URL แบบปกติเมื่อกด Refresh หน้าเว็บ (จะเจอ 404)
+     */
+    // history: createWebHistory(), 
+
+    /**
+     * ✅ โค้ดใหม่: ใช้ createWebHashHistory
+     * วิธีนี้จะเติม /#/ ใน URL เพื่อให้ GitHub Pages ทำงานร่วมกับ Vue Router ได้โดยไม่จอขาว
+     */
+    history: createWebHashHistory(import.meta.env.BASE_URL),
     routes
 })
 
-// 🔐 Navigation Guard: ป้องกันคนทั่วไปแอบเข้าหน้า Admin
+// 🔐 Navigation Guard: ตรวจสอบสิทธิ์การเข้าถึง
 router.beforeEach((to, from, next) => {
     const user = JSON.parse(localStorage.getItem('user'))
 
-    // ถ้าจะเข้าหน้า admin แต่ไม่มี user หรือไม่ใช่ admin ให้ไปหน้า login
     if (to.path.startsWith('/admin')) {
         if (!user || user.role !== 'admin') {
             alert('สิทธิ์การเข้าถึงเฉพาะผู้ดูแลระบบเท่านั้น')
@@ -117,14 +125,15 @@ router.beforeEach((to, from, next) => {
         } else {
             next()
         }
-    } else if (to.path === '/') {
-        // ให้ผู้ใช้ทั่วไปที่ล็อกอินแล้วข้ามหน้า Home (Dashboard) ไปหน้า Explore ทันที
+    }
+    else if (to.path === '/') {
         if (user && user.role !== 'admin') {
             next('/explore')
         } else {
             next()
         }
-    } else {
+    }
+    else {
         next()
     }
 })
