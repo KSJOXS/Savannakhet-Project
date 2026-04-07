@@ -74,3 +74,9 @@ class FavoriteResponse(BaseModel):
     place: PlaceResponse
 
     class Config: from_attributes = True
+
+class UserInteractionCreate(BaseModel):
+    place_id: int
+    rating: Optional[float] = None
+    comment: Optional[str] = None
+    interaction_type: str  # เช่น 'click', 'like', 'visit'

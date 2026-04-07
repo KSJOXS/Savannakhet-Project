@@ -1,53 +1,112 @@
 <template>
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="brand" @click="router.push('/')" style="cursor: pointer;">
-                🌴 <span class="brand-text">Savannakhet Smart Travel</span>
-            </div>
+    <header class="ta-header">
+        <div class="ta-top-row">
+            <div class="nav-container">
 
-            <div class="nav-menu">
-                <router-link v-if="!isLoggedIn" to="/" class="nav-item">Home</router-link>
+                <div class="nav-left">
+                    <div class="brand" @click="router.push('/')">
+                        <div class="brand-logo">
+                            <i class="fas fa-map-marked-alt"></i>
+                        </div>
+                        <span class="brand-text">Savannakhet</span>
+                    </div>
 
-                <router-link to="/explore" class="nav-btn-explore">
-                    <i class="fas fa-search"></i> Explore
-                </router-link>
-
-                <router-link v-if="isLoggedIn && (!user || user.role !== 'admin')" to="/favorites" class="nav-item nav-fav">
-                    <i class="fas fa-heart"></i> Favorites
-                </router-link>
-
-                <div v-if="!isLoggedIn" class="auth-group">
-                    <router-link to="/login" class="link-login">Sign In</router-link>
-                    <router-link to="/register" class="btn-register-pill">Sign Up</router-link>
+                    <div class="nav-search" v-if="route.path !== '/explore'">
+                        <div class="ta-search-pill" @click="router.push('/explore')">
+                            <i class="fas fa-search"></i>
+                            <input type="text" placeholder="Search..." readonly />
+                        </div>
+                    </div>
                 </div>
 
-                <div v-else class="user-control">
-                    <div class="user-info">
-                        <span class="user-label">Hello,</span>
-                        <span class="user-name">{{ username }}</span>
-                    </div>
-                    <router-link to="/profile" class="btn-setting">
-                        <i class="fas fa-cog"></i> Settings
+                <div class="nav-right">
+                    <router-link to="/explore" class="nav-item">Discover</router-link>
+
+                    <router-link v-if="isLoggedIn && (!user || user.role !== 'admin')" to="/favorites" class="nav-item">
+                        <i class="far fa-heart"></i> Saves
                     </router-link>
-                    <button @click="handleLogout" class="btn-logout-minimal">
-                        Sign Out
-                    </button>
+
+                    <div v-if="!isLoggedIn" class="auth-group">
+                        <router-link to="/login" class="btn-ta-solid">Sign in</router-link>
+                    </div>
+
+                    <div v-else class="user-group">
+                        <div class="user-avatar" :title="username" @click="isDropdownOpen = !isDropdownOpen">
+                            {{ username ? username.charAt(0).toUpperCase() : 'U' }}
+                        </div>
+
+                        <div v-if="isDropdownOpen" class="dropdown-overlay" @click="isDropdownOpen = false"></div>
+
+                        <transition name="fade-slide">
+                            <div v-if="isDropdownOpen" class="profile-dropdown">
+                                <div class="dropdown-arrow"></div>
+
+                                <router-link to="/favorites" class="dropdown-item" @click="isDropdownOpen = false">
+                                    Saves
+                                </router-link>
+                                <router-link to="/profile" class="dropdown-item" @click="isDropdownOpen = false">
+                                    Profile
+                                </router-link>
+                                <router-link to="/settings" class="dropdown-item" @click="isDropdownOpen = false">
+                                    Account info
+                                </router-link>
+
+                                <div class="dropdown-divider"></div>
+
+                                <div class="dropdown-item logout" @click="handleLogoutAndClose">
+                                    Sign out
+                                </div>
+                            </div>
+                        </transition>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="ta-bottom-row">
+            <div class="nav-container">
+                <div class="sub-nav-list">
+                    <router-link to="/hotels" class="sub-nav-item" :class="{ active: activeTab === 'hotels' }">
+                        Hotels
+                    </router-link>
+                    <router-link to="/explore?tab=things-to-do" class="sub-nav-item"
+                        :class="{ active: activeTab === 'things-to-do' || (route.path === '/explore' && !activeTab) }">
+                        Things to Do
+                    </router-link>
+                    <router-link to="/restaurants" class="sub-nav-item"
+                        :class="{ active: activeTab === 'restaurants' }">
+                        Restaurants
+                    </router-link>
+                    <router-link to="/nature" class="sub-nav-item" :class="{ active: activeTab === 'nature' }">
+                        Nature
+                    </router-link>
+                    <router-link to="/explore?tab=landmarks" class="sub-nav-item"
+                        :class="{ active: activeTab === 'landmarks' }">
+                        Landmarks
+                    </router-link>
                 </div>
             </div>
         </div>
-    </nav>
+    </header>
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
-
+import { ref, onMounted, watch, computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
 
 const router = useRouter()
+const route = useRoute()
 const { user, isAuthenticated, logout } = useAuth()
+
 const isLoggedIn = ref(isAuthenticated())
 const username = ref(user.value ? user.value.username : '')
+const isDropdownOpen = ref(false)
+const isHotelPage = computed(() => route.path === '/hotels')
+
+// 🔍 เช็คว่าตอนนี้คลิกอยู่ที่ Tab ไหนใน URL (เช่น /explore?tab=restaurants)
+const activeTab = computed(() => route.query.tab)
 
 const checkAuth = () => {
     isLoggedIn.value = isAuthenticated()
@@ -55,9 +114,13 @@ const checkAuth = () => {
 }
 
 onMounted(checkAuth)
-watch(() => router.currentRoute.value.path, checkAuth)
+watch(() => router.currentRoute.value.path, () => {
+    checkAuth()
+    isDropdownOpen.value = false
+})
 
-const handleLogout = () => {
+const handleLogoutAndClose = () => {
+    isDropdownOpen.value = false
     logout()
     checkAuth()
     router.push('/login')
@@ -65,176 +128,318 @@ const handleLogout = () => {
 </script>
 
 <style scoped>
-/* 📌 ปรับปรุงพื้นฐาน Navbar ให้ดูพรีเมียม */
-.navbar {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    /* เอฟเฟกต์กระจกฝ้า */
-    padding: 12px 0;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
+
+/* 📌 โครงสร้างหลักของ Header */
+.ta-header {
+    background: #ffffff;
     position: sticky;
     top: 0;
     z-index: 1000;
+    font-family: 'Inter', sans-serif;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    /* เงาบางๆ ใต้สุด */
+}
+
+/* 📌 แถวบนสุด (Top Row) */
+.ta-top-row {
+    height: 76px;
+    display: flex;
+    align-items: center;
 }
 
 .nav-container {
-    max-width: 1200px;
+    width: 100%;
+    max-width: 1400px;
     margin: 0 auto;
+    padding: 0 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 25px;
 }
 
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+/* Brand Logo */
 .brand {
-    font-size: 1.25rem;
-    font-weight: 800;
-    color: #2c3e50;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.brand-logo {
+    width: 38px;
+    height: 38px;
+    background: #00aa6c;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.brand-text {
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: #000000;
+    letter-spacing: -0.5px;
+}
+
+/* Search Box ด้านบน */
+.nav-search {
+    width: 350px;
+}
+
+.ta-search-pill {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 40px;
+    padding: 10px 20px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    transition: 0.2s ease-in-out;
+}
+
+.ta-search-pill:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.ta-search-pill i {
+    color: #0f172a;
+    font-size: 1.1rem;
+}
+
+.ta-search-pill input {
+    border: none;
+    background: transparent;
+    font-family: inherit;
+    font-size: 0.95rem;
+    color: #475569;
+    font-weight: 500;
+    outline: none;
+    cursor: pointer;
+    width: 100%;
+}
+
+/* Right Menu */
+.nav-right {
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
-.nav-menu {
-    display: flex;
-    gap: 25px;
-    align-items: center;
-}
-
-/* 📌 สไตล์เมนูทั่วไป */
 .nav-item {
     text-decoration: none;
-    color: #64748b;
+    color: #000000;
     font-weight: 600;
     font-size: 0.95rem;
-    transition: 0.2s;
+    padding: 10px 16px;
+    border-radius: 24px;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .nav-item:hover {
-    color: #3498db;
-}
-
-.nav-fav {
-    color: #ef4444 !important;
-}
-
-/* 🌟 ปุ่มไฮไลท์ "ค้นหา" ตามแบบมืออาชีพ */
-.nav-btn-explore {
-    background: #ebf5ff;
-    color: #3498db;
-    padding: 10px 22px;
-    border-radius: 50px;
-    text-decoration: none;
-    font-weight: 700;
-    font-size: 0.9rem;
-    transition: 0.3s;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.nav-btn-explore:hover {
-    background: #3498db;
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
-}
-
-/* 📌 Auth Buttons */
-.auth-group {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    border-left: 1px solid #e2e8f0;
-    padding-left: 20px;
-}
-
-.link-login {
-    text-decoration: none;
-    color: #3498db;
-    font-weight: 700;
-    font-size: 0.95rem;
-}
-
-.btn-register-pill {
-    background: #3498db;
-    color: white;
-    padding: 10px 24px;
-    border-radius: 50px;
-    /* ทรงมนตามรูป */
-    text-decoration: none;
-    font-weight: 700;
-    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
-    transition: 0.3s;
-}
-
-.btn-register-pill:hover {
-    background: #2980b9;
-    transform: scale(1.05);
-}
-
-/* 📌 User Profile After Login */
-.user-control {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    background: #f8fafc;
-    padding: 6px 6px 6px 18px;
-    border-radius: 50px;
-}
-
-.user-info {
-    display: flex;
-    flex-direction: column;
-}
-
-.user-label {
-    font-size: 0.7rem;
-    color: #94a3b8;
-    text-transform: uppercase;
-}
-
-.user-name {
-    font-weight: 700;
-    color: #1e293b;
-    font-size: 0.9rem;
-}
-
-.btn-setting {
     background: #f1f5f9;
-    color: #475569;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 50px;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 0.8rem;
-    transition: 0.2s;
+}
+
+/* Auth & User Buttons */
+.auth-group {
+    margin-left: 10px;
+}
+
+.btn-ta-solid {
+    background: #000000;
+    color: #ffffff;
     text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding: 10px 24px;
+    border-radius: 24px;
+    transition: 0.2s;
+    display: inline-block;
+}
+
+.btn-ta-solid:hover {
+    background: #334155;
+}
+
+.user-group {
+    position: relative;
     display: flex;
     align-items: center;
-    gap: 5px;
+    margin-left: 10px;
 }
 
-.btn-setting:hover {
-    background: #e2e8f0;
-    color: #1e293b;
-}
-
-.btn-logout-minimal {
-    background: white;
-    color: #ef4444;
-    border: 1px solid #fee2e2;
-    padding: 8px 15px;
-    border-radius: 50px;
+.user-avatar {
+    width: 42px;
+    height: 42px;
+    background: #000000;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.2rem;
     cursor: pointer;
+    transition: box-shadow 0.2s;
+    position: relative;
+    z-index: 1002;
+}
+
+.user-avatar:hover {
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Dropdown Profile */
+.dropdown-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1001;
+    cursor: default;
+}
+
+.profile-dropdown {
+    position: absolute;
+    top: calc(100% + 15px);
+    right: 0;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    width: 220px;
+    padding: 10px 0;
+    z-index: 1002;
+    border: 1px solid #f1f5f9;
+}
+
+.dropdown-arrow {
+    position: absolute;
+    top: -6px;
+    right: 18px;
+    width: 14px;
+    height: 14px;
+    background: #ffffff;
+    transform: rotate(45deg);
+    border-left: 1px solid #f1f5f9;
+    border-top: 1px solid #f1f5f9;
+}
+
+.dropdown-item {
+    display: block;
+    padding: 12px 20px;
+    color: #0f172a;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.dropdown-item:hover {
+    background: #f8fafc;
+}
+
+.dropdown-divider {
+    height: 1px;
+    background: #e2e8f0;
+    margin: 8px 0;
+}
+
+.dropdown-item.logout {
+    color: #ef4444;
+}
+
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.fade-slide-enter-from,
+.fade-slide-leave-to {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+/* 🌟 แถวล่าง: Sub-navigation Menu (ที่เพิ่มเข้ามาใหม่) */
+.ta-bottom-row {
+    background: #ffffff;
+    border-top: 1px solid #f1f5f9;
+    /* เส้นคั่นบางๆ ระหว่างแถวบนกับแถวล่าง */
+}
+
+.sub-nav-list {
+    display: flex;
+    gap: 30px;
+    overflow-x: auto;
+    /* เผื่อในมือถือให้เลื่อนซ้ายขวาได้ */
+    scrollbar-width: none;
+}
+
+.sub-nav-list::-webkit-scrollbar {
+    display: none;
+}
+
+.sub-nav-item {
+    text-decoration: none;
+    color: #475569;
     font-weight: 600;
-    font-size: 0.8rem;
+    font-size: 0.95rem;
+    padding: 12px 0;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
     transition: 0.2s;
 }
 
-.btn-logout-minimal:hover {
-    background: #ef4444;
-    color: white;
+.sub-nav-item:hover {
+    color: #0f172a;
+    border-bottom: 2px solid #cbd5e1;
+}
+
+/* 🌟 ขีดเส้นใต้สีดำสำหรับหน้าที่กำลังเลือกอยู่ (Active State) */
+.sub-nav-item.active {
+    color: #000000;
+    border-bottom: 2px solid #000000;
+}
+
+/* 📌 Responsive */
+@media (max-width: 992px) {
+    .nav-search {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .brand-text {
+        font-size: 1.3rem;
+    }
+
+    .nav-item {
+        padding: 10px;
+        font-size: 0;
+    }
+
+    .nav-item i {
+        font-size: 1.2rem;
+    }
+
+    .sub-nav-list {
+        gap: 20px;
+    }
 }
 </style>

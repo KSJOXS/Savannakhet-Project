@@ -11,6 +11,10 @@ import EditPlace from '../pages/admin/location/update/EditPlace.vue'
 import Favorites from '../pages/Favorites.vue'
 import Profile from '../pages/Profile.vue'
 import AddPlace from '../pages/admin/location/AddPlace.vue'
+import Hotels from '../pages/Hotels.vue'
+import HotelDetail from '../pages/HotelDetail.vue'
+import Restaurants from '../pages/Restaurants.vue'
+import nature from '../pages/Nature.vue'
 
 // --- Admin Components ---
 import AdminLayout from '../pages/admin/AdminLayout.vue'
@@ -65,6 +69,26 @@ const routes = [
         path: '/profile',
         name: 'Profile',
         component: Profile
+    },
+    {
+        path: '/hotels',
+        name: 'Hotels',
+        component: Hotels
+    },
+    {
+        path: '/hotels/:id',
+        name: 'HotelDetail',
+        component: HotelDetail
+    },
+    {
+        path: '/restaurants',
+        name: 'Restaurants',
+        component: Restaurants
+    },
+    {
+        path: '/nature',
+        name: 'Nature',
+        component: nature
     },
 
     // --- Admin Routes with Sidebar System ---
