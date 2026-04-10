@@ -85,5 +85,5 @@ const handleRegister = async () => {
 </script>
 
 <style scoped>
-@import "../assets/auth.css";
+@import "@/assets/auth.css";
 </style>

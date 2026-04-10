@@ -55,7 +55,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import Navbar from '../components/Navbar.vue'
+import Navbar from '@/components/Navbar.vue'
 import { favoriteRepository } from '@/repositories/favoriteRepository'
 import { useAuth } from '@/composables/useAuth'
 

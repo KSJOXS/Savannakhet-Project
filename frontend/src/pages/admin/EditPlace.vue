@@ -6,37 +6,40 @@
                     <i class="fas fa-arrow-left"></i> Back
                 </button>
                 <div class="title-group">
-                    <h1>Add New Place</h1>
-                    <p class="subtitle">Enter details, coordinates, and upload images for the new location.</p>
+                    <h1>Edit Place</h1>
+                    <p class="subtitle">Manage details, coordinates, and images for this location.</p>
                 </div>
             </div>
         </div>
 
         <div class="main-layout">
-            <form @submit.prevent="savePlace" class="form-grid">
+            <form @submit.prevent="updatePlace" class="form-grid">
                 <div class="left-column">
-                    <div class="card info-card">
+                    <div class="card info-card" :class="{ 'is-locked': form.is_published }">
                         <div class="card-header">
-                            <i class="fas fa-info-circle"></i> <span>General Info</span>
+                            <i class="fas fa-edit"></i> <span>General Info</span>
+                            <div v-if="form.is_published" class="lock-badge">
+                                <i class="fas fa-lock"></i> Locked (Change to Draft to edit)
+                            </div>
                         </div>
                         <div class="card-body">
                             <div class="input-row">
                                 <div class="input-group">
-                                    <label>Place Name <span class="text-danger">*</span></label>
-                                    <input v-model="form.name" placeholder="Enter place name..." required>
+                                    <label>Place Name</label>
+                                    <input v-model="form.name" :disabled="form.is_published"
+                                        placeholder="Enter place name..." required>
                                 </div>
                                 <div class="input-group">
-                                    <label>Category <span class="text-danger">*</span></label>
-                                    <select v-model="form.category_id" required>
-                                        <option value="" disabled>Select category</option>
+                                    <label>Category</label>
+                                    <select v-model="form.category_id" :disabled="form.is_published">
                                         <option v-for="cat in categories" :key="cat.id" :value="cat.id">
-                                            {{ cat.name }}
+                                            [{{ cat.parent_type.toUpperCase() }}] {{ cat.name }}
                                         </option>
                                     </select>
                                 </div>
                             </div>
 
-                            <div class="input-group" style="margin-top: 10px;">
+                            <div class="input-group" v-if="!form.is_published" style="margin-top: 10px;">
                                 <label style="color: #6366f1;"><i class="fas fa-paste"></i> Paste Google Maps Plus Code/Address</label>
                                 <div style="display: flex; gap: 10px;">
                                     <input v-model="addressPaste" @paste="handlePasteAddress"
@@ -50,8 +53,9 @@
                             </div>
 
                             <div class="input-group">
-                                <label>Description <span class="text-danger">*</span></label>
-                                <textarea v-model="form.description" rows="4" placeholder="Place details..." required></textarea>
+                                <label>Description</label>
+                                <textarea v-model="form.description" :disabled="form.is_published" rows="4"
+                                    placeholder="Place details..."></textarea>
                             </div>
                         </div>
                     </div>
@@ -66,6 +70,11 @@
                         </div>
                         <div class="card-body p-0">
                             <div class="map-wrapper-large">
+                                <div v-if="form.is_published" class="map-overlay-locked">
+                                    <div class="overlay-msg">
+                                        <i class="fas fa-info-circle"></i> Change to Draft to edit coordinates
+                                    </div>
+                                </div>
                                 <div id="map-container"></div>
                             </div>
                         </div>
@@ -90,7 +99,7 @@
                                         <i class="fas fa-star"></i> Cover
                                     </div>
 
-                                    <div class="gallery-overlay">
+                                    <div v-if="!form.is_published" class="gallery-overlay">
                                         <button v-if="index !== 0" type="button"
                                             class="img-action-btn set-cover-btn"
                                             @click="setCover(index)"
@@ -106,7 +115,7 @@
                                     </div>
                                 </div>
 
-                                <label v-if="images.length < 10" class="gallery-add-btn">
+                                <label v-if="!form.is_published && images.length < 10" class="gallery-add-btn">
                                     <i class="fas fa-plus"></i>
                                     <span>Add</span>
                                     <input type="file" @change="onFileChange" accept="image/*" multiple hidden>
@@ -116,10 +125,11 @@
                             <div v-else class="upload-empty-state">
                                 <i class="fas fa-cloud-upload-alt"></i>
                                 <p>No images uploaded</p>
-                                <label class="upload-first-btn">
+                                <label v-if="!form.is_published" class="upload-first-btn">
                                     <i class="fas fa-plus"></i> Upload Images
                                     <input type="file" @change="onFileChange" accept="image/*" multiple hidden>
                                 </label>
+                                <span v-else class="locked-hint">Change to Draft to upload images</span>
                             </div>
 
                             <p class="upload-hint">
@@ -148,7 +158,7 @@
                             <div class="btn-group-vertical">
                                 <button type="submit" class="btn-submit-full" :disabled="isSaving">
                                     <i class="fas" :class="isSaving ? 'fa-spinner fa-spin' : 'fa-check-circle'"></i> 
-                                    {{ isSaving ? 'Saving...' : 'Create Place' }}
+                                    {{ isSaving ? 'Saving...' : 'Save All Changes' }}
                                 </button>
                                 <button type="button" class="btn-cancel-full" @click="$router.push('/admin/places')">
                                     Cancel
@@ -164,11 +174,12 @@
 
 <script setup>
 /* global L */
-import { ref, onMounted, nextTick } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted, nextTick, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { placeRepository } from '@/repositories/placeRepository'
 import { categoryRepository } from '@/repositories/categoryRepository'
 
+const route = useRoute()
 const router = useRouter()
 const categories = ref([])
 const map = ref(null)
@@ -176,36 +187,62 @@ const marker = ref(null)
 const addressPaste = ref('')
 const isSaving = ref(false)
 
-// 💡 สร้าง 2 Array: 
-// 1. images ไว้เก็บ Base64 โชว์ให้แอดมินดูหน้าเว็บ
-// 2. rawFiles ไว้เก็บก้อนไฟล์ดิบๆ สำหรับยิงไปหา FastAPI
-const images = ref([]) 
-const rawFiles = ref([]) 
+const images = ref([]) // เก็บ Base64 หรือ URL สำหรับโชว์ในหน้าเว็บ
+const rawFiles = ref([]) // เก็บก้อนไฟล์จริง (File object) เตรียมส่งให้ Backend
 
 const form = ref({
     name: '',
-    category_id: '',
+    category_id: 1,
     description: '',
-    location_lat: 16.5662, // พิกัดเริ่มต้นที่สะหวันนะเขต
+    location_lat: 16.5662,
     location_lng: 104.7525,
     is_published: true
 })
 
-// --- จัดการแผนที่ (Map) ---
+// --- Parse image_url: ดึงข้อมูลจาก DB แล้วเติม localhost:8000 ให้อัตโนมัติ ---
+const parseImages = (imageUrl) => {
+    if (!imageUrl) return []
+    
+    let arr = []
+    if (typeof imageUrl === 'string' && imageUrl.trim().startsWith('[')) {
+        try { 
+            arr = JSON.parse(imageUrl) 
+        } catch { 
+            arr = [imageUrl.replace(/^\["?|"?\]$/g, '').replace(/\\"/g, '')] 
+        }
+    } else {
+        arr = [imageUrl]
+    }
+
+    return arr.map(url => {
+        if (!url) return null;
+        if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
+            return url;
+        }
+        return `http://localhost:8000${url.startsWith('/') ? '' : '/'}${url}`;
+    }).filter(Boolean);
+}
+
+watch(() => form.value.is_published, (newVal) => {
+    if (marker.value) {
+        if (newVal) marker.value.dragging.disable()
+        else marker.value.dragging.enable()
+    }
+})
+
 const initMap = () => {
     if (map.value) return;
-    const lat = parseFloat(form.value.location_lat)
-    const lng = parseFloat(form.value.location_lng)
+    const lat = parseFloat(form.value.location_lat) || 16.5662
+    const lng = parseFloat(form.value.location_lng) || 104.7525
 
     map.value = L.map('map-container', { zoomControl: false }).setView([lat, lng], 15)
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map.value)
     L.control.zoom({ position: 'bottomright' }).addTo(map.value);
 
-    // ตอนสร้างใหม่ ให้ Marker ลากได้เสมอ
-    marker.value = L.marker([lat, lng], { draggable: true }).addTo(map.value)
+    marker.value = L.marker([lat, lng], { draggable: !form.value.is_published }).addTo(map.value)
 
     map.value.on('click', (e) => {
-        updateMarkerPosition(e.latlng.lat, e.latlng.lng)
+        if (!form.value.is_published) updateMarkerPosition(e.latlng.lat, e.latlng.lng)
     })
 
     marker.value.on('dragend', () => {
@@ -222,14 +259,41 @@ const handlePasteAddress = (e) => {
 
 const searchFromAddress = () => {
     if (!addressPaste.value) return
+
+    const input = addressPaste.value.trim()
+
+    // 1. ตรวจสอบว่าเป็นการวางลิงก์ Google Maps ที่มีพิกัด (เช่น /@16.5401,104.7570,15z)
+    const urlMatch = input.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/)
+    
+    // 2. ตรวจสอบว่าเป็นการวางพิกัดตรงๆ (เช่น 16.5401, 104.7570)
+    const coordMatch = input.match(/^(-?\d+\.\d+)[\s,]+(-?\d+\.\d+)$/)
+
+    let lat = null
+    let lng = null
+
+    if (urlMatch) {
+        lat = parseFloat(urlMatch[1])
+        lng = parseFloat(urlMatch[2])
+    } else if (coordMatch) {
+        lat = parseFloat(coordMatch[1])
+        lng = parseFloat(coordMatch[2])
+    }
+
+    if (lat !== null && lng !== null) {
+        map.value.setView([lat, lng], 17)
+        updateMarkerPosition(lat, lng)
+        return
+    }
+
+    // 3. Fallback ไปใช้ระบบค้นหาชื่อฟรีด้วย Nominatim (อาจจะไม่เจอชื่อที่เป๊ะแบบ Google Maps)
     const geocoder = L.Control.Geocoder.nominatim()
-    geocoder.geocode(addressPaste.value, (results) => {
+    geocoder.geocode(input, (results) => {
         if (results && results.length > 0) {
             const { center } = results[0]
             map.value.setView(center, 17)
             updateMarkerPosition(center.lat, center.lng)
         } else {
-            alert('Location not found. Try adding city or country (e.g. Savannakhet, Laos)')
+            alert('Location not found in free database.\n\nTip: Copy the whole Google Maps Link (URL) or exact coordinates (e.g., 16.540, 104.757) instead!')
         }
     })
 }
@@ -242,56 +306,87 @@ const updateMarkerPosition = (lat, lng) => {
     form.value.location_lng = fixedLng
 }
 
-// --- จัดการรูปภาพ (Gallery) ---
+// --- Multi-image handlers ---
 const onFileChange = (e) => {
     const files = Array.from(e.target.files)
     files.forEach(file => {
         if (images.value.length >= 10) return
         
-        // เช็คขนาด 5MB
+        // เช็คขนาดไฟล์ (5MB)
         if (file.size > 5 * 1024 * 1024) {
             alert(`File ${file.name} is too large (Max 5MB).`)
             return
         }
 
-        // 1. เก็บไฟล์ดิบไว้ส่ง API
+        // 1. เก็บไฟล์จริงไว้เตรียมส่ง
         rawFiles.value.push(file)
 
-        // 2. แปลงเป็น Base64 ไว้โชว์พรีวิว
+        // 2. แปลงเป็น Base64 ไว้โชว์หน้าเว็บ
         const reader = new FileReader()
         reader.onload = (ev) => {
             images.value.push(ev.target.result)
         }
         reader.readAsDataURL(file)
     })
-    e.target.value = '' // Reset input
+    e.target.value = '' // reset
 }
 
 const removeImage = (index) => {
-    images.value.splice(index, 1)     // ลบพรีวิว
-    rawFiles.value.splice(index, 1)   // ลบไฟล์จริงที่จะส่ง
+    images.value.splice(index, 1)
+    
+    // ลบไฟล์จริงออกด้วย ถ้าหากเป็นรูปใหม่ที่เพิ่งเพิ่มเข้ามา
+    if (rawFiles.value[index]) {
+        rawFiles.value.splice(index, 1)
+    }
 }
 
 const setCover = (index) => {
-    // สลับพรีวิวมาไว้ตำแหน่งแรก (Cover)
+    // เลื่อนรูปพรีวิวมาเป็นปก
     const [img] = images.value.splice(index, 1)
     images.value.unshift(img) 
 
-    // สลับไฟล์ดิบมาไว้ตำแหน่งแรกด้วย (เพื่อส่งให้ API ตามลำดับ)
-    const [file] = rawFiles.value.splice(index, 1)
-    rawFiles.value.unshift(file)
+    // เลื่อนไฟล์จริงมาเป็นปกด้วย (เพื่อส่งให้ API ตามลำดับ)
+    if (rawFiles.value[index]) {
+        const [file] = rawFiles.value.splice(index, 1)
+        rawFiles.value.unshift(file)
+    }
 }
 
-// --- ฟังก์ชันบันทึกข้อมูล ---
-const savePlace = async () => {
-    if (!form.value.name || !form.value.category_id || !form.value.description) {
-        alert("Please fill in Name, Category, and Description.")
-        return
-    }
-
-    isSaving.value = true
+const fetchDetails = async () => {
+    const id = route.params.id
     try {
-        // ใช้ FormData ส่งไป FastAPI
+        const [resPlace, resCats] = await Promise.all([
+            placeRepository.getById(id),
+            categoryRepository.getAll()
+        ])
+        const data = resPlace.data
+        form.value = {
+            ...data,
+            location_lat: parseFloat(data.location_lat) || 16.5662,
+            location_lng: parseFloat(data.location_lng) || 104.7525,
+            is_published: !!data.is_published
+        }
+        
+        // โหลดรูปเก่ามาแสดง
+        images.value = parseImages(data.image_url)
+        // สำหรับรูปเก่า เราไม่รู้ว่าเป็นไฟล์อะไร (เพราะมันอยู่บนเซิร์ฟเวอร์แล้ว) 
+        // เราเลยเอาค่า URL ไปใส่ใน rawFiles ไว้ชั่วคราว เพื่อรักษาจำนวน index ให้เท่ากันกับ images
+        rawFiles.value = [...images.value] 
+
+        categories.value = resCats.data
+        await nextTick()
+        initMap()
+    } catch (error) {
+        console.error("Error:", error)
+    }
+}
+
+// --- บันทึกข้อมูลด้วย FormData (เหมือนหน้า Add) ---
+const updatePlace = async () => {
+    const id = route.params.id
+    isSaving.value = true
+
+    try {
         const formData = new FormData()
         formData.append('name', form.value.name)
         formData.append('description', form.value.description)
@@ -300,33 +395,34 @@ const savePlace = async () => {
         formData.append('location_lat', form.value.location_lat)
         formData.append('location_lng', form.value.location_lng)
 
-        // ยัดไฟล์ทั้งหมดใส่ Key 'images' ให้ FastAPI แปลงเป็น List[UploadFile]
-        rawFiles.value.forEach((file) => {
-            formData.append('images', file) 
+        // ตรวจสอบรูปภาพ
+        let hasNewImage = false;
+        rawFiles.value.forEach((fileOrUrl) => {
+            if (fileOrUrl instanceof File) {
+                // ถ้าเป็น File แสดงว่าเพิ่งอัปโหลดใหม่
+                formData.append('images', fileOrUrl)
+                hasNewImage = true;
+            }
         })
 
-        await placeRepository.create(formData)
+        // ถ้าไม่มีรูปใหม่เลย จะส่งแค่ข้อมูลทั่วไป (FastAPI จะรู้ว่าไม่ต้องอัปเดตไฟล์)
+        if (!hasNewImage) {
+            // เราอาจจะต้องทำระบบส่งรูปเก่าไปบอก FastAPI ด้วย แต่ในเบื้องต้นส่งแค่นี้ก่อน
+        }
+
+        await placeRepository.update(id, formData)
         
-        alert('✅ Place added successfully!')
-        router.push('/admin/places') // กลับไปหน้าตาราง
+        alert('✅ Saved successfully')
+        router.push('/admin/places')
     } catch (error) {
-        console.error("Save Error:", error)
-        alert('❌ Failed to save place. ' + (error.response?.data?.detail || ''))
+        console.error("Update Error:", error)
+        alert('❌ Failed to save. ' + (error.response?.data?.detail || ''))
     } finally {
         isSaving.value = false
     }
 }
 
-onMounted(async () => {
-    try {
-        const res = await categoryRepository.getAll()
-        categories.value = res.data
-        await nextTick()
-        initMap()
-    } catch (error) {
-        console.error("Failed to load categories:", error)
-    }
-})
+onMounted(fetchDetails)
 </script>
 
 <style scoped>
@@ -338,8 +434,6 @@ onMounted(async () => {
     font-family: 'Kanit', sans-serif;
     color: #1e293b;
 }
-
-.text-danger { color: #e74c3c; }
 
 .header-section {
     background: white;
@@ -389,10 +483,6 @@ onMounted(async () => {
     gap: 25px;
 }
 
-@media (max-width: 1024px) {
-    .form-grid { grid-template-columns: 1fr; }
-}
-
 .card {
     background: white;
     border-radius: 20px;
@@ -432,10 +522,6 @@ onMounted(async () => {
     gap: 15px;
 }
 
-@media (max-width: 600px) {
-    .input-row { grid-template-columns: 1fr; }
-}
-
 .input-group {
     margin-bottom: 15px;
 }
@@ -458,13 +544,8 @@ input, select, textarea {
     box-sizing: border-box;
 }
 
-input:focus, select:focus, textarea:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
 .map-wrapper-large {
-    height: 500px;
+    height: 600px;
     position: relative;
     border-radius: 0 0 20px 20px;
     overflow: hidden;
@@ -480,6 +561,25 @@ input:focus, select:focus, textarea:focus {
     border-radius: 15px;
     display: flex;
     gap: 12px;
+}
+
+.map-overlay-locked {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.4);
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(1px);
+}
+
+.overlay-msg {
+    background: #1e293b;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-size: 0.9rem;
 }
 
 /* ===================== GALLERY STYLES ===================== */
@@ -617,6 +717,8 @@ input:focus, select:focus, textarea:focus {
 }
 .upload-first-btn:hover { background: #2563eb; }
 
+.locked-hint { font-size: 0.85rem; color: #94a3b8; }
+
 .upload-hint {
     font-size: 0.8rem;
     color: #94a3b8;
@@ -668,6 +770,8 @@ input:focus, select:focus, textarea:focus {
 }
 .btn-cancel-full:hover { background: #f8fafc; }
 
+.btn-group-vertical { display: flex; flex-direction: column; }
+
 /* Switch Toggle */
 .switch { position: relative; width: 50px; height: 26px; }
 .switch input { opacity: 0; width: 0; height: 0; }
@@ -683,4 +787,17 @@ input:focus, select:focus, textarea:focus {
 }
 input:checked + .slider { background: #10b981; }
 input:checked + .slider:before { transform: translateX(24px); }
+
+/* Lock badge */
+.lock-badge {
+    margin-left: auto;
+    font-size: 0.78rem;
+    background: #fff7ed;
+    color: #c2410c;
+    padding: 3px 10px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
 </style>

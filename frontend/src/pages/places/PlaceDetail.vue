@@ -21,7 +21,9 @@
                         <span class="divider">•</span>
                         <span class="category-link">{{ getCategoryName(place.category_id) }}</span>
                         <span class="divider">•</span>
-                        <span class="location-text"><i class="fas fa-map-marker-alt"></i> สะหวันนะเขต, ลาว</span>
+                        <span class="location-text top-location-link" @click="openMap" title="คลิกเพื่อดู Google Maps">
+                            <i class="fas fa-map-marker-alt"></i> {{ addressText }}
+                        </span>
                     </div>
                 </div>
                 <div class="header-actions">
@@ -122,7 +124,7 @@
                             </iframe>
                         </div>
                         <div class="contact-info">
-                            <p><i class="fas fa-map-marker-alt"></i> สะหวันนะเขต, สปป.ลาว</p>
+                            <p class="real-address-info"><i class="fas fa-map-marker-alt"></i> {{ addressText }}</p>
                             <button class="btn-directions" @click="openMap">
                                 ขอเส้นทาง (Google Maps) <i class="fas fa-external-link-alt"></i>
                             </button>
@@ -166,6 +168,7 @@ const comments = ref([])
 const user = ref(JSON.parse(localStorage.getItem('user')))
 const isFavorite = ref(false)
 const reviewSuccess = ref(false)
+const addressText = ref('กำลังค้นหาตำแหน่ง...')
 
 const newComment = ref('')
 const newRating = ref(5)
@@ -264,6 +267,26 @@ const fetchData = async () => {
         ])
         place.value = resPlace.data
         categories.value = resCats.data
+
+        // แปลงพิกัดเป็นชื่อสถานที่ (Reverse Geocoding)
+        if (place.value.location_lat && place.value.location_lng) {
+            const lat = parseFloat(place.value.location_lat)
+            const lng = parseFloat(place.value.location_lng)
+            
+            try {
+                const mapRes = await axios.get(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=th,en`)
+                if (mapRes.data && mapRes.data.display_name) {
+                    const parts = mapRes.data.display_name.split(', ')
+                    addressText.value = parts.length > 3 ? parts.slice(0, 3).join(', ') : mapRes.data.display_name
+                } else {
+                    addressText.value = `📍 พิกัด (Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)})`
+                }
+            } catch (e) {
+                addressText.value = `📍 พิกัด (Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)})`
+            }
+        } else {
+            addressText.value = 'ไม่พบข้อมูลตำแหน่ง'
+        }
 
         if (user.value && user.value.role !== 'admin') {
             const favRes = await favoriteRepository.getUserFavorites(user.value.id)
@@ -416,6 +439,16 @@ const openMap = () => window.open(`https://www.google.com/maps/search/?api=1&que
 .category-link {
     font-weight: 600;
     color: #475569;
+}
+
+.top-location-link {
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.top-location-link:hover {
+    color: #000;
+    text-decoration: underline;
 }
 
 .header-actions {
@@ -758,6 +791,10 @@ textarea:focus {
     overflow: hidden;
     margin-bottom: 15px;
     border: 1px solid #e2e8f0;
+}
+
+.real-address-info {
+    line-height: 1.6;
 }
 
 .contact-info p {

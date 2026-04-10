@@ -48,26 +48,17 @@
                 </div>
 
                 <div class="filter-group">
-                    <h3>Popular Filters</h3>
-                    <label class="filter-checkbox"><input type="checkbox" checked /> <span>Pool</span></label>
-                    <label class="filter-checkbox"><input type="checkbox" checked /> <span>Free Breakfast</span></label>
-                    <label class="filter-checkbox"><input type="checkbox" /> <span>Free Wifi</span></label>
-                    <label class="filter-checkbox"><input type="checkbox" /> <span>Spa</span></label>
-                </div>
-
-                <div class="filter-divider"></div>
-
-                <div class="filter-group">
-                    <h3>Property Class (Stars)</h3>
-                    <label class="filter-checkbox"><input type="checkbox" /> <span class="stars"><i class="fas fa-star" v-for="i in 5" :key="'5s'+i"></i></span></label>
-                    <label class="filter-checkbox"><input type="checkbox" /> <span class="stars"><i class="fas fa-star" v-for="i in 4" :key="'4s'+i"></i></span></label>
-                    <label class="filter-checkbox"><input type="checkbox" /> <span class="stars"><i class="fas fa-star" v-for="i in 3" :key="'3s'+i"></i></span></label>
+                    <h3>Property Type</h3>
+                    <label v-for="cat in hotelCategories" :key="'sidebar-'+cat.id" class="filter-checkbox">
+                        <input type="checkbox" :value="cat.name.toLowerCase()" v-model="selectedCategories" />
+                        <span>{{ cat.name }}</span>
+                    </label>
                 </div>
             </aside>
 
             <main class="hotel-list-area">
                 <div class="list-header">
-                    <h2>{{ hotels.length }} properties in Savannakhet</h2>
+                    <h2>{{ filteredHotels.length }} properties in Savannakhet</h2>
                     <div class="sort-by">
                         <span>Sort by:</span>
                         <select>
@@ -78,14 +69,32 @@
                     </div>
                 </div>
 
-                <div class="hotel-card" v-for="(hotel, index) in hotels" :key="hotel.id">
+                <div v-if="loading" class="loading-box">
+                    <div class="spinner"></div>
+                    <p>Finding comfort for you...</p>
+                </div>
+
+                <div v-else-if="filteredHotels.length === 0" class="empty-box">
+                    <i class="fas fa-bed"></i>
+                    <p>No hotels found matching your search.</p>
+                </div>
+
+                <div v-else class="hotel-card" v-for="(hotel, index) in filteredHotels" :key="hotel.id" @click="goToDetail(hotel.id)">
                     
                     <div class="hotel-img-wrapper">
-                        <img :src="hotel.image" :alt="hotel.name" />
-                        <button class="btn-heart" :class="{ active: hotel.isSaved }" @click="hotel.isSaved = !hotel.isSaved">
+                        <img :src="getCoverImage(hotel)" :alt="hotel.name" />
+                        
+                        <div class="slider-arrows" v-if="getPlaceImagesArray(hotel).length > 1">
+                            <button class="arrow-btn left" @click.stop="prevImage(hotel.id, hotel)"><i class="fas fa-chevron-left"></i></button>
+                            <button class="arrow-btn right" @click.stop="nextImage(hotel.id, hotel)"><i class="fas fa-chevron-right"></i></button>
+                        </div>
+                        <div class="slider-dots" v-if="getPlaceImagesArray(hotel).length > 1">
+                            <span v-for="(_, idx) in getPlaceImagesArray(hotel)" :key="idx" :class="['dot', { active: (currentImageIndices[hotel.id] || 0) === idx }]"></span>
+                        </div>
+
+                        <button class="btn-heart" :class="{ active: isFavorite(hotel.id) }" @click.stop="toggleHeart(hotel.id)">
                             <i class="fas fa-heart"></i>
                         </button>
-                        <div class="img-counter"><i class="fas fa-camera"></i> 1/12</div>
                     </div>
 
                     <div class="hotel-info">
@@ -94,44 +103,28 @@
                         
                         <div class="rating-row">
                             <span class="bubbles">
-                                <i class="fas fa-circle"></i><i class="fas fa-circle"></i><i class="fas fa-circle"></i><i class="fas fa-circle"></i><i class="fas fa-circle-half-stroke"></i>
+                                <i v-for="s in 5" :key="s" :class="[(hotel.rating_avg || 0) >= s ? 'fas' : 'far', 'fa-circle']"></i>
                             </span>
-                            <span class="review-count">{{ hotel.reviews }} reviews</span>
+                            <span class="review-count">{{ hotel.rating_avg || '0.0' }} Rating</span>
                         </div>
                         
                         <div class="hotel-amenities">
-                            <span v-if="hotel.hasWifi"><i class="fas fa-wifi"></i> Free Wifi</span>
-                            <span v-if="hotel.hasPool"><i class="fas fa-swimming-pool"></i> Pool</span>
-                            <span v-if="hotel.hasBreakfast"><i class="fas fa-coffee"></i> Free Breakfast</span>
-                            <span v-if="hotel.hasParking"><i class="fas fa-parking"></i> Free Parking</span>
+                            <span><i class="fas fa-map-marker-alt"></i> {{ getCategoryName(hotel.category_id) }}</span>
                         </div>
 
                         <p class="hotel-desc">
-                            "{{ hotel.snippet }}"
+                            "{{ hotel.description || 'Experience comfort and luxury in the heart of Savannakhet.' }}"
                         </p>
                     </div>
 
                     <div class="hotel-deals">
                         <div class="deal-provider">
-                            <span>Agoda.com</span>
-                            <i class="fas fa-external-link-alt"></i>
+                            <span>Starting from</span>
                         </div>
                         <div class="deal-price">
-                            <span class="price-strike" v-if="hotel.oldPrice">${{ hotel.oldPrice }}</span>
-                            <span class="price-current">${{ hotel.price }}</span>
+                            <span class="price-current">$25+</span>
                         </div>
-                        <button class="btn-view-deal">View Deal</button>
-                        
-                        <div class="other-deals">
-                            <div class="mini-deal">
-                                <span>Booking.com</span>
-                                <strong>${{ hotel.price + 2 }}</strong>
-                            </div>
-                            <div class="mini-deal">
-                                <span>Expedia</span>
-                                <strong>${{ hotel.price + 5 }}</strong>
-                            </div>
-                        </div>
+                        <button class="btn-view-deal">Check Availability</button>
                     </div>
                 </div>
             </main>
@@ -140,68 +133,123 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import Navbar from '../components/Navbar.vue' // นำเข้า Navbar ที่เราทำไว้
+import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { placeRepository } from '@/repositories/placeRepository'
+import { categoryRepository } from '@/repositories/categoryRepository'
+import { favoriteRepository } from '@/repositories/favoriteRepository'
+import { useAuth } from '@/composables/useAuth'
+import Navbar from '@/components/Navbar.vue'
 
-// ข้อมูลจำลองโรงแรมในสะหวันนะเขต (MOCK DATA)
-const hotels = ref([
-    {
-        id: 1,
-        name: "Daosavanh Resort & Spa",
-        image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-        reviews: 142,
-        price: 45,
-        oldPrice: 55,
-        hasWifi: true,
-        hasPool: true,
-        hasBreakfast: true,
-        hasParking: true,
-        snippet: "A beautiful resort right by the Mekong river. The pool is fantastic and the breakfast buffet has a great variety of Lao and Western food.",
-        isSaved: true
-    },
-    {
-        id: 2,
-        name: "Avalon Residence",
-        image: "https://images.unsplash.com/photo-1551882547-ff40c0d13c05?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-        reviews: 98,
-        price: 28,
-        oldPrice: null,
-        hasWifi: true,
-        hasPool: false,
-        hasBreakfast: true,
-        hasParking: true,
-        snippet: "Very clean and modern rooms right in the city center. Walking distance to the night market and famous cafes. Highly recommended for couples.",
-        isSaved: false
-    },
-    {
-        id: 3,
-        name: "Pilgrim's Kitchen & Inn",
-        image: "https://images.unsplash.com/photo-1505691938895-1758d7feb511?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-        reviews: 215,
-        price: 18,
-        oldPrice: 22,
-        hasWifi: true,
-        hasPool: false,
-        hasBreakfast: false,
-        hasParking: false,
-        snippet: "Best budget option in town! The food downstairs is amazing (try their burgers). The rooms are simple but have everything you need.",
-        isSaved: false
-    },
-    {
-        id: 4,
-        name: "Macchiato Resort",
-        image: "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
-        reviews: 76,
-        price: 35,
-        oldPrice: 40,
-        hasWifi: true,
-        hasPool: true,
-        hasBreakfast: true,
-        hasParking: true,
-        snippet: "A hidden gem! The architecture is unique and the coffee served at the lobby is the best in Savannakhet.",
-        isSaved: false
+const router = useRouter()
+const { user } = useAuth()
+const places = ref([])
+const categories = ref([])
+const favoriteIds = ref([])
+const loading = ref(true)
+const selectedCategories = ref([])
+
+const fetchData = async () => {
+    loading.value = true
+    try {
+        const [resPlaces, resCats] = await Promise.all([
+            placeRepository.getAll(),
+            categoryRepository.getAll()
+        ])
+        places.value = resPlaces.data
+        categories.value = resCats.data
+
+        if (user.value) {
+            const favRes = await favoriteRepository.getUserFavorites(user.value.id)
+            favoriteIds.value = favRes.data.map(f => f.place_id)
+        }
+    } catch (err) {
+        console.error("Error fetching hotels:", err)
+    } finally {
+        loading.value = false
     }
-])
+}
+
+const filteredHotels = computed(() => {
+    let results = places.value.filter(p => {
+        const cat = categories.value.find(c => c.id === p.category_id)
+        return cat && cat.parent_type === 'hotel'
+    })
+
+    if (selectedCategories.value.length > 0) {
+        results = results.filter(p => {
+            const cat = categories.value.find(c => c.id === p.category_id)
+            return cat && selectedCategories.value.includes(cat.name.toLowerCase())
+        })
+    }
+    return results
+})
+
+const hotelCategories = computed(() => {
+    return categories.value.filter(c => c.parent_type === 'hotel')
+})
+
+const getCategoryName = (id) => categories.value.find(c => c.id === id)?.name || 'Accommodation'
+
+// --- Image Carousel Logic ---
+const currentImageIndices = ref({}) 
+
+const getPlaceImagesArray = (place) => {
+    const noImageUrl = 'https://via.placeholder.com/400x300?text=No+Image';
+    let urls = [];
+    
+    if (place.images && Array.isArray(place.images) && place.images.length > 0) {
+        urls = place.images.map(img => img.image_url || img.url || img);
+    } else if (place.image_url) { 
+        if (typeof place.image_url === 'string' && place.image_url.trim().startsWith('[')) {
+            try { urls = JSON.parse(place.image_url); } catch (e) { urls = [place.image_url.replace(/^\["?|"?\]$/g, '').replace(/\\"/g, '')]; }
+        } else {
+            urls = [place.image_url];
+        }
+    }
+    
+    if (urls.length === 0) return [noImageUrl];
+
+    return urls.map(url => {
+        if (!url) return noImageUrl;
+        if (url.startsWith('https://') || url.startsWith('http://') || url.startsWith('data:')) return url;
+        return `http://localhost:8000${url.startsWith('/') ? '' : '/'}${url}`;
+    });
+}
+
+const getCoverImage = (place) => {
+    const images = getPlaceImagesArray(place);
+    const index = currentImageIndices.value[place.id] || 0;
+    return images[index] || images[0];
+}
+
+const nextImage = (placeId, place) => {
+    const images = getPlaceImagesArray(place);
+    if (images.length <= 1) return;
+    const currentIdx = currentImageIndices.value[placeId] || 0;
+    currentImageIndices.value[placeId] = (currentIdx + 1) % images.length;
+}
+
+const prevImage = (placeId, place) => {
+    const images = getPlaceImagesArray(place);
+    if (images.length <= 1) return;
+    const currentIdx = currentImageIndices.value[placeId] || 0;
+    currentImageIndices.value[placeId] = currentIdx === 0 ? images.length - 1 : currentIdx - 1;
+}
+
+const isFavorite = (id) => favoriteIds.value.includes(id)
+const toggleHeart = async (id) => {
+    if (!user.value) return router.push('/login')
+    try {
+        const res = await favoriteRepository.toggleFavorite(user.value.id, id)
+        if (res.data.status === 'added') favoriteIds.value.push(id)
+        else favoriteIds.value = favoriteIds.value.filter(fid => fid !== id)
+    } catch (e) { console.error(e) }
+}
+
+const goToDetail = (id) => router.push(`/places/${id}`)
+
+onMounted(fetchData)
 </script>
 
 <style scoped>
@@ -336,7 +384,18 @@ const hotels = ref([
 /* Left: Image */
 .hotel-img-wrapper { width: 280px; position: relative; flex-shrink: 0;}
 .hotel-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
-.btn-heart { position: absolute; top: 15px; right: 15px; background: white; border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.2); font-size: 1.1rem; color: #94a3b8; transition: 0.2s;}
+
+.slider-arrows { opacity: 0; transition: opacity 0.2s ease-in-out; }
+.hotel-img-wrapper:hover .slider-arrows { opacity: 1; }
+.arrow-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255, 255, 255, 0.85); border: none; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #1e293b; box-shadow: 0 2px 6px rgba(0,0,0,0.2); z-index: 5; transition: 0.2s; }
+.arrow-btn:hover { background: white; transform: translateY(-50%) scale(1.1); }
+.arrow-btn.left { left: 8px; } .arrow-btn.right { right: 8px; }
+
+.slider-dots { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); display: flex; gap: 4px; z-index: 5; }
+.dot { width: 6px; height: 6px; background: rgba(255, 255, 255, 0.6); border-radius: 50%; transition: 0.2s; }
+.dot.active { background: white; transform: scale(1.3); }
+
+.btn-heart { position: absolute; top: 15px; right: 15px; background: white; border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.2); font-size: 1.1rem; color: #94a3b8; transition: 0.2s; z-index: 10;}
 .btn-heart.active { color: #ef4444; }
 .btn-heart:hover { transform: scale(1.1); }
 .img-counter { position: absolute; bottom: 15px; left: 15px; background: rgba(0,0,0,0.6); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; gap: 6px;}
@@ -379,14 +438,39 @@ const hotels = ref([
     .filter-sidebar { display: none; } /* ซ่อน Sidebar ในมือถือ (ในเว็บจริงจะทำเป็นปุ่ม Filter เด้งขึ้นมา) */
 }
 
-@media (max-width: 768px) {
-    .booking-bar { flex-direction: column; }
-    .booking-divider { width: 100%; height: 1px; margin: 10px 0; }
-    .btn-update-search { width: 100%; margin: 10px 0 0; }
-    
-    .hotel-card { flex-direction: column; height: auto; }
-    .hotel-img-wrapper { width: 100%; height: 200px; }
-    .hotel-info { border-right: none; border-bottom: 1px solid #e2e8f0; }
-    .hotel-deals { width: 100%; }
+/* States */
+.loading-box,
+.empty-box {
+    text-align: center;
+    padding: 60px;
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+
+.spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #00aa6c;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.empty-box i {
+    font-size: 2.5rem;
+    color: #cbd5e1;
+    margin-bottom: 15px;
+}
+
+.empty-box p {
+    color: #64748b;
+    font-size: 1rem;
 }
 </style>

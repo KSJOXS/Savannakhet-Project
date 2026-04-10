@@ -20,7 +20,7 @@ def create_category(cat: schemas.CategoryCreate, db: Session = Depends(get_db)):
     if existing:
         raise HTTPException(status_code=400, detail="Category already exists.")
     
-    new_cat = models.Category(name=cat.name)
+    new_cat = models.Category(name=cat.name, parent_type=cat.parent_type)
     db.add(new_cat)
     db.commit()
     db.refresh(new_cat)

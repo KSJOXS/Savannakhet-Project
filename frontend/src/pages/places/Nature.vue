@@ -15,17 +15,14 @@
                 </div>
 
                 <div class="quick-filters">
-                    <button class="filter-pill" @click="toggleCategory('waterfall')"
-                        :class="{ active: selectedCategories.includes('waterfall') }">
-                        <i class="fas fa-water"></i> Waterfalls
-                    </button>
-                    <button class="filter-pill" @click="toggleCategory('cave')"
-                        :class="{ active: selectedCategories.includes('cave') }">
-                        <i class="fas fa-mountain"></i> Caves
-                    </button>
-                    <button class="filter-pill" @click="toggleCategory('forest')"
-                        :class="{ active: selectedCategories.includes('forest') }">
-                        <i class="fas fa-leaf"></i> Forests
+                    <button 
+                        v-for="cat in natureCategories" 
+                        :key="cat.id"
+                        class="filter-pill" 
+                        @click="toggleCategory(cat.name.toLowerCase())"
+                        :class="{ active: selectedCategories.includes(cat.name.toLowerCase()) }"
+                    >
+                        <i :class="getIconForNature(cat.name)"></i> {{ cat.name }}
                     </button>
                 </div>
             </div>
@@ -41,21 +38,9 @@
 
                 <div class="filter-group">
                     <h3>Category</h3>
-                    <label class="filter-checkbox">
-                        <input type="checkbox" value="nature" v-model="selectedCategories" />
-                        <span>Nature & Parks</span>
-                    </label>
-                    <label class="filter-checkbox">
-                        <input type="checkbox" value="waterfall" v-model="selectedCategories" />
-                        <span>Waterfalls</span>
-                    </label>
-                    <label class="filter-checkbox">
-                        <input type="checkbox" value="cave" v-model="selectedCategories" />
-                        <span>Caves</span>
-                    </label>
-                    <label class="filter-checkbox">
-                        <input type="checkbox" value="forest" v-model="selectedCategories" />
-                        <span>Forests</span>
+                    <label v-for="cat in natureCategories" :key="'sidebar-'+cat.id" class="filter-checkbox">
+                        <input type="checkbox" :value="cat.name.toLowerCase()" v-model="selectedCategories" />
+                        <span>{{ cat.name }}</span>
                     </label>
                 </div>
 
@@ -99,6 +84,15 @@
 
                         <div class="card-img-wrapper">
                             <img :src="getCoverImage(place)" :alt="place.name" @error="handleImgError" />
+                            
+                            <div class="slider-arrows" v-if="getPlaceImagesArray(place).length > 1">
+                                <button class="arrow-btn left" @click.stop="prevImage(place.id, place)"><i class="fas fa-chevron-left"></i></button>
+                                <button class="arrow-btn right" @click.stop="nextImage(place.id, place)"><i class="fas fa-chevron-right"></i></button>
+                            </div>
+                            <div class="slider-dots" v-if="getPlaceImagesArray(place).length > 1">
+                                <span v-for="(_, idx) in getPlaceImagesArray(place)" :key="idx" :class="['dot', { active: (currentImageIndices[place.id] || 0) === idx }]"></span>
+                            </div>
+
                             <button class="btn-heart" :class="{ active: isFavorite(place.id) }"
                                 @click.stop="toggleHeart(place.id)">
                                 <i class="fas fa-heart"></i>
@@ -149,7 +143,7 @@ import { placeRepository } from '@/repositories/placeRepository'
 import { categoryRepository } from '@/repositories/categoryRepository'
 import { favoriteRepository } from '@/repositories/favoriteRepository'
 import { useAuth } from '@/composables/useAuth'
-import Navbar from '../components/Navbar.vue'
+import Navbar from '@/components/Navbar.vue'
 
 const router = useRouter()
 const { user } = useAuth()
@@ -160,11 +154,24 @@ const loading = ref(true)
 const selectedCategories = ref([])
 
 const toggleCategory = (cat) => {
+    cat = cat.toLowerCase()
     if (selectedCategories.value.includes(cat)) {
         selectedCategories.value = selectedCategories.value.filter(c => c !== cat)
     } else {
         selectedCategories.value.push(cat)
     }
+}
+
+const natureCategories = computed(() => {
+    return categories.value.filter(c => c.parent_type === 'nature')
+})
+
+const getIconForNature = (name) => {
+    name = name.toLowerCase()
+    if (name.includes('waterfall')) return 'fas fa-water'
+    if (name.includes('cave')) return 'fas fa-mountain'
+    if (name.includes('forest')) return 'fas fa-tree'
+    return 'fas fa-leaf'
 }
 
 const fetchData = async () => {
@@ -194,15 +201,8 @@ const filteredNature = computed(() => {
     let spots = places.value.filter(p => {
         const cat = categories.value.find(c => c.id == p.category_id)
         if (!cat) return false
-        const name = cat.name.toLowerCase()
-        return name.includes('nature') || name.includes('park') ||
-            name.includes('waterfall') || name.includes('cave') ||
-            name.includes('forest') || name.includes('ธรรมชาติ')
+        return cat.parent_type === 'nature'
     })
-
-    if (spots.length === 0 && places.value.length > 0) {
-        spots = places.value;
-    }
 
     if (selectedCategories.value.length > 0) {
         return spots.filter(p => {
@@ -215,36 +215,50 @@ const filteredNature = computed(() => {
     return spots
 })
 
-// 🛠️ แก้ไข BUG รูปภาพไม่ขึ้น
-const getCoverImage = (place) => {
-    let url = place.image_url;
-    if (!url || url === '[]' || url === '') return 'https://via.placeholder.com/600x400?text=No+Image';
+// --- Image Carousel Logic ---
+const currentImageIndices = ref({}) 
 
-    // 1. ถ้าเป็น JSON Array ["url"] ให้แกะออกมา
-    if (typeof url === 'string' && url.startsWith('[')) {
-        try {
-            const arr = JSON.parse(url);
-            if (Array.isArray(arr) && arr.length > 0) {
-                url = arr[0];
-            }
-        } catch (e) {
-            url = url.replace(/[\[\]"]/g, ''); // ถ้า Parse พัง ให้ล้างเครื่องหมายทิ้ง
+const getPlaceImagesArray = (place) => {
+    const noImageUrl = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22400%22%20height%3D%22300%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23e2e8f0%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20fill%3D%22%2364748b%22%20font-family%3D%22sans-serif%22%20font-size%3D%2220%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%3ENo%20Image%3C%2Ftext%3E%3C%2Fsvg%3E';
+    let urls = [];
+    
+    if (place.images && Array.isArray(place.images) && place.images.length > 0) {
+        urls = place.images.map(img => img.image_url || img.url || img);
+    } else if (place.image_url) { 
+        if (typeof place.image_url === 'string' && place.image_url.trim().startsWith('[')) {
+            try { urls = JSON.parse(place.image_url); } catch (e) { urls = [place.image_url.replace(/^\["?|"?\]$/g, '').replace(/\\"/g, '')]; }
+        } else {
+            urls = [place.image_url];
         }
     }
+    
+    if (urls.length === 0) return [noImageUrl];
 
-    // 2. ถ้าเป็น Base64 (data:image...) ให้ส่งคืนไปตรงๆ เลย
-    if (url.startsWith('data:')) {
-        return url;
-    }
+    return urls.map(url => {
+        if (!url) return noImageUrl;
+        if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) return url;
+        return `http://localhost:8000${url.startsWith('/') ? '' : '/'}${url}`;
+    });
+}
 
-    // 3. ถ้าเป็น URL สมบูรณ์ (http...) ให้ส่งคืนไปเลย
-    if (url.startsWith('http')) {
-        return url;
-    }
+const getCoverImage = (place) => {
+    const images = getPlaceImagesArray(place);
+    const index = currentImageIndices.value[place.id] || 0;
+    return images[index] || images[0];
+}
 
-    // 4. ถ้าเป็น Path ในเครื่อง ให้เติม localhost:8000
-    const cleanPath = url.startsWith('/') ? url.slice(1) : url;
-    return `http://localhost:8000/${cleanPath}`;
+const nextImage = (placeId, place) => {
+    const images = getPlaceImagesArray(place);
+    if (images.length <= 1) return;
+    const currentIdx = currentImageIndices.value[placeId] || 0;
+    currentImageIndices.value[placeId] = (currentIdx + 1) % images.length;
+}
+
+const prevImage = (placeId, place) => {
+    const images = getPlaceImagesArray(place);
+    if (images.length <= 1) return;
+    const currentIdx = currentImageIndices.value[placeId] || 0;
+    currentImageIndices.value[placeId] = currentIdx === 0 ? images.length - 1 : currentIdx - 1;
 }
 
 const handleImgError = (e) => {
@@ -491,6 +505,16 @@ onMounted(fetchData)
     height: 100%;
     object-fit: cover;
 }
+
+.slider-arrows { opacity: 0; transition: opacity 0.2s ease-in-out; }
+.card-img-wrapper:hover .slider-arrows { opacity: 1; }
+.arrow-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255, 255, 255, 0.85); border: none; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #1e293b; box-shadow: 0 2px 6px rgba(0,0,0,0.2); z-index: 5; transition: 0.2s; }
+.arrow-btn:hover { background: white; transform: translateY(-50%) scale(1.1); }
+.arrow-btn.left { left: 8px; } .arrow-btn.right { right: 8px; }
+
+.slider-dots { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); display: flex; gap: 4px; z-index: 5; }
+.dot { width: 6px; height: 6px; background: rgba(255, 255, 255, 0.6); border-radius: 50%; transition: 0.2s; }
+.dot.active { background: white; transform: scale(1.3); }
 
 .btn-heart {
     position: absolute;

@@ -28,9 +28,20 @@
                         :class="{ 'is-error': validationError }"
                     >
                 </div>
+
+                <div class="select-wrapper">
+                    <select v-model="selectedParentType" class="type-select">
+                        <option value="other">📁 Other</option>
+                        <option value="nature">🏞️ Nature</option>
+                        <option value="restaurant">🍴 Restaurant</option>
+                        <option value="hotel">🏨 Hotel</option>
+                        <option value="culture">🏛️ Culture</option>
+                    </select>
+                </div>
+
                 <button @click="addCategory" class="btn-primary" :disabled="isLoading">
                     <i class="fas fa-save"></i>
-                    {{ isLoading ? 'Adding...' : 'Add Category' }}
+                    {{ isLoading ? 'Add' : 'Add Category' }}
                 </button>
             </div>
             <!-- Inline Validation Message -->
@@ -43,9 +54,12 @@
             <div v-for="cat in categories" :key="cat.id" class="cat-card">
                 <div class="cat-info">
                     <div class="icon-box">
-                        <i class="fas fa-folder"></i>
+                        <i :class="getIconForType(cat.parent_type)"></i>
                     </div>
-                    <span class="cat-name">{{ cat.name }}</span>
+                    <div class="cat-details">
+                        <span class="cat-name">{{ cat.name }}</span>
+                        <span class="parent-type-tag" :class="cat.parent_type">{{ cat.parent_type }}</span>
+                    </div>
                 </div>
                 <button @click="deleteCategory(cat.id, cat.name)" class="btn-del" title="Delete category">
                     <i class="fas fa-trash-alt"></i>
@@ -90,6 +104,7 @@ import { categoryRepository } from '@/repositories/categoryRepository'
 
 const categories = ref([])
 const newCatName = ref('')
+const selectedParentType = ref('other')
 const validationError = ref('')
 const isLoading = ref(false)
 const isDeleting = ref(false)
@@ -124,7 +139,10 @@ const addCategory = async () => {
 
     isLoading.value = true
     try {
-        await categoryRepository.create({ name })
+        await categoryRepository.create({ 
+            name,
+            parent_type: selectedParentType.value 
+        })
         newCatName.value = ''
         validationError.value = ''
         await fetchCats()
@@ -134,6 +152,17 @@ const addCategory = async () => {
     } finally {
         isLoading.value = false
     }
+}
+
+const getIconForType = (type) => {
+    const icons = {
+        nature: 'fas fa-tree',
+        restaurant: 'fas fa-utensils',
+        hotel: 'fas fa-bed',
+        culture: 'fas fa-landmark',
+        other: 'fas fa-folder'
+    }
+    return icons[type] || 'fas fa-folder'
 }
 
 const deleteCategory = (id, name) => {
@@ -337,7 +366,42 @@ onMounted(fetchCats)
     border-radius: 8px;
     font-size: 1.1rem;
 }
-.cat-name { font-weight: 500; color: #334155; }
+.cat-details {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.cat-name { font-weight: 600; color: #1e293b; font-size: 1rem; }
+.parent-type-tag {
+    font-size: 0.7rem;
+    padding: 1px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    font-weight: 700;
+    width: fit-content;
+}
+.parent-type-tag.nature { background: #dcfce7; color: #166534; }
+.parent-type-tag.restaurant { background: #fef9c3; color: #854d0e; }
+.parent-type-tag.hotel { background: #dbeafe; color: #1e40af; }
+.parent-type-tag.culture { background: #f3e8ff; color: #6b21a8; }
+.parent-type-tag.other { background: #f1f5f9; color: #475569; }
+
+.select-wrapper {
+    width: 200px;
+}
+.type-select {
+    width: 100%;
+    padding: 12px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    background: #f8fafc;
+    font-family: 'Kanit', sans-serif;
+    cursor: pointer;
+}
+.type-select:focus {
+    border-color: #3b82f6;
+    background: white;
+}
 
 .btn-del {
     color: #cbd5e1;

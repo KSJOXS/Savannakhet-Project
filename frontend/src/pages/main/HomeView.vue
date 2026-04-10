@@ -100,7 +100,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { placeRepository } from '@/repositories/placeRepository'
 import { categoryRepository } from '@/repositories/categoryRepository'
-import Navbar from '../components/Navbar.vue'
+import Navbar from '@/components/Navbar.vue'
 
 const router = useRouter()
 const featuredPlaces = ref([])

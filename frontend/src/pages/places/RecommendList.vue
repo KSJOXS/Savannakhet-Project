@@ -295,7 +295,7 @@ import { ref, onMounted, computed, onUnmounted } from 'vue'
 import { placeRepository } from '@/repositories/placeRepository'
 import { categoryRepository } from '@/repositories/categoryRepository'
 import { useRouter } from 'vue-router'
-import Navbar from '../components/Navbar.vue'
+import Navbar from '@/components/Navbar.vue'
 import { favoriteRepository } from '@/repositories/favoriteRepository'
 import { useAuth } from '@/composables/useAuth'
 import axios from 'axios'
@@ -376,23 +376,17 @@ const prevImage = (placeId, place) => {
     currentImageIndices.value[placeId] = currentIdx === 0 ? images.length - 1 : currentIdx - 1;
 }
 
-const filterByCategoryKeywords = (keywords) => {
+const filterByParentType = (type) => {
     return places.value.filter(p => {
         const cat = categories.value.find(c => c.id === p.category_id);
-        if (!cat) return false;
-        const catName = cat.name.toLowerCase();
-        return keywords.some(kw => catName.includes(kw.toLowerCase()));
+        return cat && cat.parent_type === type;
     });
 };
 
-const foodPlaces = computed(() => filterByCategoryKeywords(['restaurant', 'coffee', 'cafe', 'food', 'ร้านอาหาร', 'คาเฟ่', 'กาแฟ', 'ของกิน']));
-const naturePlaces = computed(() => filterByCategoryKeywords(['nature', 'ธรรมชาติ']));
-const marketPlaces = computed(() => filterByCategoryKeywords(['market', 'walking street', 'ตลาด', 'ถนนคนเดิน']));
-const landmarkPlaces = computed(() => filterByCategoryKeywords(['landmark', 'point of interest', 'สถานที่สำคัญ', 'จุดที่น่าสนใจ']));
-const historicPlaces = computed(() => filterByCategoryKeywords(['historic', 'history', 'ประวัติศาสตร์']));
-const sciencePlaces = computed(() => filterByCategoryKeywords(['science', 'museum', 'วิทยาศาสตร์', 'พิพิธภัณฑ์']));
-const parkPlaces = computed(() => filterByCategoryKeywords(['park', 'สวน']));
-const religiousPlaces = computed(() => filterByCategoryKeywords(['religious', 'sacred', 'temple', 'ศาสนา', 'ศักดิ์สิทธิ์', 'วัด']));
+const foodPlaces = computed(() => filterByParentType('restaurant'));
+const naturePlaces = computed(() => filterByParentType('nature'));
+const landmarkPlaces = computed(() => filterByParentType('culture'));
+const religiousPlaces = computed(() => filterByParentType('culture'));
 
 const topRatedPlaces = computed(() => {
     return [...places.value].sort((a, b) => (parseFloat(b.rating_avg) || 0) - (parseFloat(a.rating_avg) || 0)).slice(0, 8);

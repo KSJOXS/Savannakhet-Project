@@ -7,13 +7,16 @@
                 <h1>Restaurants in Savannakhet</h1>
                 <p class="subtitle">Explore the best places to eat, drink, and relax.</p>
 
-                <div class="quick-filters">
-                    <button class="filter-pill"><i class="fas fa-coffee"></i> Breakfast</button>
-                    <button class="filter-pill"><i class="fas fa-hamburger"></i> Lunch</button>
-                    <button class="filter-pill"><i class="fas fa-utensils"></i> Dinner</button>
-                    <button class="filter-pill"><i class="fas fa-mug-hot"></i> Coffee & Tea</button>
-                    <button class="filter-pill"><i class="fas fa-pizza-slice"></i> Cheap Eats</button>
-                    <button class="filter-pill"><i class="fas fa-wine-glass-alt"></i> Fine Dining</button>
+                <div class="quick-filters" v-if="restaurantCategories.length > 0">
+                    <button 
+                        v-for="cat in restaurantCategories.slice(0, 6)" 
+                        :key="cat.id"
+                        class="filter-pill"
+                        @click="toggleCategory(cat.name.toLowerCase())"
+                        :class="{ active: selectedCategories.includes(cat.name.toLowerCase()) }"
+                    >
+                        <i :class="getIconForRestaurant(cat.name)"></i> {{ cat.name }}
+                    </button>
                 </div>
             </div>
         </div>
@@ -28,10 +31,10 @@
 
                 <div class="filter-group">
                     <h3>Establishment Type</h3>
-                    <label class="filter-checkbox"><input type="checkbox" /> <span>Restaurants</span></label>
-                    <label class="filter-checkbox"><input type="checkbox" /> <span>Coffee & Tea</span></label>
-                    <label class="filter-checkbox"><input type="checkbox" /> <span>Bars & Pubs</span></label>
-                    <label class="filter-checkbox"><input type="checkbox" /> <span>Street Food</span></label>
+                    <label v-for="cat in restaurantCategories" :key="'sidebar-'+cat.id" class="filter-checkbox">
+                        <input type="checkbox" :value="cat.name.toLowerCase()" v-model="selectedCategories" />
+                        <span>{{ cat.name }}</span>
+                    </label>
                 </div>
 
                 <div class="filter-divider"></div>
@@ -71,6 +74,15 @@
 
                     <div class="card-img-wrapper">
                         <img :src="getCoverImage(place)" :alt="place.name" />
+                        
+                        <div class="slider-arrows" v-if="getPlaceImagesArray(place).length > 1">
+                            <button class="arrow-btn left" @click.stop="prevImage(place.id, place)"><i class="fas fa-chevron-left"></i></button>
+                            <button class="arrow-btn right" @click.stop="nextImage(place.id, place)"><i class="fas fa-chevron-right"></i></button>
+                        </div>
+                        <div class="slider-dots" v-if="getPlaceImagesArray(place).length > 1">
+                            <span v-for="(_, idx) in getPlaceImagesArray(place)" :key="idx" :class="['dot', { active: (currentImageIndices[place.id] || 0) === idx }]"></span>
+                        </div>
+
                         <button class="btn-heart" :class="{ active: isFavorite(place.id) }"
                             @click.stop="toggleHeart(place.id)">
                             <i class="fas fa-heart"></i>
@@ -113,7 +125,7 @@ import { placeRepository } from '@/repositories/placeRepository'
 import { categoryRepository } from '@/repositories/categoryRepository'
 import { favoriteRepository } from '@/repositories/favoriteRepository'
 import { useAuth } from '@/composables/useAuth'
-import Navbar from '../components/Navbar.vue'
+import Navbar from '@/components/Navbar.vue'
 import axios from 'axios'
 
 const router = useRouter()
@@ -122,6 +134,7 @@ const places = ref([])
 const categories = ref([])
 const favoriteIds = ref([])
 const loading = ref(true)
+const selectedCategories = ref([])
 
 // --- API DATA FETCHING ---
 const fetchData = async () => {
@@ -148,29 +161,88 @@ const fetchData = async () => {
 
 // 🍽️ กรองเฉพาะร้านอาหารและคาเฟ่
 const filteredRestaurants = computed(() => {
-    return places.value.filter(p => {
+    let results = places.value.filter(p => {
         const cat = categories.value.find(c => c.id === p.category_id)
-        if (!cat) return false
-        const name = cat.name.toLowerCase()
-        return name.includes('restaurant') ||
-            name.includes('cafe') ||
-            name.includes('coffee') ||
-            name.includes('food') ||
-            name.includes('ร้านอาหาร') ||
-            name.includes('คาเฟ่') ||
-            name.includes('ของกิน') ||
-            name.includes('กาแฟ')
+        return cat && cat.parent_type === 'restaurant'
     })
+
+    if (selectedCategories.value.length > 0) {
+        results = results.filter(p => {
+            const cat = categories.value.find(c => c.id === p.category_id)
+            return cat && selectedCategories.value.includes(cat.name.toLowerCase())
+        })
+    }
+    return results
 })
 
-// --- HELPERS ---
-const getCoverImage = (place) => {
-    if (!place.image_url) return 'https://via.placeholder.com/400x300?text=No+Image';
-    let url = place.image_url;
-    if (url.startsWith('[')) {
-        try { url = JSON.parse(url)[0]; } catch (e) { }
+const restaurantCategories = computed(() => {
+    return categories.value.filter(c => c.parent_type === 'restaurant')
+})
+
+const toggleCategory = (name) => {
+    name = name.toLowerCase()
+    if (selectedCategories.value.includes(name)) {
+        selectedCategories.value = selectedCategories.value.filter(c => c !== name)
+    } else {
+        selectedCategories.value.push(name)
     }
-    return url.startsWith('http') ? url : `http://localhost:8000/${url.replace(/^\//, '')}`;
+}
+
+const getIconForRestaurant = (name) => {
+    name = name.toLowerCase()
+    if (name.includes('coffee') || name.includes('cafe')) return 'fas fa-mug-hot'
+    if (name.includes('breakfast')) return 'fas fa-coffee'
+    if (name.includes('lunch')) return 'fas fa-hamburger'
+    if (name.includes('dinner')) return 'fas fa-utensils'
+    if (name.includes('bar') || name.includes('pub')) return 'fas fa-wine-glass-alt'
+    if (name.includes('street')) return 'fas fa-pizza-slice'
+    return 'fas fa-utensils'
+}
+
+// --- Image Carousel Logic ---
+const currentImageIndices = ref({}) 
+
+const getPlaceImagesArray = (place) => {
+    const noImageUrl = 'https://via.placeholder.com/400x300?text=No+Image';
+    let urls = [];
+    
+    if (place.images && Array.isArray(place.images) && place.images.length > 0) {
+        urls = place.images.map(img => img.image_url || img.url || img);
+    } else if (place.image_url) { 
+        if (typeof place.image_url === 'string' && place.image_url.trim().startsWith('[')) {
+            try { urls = JSON.parse(place.image_url); } catch (e) { urls = [place.image_url.replace(/^\["?|"?\]$/g, '').replace(/\\"/g, '')]; }
+        } else {
+            urls = [place.image_url];
+        }
+    }
+    
+    if (urls.length === 0) return [noImageUrl];
+
+    return urls.map(url => {
+        if (!url) return noImageUrl;
+        if (url.startsWith('https://') || url.startsWith('http://') || url.startsWith('data:')) return url;
+        return `http://localhost:8000${url.startsWith('/') ? '' : '/'}${url}`;
+    });
+}
+
+const getCoverImage = (place) => {
+    const images = getPlaceImagesArray(place);
+    const index = currentImageIndices.value[place.id] || 0;
+    return images[index] || images[0];
+}
+
+const nextImage = (placeId, place) => {
+    const images = getPlaceImagesArray(place);
+    if (images.length <= 1) return;
+    const currentIdx = currentImageIndices.value[placeId] || 0;
+    currentImageIndices.value[placeId] = (currentIdx + 1) % images.length;
+}
+
+const prevImage = (placeId, place) => {
+    const images = getPlaceImagesArray(place);
+    if (images.length <= 1) return;
+    const currentIdx = currentImageIndices.value[placeId] || 0;
+    currentImageIndices.value[placeId] = currentIdx === 0 ? images.length - 1 : currentIdx - 1;
 }
 
 const getCategoryName = (id) => {
@@ -406,6 +478,16 @@ onMounted(fetchData)
     height: 100%;
     object-fit: cover;
 }
+
+.slider-arrows { opacity: 0; transition: opacity 0.2s ease-in-out; }
+.card-img-wrapper:hover .slider-arrows { opacity: 1; }
+.arrow-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255, 255, 255, 0.85); border: none; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #1e293b; box-shadow: 0 2px 6px rgba(0,0,0,0.2); z-index: 5; transition: 0.2s; }
+.arrow-btn:hover { background: white; transform: translateY(-50%) scale(1.1); }
+.arrow-btn.left { left: 8px; } .arrow-btn.right { right: 8px; }
+
+.slider-dots { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); display: flex; gap: 4px; z-index: 5; }
+.dot { width: 6px; height: 6px; background: rgba(255, 255, 255, 0.6); border-radius: 50%; transition: 0.2s; }
+.dot.active { background: white; transform: scale(1.3); }
 
 .btn-heart {
     position: absolute;

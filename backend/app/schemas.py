@@ -49,10 +49,12 @@ class PlaceResponse(PlaceBase):
 # --- Category & Review ---
 class CategoryCreate(BaseModel):
     name: str
+    parent_type: str = 'other'
 
 class CategoryResponse(BaseModel):
     id: int
     name: str
+    parent_type: str
     class Config: from_attributes = True
 
 class ReviewCreate(BaseModel):
