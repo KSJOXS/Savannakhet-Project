@@ -1,6 +1,6 @@
 <template>
     <div class="recently-viewed-section" v-if="recentPlaces.length > 0">
-        <h2 class="section-title">Recently viewed</h2>
+        <h2 class="section-title">{{ t('recentlyViewed.title') }}</h2>
         <div class="recent-grid">
             <div v-for="place in recentPlaces" :key="place.id" class="recent-card" @click="goToDetail(place.id)">
                 <div class="img-container">
@@ -30,8 +30,10 @@ import { useRouter } from 'vue-router'
 import { placeRepository } from '@/repositories/placeRepository'
 import { categoryRepository } from '@/repositories/categoryRepository'
 import { favoriteRepository } from '@/repositories/favoriteRepository'
+import { useI18n } from '@/composables/useI18n'
 import axios from 'axios'
 
+const { t } = useI18n()
 const router = useRouter()
 const recentPlaces = ref([])
 const categories = ref([])

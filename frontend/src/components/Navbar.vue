@@ -21,19 +21,43 @@
 
                 <div class="nav-right">
                     <router-link to="/explore" class="nav-item">
-                        <span>Discover</span>
+                        <span>{{ t('nav.discover') }}</span>
                     </router-link>
 
                     <router-link to="/about" class="nav-item" :class="{ active: route.path === '/about' }">
-                        <i class="fas fa-info-circle"></i> <span>About</span>
+                        <i class="fas fa-info-circle"></i> <span>{{ t('nav.about') }}</span>
                     </router-link>
 
                     <router-link v-if="isLoggedIn && (!user || user.role !== 'admin')" to="/favorites" class="nav-item">
-                        <i class="far fa-heart"></i> <span>Saves</span>
+                        <i class="far fa-heart"></i> <span>{{ t('nav.saves') }}</span>
                     </router-link>
 
+                    <!-- Language Switcher -->
+                    <div class="lang-switcher">
+                        <button class="lang-btn" @click="isLangOpen = !isLangOpen">
+                            <span>{{ currentFlagLabel }}</span>
+                            <i class="fas fa-chevron-down" :class="{ rotated: isLangOpen }"></i>
+                        </button>
+                        <div v-if="isLangOpen" class="lang-overlay" @click="isLangOpen = false"></div>
+                        <transition name="fade-slide">
+                            <div v-if="isLangOpen" class="lang-dropdown">
+                                <div
+                                    v-for="loc in supportedLocales"
+                                    :key="loc.code"
+                                    class="lang-item"
+                                    :class="{ active: locale === loc.code }"
+                                    @click="switchLang(loc.code)"
+                                >
+                                    <span class="lang-flag">{{ loc.flag }}</span>
+                                    <span>{{ loc.label }}</span>
+                                    <i v-if="locale === loc.code" class="fas fa-check lang-check"></i>
+                                </div>
+                            </div>
+                        </transition>
+                    </div>
+
                     <div v-if="!isLoggedIn" class="auth-group">
-                        <router-link to="/login" class="btn-ta-solid">Sign in</router-link>
+                        <router-link to="/login" class="btn-ta-solid">{{ t('nav.signIn') }}</router-link>
                     </div>
 
                     <div v-else class="user-group">
@@ -48,19 +72,19 @@
                                 <div class="dropdown-arrow"></div>
 
                                 <router-link to="/favorites" class="dropdown-item" @click="isDropdownOpen = false">
-                                    Saves
+                                    {{ t('nav.saves') }}
                                 </router-link>
                                 <router-link to="/profile" class="dropdown-item" @click="isDropdownOpen = false">
-                                    Profile
+                                    {{ t('nav.profile') }}
                                 </router-link>
                                 <router-link to="/settings" class="dropdown-item" @click="isDropdownOpen = false">
-                                    Account info
+                                    {{ t('nav.accountInfo') }}
                                 </router-link>
 
                                 <div class="dropdown-divider"></div>
 
                                 <div class="dropdown-item logout" @click="handleLogoutAndClose">
-                                    Sign out
+                                    {{ t('nav.signOut') }}
                                 </div>
                             </div>
                         </transition>
@@ -78,31 +102,31 @@
                         v-if="!user || user.role !== 'admin'" 
                         to="/" 
                         class="sub-nav-item"
-                        :class="{ active: route.path === '/explore' && (!route.query.tab || route.query.tab === 'things-to-do') }">
-                        Home
+                        :class="{ active: route.path === '/' }">
+                        {{ t('nav.home') }}
                     </router-link>
 
                     <router-link to="/hotels" class="sub-nav-item" :class="{ active: route.path.includes('/hotels') }">
-                        Hotels
+                        {{ t('nav.hotels') }}
                     </router-link>
 
                     <router-link to="/explore?tab=things-to-do" class="sub-nav-item"
                         :class="{ active: route.path === '/explore' && (!route.query.tab || route.query.tab === 'things-to-do') }">
-                        Things to Do
+                        {{ t('nav.thingsToDo') }}
                     </router-link>
 
                     <router-link to="/restaurants" class="sub-nav-item"
                         :class="{ active: route.path.includes('/restaurants') }">
-                        Restaurants
+                        {{ t('nav.restaurants') }}
                     </router-link>
 
                     <router-link to="/nature" class="sub-nav-item" :class="{ active: route.path.includes('/nature') }">
-                        Nature
+                        {{ t('nav.nature') }}
                     </router-link>
 
                     <router-link to="/explore?tab=landmarks" class="sub-nav-item"
                         :class="{ active: route.path === '/explore' && route.query.tab === 'landmarks' }">
-                        Landmarks
+                        {{ t('nav.landmarks') }}
                     </router-link>
                 </div>
             </div>
@@ -111,17 +135,30 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
+import { useI18n } from '@/composables/useI18n'
 
 const router = useRouter()
 const route = useRoute()
 const { user, isAuthenticated, logout } = useAuth()
+const { t, setLocale, locale, supportedLocales } = useI18n()
 
 const isLoggedIn = ref(isAuthenticated())
 const username = ref(user.value ? user.value.username : '')
 const isDropdownOpen = ref(false)
+const isLangOpen = ref(false)
+
+const currentFlagLabel = computed(() => {
+    const found = supportedLocales.find(l => l.code === locale.value)
+    return found ? `${found.flag} ${found.code.toUpperCase()}` : '🇬🇧 EN'
+})
+
+const switchLang = (code) => {
+    setLocale(code)
+    isLangOpen.value = false
+}
 
 const checkAuth = () => {
     isLoggedIn.value = isAuthenticated()
@@ -130,10 +167,10 @@ const checkAuth = () => {
 
 onMounted(checkAuth)
 
-// ปิด Dropdown และอัปเดตสถานะทุกครั้งที่เปลี่ยนหน้า
 watch(() => router.currentRoute.value.path, () => {
     checkAuth()
     isDropdownOpen.value = false
+    isLangOpen.value = false
 })
 
 const handleLogoutAndClose = () => {
@@ -384,6 +421,91 @@ const handleLogoutAndClose = () => {
 
 .dropdown-item.logout {
     color: #ef4444;
+}
+
+/* Language Switcher */
+.lang-switcher {
+    position: relative;
+}
+
+.lang-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 24px;
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    color: #0f172a;
+    transition: 0.2s;
+    font-family: inherit;
+}
+
+.lang-btn:hover {
+    background: #e2e8f0;
+}
+
+.lang-btn .fa-chevron-down {
+    font-size: 0.7rem;
+    transition: transform 0.2s;
+}
+
+.lang-btn .fa-chevron-down.rotated {
+    transform: rotate(180deg);
+}
+
+.lang-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 1001;
+}
+
+.lang-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    border: 1px solid #f1f5f9;
+    min-width: 160px;
+    overflow: hidden;
+    z-index: 1002;
+}
+
+.lang-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 16px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #0f172a;
+    transition: background 0.15s;
+}
+
+.lang-item:hover {
+    background: #f8fafc;
+}
+
+.lang-item.active {
+    background: #f0fdf4;
+    color: #00aa6c;
+    font-weight: 700;
+}
+
+.lang-flag {
+    font-size: 1.1rem;
+}
+
+.lang-check {
+    margin-left: auto;
+    color: #00aa6c;
+    font-size: 0.8rem;
 }
 
 .fade-slide-enter-active,

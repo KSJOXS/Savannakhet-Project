@@ -6,24 +6,24 @@
                     <div class="logo-icon">
                         <i class="fas fa-map-marked-alt"></i>
                     </div>
-                    <span class="copyright-text">© 2026 Savannakhet Smart Travel. สงวนลิขสิทธิ์ทั้งหมด</span>
+                    <span class="copyright-text">{{ t('footer.copyright') }}</span>
                 </div>
                 <div class="footer-links">
-                    <a href="#">ข้อกำหนดการใช้งาน</a>
-                    <a href="#">คำแถลงเกี่ยวกับคุกกี้และความเป็นส่วนตัว</a>
-                    <a href="#">ความยินยอมให้ใช้คุกกี้</a>
-                    <a href="#">แผนผังเว็บไซต์</a>
-                    <a href="#">วิธีการทำงานของเว็บไซต์</a>
-                    <a href="#">ติดต่อเรา</a>
+                    <a href="#">{{ t('footer.terms') }}</a>
+                    <a href="#">{{ t('footer.cookiePolicy') }}</a>
+                    <a href="#">{{ t('footer.cookieConsent') }}</a>
+                    <a href="#">{{ t('footer.sitemap') }}</a>
+                    <a href="#">{{ t('footer.howItWorks') }}</a>
+                    <a href="#">{{ t('footer.contactUs') }}</a>
                 </div>
                 <div class="footer-disclaimer">
-                    เว็บไซต์ของเราเป็นแพลตฟอร์มต้นแบบสำหรับโครงการการท่องเที่ยวอัจฉริยะแขวงสะหวันนะเขต ข้อมูลและราคาที่แสดงอาจมีการเปลี่ยนแปลง ไม่รับรองความถูกต้อง แนะนำให้ตรวจสอบกับสถานที่จริงหรือผู้ให้บริการโดยตรง
+                    {{ t('footer.disclaimer') }}
                     <br><br>
-                    Savannakhet Smart Travel ไม่ใช่ตัวแทนการจองหรือบริษัททัวร์ โปรดตรวจสอบนโยบายการจองของโรงแรมหรือสถานที่นั้นๆ ก่อนการเดินทางเสมอ
+                    {{ t('footer.disclaimer2') }}
                 </div>
                 
                 <div v-if="contactPhone || contactEmail" class="footer-contact-info">
-                    <p><strong>ติดต่อเรา:</strong> 
+                    <p><strong>{{ t('footer.contactLabel') }}</strong> 
                         <span v-if="contactPhone"><i class="fas fa-phone-alt"></i> {{ contactPhone }}</span>
                         <span v-if="contactEmail" class="ml-2"><i class="fas fa-envelope"></i> {{ contactEmail }}</span>
                     </p>
@@ -32,10 +32,10 @@
             
             <div class="footer-right">
                 <div class="language-dropdown-wrapper">
-                    <select class="language-select">
-                        <option value="th">ไทย</option>
-                        <option value="lo">ພາສາລາວ</option>
-                        <option value="en">English</option>
+                    <select class="language-select" :value="locale" @change="setLocale($event.target.value)">
+                        <option v-for="loc in supportedLocales" :key="loc.code" :value="loc.code">
+                            {{ loc.flag }} {{ loc.label }}
+                        </option>
                     </select>
                     <i class="fas fa-chevron-down arrow-icon"></i>
                 </div>
@@ -47,6 +47,9 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import settingRepository from '@/repositories/settingRepository';
+import { useI18n } from '@/composables/useI18n';
+
+const { t, setLocale, locale, supportedLocales } = useI18n();
 
 const contactPhone = ref('');
 const contactEmail = ref('');
@@ -68,12 +71,12 @@ onMounted(async () => {
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 .smart-travel-footer {
-    background-color: #f8fafc; /* Very light gray to match TripAdvisor background */
+    background-color: #f8fafc;
     padding: 30px 40px;
     border-top: 1px solid #e2e8f0;
     font-family: 'Inter', 'Prompt', sans-serif;
     color: #334155;
-    margin-top: 50px; /* Space between content and footer */
+    margin-top: 50px;
 }
 
 .footer-container {
@@ -98,7 +101,7 @@ onMounted(async () => {
 .logo-icon {
     width: 32px;
     height: 32px;
-    background-color: #00aa6c; /* TripAdvisor green */
+    background-color: #00aa6c;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -172,7 +175,7 @@ onMounted(async () => {
     appearance: none;
     background-color: white;
     border: 1px solid #cbd5e1;
-    border-radius: 8px; /* Slightly squarer like the image */
+    border-radius: 8px;
     padding: 10px 30px 10px 14px;
     font-size: 0.9rem;
     font-weight: 600;
