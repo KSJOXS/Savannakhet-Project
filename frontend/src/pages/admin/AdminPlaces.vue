@@ -7,6 +7,33 @@
             </button>
         </div>
 
+        <div class="filter-bar">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input v-model="searchQuery" type="text" placeholder="Search by place name..." />
+            </div>
+
+            <div class="filter-controls">
+                <select v-model="selectedCategory" class="filter-select">
+                    <option value="">All Categories</option>
+                    <option v-for="cat in categories" :key="cat.id" :value="cat.id">
+                        {{ cat.name }}
+                    </option>
+                </select>
+
+                <select v-model="selectedStatus" class="filter-select">
+                    <option value="">All Statuses</option>
+                    <option value="1">Published</option>
+                    <option value="0">Draft</option>
+                </select>
+
+                <button v-if="searchQuery || selectedCategory !== '' || selectedStatus !== ''" @click="resetFilters"
+                    class="btn-clear">
+                    Clear
+                </button>
+            </div>
+        </div>
+
         <div class="table-container">
             <table class="admin-table">
                 <thead>
@@ -19,9 +46,10 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="place in places" :key="place.id">
+                    <tr v-for="place in filteredPlaces" :key="place.id">
                         <td>
-                            <img :src="getThumbnail(place.image_url)" class="thumb-img" @error="e => e.target.src = PLACEHOLDER">
+                            <img :src="getThumbnail(place.image_url)" class="thumb-img"
+                                @error="e => e.target.src = PLACEHOLDER">
                         </td>
                         <td><strong>{{ place.name }}</strong></td>
                         <td><span class="badge">{{ getCategoryName(place.category_id) }}</span></td>
@@ -41,9 +69,11 @@
                             </button>
                         </td>
                     </tr>
-                    <tr v-if="places.length === 0">
-                        <td colspan="5" style="text-align: center; padding: 30px; color: #999;">
-                            No places found.
+                    <tr v-if="filteredPlaces.length === 0">
+                        <td colspan="5" style="text-align: center; padding: 40px; color: #64748b;">
+                            <i class="fas fa-search"
+                                style="font-size: 2rem; margin-bottom: 10px; color: #cbd5e1; display: block;"></i>
+                            No places found matching your filters.
                         </td>
                     </tr>
                 </tbody>
@@ -53,42 +83,61 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { placeRepository } from '@/repositories/placeRepository'
 import { categoryRepository } from '@/repositories/categoryRepository'
 
 const places = ref([])
 const categories = ref([])
 
+// 🔍 State สำหรับตัวกรอง
+const searchQuery = ref('')
+const selectedCategory = ref('')
+const selectedStatus = ref('')
+
 const PLACEHOLDER = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='70' height='45' viewBox='0 0 70 45'%3E%3Crect width='70' height='45' fill='%23f1f5f9'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%2394a3b8' font-size='9' font-family='sans-serif'%3ENo Image%3C/text%3E%3C/svg%3E`
 
-// 🛠️ ฟังก์ชัน getThumbnail ฉบับอัปเดต จัดการ JSON Array + เติม localhost ให้อัตโนมัติ
+// 🧠 Computed Property สำหรับกรองข้อมูลตาราง
+const filteredPlaces = computed(() => {
+    return places.value.filter(place => {
+        // 1. กรองชื่อ (Search)
+        const matchSearch = place.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+
+        // 2. กรองหมวดหมู่ (Category)
+        const matchCategory = selectedCategory.value === '' || place.category_id === selectedCategory.value
+
+        // 3. กรองสถานะ (Status)
+        const matchStatus = selectedStatus.value === '' || Number(place.is_published) === Number(selectedStatus.value)
+
+        return matchSearch && matchCategory && matchStatus
+    })
+})
+
+// ฟังก์ชันล้างตัวกรอง
+const resetFilters = () => {
+    searchQuery.value = ''
+    selectedCategory.value = ''
+    selectedStatus.value = ''
+}
+
 const getThumbnail = (imageUrl) => {
     if (!imageUrl) return PLACEHOLDER;
-    
     let url = imageUrl;
-
-    // 1. แกะกล่อง JSON Array ออกมาก่อน (ถ้ามี)
     if (typeof url === 'string' && url.trim().startsWith('[')) {
         try {
             const arr = JSON.parse(url);
             if (Array.isArray(arr) && arr.length > 0) {
-                url = arr[0]; // เอารูปแรกมาเป็น Thumbnail
+                url = arr[0];
             } else {
                 return PLACEHOLDER;
             }
         } catch {
-            // ถ้าแกะ JSON ไม่ได้ ให้พยายามลบสัญลักษณ์วงเล็บก้ามปูทิ้งเผื่อฟลุค
             url = url.replace(/^\["?|"?\]$/g, '').replace(/\\"/g, '');
         }
     }
-
-    // 2. ถ้ารูปเป็น Placeholder, ลิงก์เว็บนอก หรือ Base64 อยู่แล้ว ก็ใช้ได้เลย
     if (url === PLACEHOLDER || url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
         return url;
     }
-
-    // 3. ถ้าเป็นแค่ Path จาก Database ให้เติม URL ของ FastAPI (localhost:8000) เข้าไป
     return `http://localhost:8000${url.startsWith('/') ? '' : '/'}${url}`;
 }
 
@@ -100,7 +149,6 @@ const fetchData = async () => {
         ])
         places.value = p.data
         categories.value = c.data
-        console.log("Response Data:", p.data)
     } catch (error) {
         console.error("Error:", error)
     }
@@ -110,7 +158,7 @@ const handleDelete = async (id) => {
     if (confirm('Are you sure you want to delete this place?')) {
         try {
             await placeRepository.delete(id)
-            await fetchData() // โหลดข้อมูลใหม่หลังจากลบ
+            await fetchData()
         } catch (error) {
             console.error('Delete Error:', error)
             alert('Failed to delete. Please try again.')
@@ -140,11 +188,101 @@ onMounted(fetchData)
     margin-bottom: 25px;
 }
 
+/* 🌟 สไตล์สำหรับ Filter Bar 🌟 */
+.filter-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    padding: 15px 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.search-box {
+    position: relative;
+    flex: 1;
+    min-width: 250px;
+    max-width: 400px;
+}
+
+.search-box i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 10px 10px 10px 40px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    outline: none;
+    font-size: 0.95rem;
+    transition: 0.2s;
+    background: #f8fafc;
+}
+
+.search-box input:focus {
+    border-color: #3498db;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.filter-controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.filter-select {
+    padding: 10px 15px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    outline: none;
+    font-size: 0.95rem;
+    cursor: pointer;
+    background-color: white;
+    color: #475569;
+    transition: 0.2s;
+}
+
+.filter-select:hover {
+    border-color: #cbd5e1;
+}
+
+.filter-select:focus {
+    border-color: #3498db;
+}
+
+.btn-clear {
+    background: transparent;
+    color: #ef4444;
+    border: 1px solid #fca5a5;
+    padding: 8px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: 0.2s;
+}
+
+.btn-clear:hover {
+    background: #fef2f2;
+}
+
+/* Table Style */
 .table-container {
     background: white;
     border-radius: 12px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-    overflow: hidden;
+    overflow-x: auto;
 }
 
 .admin-table {
@@ -181,24 +319,25 @@ onMounted(fetchData)
     padding: 5px 10px;
     border-radius: 20px;
     font-size: 0.85rem;
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .status-draft {
-    color: #7f8c8d;
-    background: #f4f6f6;
+    color: #64748b;
+    background: #f1f5f9;
     padding: 5px 10px;
     border-radius: 20px;
     font-size: 0.85rem;
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .badge {
     background: #e8f4fd;
     color: #2980b9;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 0.9rem;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 500;
 }
 
 /* ปุ่มต่างๆ */
@@ -209,7 +348,7 @@ onMounted(fetchData)
     padding: 10px 18px;
     border-radius: 8px;
     cursor: pointer;
-    font-weight: 500;
+    font-weight: 600;
     transition: 0.2s;
 }
 
@@ -221,10 +360,11 @@ onMounted(fetchData)
     background: #f39c12;
     color: white;
     border: none;
-    padding: 7px 14px;
+    padding: 8px 14px;
     border-radius: 6px;
     margin-right: 8px;
     cursor: pointer;
+    font-weight: 500;
     transition: 0.2s;
 }
 
@@ -233,16 +373,16 @@ onMounted(fetchData)
 }
 
 .btn-delete {
-    background: #e74c3c;
+    background: #ef4444;
     color: white;
     border: none;
-    padding: 7px 14px;
+    padding: 8px 14px;
     border-radius: 6px;
     cursor: pointer;
     transition: 0.2s;
 }
 
 .btn-delete:hover {
-    background: #c0392b;
+    background: #dc2626;
 }
 </style>

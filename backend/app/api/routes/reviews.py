@@ -64,3 +64,51 @@ def get_recommendations(user_id: int, db: Session = Depends(get_db)):
         ~models.Place.id.in_(reviewed_ids) if reviewed_ids else True,
         models.Place.is_published == True
     ).order_by(desc(models.Place.rating_avg)).limit(5).all()
+
+
+# GET /admin/all-comments — ดึงรีวิวทั้งหมดสำหรับหน้า Admin (JOIN ครบทั้งคนรีวิวและชื่อสถานที่)
+@router.get("/admin/all-comments")
+def get_admin_all_comments(db: Session = Depends(get_db)):
+    try:
+        # ใช้ JOIN เพื่อดึงข้อมูลจาก 3 ตาราง: Interaction, User, และ Place
+        results = db.query(
+            models.Interaction.id,
+            models.Interaction.rating,
+            models.Interaction.comment.label("comment_text"),
+            models.Interaction.place_id,
+            models.User.username,
+            models.Place.name.label("place_name"),
+            models.Place.image_url.label("place_image")
+        ).join(
+            models.User, models.Interaction.user_id == models.User.id
+        ).join(
+            models.Place, models.Interaction.place_id == models.Place.id
+        ).all()
+
+        return [
+            {
+                "id": r.id,
+                "rating": r.rating,
+                "comment_text": r.comment_text,
+                "username": r.username,
+                "place_id": r.place_id,
+                "place_name": r.place_name,
+                "place_image": r.place_image
+            }
+            for r in results
+        ]
+    except Exception as e:
+        # ถ้าพัง จะแจ้งรายละเอียด Error ใน Terminal ของ FastAPI
+        print(f"Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# DELETE /admin/comments/{comment_id} — สำหรับปุ่มลบในหน้า Admin
+@router.delete("/admin/comments/{comment_id}")
+def delete_review(comment_id: int, db: Session = Depends(get_db)):
+    review = db.query(models.Interaction).filter(models.Interaction.id == comment_id).first()
+    if not review:
+        raise HTTPException(status_code=404, detail="Review not found")
+    
+    db.delete(review)
+    db.commit()
+    return {"message": "Review deleted successfully"}

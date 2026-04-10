@@ -20,10 +20,16 @@
                 </div>
 
                 <div class="nav-right">
-                    <router-link to="/explore" class="nav-item">Discover</router-link>
+                    <router-link to="/explore" class="nav-item">
+                        <span>Discover</span>
+                    </router-link>
+
+                    <router-link to="/about" class="nav-item" :class="{ active: route.path === '/about' }">
+                        <i class="fas fa-info-circle"></i> <span>About</span>
+                    </router-link>
 
                     <router-link v-if="isLoggedIn && (!user || user.role !== 'admin')" to="/favorites" class="nav-item">
-                        <i class="far fa-heart"></i> Saves
+                        <i class="far fa-heart"></i> <span>Saves</span>
                     </router-link>
 
                     <div v-if="!isLoggedIn" class="auth-group">
@@ -67,22 +73,26 @@
         <div class="ta-bottom-row">
             <div class="nav-container">
                 <div class="sub-nav-list">
-                    <router-link to="/hotels" class="sub-nav-item" :class="{ active: activeTab === 'hotels' }">
+                    <router-link to="/hotels" class="sub-nav-item" :class="{ active: route.path.includes('/hotels') }">
                         Hotels
                     </router-link>
+
                     <router-link to="/explore?tab=things-to-do" class="sub-nav-item"
-                        :class="{ active: activeTab === 'things-to-do' || (route.path === '/explore' && !activeTab) }">
+                        :class="{ active: route.path === '/explore' && (!route.query.tab || route.query.tab === 'things-to-do') }">
                         Things to Do
                     </router-link>
+
                     <router-link to="/restaurants" class="sub-nav-item"
-                        :class="{ active: activeTab === 'restaurants' }">
+                        :class="{ active: route.path.includes('/restaurants') }">
                         Restaurants
                     </router-link>
-                    <router-link to="/nature" class="sub-nav-item" :class="{ active: activeTab === 'nature' }">
+
+                    <router-link to="/nature" class="sub-nav-item" :class="{ active: route.path.includes('/nature') }">
                         Nature
                     </router-link>
+
                     <router-link to="/explore?tab=landmarks" class="sub-nav-item"
-                        :class="{ active: activeTab === 'landmarks' }">
+                        :class="{ active: route.path === '/explore' && route.query.tab === 'landmarks' }">
                         Landmarks
                     </router-link>
                 </div>
@@ -92,7 +102,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, computed } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
 
@@ -103,10 +113,6 @@ const { user, isAuthenticated, logout } = useAuth()
 const isLoggedIn = ref(isAuthenticated())
 const username = ref(user.value ? user.value.username : '')
 const isDropdownOpen = ref(false)
-const isHotelPage = computed(() => route.path === '/hotels')
-
-// 🔍 เช็คว่าตอนนี้คลิกอยู่ที่ Tab ไหนใน URL (เช่น /explore?tab=restaurants)
-const activeTab = computed(() => route.query.tab)
 
 const checkAuth = () => {
     isLoggedIn.value = isAuthenticated()
@@ -114,6 +120,8 @@ const checkAuth = () => {
 }
 
 onMounted(checkAuth)
+
+// ปิด Dropdown และอัปเดตสถานะทุกครั้งที่เปลี่ยนหน้า
 watch(() => router.currentRoute.value.path, () => {
     checkAuth()
     isDropdownOpen.value = false
@@ -130,7 +138,7 @@ const handleLogoutAndClose = () => {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
 
-/* 📌 โครงสร้างหลักของ Header */
+/* โครงสร้างหลักของ Header */
 .ta-header {
     background: #ffffff;
     position: sticky;
@@ -138,10 +146,9 @@ const handleLogoutAndClose = () => {
     z-index: 1000;
     font-family: 'Inter', sans-serif;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    /* เงาบางๆ ใต้สุด */
 }
 
-/* 📌 แถวบนสุด (Top Row) */
+/* แถวบนสุด (Top Row) */
 .ta-top-row {
     height: 76px;
     display: flex;
@@ -253,6 +260,11 @@ const handleLogoutAndClose = () => {
 
 .nav-item:hover {
     background: #f1f5f9;
+}
+
+/* 🌟 สีไฮไลท์เวลาอยู่หน้า About */
+.nav-item.active {
+    background: #e2e8f0;
 }
 
 /* Auth & User Buttons */
@@ -376,18 +388,16 @@ const handleLogoutAndClose = () => {
     transform: translateY(-10px);
 }
 
-/* 🌟 แถวล่าง: Sub-navigation Menu (ที่เพิ่มเข้ามาใหม่) */
+/* แถวล่าง: Sub-navigation Menu */
 .ta-bottom-row {
     background: #ffffff;
     border-top: 1px solid #f1f5f9;
-    /* เส้นคั่นบางๆ ระหว่างแถวบนกับแถวล่าง */
 }
 
 .sub-nav-list {
     display: flex;
     gap: 30px;
     overflow-x: auto;
-    /* เผื่อในมือถือให้เลื่อนซ้ายขวาได้ */
     scrollbar-width: none;
 }
 
@@ -411,13 +421,13 @@ const handleLogoutAndClose = () => {
     border-bottom: 2px solid #cbd5e1;
 }
 
-/* 🌟 ขีดเส้นใต้สีดำสำหรับหน้าที่กำลังเลือกอยู่ (Active State) */
+/* ขีดเส้นใต้สีดำสำหรับหน้าที่กำลังเลือกอยู่ */
 .sub-nav-item.active {
     color: #000000;
     border-bottom: 2px solid #000000;
 }
 
-/* 📌 Responsive */
+/* Responsive */
 @media (max-width: 992px) {
     .nav-search {
         display: none;
@@ -429,9 +439,9 @@ const handleLogoutAndClose = () => {
         font-size: 1.3rem;
     }
 
-    .nav-item {
-        padding: 10px;
-        font-size: 0;
+    .nav-item span {
+        display: none;
+        /* ซ่อนข้อความโชว์แค่ไอคอนบนมือถือ */
     }
 
     .nav-item i {

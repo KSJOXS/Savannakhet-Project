@@ -15,11 +15,18 @@
                 </div>
 
                 <div class="quick-filters">
-                    <button class="filter-pill"><i class="fas fa-water"></i> Waterfalls</button>
-                    <button class="filter-pill"><i class="fas fa-mountain"></i> Caves</button>
-                    <button class="filter-pill"><i class="fas fa-hiking"></i> Hiking Trails</button>
-                    <button class="filter-pill"><i class="fas fa-fish"></i> Lakes & Rivers</button>
-                    <button class="filter-pill"><i class="fas fa-leaf"></i> Ecotourism</button>
+                    <button class="filter-pill" @click="toggleCategory('waterfall')"
+                        :class="{ active: selectedCategories.includes('waterfall') }">
+                        <i class="fas fa-water"></i> Waterfalls
+                    </button>
+                    <button class="filter-pill" @click="toggleCategory('cave')"
+                        :class="{ active: selectedCategories.includes('cave') }">
+                        <i class="fas fa-mountain"></i> Caves
+                    </button>
+                    <button class="filter-pill" @click="toggleCategory('forest')"
+                        :class="{ active: selectedCategories.includes('forest') }">
+                        <i class="fas fa-leaf"></i> Forests
+                    </button>
                 </div>
             </div>
         </div>
@@ -34,10 +41,22 @@
 
                 <div class="filter-group">
                     <h3>Category</h3>
-                    <label class="filter-checkbox"><input type="checkbox" /> <span>Nature & Parks</span></label>
-                    <label class="filter-checkbox"><input type="checkbox" /> <span>Waterfalls</span></label>
-                    <label class="filter-checkbox"><input type="checkbox" /> <span>Caves</span></label>
-                    <label class="filter-checkbox"><input type="checkbox" /> <span>Forests</span></label>
+                    <label class="filter-checkbox">
+                        <input type="checkbox" value="nature" v-model="selectedCategories" />
+                        <span>Nature & Parks</span>
+                    </label>
+                    <label class="filter-checkbox">
+                        <input type="checkbox" value="waterfall" v-model="selectedCategories" />
+                        <span>Waterfalls</span>
+                    </label>
+                    <label class="filter-checkbox">
+                        <input type="checkbox" value="cave" v-model="selectedCategories" />
+                        <span>Caves</span>
+                    </label>
+                    <label class="filter-checkbox">
+                        <input type="checkbox" value="forest" v-model="selectedCategories" />
+                        <span>Forests</span>
+                    </label>
                 </div>
 
                 <div class="filter-divider"></div>
@@ -69,45 +88,52 @@
 
                 <div v-else-if="filteredNature.length === 0" class="empty-box">
                     <i class="fas fa-seedling"></i>
-                    <p>No nature spots found. Please add some in the Admin panel.</p>
+                    <p>No nature spots found matching your filter.</p>
+                    <button @click="selectedCategories = []" class="btn-details" style="margin-top: 15px;">Clear
+                        Filters</button>
                 </div>
 
-                <div v-else class="nature-card" v-for="(place, index) in filteredNature" :key="place.id"
-                    @click="goToDetail(place.id)">
+                <div v-else>
+                    <div class="nature-card" v-for="(place, index) in filteredNature" :key="place.id"
+                        @click="goToDetail(place.id)">
 
-                    <div class="card-img-wrapper">
-                        <img :src="getCoverImage(place)" :alt="place.name" />
-                        <button class="btn-heart" :class="{ active: isFavorite(place.id) }"
-                            @click.stop="toggleHeart(place.id)">
-                            <i class="fas fa-heart"></i>
-                        </button>
-                    </div>
-
-                    <div class="card-info">
-                        <h3 class="place-name">{{ index + 1 }}. {{ place.name }}</h3>
-
-                        <div class="rating-row">
-                            <span class="bubbles">
-                                <i v-for="s in 5" :key="s"
-                                    :class="[(place.rating_avg || 0) >= s ? 'fas' : 'far', 'fa-circle']"></i>
-                            </span>
-                            <span class="review-count">{{ place.rating_avg || '0.0' }} Rating</span>
+                        <div class="card-img-wrapper">
+                            <img :src="getCoverImage(place)" :alt="place.name" @error="handleImgError" />
+                            <button class="btn-heart" :class="{ active: isFavorite(place.id) }"
+                                @click.stop="toggleHeart(place.id)">
+                                <i class="fas fa-heart"></i>
+                            </button>
                         </div>
 
-                        <div class="category-row">
-                            <span class="cat-label"><i class="fas fa-leaf"></i> {{ getCategoryName(place.category_id)
-                                }}</span>
-                            <span class="divider">•</span>
-                            <span>Savannakhet Province</span>
-                        </div>
+                        <div class="card-info">
+                            <h3 class="place-name">{{ index + 1 }}. {{ place.name }}</h3>
 
-                        <div class="description-snippet">
-                            <p>{{ place.description || `Explore the untouched beauty of this natural wonder in
-                                Savannakhet. Perfect for photography and relaxing.` }}</p>
-                        </div>
+                            <div class="rating-row">
+                                <span class="bubbles">
+                                    <i v-for="s in 5" :key="s"
+                                        :class="[(place.rating_avg || 0) >= s ? 'fas' : 'far', 'fa-circle']"></i>
+                                </span>
+                                <span class="review-count">{{ place.rating_avg || '0.0' }} Rating</span>
+                            </div>
 
-                        <div class="card-footer">
-                            <button class="btn-details">View Details</button>
+                            <div class="category-row">
+                                <span class="cat-label"><i class="fas fa-leaf"></i> {{
+                                    getCategoryName(place.category_id) }}</span>
+                                <span class="divider">•</span>
+                                <span>Savannakhet Province</span>
+                            </div>
+
+                            <div class="description-snippet">
+                                <p>{{ place.description || `Explore the untouched beauty of this natural wonder in
+                                    Savannakhet.` }}</p>
+                            </div>
+
+                            <div class="card-footer">
+                                <button class="btn-contact" @click.stop="handleContact(place)">
+                                    <i class="fas fa-phone-alt"></i> Contact
+                                </button>
+                                <button class="btn-details">View Details</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -124,7 +150,6 @@ import { categoryRepository } from '@/repositories/categoryRepository'
 import { favoriteRepository } from '@/repositories/favoriteRepository'
 import { useAuth } from '@/composables/useAuth'
 import Navbar from '../components/Navbar.vue'
-import axios from 'axios'
 
 const router = useRouter()
 const { user } = useAuth()
@@ -132,6 +157,15 @@ const places = ref([])
 const categories = ref([])
 const favoriteIds = ref([])
 const loading = ref(true)
+const selectedCategories = ref([])
+
+const toggleCategory = (cat) => {
+    if (selectedCategories.value.includes(cat)) {
+        selectedCategories.value = selectedCategories.value.filter(c => c !== cat)
+    } else {
+        selectedCategories.value.push(cat)
+    }
+}
 
 const fetchData = async () => {
     loading.value = true
@@ -140,56 +174,86 @@ const fetchData = async () => {
             placeRepository.getAll(),
             categoryRepository.getAll()
         ])
-
         places.value = resPlaces.data
         categories.value = resCats.data
+        loading.value = false
 
         if (user.value) {
-            const favRes = await favoriteRepository.getUserFavorites(user.value.id)
-            favoriteIds.value = favRes.data.map(f => f.place_id)
+            favoriteRepository.getUserFavorites(user.value.id)
+                .then(favRes => {
+                    favoriteIds.value = favRes.data.map(f => f.place_id)
+                })
         }
     } catch (err) {
-        console.error("Error fetching nature data:", err)
-    } finally {
+        console.error("Error fetching data:", err)
         loading.value = false
     }
 }
 
 const filteredNature = computed(() => {
-    return places.value.filter(p => {
-        const cat = categories.value.find(c => c.id === p.category_id)
+    let spots = places.value.filter(p => {
+        const cat = categories.value.find(c => c.id == p.category_id)
         if (!cat) return false
         const name = cat.name.toLowerCase()
-        return name.includes('nature') ||
-            name.includes('park') ||
-            name.includes('waterfall') ||
-            name.includes('cave') ||
-            name.includes('forest') ||
-            name.includes('river') ||
-            name.includes('lake') ||
-            name.includes('ธรรมชาติ') ||
-            name.includes('สวน') ||
-            name.includes('น้ำตก') ||
-            name.includes('ถ้ำ') ||
-            name.includes('ป่า') ||
-            name.includes('ภูเขา')
+        return name.includes('nature') || name.includes('park') ||
+            name.includes('waterfall') || name.includes('cave') ||
+            name.includes('forest') || name.includes('ธรรมชาติ')
     })
+
+    if (spots.length === 0 && places.value.length > 0) {
+        spots = places.value;
+    }
+
+    if (selectedCategories.value.length > 0) {
+        return spots.filter(p => {
+            const cat = categories.value.find(c => c.id == p.category_id)
+            if (!cat) return false
+            const name = cat.name.toLowerCase()
+            return selectedCategories.value.some(sel => name.includes(sel))
+        })
+    }
+    return spots
 })
 
-// ✅ แก้ไขบั๊ก Unterminated string literal
+// 🛠️ แก้ไข BUG รูปภาพไม่ขึ้น
 const getCoverImage = (place) => {
-    if (!place.image_url) return 'https://via.placeholder.com/600x400?text=No+Image';
     let url = place.image_url;
-    if (url.startsWith('[')) {
-        try { url = JSON.parse(url)[0]; } catch (e) { }
+    if (!url || url === '[]' || url === '') return 'https://via.placeholder.com/600x400?text=No+Image';
+
+    // 1. ถ้าเป็น JSON Array ["url"] ให้แกะออกมา
+    if (typeof url === 'string' && url.startsWith('[')) {
+        try {
+            const arr = JSON.parse(url);
+            if (Array.isArray(arr) && arr.length > 0) {
+                url = arr[0];
+            }
+        } catch (e) {
+            url = url.replace(/[\[\]"]/g, ''); // ถ้า Parse พัง ให้ล้างเครื่องหมายทิ้ง
+        }
     }
-    // เลี่ยงการใช้ Regex (/^\//) ที่ทำให้ VS Code บั๊ก
-    return url.startsWith('http') ? url : `http://localhost:8000/${url.startsWith('/') ? url.slice(1) : url}`;
+
+    // 2. ถ้าเป็น Base64 (data:image...) ให้ส่งคืนไปตรงๆ เลย
+    if (url.startsWith('data:')) {
+        return url;
+    }
+
+    // 3. ถ้าเป็น URL สมบูรณ์ (http...) ให้ส่งคืนไปเลย
+    if (url.startsWith('http')) {
+        return url;
+    }
+
+    // 4. ถ้าเป็น Path ในเครื่อง ให้เติม localhost:8000
+    const cleanPath = url.startsWith('/') ? url.slice(1) : url;
+    return `http://localhost:8000/${cleanPath}`;
+}
+
+const handleImgError = (e) => {
+    e.target.src = 'https://via.placeholder.com/600x400?text=Image+Not+Found';
 }
 
 const getCategoryName = (id) => {
-    const cat = categories.value.find(c => c.id === id)
-    return cat ? cat.name : 'Nature spot'
+    const cat = categories.value.find(c => c.id == id)
+    return cat ? cat.name : 'Nature'
 }
 
 const isFavorite = (id) => favoriteIds.value.includes(id)
@@ -200,9 +264,6 @@ const toggleHeart = async (placeId) => {
         const res = await favoriteRepository.toggleFavorite(user.value.id, placeId)
         if (res.data.status === 'added') {
             favoriteIds.value.push(placeId)
-            await axios.post('http://localhost:8000/api/interactions/', {
-                place_id: placeId, rating: 5, interaction_type: 'like'
-            })
         } else {
             favoriteIds.value = favoriteIds.value.filter(id => id !== placeId)
         }
@@ -210,11 +271,11 @@ const toggleHeart = async (placeId) => {
 }
 
 const goToDetail = (id) => router.push(`/places/${id}`)
-const openGeneralMap = () => window.open('http://googleusercontent.com/maps.google.com/5', '_blank')
+const openGeneralMap = () => window.open('https://www.google.com/maps', '_blank')
+const handleContact = (place) => alert(`Contact for ${place.name}`)
 
 onMounted(fetchData)
 </script>
-
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
@@ -285,7 +346,8 @@ onMounted(fetchData)
     gap: 8px;
 }
 
-.filter-pill:hover {
+.filter-pill:hover,
+.filter-pill.active {
     border-color: #2e7d32;
     background: #e8f5e9;
     transform: translateY(-2px);
@@ -524,7 +586,6 @@ onMounted(fetchData)
     color: #cbd5e1;
 }
 
-/* ✅ แก้ไขบั๊ก line-clamp CSS Warning */
 .description-snippet {
     font-size: 0.9rem;
     color: #475569;
@@ -541,13 +602,38 @@ onMounted(fetchData)
     margin-top: auto;
     display: flex;
     justify-content: flex-end;
+    gap: 10px;
+}
+
+.btn-contact {
+    background: white;
+    color: #1e293b;
+    border: 1px solid #cbd5e1;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-contact:hover {
+    border-color: #000;
+    background: #f8fafc;
+}
+
+.btn-contact i {
+    font-size: 0.85rem;
 }
 
 .btn-details {
     background: #000;
     color: white;
     border: none;
-    padding: 12px 24px;
+    padding: 10px 24px;
     border-radius: 25px;
     font-weight: 700;
     font-size: 0.9rem;

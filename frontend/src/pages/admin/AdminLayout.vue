@@ -23,11 +23,15 @@
                     <i class="fas fa-users"></i> Users
                 </router-link>
 
+                <router-link to="/admin/dashboard" class="nav-link" active-class="active">
+                    <i class="fas fa-chart-line"></i> Dashboard
+                </router-link>
+
                 <div class="nav-divider"></div>
 
-                <router-link to="/" class="nav-link back-home">
+                <a href="/" target="_blank" class="nav-link back-home">
                     <i class="fas fa-external-link-alt"></i> Back to Site
-                </router-link>
+                </a>
 
                 <button @click="logout" class="nav-link btn-logout-action">
                     <i class="fas fa-sign-out-alt"></i> Sign Out

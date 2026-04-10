@@ -15,6 +15,7 @@ import Hotels from '../pages/Hotels.vue'
 import HotelDetail from '../pages/HotelDetail.vue'
 import Restaurants from '../pages/Restaurants.vue'
 import nature from '../pages/Nature.vue'
+import About from '../pages/About.vue'
 
 // --- Admin Components ---
 import AdminLayout from '../pages/admin/AdminLayout.vue'
@@ -22,6 +23,7 @@ import AdminPlaces from '../pages/admin/AdminPlaces.vue'
 import AdminCategories from '../pages/admin/AdminCategories.vue'
 import AdminComments from '../pages/admin/AdminComments.vue'
 import AdminUsers from '../pages/admin/AdminUsers.vue'
+import AdminDashboard from '../pages/admin/Admin Dashboard.vue'
 
 const routes = [
     {
@@ -90,6 +92,11 @@ const routes = [
         name: 'Nature',
         component: nature
     },
+    {
+        path: '/about',
+        name: 'About',
+        component: About
+    },
 
     // --- Admin Routes with Sidebar System ---
     {
@@ -119,6 +126,11 @@ const routes = [
             {
                 path: '',
                 redirect: '/admin/places'
+            },
+            {
+                path: 'dashboard',
+                name: 'AdminDashboard',
+                component: AdminDashboard
             }
         ]
     }
