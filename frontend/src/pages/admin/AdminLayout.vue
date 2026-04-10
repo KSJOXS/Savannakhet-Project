@@ -23,6 +23,10 @@
                     <i class="fas fa-users"></i> Users
                 </router-link>
 
+                <router-link to="/admin/settings" class="nav-link" active-class="active">
+                    <i class="fas fa-cog"></i> Web Settings
+                </router-link>
+
                 <router-link to="/admin/dashboard" class="nav-link" active-class="active">
                     <i class="fas fa-chart-line"></i> Dashboard
                 </router-link>

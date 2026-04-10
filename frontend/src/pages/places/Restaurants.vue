@@ -23,7 +23,7 @@
 
         <div class="main-layout">
             <aside class="filter-sidebar">
-                <div class="map-preview" @click="openGeneralMap">
+                <div class="map-preview" @click="showMapModal = true">
                     <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80"
                         alt="Map View" />
                     <button class="btn-view-map"><i class="fas fa-map"></i> View on map</button>
@@ -115,6 +115,17 @@
                 </div>
             </main>
         </div>
+
+        <MapOverlay 
+            :is-open="showMapModal" 
+            :places="places" 
+            :categories="categories"
+            initial-filter="restaurant"
+            title="Restaurants" 
+            @close="showMapModal = false" 
+        />
+
+        <RecentlyViewed />
     </div>
 </template>
 
@@ -126,6 +137,8 @@ import { categoryRepository } from '@/repositories/categoryRepository'
 import { favoriteRepository } from '@/repositories/favoriteRepository'
 import { useAuth } from '@/composables/useAuth'
 import Navbar from '@/components/Navbar.vue'
+import MapOverlay from '@/components/MapOverlay.vue'
+import RecentlyViewed from '@/components/RecentlyViewed.vue'
 import axios from 'axios'
 
 const router = useRouter()
@@ -135,6 +148,7 @@ const categories = ref([])
 const favoriteIds = ref([])
 const loading = ref(true)
 const selectedCategories = ref([])
+const showMapModal = ref(false)
 
 // --- API DATA FETCHING ---
 const fetchData = async () => {
@@ -269,7 +283,6 @@ const toggleHeart = async (placeId) => {
 
 // นำทางไปหน้า Detail ปกติ (เพราะร้านอาหารใช้ฟอร์แมตข้อมูลเหมือนสถานที่ท่องเที่ยวทั่วไปได้)
 const goToDetail = (id) => router.push(`/places/${id}`)
-const openGeneralMap = () => window.open('https://www.google.com/maps/search/hotels+in+Savannakhet', '_blank')
 
 onMounted(fetchData)
 </script>

@@ -78,3 +78,10 @@ class Favorite(Base):
     # เชื่อมกลับ
     user = relationship("User", back_populates="favorites")
     place = relationship("Place", back_populates="favorites")
+
+class SiteSetting(Base):
+    __tablename__ = "site_settings"
+
+    key_name = Column(String(100), primary_key=True, index=True)
+    value = Column(LONGTEXT)
+    description = Column(String(255))

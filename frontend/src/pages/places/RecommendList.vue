@@ -2,57 +2,92 @@
     <div class="explore-page">
         <Navbar />
 
-        <div class="hero-section" :style="{ backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.6)), url(${heroImages[currentHeroIndex]})` }">
+        <header class="hero" :style="heroStyle">
+            <transition name="slide-fade">
+                <div class="hero-bg" :key="currentHeroIndex" :style="slideStyle"></div>
+            </transition>
+            <div class="hero-overlay"></div>
             <div class="hero-content">
-                <h1>Book traveler-backed things to do</h1>
-                <p>Discover top attractions, amazing food, and the best experiences in Savannakhet.</p>
-                
-                <div class="hero-search-container">
-                    <div class="hero-search-box" :class="{ 'dropdown-open': isSearchFocused }">
-                        <i class="fas fa-search"></i>
-                        <input 
-                            v-model="searchQuery" 
-                            type="text" 
-                            placeholder="Search by destination, place, or category..." 
-                            @focus="isSearchFocused = true"
-                            @keyup.enter="executeSearch"
-                        />
-                        <button class="btn-search-hero" @click="executeSearch">Search</button>
-                    </div>
-
-                    <div v-if="isSearchFocused" class="search-overlay" @click="isSearchFocused = false"></div>
-
-                    <div v-if="isSearchFocused" class="search-dropdown">
-                        <div class="dropdown-item" @click="executeSearch">
-                            <div class="icon-box"><i class="fas fa-location-arrow"></i></div>
-                            <div class="item-text">
-                                <strong>Nearby</strong>
-                            </div>
-                        </div>
-
-                        <div class="dropdown-divider"></div>
-
-                        <div class="dropdown-group" v-if="topRatedPlaces.length > 0">
-                            <h4>Popular Destinations</h4>
-                            <div v-for="place in topRatedPlaces.slice(0, 3)" :key="'dd-'+place.id" class="dropdown-item" @click="goToDetail(place.id)">
-                                <img :src="getCoverImage(place)" class="dropdown-img" :alt="place.name" />
-                                <div class="item-text">
-                                    <strong>{{ place.name }}</strong>
-                                    <small>{{ getCategoryName(place.category_id) }}, Savannakhet</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="badge-new">✨ AI-Powered Recommendation System</div>
+                <h1>Discover Savannakhet</h1>
+                <p>Experience the beauty of Southern Laos with our intelligent GNN travel guide.</p>
+                <div class="hero-actions">
+                    <button @click="executeSearch" class="btn-start">
+                        <i class="fas fa-rocket"></i> Start Exploring
+                    </button>
+                    <button v-if="!user" @click="router.push('/register')" class="btn-start btn-outline">
+                        <i class="fas fa-user-plus"></i> Join Free
+                    </button>
                 </div>
             </div>
 
-            <div class="hero-dots">
+            <div v-if="heroImages.length > 1" class="hero-dots">
                 <span v-for="(_, idx) in heroImages" :key="'hero-dot-'+idx" 
                       :class="['dot', { active: currentHeroIndex === idx }]" 
                       @click="currentHeroIndex = idx">
                 </span>
             </div>
+        </header>
+
+        <div class="stats-bar">
+            <div class="stat-item">
+                <span class="stat-num">50+</span>
+                <span class="stat-label">Places</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <span class="stat-num">AI</span>
+                <span class="stat-label">Powered</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <span class="stat-num">Free</span>
+                <span class="stat-label">Forever</span>
+            </div>
         </div>
+
+        <section class="featured-section">
+            <div class="container">
+                <div class="section-header">
+                    <div>
+                        <p class="section-eyebrow">Handpicked for you</p>
+                        <h2>Featured Places</h2>
+                    </div>
+                    <button @click="executeSearch" class="btn-view-all">
+                        View All <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+
+                <div v-if="loading" class="featured-grid">
+                    <div v-for="i in 3" :key="i" class="placeholder-card">
+                        <div class="skeleton-img"></div>
+                        <div class="skeleton-body">
+                            <div class="skeleton-title"></div>
+                            <div class="skeleton-text"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div v-else class="featured-grid">
+                    <div v-for="place in featuredPlaces" :key="place.id" class="place-card"
+                        @click="router.push(`/places/${place.id}`)">
+                        <div class="card-img-wrapper">
+                            <img :src="getCoverImage(place)" :alt="place.name">
+                            <span class="card-tag">{{ getCategoryName(place.category_id) }}</span>
+                            <div class="rating-pill">⭐ {{ place.rating_avg || '0.0' }}</div>
+                        </div>
+                        <div class="card-body">
+                            <h3>{{ place.name }}</h3>
+                            <p class="desc">{{ place.description }}</p>
+                            <div class="card-footer">
+                                <span class="location-tag"><i class="fas fa-map-marker-alt"></i> Savannakhet, Laos</span>
+                                <span class="btn-detail">View <i class="fas fa-arrow-right"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
         <div class="main-container">
             <section v-if="recommendedPlaces.length > 0" class="horizontal-section">
@@ -64,15 +99,6 @@
                     <div v-for="place in recommendedPlaces" :key="'rec-'+place.id" class="ta-card ai-card" @click="goToDetail(place.id)">
                         <div class="card-img-wrapper">
                             <img :src="getCoverImage(place)" :alt="place.name" />
-                            
-                            <div class="slider-arrows" v-if="getPlaceImagesArray(place).length > 1">
-                                <button class="arrow-btn left" @click.stop="prevImage(place.id, place)"><i class="fas fa-chevron-left"></i></button>
-                                <button class="arrow-btn right" @click.stop="nextImage(place.id, place)"><i class="fas fa-chevron-right"></i></button>
-                            </div>
-                            <div class="slider-dots" v-if="getPlaceImagesArray(place).length > 1">
-                                <span v-for="(_, idx) in getPlaceImagesArray(place)" :key="idx" :class="['dot', { active: (currentImageIndices[place.id] || 0) === idx }]"></span>
-                            </div>
-
                             <button v-if="!user || user.role !== 'admin'" class="btn-heart" :class="{ active: isFavorite(place.id) }" @click.stop="toggleHeart(place.id)">
                                 <i class="fas fa-heart"></i>
                             </button>
@@ -80,7 +106,7 @@
                         <div class="card-info">
                             <h3 class="truncate">{{ place.name }}</h3>
                             <div class="rating-row">
-                                <span class="bubbles"><i class="fas fa-circle"></i><i class="fas fa-circle"></i><i class="fas fa-circle"></i><i class="fas fa-circle"></i><i class="fas fa-circle-half-stroke"></i></span>
+                                <span class="bubbles"><i class="fas fa-star" style="color: #f59e0b;"></i></span>
                                 <span class="rating-num">{{ place.rating_avg || '0.0' }}</span>
                             </div>
                             <p class="cat-text"><i class="fas fa-map-marker-alt"></i> {{ getCategoryName(place.category_id) }}</p>
@@ -99,15 +125,6 @@
                         <div class="card-img-wrapper">
                             <img :src="getCoverImage(place)" :alt="place.name" />
                             <div class="rank-badge">Top Rated</div>
-
-                            <div class="slider-arrows" v-if="getPlaceImagesArray(place).length > 1">
-                                <button class="arrow-btn left" @click.stop="prevImage(place.id, place)"><i class="fas fa-chevron-left"></i></button>
-                                <button class="arrow-btn right" @click.stop="nextImage(place.id, place)"><i class="fas fa-chevron-right"></i></button>
-                            </div>
-                            <div class="slider-dots" v-if="getPlaceImagesArray(place).length > 1">
-                                <span v-for="(_, idx) in getPlaceImagesArray(place)" :key="idx" :class="['dot', { active: (currentImageIndices[place.id] || 0) === idx }]"></span>
-                            </div>
-
                             <button v-if="!user || user.role !== 'admin'" class="btn-heart" :class="{ active: isFavorite(place.id) }" @click.stop="toggleHeart(place.id)">
                                 <i class="fas fa-heart"></i>
                             </button>
@@ -120,94 +137,6 @@
                             </div>
                             <p class="cat-text"><i class="fas fa-map-marker-alt"></i> {{ getCategoryName(place.category_id) }}</p>
                         </div>
-                    </div>
-                </div>
-            </section>
-
-            <section v-if="foodPlaces.length > 0" class="horizontal-section">
-                <div class="section-header"><h2>🍽️ Restaurants & Cafes</h2></div>
-                <div class="carousel-container">
-                    <div v-for="place in foodPlaces" :key="'food-'+place.id" class="ta-card" @click="goToDetail(place.id)">
-                        <div class="card-img-wrapper">
-                            <img :src="getCoverImage(place)" :alt="place.name" />
-                            <div class="slider-arrows" v-if="getPlaceImagesArray(place).length > 1">
-                                <button class="arrow-btn left" @click.stop="prevImage(place.id, place)"><i class="fas fa-chevron-left"></i></button>
-                                <button class="arrow-btn right" @click.stop="nextImage(place.id, place)"><i class="fas fa-chevron-right"></i></button>
-                            </div>
-                            <div class="slider-dots" v-if="getPlaceImagesArray(place).length > 1">
-                                <span v-for="(_, idx) in getPlaceImagesArray(place)" :key="idx" :class="['dot', { active: (currentImageIndices[place.id] || 0) === idx }]"></span>
-                            </div>
-                            <button v-if="!user || user.role !== 'admin'" class="btn-heart" :class="{ active: isFavorite(place.id) }" @click.stop="toggleHeart(place.id)">
-                                <i class="fas fa-heart"></i>
-                            </button>
-                        </div>
-                        <div class="card-info"><h3 class="truncate">{{ place.name }}</h3><p class="cat-text"><i class="fas fa-map-marker-alt"></i> {{ getCategoryName(place.category_id) }}</p></div>
-                    </div>
-                </div>
-            </section>
-
-            <section v-if="naturePlaces.length > 0" class="horizontal-section">
-                <div class="section-header"><h2>🌿 Nature</h2></div>
-                <div class="carousel-container">
-                    <div v-for="place in naturePlaces" :key="'nat-'+place.id" class="ta-card" @click="goToDetail(place.id)">
-                        <div class="card-img-wrapper">
-                            <img :src="getCoverImage(place)" :alt="place.name" />
-                            <div class="slider-arrows" v-if="getPlaceImagesArray(place).length > 1">
-                                <button class="arrow-btn left" @click.stop="prevImage(place.id, place)"><i class="fas fa-chevron-left"></i></button>
-                                <button class="arrow-btn right" @click.stop="nextImage(place.id, place)"><i class="fas fa-chevron-right"></i></button>
-                            </div>
-                            <div class="slider-dots" v-if="getPlaceImagesArray(place).length > 1">
-                                <span v-for="(_, idx) in getPlaceImagesArray(place)" :key="idx" :class="['dot', { active: (currentImageIndices[place.id] || 0) === idx }]"></span>
-                            </div>
-                            <button v-if="!user || user.role !== 'admin'" class="btn-heart" :class="{ active: isFavorite(place.id) }" @click.stop="toggleHeart(place.id)">
-                                <i class="fas fa-heart"></i>
-                            </button>
-                        </div>
-                        <div class="card-info"><h3 class="truncate">{{ place.name }}</h3><p class="cat-text"><i class="fas fa-map-marker-alt"></i> {{ getCategoryName(place.category_id) }}</p></div>
-                    </div>
-                </div>
-            </section>
-
-            <section v-if="landmarkPlaces.length > 0" class="horizontal-section">
-                <div class="section-header"><h2>📸 Landmarks & Points of Interest</h2></div>
-                <div class="carousel-container">
-                    <div v-for="place in landmarkPlaces" :key="'lan-'+place.id" class="ta-card" @click="goToDetail(place.id)">
-                        <div class="card-img-wrapper">
-                            <img :src="getCoverImage(place)" :alt="place.name" />
-                            <div class="slider-arrows" v-if="getPlaceImagesArray(place).length > 1">
-                                <button class="arrow-btn left" @click.stop="prevImage(place.id, place)"><i class="fas fa-chevron-left"></i></button>
-                                <button class="arrow-btn right" @click.stop="nextImage(place.id, place)"><i class="fas fa-chevron-right"></i></button>
-                            </div>
-                            <div class="slider-dots" v-if="getPlaceImagesArray(place).length > 1">
-                                <span v-for="(_, idx) in getPlaceImagesArray(place)" :key="idx" :class="['dot', { active: (currentImageIndices[place.id] || 0) === idx }]"></span>
-                            </div>
-                            <button v-if="!user || user.role !== 'admin'" class="btn-heart" :class="{ active: isFavorite(place.id) }" @click.stop="toggleHeart(place.id)">
-                                <i class="fas fa-heart"></i>
-                            </button>
-                        </div>
-                        <div class="card-info"><h3 class="truncate">{{ place.name }}</h3><p class="cat-text"><i class="fas fa-map-marker-alt"></i> {{ getCategoryName(place.category_id) }}</p></div>
-                    </div>
-                </div>
-            </section>
-
-            <section v-if="religiousPlaces.length > 0" class="horizontal-section">
-                <div class="section-header"><h2>⛩️ Religious & Sacred Sites</h2></div>
-                <div class="carousel-container">
-                    <div v-for="place in religiousPlaces" :key="'rel-'+place.id" class="ta-card" @click="goToDetail(place.id)">
-                        <div class="card-img-wrapper">
-                            <img :src="getCoverImage(place)" :alt="place.name" />
-                            <div class="slider-arrows" v-if="getPlaceImagesArray(place).length > 1">
-                                <button class="arrow-btn left" @click.stop="prevImage(place.id, place)"><i class="fas fa-chevron-left"></i></button>
-                                <button class="arrow-btn right" @click.stop="nextImage(place.id, place)"><i class="fas fa-chevron-right"></i></button>
-                            </div>
-                            <div class="slider-dots" v-if="getPlaceImagesArray(place).length > 1">
-                                <span v-for="(_, idx) in getPlaceImagesArray(place)" :key="idx" :class="['dot', { active: (currentImageIndices[place.id] || 0) === idx }]"></span>
-                            </div>
-                            <button v-if="!user || user.role !== 'admin'" class="btn-heart" :class="{ active: isFavorite(place.id) }" @click.stop="toggleHeart(place.id)">
-                                <i class="fas fa-heart"></i>
-                            </button>
-                        </div>
-                        <div class="card-info"><h3 class="truncate">{{ place.name }}</h3><p class="cat-text"><i class="fas fa-map-marker-alt"></i> {{ getCategoryName(place.category_id) }}</p></div>
                     </div>
                 </div>
             </section>
@@ -254,15 +183,6 @@
                             <div v-for="place in filteredPlaces" :key="place.id" class="ta-card list-card" @click="goToDetail(place.id)">
                                 <div class="card-img-wrapper">
                                     <img :src="getCoverImage(place)" :alt="place.name" />
-                                    
-                                    <div class="slider-arrows" v-if="getPlaceImagesArray(place).length > 1">
-                                        <button class="arrow-btn left" @click.stop="prevImage(place.id, place)"><i class="fas fa-chevron-left"></i></button>
-                                        <button class="arrow-btn right" @click.stop="nextImage(place.id, place)"><i class="fas fa-chevron-right"></i></button>
-                                    </div>
-                                    <div class="slider-dots" v-if="getPlaceImagesArray(place).length > 1">
-                                        <span v-for="(_, idx) in getPlaceImagesArray(place)" :key="idx" :class="['dot', { active: (currentImageIndices[place.id] || 0) === idx }]"></span>
-                                    </div>
-
                                     <button v-if="!user || user.role !== 'admin'" class="btn-heart" :class="{ active: isFavorite(place.id) }" @click.stop="toggleHeart(place.id)">
                                         <i class="fas fa-heart"></i>
                                     </button>
@@ -287,106 +207,99 @@
                 </div>
             </section>
         </div>
+
+        <section class="cta-section">
+            <div class="cta-content">
+                <h2>Ready to Explore?</h2>
+                <p>Create a free account to save favorites and get personalized recommendations.</p>
+                <button @click="router.push('/register')" class="btn-cta">
+                    <i class="fas fa-user-plus"></i> Get Started — It's Free
+                </button>
+            </div>
+        </section>
+
+        <footer class="simple-footer">
+            <p>🌴 Savannakhet Smart Travel &copy; 2026 — Powered by GNN Recommendation</p>
+        </footer>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { placeRepository } from '@/repositories/placeRepository'
 import { categoryRepository } from '@/repositories/categoryRepository'
-import { useRouter } from 'vue-router'
-import Navbar from '@/components/Navbar.vue'
+import settingRepository from '@/repositories/settingRepository'
 import { favoriteRepository } from '@/repositories/favoriteRepository'
 import { useAuth } from '@/composables/useAuth'
+import Navbar from '@/components/Navbar.vue'
 import axios from 'axios'
 
 const router = useRouter()
 const { user } = useAuth()
 const places = ref([])
 const categories = ref([])
+const featuredPlaces = ref([])
 const loading = ref(true)
 const searchQuery = ref('')
 const selectedCategory = ref(null)
 const favoriteIds = ref([])
 const recommendedPlaces = ref([])
 
-// 🔍 State สำหรับ Search Dropdown
-const isSearchFocused = ref(false)
-
-// 🏞️ ข้อมูลสำหรับ Hero Slider
-const heroImages = [
-    'https://images.unsplash.com/photo-1540202404-b711c0729ea2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
-    'https://images.unsplash.com/photo-1528181304800-259b08848526?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80',
-    'https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'
-]
+// 🏞️ ข้อมูลสำหรับ Hero Slider (ดึงจาก Settings)
+const heroImages = ref([])
 const currentHeroIndex = ref(0)
 let heroInterval = null
 
-// 📍 ตัวแปรสำหรับเลื่อนหน้าจอไปยังผลการค้นหา
+// รูปภาพสำรองกรณี Admin ยังไม่ได้อัปโหลด
+const DEFAULT_HERO = 'https://images.unsplash.com/photo-1540611025311-01df3cef54b5?q=80&w=2070'
+
+const heroStyle = computed(() => ({
+    backgroundColor: '#1e293b',
+    backgroundImage: heroImages.value.length === 0 ? `url(${DEFAULT_HERO})` : 'none',
+}))
+
+const slideStyle = computed(() => {
+    if (!heroImages.value.length) return {};
+    return {
+        backgroundImage: `url(${heroImages.value[currentHeroIndex.value]})`,
+    };
+})
+
+const startSlideshow = () => {
+    if (heroInterval) clearInterval(heroInterval);
+    if (heroImages.value.length > 1) {
+        heroInterval = setInterval(() => {
+            currentHeroIndex.value = (currentHeroIndex.value + 1) % heroImages.value.length;
+        }, 5000);
+    }
+}
+
 const exploreAllSection = ref(null)
 const executeSearch = () => {
-    isSearchFocused.value = false; // ปิด dropdown
     if (exploreAllSection.value) {
         exploreAllSection.value.scrollIntoView({ behavior: 'smooth' })
     }
 }
 
-const currentImageIndices = ref({}) 
-
-const getPlaceImagesArray = (place) => {
+const getCoverImage = (place) => {
     const noImageUrl = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22400%22%20height%3D%22300%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23e2e8f0%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20fill%3D%22%2364748b%22%20font-family%3D%22sans-serif%22%20font-size%3D%2220%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%3ENo%20Image%3C%2Ftext%3E%3C%2Fsvg%3E';
-    let urls = [];
-    
-    if (place.images && Array.isArray(place.images) && place.images.length > 0) {
-        urls = place.images.map(img => img.image_url || img.url || img);
-    } else if (place.image_url) { 
-        if (typeof place.image_url === 'string' && place.image_url.trim().startsWith('[')) {
-            try { urls = JSON.parse(place.image_url); } catch (e) { urls = [place.image_url.replace(/^\["?|"?\]$/g, '').replace(/\\"/g, '')]; }
-        } else {
-            urls = [place.image_url];
+    let targetUrl = place.image_url;
+
+    if (!targetUrl || targetUrl === '[]') return noImageUrl;
+
+    if (typeof targetUrl === 'string' && targetUrl.trim().startsWith('[')) {
+        try {
+            const parsed = JSON.parse(targetUrl);
+            if (Array.isArray(parsed) && parsed.length > 0) targetUrl = parsed[0];
+        } catch (e) {
+            targetUrl = targetUrl.replace(/^\["?|"?\]$/g, '').replace(/\\"/g, '');
         }
     }
-    
-    if (urls.length === 0) return [noImageUrl];
 
-    return urls.map(url => {
-        if (!url) return noImageUrl;
-        if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) return url;
-        return `http://localhost:8000${url.startsWith('/') ? '' : '/'}${url}`;
-    });
+    if (targetUrl.startsWith('http://') || targetUrl.startsWith('https://') || targetUrl.startsWith('data:')) return targetUrl;
+    return `http://localhost:8000${targetUrl.startsWith('/') ? '' : '/'}${targetUrl}`;
 }
-
-const getCoverImage = (place) => {
-    const images = getPlaceImagesArray(place);
-    const index = currentImageIndices.value[place.id] || 0;
-    return images[index] || images[0];
-}
-
-const nextImage = (placeId, place) => {
-    const images = getPlaceImagesArray(place);
-    if (images.length <= 1) return;
-    const currentIdx = currentImageIndices.value[placeId] || 0;
-    currentImageIndices.value[placeId] = (currentIdx + 1) % images.length;
-}
-
-const prevImage = (placeId, place) => {
-    const images = getPlaceImagesArray(place);
-    if (images.length <= 1) return;
-    const currentIdx = currentImageIndices.value[placeId] || 0;
-    currentImageIndices.value[placeId] = currentIdx === 0 ? images.length - 1 : currentIdx - 1;
-}
-
-const filterByParentType = (type) => {
-    return places.value.filter(p => {
-        const cat = categories.value.find(c => c.id === p.category_id);
-        return cat && cat.parent_type === type;
-    });
-};
-
-const foodPlaces = computed(() => filterByParentType('restaurant'));
-const naturePlaces = computed(() => filterByParentType('nature'));
-const landmarkPlaces = computed(() => filterByParentType('culture'));
-const religiousPlaces = computed(() => filterByParentType('culture'));
 
 const topRatedPlaces = computed(() => {
     return [...places.value].sort((a, b) => (parseFloat(b.rating_avg) || 0) - (parseFloat(a.rating_avg) || 0)).slice(0, 8);
@@ -398,6 +311,7 @@ const fetchData = async () => {
         const [resPlaces, resCats] = await Promise.all([placeRepository.getAll(), categoryRepository.getAll()])
         places.value = resPlaces.data
         categories.value = resCats.data
+        featuredPlaces.value = resPlaces.data.slice(0, 3)
 
         if (user.value && user.value.role !== 'admin') {
             try {
@@ -416,6 +330,23 @@ const fetchData = async () => {
             } catch (aiErr) { console.warn("AI Not ready", aiErr); }
         }
     } catch (err) { console.error("API Error:", err) } finally { loading.value = false }
+
+    // 3. 🌟 ดึงข้อมูล hero_images_recommend 🌟
+    try {
+        const resSetting = await settingRepository.getByKey('hero_images_recommend')
+        if (resSetting.data && resSetting.data.value) {
+            const parsed = JSON.parse(resSetting.data.value);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                heroImages.value = parsed.map(url => {
+                    if (url.startsWith('http') || url.startsWith('data:')) return url;
+                    return `http://localhost:8000/${url.startsWith('/') ? url.slice(1) : url}`;
+                });
+                startSlideshow();
+            }
+        }
+    } catch (settingsError) {
+        console.warn('Hero settings for recommend list not found:', settingsError?.response?.status || settingsError.message)
+    }
 }
 
 const filteredPlaces = computed(() => {
@@ -430,230 +361,113 @@ const filterByCategory = (id) => selectedCategory.value = id
 const resetFilters = () => { searchQuery.value = ''; selectedCategory.value = null }
 const getCategoryName = (id) => categories.value.find(c => c.id === id)?.name || 'General'
 
-const goToDetail = (id) => {
-    router.push(`/places/${id}`)
-}
+const goToDetail = (id) => router.push(`/places/${id}`)
 
 const toggleHeart = async (placeId) => {
-    if (!user.value) {
-        return router.push('/login')
-    }
-
+    if (!user.value) return router.push('/login')
     try {
         const res = await favoriteRepository.toggleFavorite(user.value.id, placeId)
-        if (res.data.status === 'added') {
-            favoriteIds.value.push(placeId)
-            try {
-                const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-                await axios.post(`${backendUrl}/api/interactions/`, { place_id: placeId, rating: 5, comment: "Liked", interaction_type: 'like' });
-            } catch (aiErr) { }
-        } else {
-            favoriteIds.value = favoriteIds.value.filter(id => id !== placeId)
-        }
+        if (res.data.status === 'added') favoriteIds.value.push(placeId)
+        else favoriteIds.value = favoriteIds.value.filter(id => id !== placeId)
     } catch (err) { console.error(err) }
 }
 const isFavorite = (id) => favoriteIds.value.includes(id)
 
-onMounted(() => {
-    fetchData()
-    heroInterval = setInterval(() => {
-        currentHeroIndex.value = (currentHeroIndex.value + 1) % heroImages.length
-    }, 5000)
-})
-
-onUnmounted(() => {
-    if (heroInterval) clearInterval(heroInterval)
-})
+onMounted(() => { fetchData() })
+onUnmounted(() => { if (heroInterval) clearInterval(heroInterval) })
 </script>
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
-/* --- ปรับสีพื้นหลังให้ขาวสะอาดแบบ TripAdvisor --- */
-.explore-page {
-    background-color: #f7f9fa; /* สีเทาอ่อนมากๆ / ขาว */
-    min-height: 100vh;
-    font-family: 'Inter', sans-serif;
-    color: #1e293b; /* อักษรสีเข้ม */
-}
+.explore-page { background-color: #f7f9fa; min-height: 100vh; font-family: 'Inter', sans-serif; color: #1e293b; }
 
-/* --- 🆕 Hero Banner --- */
-.hero-section {
-    height: 480px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    color: white;
-    padding: 0 20px;
-    position: relative;
-    background-size: cover;
-    background-position: center;
-    transition: background-image 0.8s ease-in-out;
-    z-index: 50; /* 🛠️ แก้ไขบั๊กหัวใจทะลุ: ปรับให้ Hero อยู่ชั้นบนสุด */
-}
+/* ─── Hero ─── */
+.hero { position: relative; min-height: 580px; display: flex; align-items: center; justify-content: center; text-align: center; color: white; overflow: hidden; z-index: 50; }
+.hero-bg { position: absolute; inset: 0; background-position: center; background-size: cover; z-index: 0; }
+.slide-fade-enter-active { transition: opacity 1s ease; }
+.slide-fade-leave-active { transition: opacity 1s ease; position: absolute; inset: 0; }
+.slide-fade-enter-from, .slide-fade-leave-to { opacity: 0; }
 
-.hero-content {
-    width: 100%;
-    max-width: 900px;
-    z-index: 52;
-}
-
-.hero-content h1 { 
-    font-size: 3.5rem; 
-    font-weight: 900; 
-    margin-bottom: 15px; 
-    text-shadow: 0 4px 15px rgba(0,0,0,0.6); 
-    letter-spacing: -0.5px;
-    color: white;
-}
-
-.hero-content p { 
-    font-size: 1.3rem; 
-    margin: 0 auto 40px; 
-    opacity: 0.95; 
-    text-shadow: 0 2px 8px rgba(0,0,0,0.6); 
-    font-weight: 500;
-    color: white;
-}
-
-/* 🔍 Search Container & Dropdown */
-.hero-search-container {
-    position: relative;
-    max-width: 750px;
-    margin: 0 auto;
-    z-index: 60; /* ให้อยู่บนสุดเหนือทุกสิ่ง */
-}
-
-.hero-search-box {
-    position: relative;
-    display: flex;
-    align-items: center;
-    background: white;
-    border-radius: 50px;
-    padding: 8px 8px 8px 25px;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.25);
-    z-index: 62;
-    transition: 0.3s;
-}
-
-.hero-search-box.dropdown-open {
-    border-radius: 24px 24px 0 0;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    border-bottom: 1px solid #e2e8f0;
-}
-
-.hero-search-box i { font-size: 1.3rem; color: #1e293b; margin-right: 15px; }
-
-.hero-search-box input {
-    flex: 1; border: none; font-size: 1.15rem; color: #1e293b; outline: none; background: transparent; font-family: 'Inter', sans-serif;
-}
-.hero-search-box input::placeholder { color: #94a3b8; font-weight: 500; }
-
-.btn-search-hero {
-    background: #000; color: white; border: none; padding: 14px 32px; border-radius: 40px;
-    font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: 0.2s;
-}
-.btn-search-hero:hover { background: #334155; transform: scale(1.02); }
-
-.search-overlay {
-    position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 60; background: rgba(0,0,0,0.3);
-}
-
-.search-dropdown {
-    position: absolute; top: 100%; left: 0; right: 0; background: white; border-radius: 0 0 24px 24px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.2); padding: 15px; z-index: 61; text-align: left;
-}
-
-.dropdown-item {
-    display: flex; align-items: center; padding: 12px; cursor: pointer; border-radius: 12px; transition: 0.2s;
-}
-.dropdown-item:hover { background: #f1f5f9; }
-
-.icon-box {
-    width: 45px; height: 45px; border-radius: 12px; background: #f8fafc; border: 1px solid #e2e8f0;
-    display: flex; justify-content: center; align-items: center; color: #1e293b; font-size: 1.1rem; margin-right: 15px;
-}
-
-.dropdown-img { width: 45px; height: 45px; border-radius: 12px; object-fit: cover; margin-right: 15px; }
-
-.item-text { display: flex; flex-direction: column; }
-.item-text strong { font-size: 1rem; color: #0f172a; font-weight: 700; }
-.item-text small { font-size: 0.85rem; color: #64748b; }
-
-.dropdown-divider { height: 1px; background: #e2e8f0; margin: 10px 0; }
-.dropdown-group h4 { font-size: 0.85rem; color: #64748b; margin: 0 0 10px 10px; text-transform: uppercase; letter-spacing: 0.5px; }
-
-.hero-dots { position: absolute; bottom: 25px; display: flex; gap: 10px; z-index: 52; }
-.hero-dots .dot { width: 10px; height: 10px; background: rgba(255,255,255,0.4); border-radius: 50%; cursor: pointer; transition: 0.3s; }
-.hero-dots .dot.active { background: white; transform: scale(1.3); }
-
-@media (max-width: 768px) {
-    .hero-content h1 { font-size: 2.2rem; }
-    .hero-content p { font-size: 1rem; margin-bottom: 25px;}
-    .hero-search-box { padding: 5px 5px 5px 15px; }
-    .hero-search-box input { font-size: 0.95rem; }
-    .btn-search-hero { padding: 10px 20px; font-size: 0.95rem; }
-}
-
-/* --- Main Layout --- */
-.main-container { 
-    max-width: 1400px; margin: 0 auto; padding: 40px 20px; 
-    position: relative; z-index: 10; /* 🛠️ แก้ไขบั๊กหัวใจทะลุ: ให้ส่วนนี้อยู่ล่าง Hero เสมอ */
-}
-
-/* --- Horizontal Sections --- */
-.horizontal-section { margin-bottom: 50px; }
-.section-header { margin-bottom: 20px; }
-.section-header h2 { font-size: 1.6rem; font-weight: 800; color: #0f172a; margin: 0 0 5px; }
-.section-header p { color: #475569; font-size: 0.95rem; margin: 0; }
-
-.carousel-container { display: flex; overflow-x: auto; gap: 20px; padding-bottom: 20px; scroll-snap-type: x mandatory; scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
-.carousel-container::-webkit-scrollbar { height: 8px; }
-.carousel-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-
-/* --- Cards --- */
-.ta-card {
-    background: white; border-radius: 16px; overflow: hidden; cursor: pointer;
-    border: 1px solid #e2e8f0; transition: box-shadow 0.3s, transform 0.3s; flex: 0 0 280px; scroll-snap-align: start;
-}
-.ta-card:hover { box-shadow: 0 15px 35px rgba(0,0,0,0.1); transform: translateY(-5px); }
-.ai-card { border: 2px solid #3498db; box-shadow: 0 4px 15px rgba(52, 152, 219, 0.1); }
-
-.card-img-wrapper { position: relative; height: 190px; }
-.card-img-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: 0.3s; }
-
-.rank-badge { position: absolute; top: 10px; left: 10px; background: #000; color: white; padding: 4px 10px; font-size: 0.75rem; font-weight: 800; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
-
-.slider-arrows { opacity: 0; transition: opacity 0.2s ease-in-out; }
-.card-img-wrapper:hover .slider-arrows { opacity: 1; }
-.arrow-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255, 255, 255, 0.85); border: none; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #1e293b; box-shadow: 0 2px 6px rgba(0,0,0,0.2); z-index: 5; transition: 0.2s; }
-.arrow-btn:hover { background: white; transform: translateY(-50%) scale(1.1); }
-.arrow-btn.left { left: 8px; } .arrow-btn.right { right: 8px; }
-
-.slider-dots { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); display: flex; gap: 4px; z-index: 5; }
-.dot { width: 6px; height: 6px; background: rgba(255, 255, 255, 0.6); border-radius: 50%; transition: 0.2s; }
+.hero-dots { position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 55; }
+.dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.7); background: transparent; cursor: pointer; transition: 0.3s; }
 .dot.active { background: white; transform: scale(1.3); }
+
+.hero-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.5) 100%); z-index: 1; }
+.hero-content { position: relative; z-index: 2; max-width: 820px; padding: 0 24px; }
+.badge-new { background: rgba(255, 255, 255, 0.18); border: 1px solid rgba(255, 255, 255, 0.3); padding: 7px 18px; border-radius: 50px; display: inline-block; margin-bottom: 22px; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.5px; backdrop-filter: blur(4px); }
+.hero-content h1 { font-size: 3.8rem; font-weight: 800; margin-bottom: 16px; line-height: 1.15; text-shadow: 0 2px 20px rgba(0,0,0,0.2); }
+.hero-content p { font-size: 1.15rem; margin-bottom: 36px; line-height: 1.6; font-weight: 500; }
+.hero-actions { display: flex; gap: 14px; justify-content: center; }
+
+.btn-start { background: #3498db; color: white; border: none; padding: 15px 38px; border-radius: 50px; font-size: 1rem; font-weight: 700; cursor: pointer; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25); transition: 0.3s; display: inline-flex; align-items: center; gap: 9px; font-family: 'Inter', sans-serif; }
+.btn-start:hover { background: #2980b9; transform: translateY(-4px); box-shadow: 0 14px 30px rgba(0, 0, 0, 0.3); }
+.btn-outline { background: rgba(255, 255, 255, 0.15); border: 1.5px solid rgba(255, 255, 255, 0.6); backdrop-filter: blur(4px); }
+.btn-outline:hover { background: rgba(255, 255, 255, 0.28); }
+
+/* ─── Stats Bar ─── */
+.stats-bar { background: white; display: flex; justify-content: center; align-items: center; gap: 48px; padding: 22px 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+.stat-item { display: flex; flex-direction: column; align-items: center; }
+.stat-num { font-size: 1.6rem; font-weight: 800; color: #3498db; line-height: 1; }
+.stat-label { font-size: 0.78rem; color: #94a3b8; font-weight: 500; margin-top: 3px; }
+.stat-divider { width: 1px; height: 36px; background: #e2e8f0; }
+
+/* ─── Featured Section ─── */
+.featured-section { padding: 80px 20px; background: #f8fafc; }
+.container { max-width: 1200px; margin: 0 auto; }
+.section-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; }
+.section-eyebrow { font-size: 0.82rem; font-weight: 700; color: #3498db; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 6px; }
+.section-header h2 { font-size: 2.1rem; font-weight: 800; color: #1e293b; margin: 0; }
+.btn-view-all { background: none; border: none; color: #3498db; font-weight: 700; cursor: pointer; font-size: 0.92rem; display: flex; align-items: center; gap: 6px; transition: 0.2s; font-family: 'Inter', sans-serif; }
+.btn-view-all:hover { gap: 10px; color: #2980b9; }
+
+/* ─── Cards ─── */
+.featured-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 28px; }
+.place-card, .ta-card { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06); transition: all 0.3s ease; cursor: pointer; border: 1px solid #f1f5f9; }
+.ta-card { flex: 0 0 280px; scroll-snap-align: start; }
+.place-card:hover, .ta-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12); }
+.ai-card { border: 2px solid #3498db; }
+
+.card-img-wrapper { position: relative; height: 220px; overflow: hidden; }
+.ta-card .card-img-wrapper { height: 190px; }
+.card-img-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
+.place-card:hover .card-img-wrapper img, .ta-card:hover .card-img-wrapper img { transform: scale(1.05); }
+
+.card-tag { position: absolute; top: 14px; left: 14px; background: #3498db; color: white; padding: 5px 13px; border-radius: 50px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.3px; }
+.rating-pill { position: absolute; top: 14px; right: 14px; background: rgba(0,0,0,0.55); color: white; padding: 5px 11px; border-radius: 50px; font-size: 0.78rem; font-weight: 700; backdrop-filter: blur(4px); }
+.rank-badge { position: absolute; top: 10px; left: 10px; background: #000; color: white; padding: 4px 10px; font-size: 0.75rem; font-weight: 800; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
 
 .btn-heart { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.9); border: none; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); color: #94a3b8; transition: 0.2s; z-index: 10; }
 .btn-heart.active { color: #ef4444; }
 .btn-heart:hover { transform: scale(1.1); }
 
-.card-info { padding: 16px; color: #1e293b; }
-.card-info h3 { margin: 0 0 6px; font-size: 1.15rem; font-weight: 800; }
+.card-body, .card-info { padding: 22px 24px; color: #1e293b; }
+.card-info { padding: 16px; }
+.card-body h3, .card-info h3 { margin: 0 0 8px; font-size: 1.15rem; font-weight: 800; }
 .truncate { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.desc, .description { color: #64748b; font-size: 0.85rem; line-height: 1.6; margin-bottom: 16px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+.card-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 14px; border-top: 1px solid #f1f5f9; }
+.location-tag { color: #94a3b8; font-size: 0.78rem; display: flex; align-items: center; gap: 5px; }
+.location-tag i { color: #3498db; }
+.btn-detail { color: #3498db; font-weight: 700; font-size: 0.83rem; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
+.place-card:hover .btn-detail { gap: 8px; }
+
 .rating-row { display: flex; align-items: center; margin-bottom: 6px; }
-.bubbles i { color: #34d399; font-size: 0.8rem; margin-right: 2px; }
 .rating-num { font-size: 0.9rem; font-weight: 700; margin-left: 6px; }
 .cat-text { font-size: 0.85rem; color: #64748b; margin: 0; }
-.cat-text i { color: #3498db; margin-right: 4px; }
-.description { font-size: 0.85rem; color: #475569; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-top: 10px; }
+
+/* --- Main Layout --- */
+.main-container { max-width: 1400px; margin: 0 auto; padding: 40px 20px; position: relative; z-index: 10; }
+.horizontal-section { margin-bottom: 50px; }
+.carousel-container { display: flex; overflow-x: auto; gap: 20px; padding-bottom: 20px; scroll-snap-type: x mandatory; scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
+.carousel-container::-webkit-scrollbar { height: 8px; }
+.carousel-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
 
 /* --- Explore All Section --- */
 .mt-50 { margin-top: 50px; scroll-margin-top: 100px; } 
 .mb-10 { margin-bottom: 10px; }
 .explore-layout { display: grid; grid-template-columns: 300px 1fr; gap: 30px; margin-top: 20px; }
-
 .sidebar { position: sticky; top: 90px; height: fit-content; }
 .filter-card { background: white; padding: 25px; border-radius: 16px; border: 1px solid #e2e8f0; color: #1e293b; }
 .filter-card h3 { margin: 0; font-size: 1.25rem; font-weight: 800; }
@@ -669,16 +483,34 @@ onUnmounted(() => {
 .cat-pill { padding: 6px 14px; border-radius: 20px; border: 1px solid #cbd5e1; background: white; color: #475569; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: 0.2s; }
 .cat-pill:hover { border-color: #000; color: #000; }
 .cat-pill.active { background: #000; color: white; border-color: #000; }
-
 .btn-clear { width: 100%; padding: 12px; margin-top: 20px; background: none; border: 1px solid #cbd5e1; border-radius: 8px; font-weight: 700; color: #1e293b; cursor: pointer; transition: 0.2s; }
 .btn-clear:hover { background: #f1f5f9; }
 
 .results-bar { margin-bottom: 20px; font-size: 1.1rem; color: #1e293b;}
 .places-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
 .list-card { flex: none; }
+
+/* ─── CTA Section ─── */
+.cta-section { background: linear-gradient(135deg, #1e5799 0%, #2989d8 50%, #207cca 100%); padding: 80px 20px; text-align: center; color: white; }
+.cta-content h2 { font-size: 2.4rem; font-weight: 800; margin: 0 0 14px; }
+.cta-content p { font-size: 1.1rem; opacity: 0.88; margin-bottom: 32px; max-width: 500px; margin-left: auto; margin-right: auto; }
+.btn-cta { background: white; color: #1e5799; border: none; padding: 16px 42px; border-radius: 50px; font-size: 1rem; font-weight: 800; cursor: pointer; transition: 0.3s; font-family: 'Inter', sans-serif; display: inline-flex; align-items: center; gap: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+.btn-cta:hover { transform: translateY(-4px); box-shadow: 0 16px 32px rgba(0,0,0,0.25); }
+
+/* ─── Skeletons & Loaders ─── */
+.placeholder-card { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06); }
+.skeleton-img { width: 100%; height: 220px; background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; }
+.skeleton-body { padding: 22px; }
+.skeleton-title { width: 60%; height: 18px; background: #eee; border-radius: 6px; margin-bottom: 12px; animation: shimmer 1.4s infinite; }
+.skeleton-text { width: 100%; height: 13px; background: #f5f5f5; border-radius: 6px; animation: shimmer 1.4s infinite; }
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+
 .loading-state, .empty-state { text-align: center; padding: 100px 0; color: #64748b;}
 .spinner { border: 4px solid #e2e8f0; border-top: 4px solid #000; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
+.simple-footer { text-align: center; padding: 32px 40px; color: #94a3b8; border-top: 1px solid #e2e8f0; font-size: 0.88rem; background: white; }
+
 @media (max-width: 992px) { .explore-layout { grid-template-columns: 1fr; } .sidebar { position: relative; top: 0; margin-bottom: 20px; } }
+@media (max-width: 768px) { .hero-content h1 { font-size: 2.2rem; } .hero-content p { font-size: 1rem; margin-bottom: 25px;} }
 </style>

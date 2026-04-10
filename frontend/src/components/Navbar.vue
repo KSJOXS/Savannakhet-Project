@@ -73,6 +73,15 @@
         <div class="ta-bottom-row">
             <div class="nav-container">
                 <div class="sub-nav-list">
+
+                    <router-link 
+                        v-if="!user || user.role !== 'admin'" 
+                        to="/" 
+                        class="sub-nav-item"
+                        :class="{ active: route.path === '/explore' && (!route.query.tab || route.query.tab === 'things-to-do') }">
+                        Home
+                    </router-link>
+
                     <router-link to="/hotels" class="sub-nav-item" :class="{ active: route.path.includes('/hotels') }">
                         Hotels
                     </router-link>

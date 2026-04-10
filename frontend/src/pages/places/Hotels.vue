@@ -42,7 +42,7 @@
 
         <div class="main-layout">
             <aside class="filter-sidebar">
-                <div class="map-preview">
+                <div class="map-preview" @click="showMapModal = true">
                     <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" alt="Map View" />
                     <button class="btn-view-map"><i class="fas fa-map"></i> View on map</button>
                 </div>
@@ -118,17 +118,22 @@
                     </div>
 
                     <div class="hotel-deals">
-                        <div class="deal-provider">
-                            <span>Starting from</span>
-                        </div>
-                        <div class="deal-price">
-                            <span class="price-current">$25+</span>
-                        </div>
-                        <button class="btn-view-deal">Check Availability</button>
+                        <button class="btn-view-deal" @click.stop="goToDetail(hotel.id)">View Place</button>
                     </div>
                 </div>
             </main>
         </div>
+
+        <MapOverlay 
+            :is-open="showMapModal" 
+            :places="places" 
+            :categories="categories"
+            initial-filter="hotel"
+            title="Hotels" 
+            @close="showMapModal = false" 
+        />
+
+        <RecentlyViewed />
     </div>
 </template>
 
@@ -140,6 +145,8 @@ import { categoryRepository } from '@/repositories/categoryRepository'
 import { favoriteRepository } from '@/repositories/favoriteRepository'
 import { useAuth } from '@/composables/useAuth'
 import Navbar from '@/components/Navbar.vue'
+import MapOverlay from '@/components/MapOverlay.vue'
+import RecentlyViewed from '@/components/RecentlyViewed.vue'
 
 const router = useRouter()
 const { user } = useAuth()
@@ -148,6 +155,7 @@ const categories = ref([])
 const favoriteIds = ref([])
 const loading = ref(true)
 const selectedCategories = ref([])
+const showMapModal = ref(false)
 
 const fetchData = async () => {
     loading.value = true

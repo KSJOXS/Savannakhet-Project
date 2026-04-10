@@ -18,18 +18,25 @@ def get_places(
     include_drafts: bool = Query(False),
     db: Session = Depends(get_db)
 ):
-    query = db.query(models.Place)
+    from sqlalchemy.orm import selectinload
+    query = db.query(models.Place).options(selectinload(models.Place.interactions))
     if not include_drafts:
         query = query.filter(models.Place.is_published == True)
     if category_id:
         query = query.filter(models.Place.category_id == category_id)
-    return query.all()
+    
+    places = query.all()
+    for p in places:
+        p.review_count = len([i for i in p.interactions if i.comment])
+    return places
 
 @router.get("/places/{place_id}", response_model=schemas.PlaceResponse)
 def get_place_detail(place_id: int, db: Session = Depends(get_db)):
-    place = db.query(models.Place).filter(models.Place.id == place_id).first()
+    from sqlalchemy.orm import selectinload
+    place = db.query(models.Place).options(selectinload(models.Place.interactions)).filter(models.Place.id == place_id).first()
     if not place:
         raise HTTPException(status_code=404, detail="Place not found.")
+    place.review_count = len([i for i in place.interactions if i.comment])
     return place
 
 # --- Admin: Create place ---

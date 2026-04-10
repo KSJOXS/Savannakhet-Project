@@ -30,7 +30,7 @@
 
         <div class="main-layout">
             <aside class="filter-sidebar">
-                <div class="map-preview" @click="openGeneralMap">
+                <div class="map-preview" @click="showMapModal = true">
                     <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80"
                         alt="Map View" />
                     <button class="btn-view-map"><i class="fas fa-map"></i> View on map</button>
@@ -133,6 +133,17 @@
                 </div>
             </main>
         </div>
+
+        <MapOverlay 
+            :is-open="showMapModal" 
+            :places="places" 
+            :categories="categories"
+            initial-filter="nature"
+            title="Nature & Parks" 
+            @close="showMapModal = false" 
+        />
+
+        <RecentlyViewed />
     </div>
 </template>
 
@@ -144,6 +155,8 @@ import { categoryRepository } from '@/repositories/categoryRepository'
 import { favoriteRepository } from '@/repositories/favoriteRepository'
 import { useAuth } from '@/composables/useAuth'
 import Navbar from '@/components/Navbar.vue'
+import MapOverlay from '@/components/MapOverlay.vue'
+import RecentlyViewed from '@/components/RecentlyViewed.vue'
 
 const router = useRouter()
 const { user } = useAuth()
@@ -152,6 +165,7 @@ const categories = ref([])
 const favoriteIds = ref([])
 const loading = ref(true)
 const selectedCategories = ref([])
+const showMapModal = ref(false)
 
 const toggleCategory = (cat) => {
     cat = cat.toLowerCase()
@@ -285,7 +299,6 @@ const toggleHeart = async (placeId) => {
 }
 
 const goToDetail = (id) => router.push(`/places/${id}`)
-const openGeneralMap = () => window.open('https://www.google.com/maps', '_blank')
 const handleContact = (place) => alert(`Contact for ${place.name}`)
 
 onMounted(fetchData)

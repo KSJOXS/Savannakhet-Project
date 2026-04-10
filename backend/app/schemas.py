@@ -42,6 +42,7 @@ class PlaceUpdate(PlaceBase):
 class PlaceResponse(PlaceBase):
     id: int
     rating_avg: float
+    review_count: int = 0
     class Config: from_attributes = True
     location_lat: Optional[float] = None
     location_lng: Optional[float] = None
@@ -82,3 +83,20 @@ class UserInteractionCreate(BaseModel):
     rating: Optional[float] = None
     comment: Optional[str] = None
     interaction_type: str  # เช่น 'click', 'like', 'visit'
+
+# --- Site Settings ---
+class SiteSettingBase(BaseModel):
+    value: Optional[str] = None
+    description: Optional[str] = None
+
+class SiteSettingCreate(SiteSettingBase):
+    pass
+
+class SiteSettingUpdate(SiteSettingBase):
+    pass
+
+class SiteSettingResponse(BaseModel):
+    key_name: str
+    value: Optional[str] = None
+    description: Optional[str] = None
+    class Config: from_attributes = True

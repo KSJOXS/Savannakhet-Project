@@ -24,6 +24,7 @@ import AdminCategories from '../pages/admin/Categories.vue'
 import AdminComments from '../pages/admin/Comments.vue'
 import AdminUsers from '../pages/admin/Users.vue'
 import AdminDashboard from '../pages/admin/Dashboard.vue'
+import AdminSettings from '../pages/admin/Settings.vue'
 
 const routes = [
     {
@@ -131,6 +132,11 @@ const routes = [
                 path: 'dashboard',
                 name: 'AdminDashboard',
                 component: AdminDashboard
+            },
+            {
+                path: 'settings',
+                name: 'AdminSettings',
+                component: AdminSettings
             }
         ]
     }

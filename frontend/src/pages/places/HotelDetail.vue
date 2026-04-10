@@ -41,9 +41,24 @@
                 </div>
             </div>
 
+            <!-- Sticky Navigation -->
+            <div class="sticky-nav-wrapper" ref="stickyNavRef">
+                <div class="sticky-nav" :class="{ 'is-sticky': isSticky }">
+                    <div class="nav-links">
+                        <a href="#deals" :class="{ active: activeSection === 'deals' }" @click.prevent="scrollTo('deals')">Deals</a>
+                        <a href="#about" :class="{ active: activeSection === 'about' }" @click.prevent="scrollTo('about')">About</a>
+                        <a href="#location" :class="{ active: activeSection === 'location' }" @click.prevent="scrollTo('location')">Location</a>
+                        <a href="#reviews" :class="{ active: activeSection === 'reviews' }" @click.prevent="scrollTo('reviews')">Reviews</a>
+                    </div>
+                    <div class="nav-action" v-if="isSticky">
+                        <button class="btn-check-availability" @click="scrollTo('deals')">Check availability</button>
+                    </div>
+                </div>
+            </div>
+
             <div class="content-layout">
                 <div class="left-col">
-                    <section class="about-hotel">
+                    <section class="about-hotel" id="about">
                         <h2>About</h2>
                         <p class="hotel-desc">{{ hotel.description }}</p>
                     </section>
@@ -62,7 +77,7 @@
 
                     <hr class="divider-line" />
 
-                    <section class="reviews-section">
+                    <section class="reviews-section" id="reviews">
                         <h2>Reviews ({{ comments.length }})</h2>
                         
                         <div class="write-review-card" v-if="user">
@@ -95,33 +110,36 @@
                 </div>
 
                 <div class="right-col">
-                    <div class="booking-widget">
+                    <div class="booking-widget" id="deals">
                         <div class="price-header">
-                            <span class="label">Best Price at</span>
-                            <div class="price-row">
-                                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Agoda_logo.svg/1200px-Agoda_logo.svg.png" height="20" />
-                                <span class="price">${{ hotel.price || '45' }}</span>
-                            </div>
+                            <span class="label" style="font-size: 1.1rem; font-weight: 700;">View prices for your travel dates</span>
                         </div>
                         
                         <div class="date-picker-box">
                             <div class="date-input">
                                 <small>Check In</small>
-                                <div>Mon 06/04/26</div>
+                                <div style="font-weight: 600;">Mon 12/04</div>
                             </div>
                             <div class="date-input">
                                 <small>Check Out</small>
-                                <div>Wed 08/04/26</div>
+                                <div style="font-weight: 600;">Wed 14/04</div>
                             </div>
                         </div>
 
-                        <button class="btn-view-deal" @click="openMap">
-                            View Deal <i class="fas fa-external-link-alt"></i>
-                        </button>
-                        <p class="free-cancel"><i class="fas fa-check"></i> Free cancellation until 05/04/26</p>
+                        <div class="partner-deal">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/Booking.com_Logo_2022.png" height="24" alt="Booking.com" />
+                            <a :href="`https://www.booking.com/searchresults.html?ss=${hotel?.name || 'Savannakhet'}`" target="_blank" class="btn-partner">View deal</a>
+                        </div>
+                        
+                        <div class="partner-deal">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Agoda_logo.svg/1200px-Agoda_logo.svg.png" height="24" alt="Agoda" />
+                            <a :href="`https://www.agoda.com/search?text=${hotel?.name || 'Savannakhet'}`" target="_blank" class="btn-partner">View deal</a>
+                        </div>
+
+                        <p class="free-cancel"><i class="fas fa-check"></i> Free cancellation on most rooms</p>
                     </div>
 
-                    <div class="mini-map-card">
+                    <div class="mini-map-card" id="location">
                         <iframe width="100%" height="150" frameborder="0" style="border:0; border-radius: 8px;"
                             :src="`https://maps.google.com/maps?q=${hotel.location_lat},${hotel.location_lng}&z=15&output=embed`"
                             allowfullscreen>
@@ -130,12 +148,34 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Recommended Places -->
+            <div class="recommended-section" v-if="recommendedPlaces.length > 0">
+                <h2>You might also like</h2>
+                <div class="recommended-grid">
+                    <div v-for="rec in recommendedPlaces" :key="rec.id" class="rec-card" @click="goToRecDetail(rec.id)">
+                        <div class="rec-img-wrapper">
+                            <img :src="getRecCoverImage(rec)" :alt="rec.name" />
+                            <button class="btn-heart-rec" @click.stop><i class="far fa-heart"></i></button>
+                        </div>
+                        <div class="rec-info">
+                            <h4>{{ rec.name }}</h4>
+                            <div class="rec-rating">
+                                <span class="bubbles">
+                                    <i v-for="s in 5" :key="s" :class="[(rec.rating_avg || 0) >= s ? 'fas' : 'far', 'fa-circle']"></i>
+                                </span>
+                                <span>{{ rec.rating_avg || '0.0' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { placeRepository } from '@/repositories/placeRepository'
 import { favoriteRepository } from '@/repositories/favoriteRepository'
@@ -152,6 +192,41 @@ const isFavorite = ref(false)
 const newComment = ref('')
 const newRating = ref(5)
 const submitting = ref(false)
+
+const recommendedPlaces = ref([])
+const stickyNavRef = ref(null)
+const isSticky = ref(false)
+const activeSection = ref('about')
+
+// Scroll Handler
+const handleScroll = () => {
+    if (stickyNavRef.value) {
+        const rect = stickyNavRef.value.getBoundingClientRect()
+        // It becomes sticky when its top reaches 0
+        isSticky.value = rect.top <= 0
+    }
+
+    const sections = ['deals', 'about', 'location', 'reviews']
+    for (const sec of sections) {
+        const el = document.getElementById(sec)
+        if (el) {
+            const rect = el.getBoundingClientRect()
+            if (rect.top >= 0 && rect.top < 300) {
+                activeSection.value = sec
+                break
+            }
+        }
+    }
+}
+
+const scrollTo = (id) => {
+    activeSection.value = id
+    const el = document.getElementById(id)
+    if (el) {
+        const y = el.getBoundingClientRect().top + window.scrollY - 70 // Offset for sticky header
+        window.scrollTo({ top: y, behavior: 'smooth' })
+    }
+}
 
 // 🖼️ จัดการรูปภาพ
 const galleryImages = computed(() => {
@@ -174,6 +249,12 @@ const fetchData = async () => {
         // ดึงรีวิว
         const revRes = await placeRepository.getComments(id)
         comments.value = revRes.data
+
+        // ดึง Recommendations (สถานที่อื่นๆ ใน category เดียวกัน)
+        const allRes = await placeRepository.getAll()
+        recommendedPlaces.value = allRes.data
+            .filter(p => p.category_id === hotel.value.category_id && p.id !== parseInt(id))
+            .slice(0, 4)
 
         // เช็ค Favorite
         if (user.value) {
@@ -211,7 +292,37 @@ const submitComment = async () => {
 
 const openMap = () => window.open(`https://www.google.com/maps/search/?api=1&query=${hotel.value.location_lat},${hotel.value.location_lng}`, '_blank')
 
-onMounted(fetchData)
+const getRecCoverImage = (place) => {
+    let url = ''
+    if (place.images && place.images.length > 0) {
+        url = place.images[0].image_url || place.images[0].url || place.images[0]
+    } else if (place.image_url) {
+        try {
+            if (place.image_url.startsWith('[')) {
+                url = JSON.parse(place.image_url)[0]
+            } else {
+                url = place.image_url
+            }
+        } catch (e) { url = place.image_url }
+    }
+    if (!url) return 'https://via.placeholder.com/300x200?text=No+Image'
+    return url.startsWith('http') ? url : `http://localhost:8000/${url.replace(/^\//,'')}`
+}
+
+const goToRecDetail = (id) => {
+    router.push(`/places/${id}`).then(() => {
+        window.location.reload()
+    })
+}
+
+onMounted(() => {
+    fetchData()
+    window.addEventListener('scroll', handleScroll)
+})
+
+onUnmounted(() => {
+    window.removeEventListener('scroll', handleScroll)
+})
 </script>
 
 <style scoped>
@@ -270,4 +381,187 @@ textarea { width: 100%; height: 80px; padding: 10px; margin: 10px 0; border: 1px
 .review-item { padding: 20px 0; border-bottom: 1px solid #eee; }
 .reviewer { display: flex; gap: 12px; margin-bottom: 10px; }
 .r-rating i { color: #00aa6c; font-size: 0.7rem; }
+
+/* Sticky Navigation */
+.sticky-nav-wrapper {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: white;
+    border-bottom: 1px solid #e0e0e0;
+    margin-top: 15px;
+    height: 60px; /* Fixed height to prevent jumpiness when sticky */
+}
+
+.sticky-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1100px;
+    margin: 0 auto;
+    height: 100%;
+}
+
+.nav-links {
+    display: flex;
+    gap: 20px;
+    height: 100%;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: #475569;
+    font-weight: 700;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    border-bottom: 3px solid transparent;
+    transition: 0.2s;
+    height: 100%;
+}
+
+.nav-links a:hover {
+    color: #000;
+}
+
+.nav-links a.active {
+    color: #000;
+    border-bottom-color: #000;
+}
+
+.nav-action {
+    display: flex;
+    align-items: center;
+}
+
+.btn-check-availability {
+    background: #00aa6c;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 24px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-check-availability:hover {
+    background: #008f5a;
+}
+
+/* Partnerships in Booking Widget */
+.partner-deal {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.btn-partner {
+    background: #fcd34d;
+    color: #000;
+    font-weight: 700;
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    transition: line-height 0.2s;
+}
+.btn-partner:hover {
+    background: #f59e0b;
+}
+
+/* Recommended Places */
+.recommended-section {
+    margin-top: 40px;
+}
+
+.recommended-section h2 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin-bottom: 20px;
+}
+
+.recommended-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+.rec-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.rec-card:hover {
+    box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+}
+
+.rec-img-wrapper {
+    position: relative;
+    height: 160px;
+}
+
+.rec-img-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.btn-heart-rec {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: white;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    font-size: 0.9rem;
+}
+
+.rec-info {
+    padding: 15px;
+}
+
+.rec-info h4 {
+    margin: 0 0 8px;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.rec-rating i {
+    color: #00aa6c;
+    font-size: 0.7rem;
+    margin-right: 2px;
+}
+
+.rec-rating span:last-child {
+    margin-left: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #475569;
+}
+
+@media (max-width: 768px) {
+    .recommended-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media (max-width: 480px) {
+    .recommended-grid {
+        grid-template-columns: 1fr;
+    }
+}
 </style>

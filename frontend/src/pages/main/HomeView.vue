@@ -2,7 +2,11 @@
     <div class="home-page">
         <Navbar />
 
-        <header class="hero">
+        <!-- Hero Slideshow -->
+        <header class="hero" :style="heroStyle">
+            <transition name="slide-fade">
+                <div class="hero-bg" :key="currentSlide" :style="slideStyle"></div>
+            </transition>
             <div class="hero-overlay"></div>
             <div class="hero-content">
                 <div class="badge-new">✨ AI-Powered Recommendation System</div>
@@ -16,6 +20,15 @@
                         <i class="fas fa-user-plus"></i> Join Free
                     </button>
                 </div>
+            </div>
+            <!-- Slide dots -->
+            <div v-if="heroImages.length > 1" class="slide-dots">
+                <button 
+                    v-for="(img, i) in heroImages" 
+                    :key="i" 
+                    :class="['dot', { active: i === currentSlide }]"
+                    @click="currentSlide = i"
+                />
             </div>
         </header>
 
@@ -96,16 +109,49 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { placeRepository } from '@/repositories/placeRepository'
 import { categoryRepository } from '@/repositories/categoryRepository'
+import settingRepository from '@/repositories/settingRepository'
 import Navbar from '@/components/Navbar.vue'
 
 const router = useRouter()
 const featuredPlaces = ref([])
 const categories = ref([])
 const loading = ref(true)
+const heroImages = ref([])
+const currentSlide = ref(0)
+let slideTimer = null
+
+// Default fallback background
+const DEFAULT_HERO = 'https://images.unsplash.com/photo-1540611025311-01df3cef54b5?q=80&w=2070'
+
+// Base hero style (always full cover)
+const heroStyle = computed(() => ({
+    backgroundImage: heroImages.value.length === 0 ? `url(${DEFAULT_HERO})` : 'none',
+    backgroundPosition: 'center',
+    backgroundSize: 'cover'
+}))
+
+// Current slide background
+const slideStyle = computed(() => {
+    if (!heroImages.value.length) return {};
+    return {
+        backgroundImage: `url(${heroImages.value[currentSlide.value]})`,
+        backgroundPosition: 'center',
+        backgroundSize: 'cover'
+    };
+})
+
+const startSlideshow = () => {
+    if (slideTimer) clearInterval(slideTimer);
+    if (heroImages.value.length > 1) {
+        slideTimer = setInterval(() => {
+            currentSlide.value = (currentSlide.value + 1) % heroImages.value.length;
+        }, 5000);
+    }
+}
 
 // 📷 ฟังก์ชันจัดการปกรูปภาพ (เหมือนหน้า Explore)
 const getCoverImage = (place) => {
@@ -153,6 +199,23 @@ const fetchData = async () => {
     } finally {
         loading.value = false
     }
+
+    // Fetch hero images separately
+    try {
+        const resSettings = await settingRepository.getAll()
+        
+        // Support new multi-image setting (hero_images)
+        const multiSetting = resSettings.data.find(s => s.key_name === 'hero_images')
+        if (multiSetting && multiSetting.value) {
+            const parsed = JSON.parse(multiSetting.value);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                heroImages.value = parsed;
+                startSlideshow();
+            }
+        }
+    } catch (settingsError) {
+        console.warn('Could not load site settings:', settingsError?.response?.status)
+    }
 }
 
 const getCategoryName = (id) => {
@@ -161,6 +224,7 @@ const getCategoryName = (id) => {
 }
 
 onMounted(fetchData)
+onUnmounted(() => { if (slideTimer) clearInterval(slideTimer); })
 </script>
 
 <style scoped>
@@ -173,24 +237,71 @@ onMounted(fetchData)
 /* ─── Hero ─── */
 .hero {
     position: relative;
-    background: url('https://images.unsplash.com/photo-1540611025311-01df3cef54b5?q=80&w=2070') center/cover;
+    background-color: #1e293b; /* fallback if no image */
+    background-position: center;
+    background-size: cover;
     min-height: 580px;
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
     color: white;
+    overflow: hidden;
+}
+
+/* Animated slide background layer */
+.hero-bg {
+    position: absolute;
+    inset: 0;
+    background-position: center;
+    background-size: cover;
+    z-index: 0;
+}
+
+/* slide-fade transition */
+.slide-fade-enter-active { transition: opacity 1s ease; }
+.slide-fade-leave-active { transition: opacity 1s ease; position: absolute; inset: 0; }
+.slide-fade-enter-from, .slide-fade-leave-to { opacity: 0; }
+
+/* Slide dots */
+.slide-dots {
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 3;
+}
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.7);
+    background: transparent;
+    cursor: pointer;
+    transition: 0.3s;
+    padding: 0;
+}
+.dot.active {
+    background: white;
+    transform: scale(1.3);
 }
 
 .hero-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(30, 87, 153, 0.88), rgba(32, 124, 202, 0.82));
+    background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.15) 0%,
+        rgba(0, 0, 0, 0.45) 100%
+    );
+    z-index: 1;
 }
 
 .hero-content {
     position: relative;
-    z-index: 1;
+    z-index: 2;
     max-width: 820px;
     padding: 0 24px;
 }
