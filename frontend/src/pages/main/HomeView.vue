@@ -9,15 +9,18 @@
             </transition>
             <div class="hero-overlay"></div>
             <div class="hero-content">
-                <div class="badge-new">✨ AI-Powered Recommendation System</div>
-                <h1>Discover Savannakhet</h1>
-                <p>Experience the beauty of Southern Laos with our intelligent GNN travel guide.</p>
+                <div class="badge-new">{{ t('recommend.hero_badge') }}</div>
+                <h1>{{ t('recommend.hero_title') }}</h1>
+                <p>{{ t('recommend.hero_subtitle') }}</p>
                 <div class="hero-actions">
                     <button @click="router.push('/explore')" class="btn-start">
-                        <i class="fas fa-rocket"></i> Start Exploring
+                        <i class="fas fa-rocket"></i> {{ t('recommend.btn_start') }}
                     </button>
-                    <button @click="router.push('/register')" class="btn-start btn-outline">
-                        <i class="fas fa-user-plus"></i> Join Free
+                    <button v-if="!isAuthenticated()" @click="router.push('/register')" class="btn-start btn-outline">
+                        <i class="fas fa-user-plus"></i> {{ t('recommend.btn_join') }}
+                    </button>
+                    <button v-else @click="router.push('/favorites')" class="btn-start btn-outline">
+                        <i class="fas fa-heart"></i> {{ t('nav.saves') }}
                     </button>
                 </div>
             </div>
@@ -35,17 +38,21 @@
         <div class="stats-bar">
             <div class="stat-item">
                 <span class="stat-num">50+</span>
-                <span class="stat-label">Places</span>
+                <span class="stat-label">{{ t('recommend.stat_places') }}</span>
             </div>
             <div class="stat-divider"></div>
             <div class="stat-item">
                 <span class="stat-num">AI</span>
-                <span class="stat-label">Powered</span>
+                <span class="stat-label">{{ t('recommend.stat_powered') }}</span>
             </div>
             <div class="stat-divider"></div>
-            <div class="stat-item">
+            <div v-if="!isAuthenticated()" class="stat-item">
                 <span class="stat-num">Free</span>
-                <span class="stat-label">Forever</span>
+                <span class="stat-label">{{ t('recommend.stat_free') }}</span>
+            </div>
+            <div v-else class="stat-item stat-welcome">
+                <span class="stat-num stat-num-sm">👋 {{ user?.username }}</span>
+                <span class="stat-label">{{ t('recommend.stat_welcome') || 'Welcome back!' }}</span>
             </div>
         </div>
 
@@ -53,11 +60,11 @@
             <div class="container">
                 <div class="section-header">
                     <div>
-                        <p class="section-eyebrow">Handpicked for you</p>
-                        <h2>Featured Places</h2>
+                        <p class="section-eyebrow">{{ t('recommend.handpicked') }}</p>
+                        <h2>{{ t('recommend.featured') }}</h2>
                     </div>
                     <button @click="router.push('/explore')" class="btn-view-all">
-                        View All <i class="fas fa-arrow-right"></i>
+                        {{ t('recommend.view_all') }} <i class="fas fa-arrow-right"></i>
                     </button>
                 </div>
 
@@ -84,7 +91,7 @@
                             <p class="desc">{{ place.description }}</p>
                             <div class="card-footer">
                                 <span class="location-tag"><i class="fas fa-map-marker-alt"></i> Savannakhet, Laos</span>
-                                <span class="btn-detail">View <i class="fas fa-arrow-right"></i></span>
+                                <span class="btn-detail">{{ t('place.viewOnMap') }} <i class="fas fa-arrow-right"></i></span>
                             </div>
                         </div>
                     </div>
@@ -92,12 +99,44 @@
             </div>
         </section>
 
-        <section class="cta-section">
+        <!-- Recommended Section (GNN AI) -->
+        <section v-if="isAuthenticated() && recommendedPlaces.length > 0" class="featured-section bg-alt">
+            <div class="container">
+                <div class="section-header">
+                    <div>
+                        <p class="section-eyebrow"><i class="fas fa-magic"></i> AI Personalized</p>
+                        <h2>{{ t('recommend.ai_recom') }}</h2>
+                    </div>
+                </div>
+                
+                <div class="featured-grid">
+                    <div v-for="rec in recommendedPlaces" :key="rec.place.id" class="place-card ai-card" 
+                        @click="router.push(`/places/${rec.place.id}`)">
+                        <div class="card-img-wrapper">
+                            <img :src="getCoverImage(rec.place)" :alt="rec.place.name">
+                            <span class="card-tag ai-tag"><i class="fas fa-sparkles"></i> {{ getCategoryName(rec.place.category_id) }}</span>
+                        </div>
+                        <div class="card-body">
+                            <h3>{{ rec.place.name }}</h3>
+                            <div class="reason-box">
+                                <i class="fas fa-lightbulb"></i> {{ rec.reason }}
+                            </div>
+                            <div class="card-footer">
+                                <span class="location-tag"><i class="fas fa-map-marker-alt"></i> Savannakhet</span>
+                                <span class="btn-detail">{{ t('place.viewOnMap') }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section v-if="!isAuthenticated()" class="cta-section">
             <div class="cta-content">
-                <h2>Ready to Explore?</h2>
-                <p>Create a free account to save favorites and get personalized recommendations.</p>
+                <h2>{{ t('recommend.ready') }}</h2>
+                <p>{{ t('recommend.create_account') }}</p>
                 <button @click="router.push('/register')" class="btn-cta">
-                    <i class="fas fa-user-plus"></i> Get Started — It's Free
+                    <i class="fas fa-user-plus"></i> {{ t('recommend.get_started') }}
                 </button>
             </div>
         </section>
@@ -114,25 +153,47 @@ import { useRouter } from 'vue-router'
 import { placeRepository } from '@/repositories/placeRepository'
 import { categoryRepository } from '@/repositories/categoryRepository'
 import settingRepository from '@/repositories/settingRepository'
+import { gnnRepository } from '@/repositories/gnnRepository'
+import { useAuth } from '@/composables/useAuth'
+import { useI18n } from '@/composables/useI18n'
 import Navbar from '@/components/Navbar.vue'
 
 const router = useRouter()
+const { user, isAuthenticated } = useAuth()
+const { t } = useI18n()
 const featuredPlaces = ref([])
+const recommendedPlaces = ref([])
 const categories = ref([])
 const loading = ref(true)
 const heroImages = ref([])
 const currentSlide = ref(0)
+const dynamicHeroCategory = ref(null)
 let slideTimer = null
+
+// Semantic fallbacks
+const categoryImages = {
+    'nature': 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=1948',
+    'hotel': 'https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2070',
+    'restaurant': 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070'
+}
 
 // Default fallback background
 const DEFAULT_HERO = 'https://images.unsplash.com/photo-1540611025311-01df3cef54b5?q=80&w=2070'
 
-// Base hero style (always full cover)
-const heroStyle = computed(() => ({
-    backgroundImage: heroImages.value.length === 0 ? `url(${DEFAULT_HERO})` : 'none',
-    backgroundPosition: 'center',
-    backgroundSize: 'cover'
-}))
+// Base hero style 
+const heroStyle = computed(() => {
+    let bgUrl = DEFAULT_HERO
+    if (heroImages.value.length === 0) {
+        if (dynamicHeroCategory.value && categoryImages[dynamicHeroCategory.value]) {
+            bgUrl = categoryImages[dynamicHeroCategory.value]
+        }
+    }
+    return {
+        backgroundImage: heroImages.value.length === 0 ? `url(${bgUrl})` : 'none',
+        backgroundPosition: 'center',
+        backgroundSize: 'cover'
+    }
+})
 
 // Current slide background
 const slideStyle = computed(() => {
@@ -194,6 +255,18 @@ const fetchData = async () => {
         ])
         featuredPlaces.value = resPlaces.data.slice(0, 3)
         categories.value = resCats.data
+
+        if (isAuthenticated() && user.value) {
+            try {
+                const recRes = await gnnRepository.getRecommendations(user.value.id)
+                if (recRes.data && recRes.data.recommended_places) {
+                    recommendedPlaces.value = recRes.data.recommended_places
+                    dynamicHeroCategory.value = recRes.data.dynamic_hero_category
+                }
+            } catch (recErr) {
+                console.warn('No recommendations yet', recErr)
+            }
+        }
     } catch (error) {
         console.error('Error fetching home data:', error)
     } finally {
@@ -403,6 +476,19 @@ onUnmounted(() => { if (slideTimer) clearInterval(slideTimer); })
     color: #94a3b8;
     font-weight: 500;
     margin-top: 3px;
+}
+
+.stat-num-sm {
+    font-size: 1.15rem;
+    background: linear-gradient(135deg, #3498db, #6366f1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.stat-welcome .stat-label {
+    color: #6366f1;
+    font-weight: 600;
 }
 
 .stat-divider {
@@ -671,7 +757,28 @@ onUnmounted(() => { if (slideTimer) clearInterval(slideTimer); })
     100% { background-position: 200% 0; }
 }
 
-/* ─── Footer ─── */
+.bg-alt {
+    background: #f1f5f9;
+}
+
+.ai-card {
+    border: 1px solid #e0e7ff;
+}
+
+.ai-tag {
+    background: #6366f1;
+}
+
+.reason-box {
+    margin-bottom: 12px;
+    padding: 8px 12px;
+    background: #fefce8;
+    color: #a16207;
+    font-size: 0.82rem;
+    border-radius: 6px;
+    font-weight: 500;
+}
+
 .simple-footer {
     text-align: center;
     padding: 32px 40px;

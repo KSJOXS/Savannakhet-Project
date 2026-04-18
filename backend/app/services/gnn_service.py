@@ -1,13 +1,12 @@
 import torch
 from sqlalchemy.orm import Session
 from torch_geometric.data import HeteroData
-from app.models import User, Place, Interaction, Favorite
+from app.models import User, Place, InteractionLog
 
 def build_gnn_graph(db: Session):
     users = db.query(User).all()
     places = db.query(Place).all()
-    interactions = db.query(Interaction).all()
-    favorites = db.query(Favorite).all()
+    logs = db.query(InteractionLog).all()
 
     user_mapping = {user.id: i for i, user in enumerate(users)}
     place_mapping = {place.id: i for i, place in enumerate(places)}
@@ -16,20 +15,30 @@ def build_gnn_graph(db: Session):
     data['user'].num_nodes = len(users)
     data['place'].num_nodes = len(places)
 
-    edge_index_interact = []
-    for interact in interactions:
-        if interact.user_id in user_mapping and interact.place_id in place_mapping:
-            edge_index_interact.append([user_mapping[interact.user_id], place_mapping[interact.place_id]])
-    
-    if edge_index_interact:
-        data['user', 'interacts_with', 'place'].edge_index = torch.tensor(edge_index_interact, dtype=torch.long).t().contiguous()
+    edges = []
+    edge_weights = []
 
-    edge_index_fav = []
-    for fav in favorites:
-        if fav.user_id in user_mapping and fav.place_id in place_mapping:
-            edge_index_fav.append([user_mapping[fav.user_id], place_mapping[fav.place_id]])
+    # Map interactions
+    for log in logs:
+        if log.user_id in user_mapping and log.place_id in place_mapping:
+            u_idx = user_mapping[log.user_id]
+            p_idx = place_mapping[log.place_id]
+            w = float(log.interaction_weight)
+            edges.append([u_idx, p_idx])
+            edge_weights.append(w)
 
-    if edge_index_fav:
-        data['user', 'likes', 'place'].edge_index = torch.tensor(edge_index_fav, dtype=torch.long).t().contiguous()
+    if edges:
+        data['user', 'interacts_with', 'place'].edge_index = torch.tensor(edges, dtype=torch.long).t().contiguous()
+        data['user', 'interacts_with', 'place'].edge_weight = torch.tensor(edge_weights, dtype=torch.float)
+    else:
+        # fallback empty
+        data['user', 'interacts_with', 'place'].edge_index = torch.empty((2, 0), dtype=torch.long)
+        data['user', 'interacts_with', 'place'].edge_weight = torch.empty((0,), dtype=torch.float)
+
+    # For undirected reasoning, we might want reverse edges
+    if edges:
+        edges_rev = [[e[1], e[0]] for e in edges]
+        data['place', 'interacted_by', 'user'].edge_index = torch.tensor(edges_rev, dtype=torch.long).t().contiguous()
+        data['place', 'interacted_by', 'user'].edge_weight = torch.tensor(edge_weights, dtype=torch.float)
 
     return data, user_mapping, place_mapping

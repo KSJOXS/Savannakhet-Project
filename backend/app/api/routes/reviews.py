@@ -37,6 +37,7 @@ def get_place_comments(place_id: int, db: Session = Depends(get_db)):
         models.Interaction.comment.label("comment_text"),
         models.Interaction.visited_at,
         models.User.username,
+        models.User.profile_image,
     ).join(models.User).filter(
         models.Interaction.place_id == place_id
     ).order_by(desc(models.Interaction.visited_at)).all()
@@ -47,6 +48,7 @@ def get_place_comments(place_id: int, db: Session = Depends(get_db)):
             "rating": r.rating,
             "comment_text": r.comment_text,
             "username": r.username,
+            "profile_image": r.profile_image,
             "visited_at": r.visited_at,
         }
         for r in results

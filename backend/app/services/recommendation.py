@@ -1,18 +1,22 @@
 import torch
 import torch.nn.functional as F
-from torch_geometric.nn import SAGEConv, to_hetero
+from torch_geometric.nn import GraphConv, to_hetero
+from sqlalchemy.sql import func
 from app.services.gnn_service import build_gnn_graph
+from app.models import InteractionLog, Place, Category
+from sqlalchemy.orm import Session
 
-# --- โครงสร้าง AI ---
+# --- AI Structure ---
 class BaseGNN(torch.nn.Module):
     def __init__(self, hidden_channels):
         super().__init__()
-        self.conv1 = SAGEConv((-1, -1), hidden_channels)
-        self.conv2 = SAGEConv((-1, -1), hidden_channels)
+        self.conv1 = GraphConv((-1, -1), hidden_channels)
+        self.conv2 = GraphConv((-1, -1), hidden_channels)
 
-    def forward(self, x, edge_index):
-        x = self.conv1(x, edge_index).relu()
-        x = self.conv2(x, edge_index)
+    def forward(self, x, edge_index, edge_weight=None):
+        # GraphConv supports edge_weight naturally
+        x = self.conv1(x, edge_index, edge_weight).relu()
+        x = self.conv2(x, edge_index, edge_weight)
         return x
 
 class SavannakhetRecommender(torch.nn.Module):
@@ -22,36 +26,57 @@ class SavannakhetRecommender(torch.nn.Module):
         self.place_emb = torch.nn.Embedding(num_places, hidden_channels)
         self.gnn = to_hetero(BaseGNN(hidden_channels), metadata=data_metadata)
 
-    def forward(self, edge_index_dict):
+    def forward(self, edge_index_dict, edge_weight_dict=None):
         x_dict = {
             'user': self.user_emb.weight,
             'place': self.place_emb.weight
         }
-        return self.gnn(x_dict, edge_index_dict)
+        return self.gnn(x_dict, edge_index_dict, edge_weight_dict)
 
     def recommend_places(self, user_id, updated_x_dict, top_k=5):
         user_features = updated_x_dict['user'][user_id]
         all_place_features = updated_x_dict['place']
         
-        # คำนวณคะแนนความชอบ
         scores = torch.matmul(all_place_features, user_features)
-        
-        # ป้องกัน Error ถ้าขอ top_k มากกว่าจำนวนสถานที่ที่มี
         actual_k = min(top_k, all_place_features.size(0))
         top_scores, top_place_indices = torch.topk(scores, k=actual_k)
         
         return top_place_indices.tolist(), top_scores.tolist()
 
-# --- ฟังก์ชันหลักสำหรับเรียกใช้งาน ---
-def get_recommendations_for_user(db, user_id_from_db, top_k=5):
+# --- Helper functions ---
+def get_user_favorite_category(db: Session, user_id: int):
+    # Find most interacted category
+    result = db.query(Category.parent_type, func.count(InteractionLog.id).label('total'))\
+        .join(Place, InteractionLog.place_id == Place.id)\
+        .join(Category, Place.category_id == Category.id)\
+        .filter(InteractionLog.user_id == user_id)\
+        .group_by(Category.parent_type)\
+        .order_by(func.count(InteractionLog.id).desc())\
+        .first()
+    return result.parent_type if result else "nature"
+
+def get_explainability(db: Session, user_id: int, recommended_place_id: int):
+    # Simple Neighbor Logic: "Because you liked X"
+    # Find a place the user heavily interacted with
+    liked = db.query(Place.name)\
+        .join(InteractionLog, InteractionLog.place_id == Place.id)\
+        .filter(InteractionLog.user_id == user_id, InteractionLog.interaction_weight >= 3.0)\
+        .order_by(InteractionLog.interaction_weight.desc())\
+        .first()
+    
+    if liked:
+        return f"Because you liked {liked[0]}"
+    return "Popular choice in Savannakhet"
+
+# --- Main logic ---
+def get_recommendations_for_user(db: Session, user_id_from_db: int, top_k=5):
     data, user_map, place_map = build_gnn_graph(db)
     
     if user_id_from_db not in user_map:
         return {"status": "error", "message": "ไม่พบผู้ใช้งานนี้ หรือยังไม่มีข้อมูลเพียงพอ (Cold Start)"}
         
-    # ป้องกัน Error กรณีกราฟยังไม่มีการกด Like หรือ Comment ใดๆ เลย
     if not data.edge_index_dict:
-         return {"status": "error", "message": "ระบบยังไม่มีข้อมูลการกด Like ของใครเลย กรุณาเพิ่มข้อมูลจำลองก่อน"}
+         return {"status": "error", "message": "ระบบยังไม่มีข้อมูล Interaction ใดๆ เลย กรุณาจำลองข้อมูลก่อน"}
 
     mapped_user_id = user_map[user_id_from_db]
 
@@ -64,15 +89,38 @@ def get_recommendations_for_user(db, user_id_from_db, top_k=5):
     
     model.eval()
     with torch.no_grad():
-        updated_features = model(data.edge_index_dict)
+        edge_weight_dict = data.edge_weight_dict if hasattr(data, 'edge_weight_dict') else None
+        updated_features = model(data.edge_index_dict, edge_weight_dict)
         recommended_indices, scores = model.recommend_places(mapped_user_id, updated_features, top_k)
         
     reverse_place_map = {v: k for k, v in place_map.items()}
     recommended_place_ids = [reverse_place_map[idx] for idx in recommended_indices]
     
+    dynamic_cat = get_user_favorite_category(db, user_id_from_db)
+
+    # Build detailed response
+    recommended_details = []
+    
+    for idx, place_id in enumerate(recommended_place_ids):
+        # Fetch Place data
+        place_obj = db.query(Place).filter(Place.id == place_id).first()
+        if place_obj:
+            reason = get_explainability(db, user_id_from_db, place_id)
+            recommended_details.append({
+                "place": place_obj,
+                "reason": reason,
+                "score": round(scores[idx], 4)
+            })
+    
     return {
         "status": "success",
         "user_id": user_id_from_db,
-        "recommended_place_ids": recommended_place_ids,
-        "scores": [round(s, 4) for s in scores] # ปัดเศษทศนิยมให้ดูง่าย
+        "dynamic_hero_category": dynamic_cat,
+        "recommended_places": recommended_details
     }
+
+def train_gnn_link_prediction(db: Session):
+    # วางโครงสำหรับทำ Offline Training
+    # (สามารถใช้ Celery หรือ Background task เรียกใช้งานฟังก์ชันนี้)
+    # เช่น การเทรนโมเดลด้วย Negative Sampling เพื่อทำ Link Prediction จริงๆ
+    pass

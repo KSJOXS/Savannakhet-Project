@@ -61,8 +61,11 @@
                     </div>
 
                     <div v-else class="user-group">
-                        <div class="user-avatar" :title="username" @click="isDropdownOpen = !isDropdownOpen">
-                            {{ username ? username.charAt(0).toUpperCase() : 'U' }}
+                        <div class="user-avatar" :title="username" @click="isDropdownOpen = !isDropdownOpen" style="padding: 0; overflow: hidden; border: none; background: none;">
+                            <img v-if="user && user.profile_image" :src="getImageUrl(user.profile_image)" alt="avatar" style="width:100%; height:100%; object-fit:cover; border-radius:50%; border:2px solid #3498db;" />
+                            <div v-else style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#000; color:white; border-radius:50%;">
+                                {{ username ? username.charAt(0).toUpperCase() : 'U' }}
+                            </div>
                         </div>
 
                         <div v-if="isDropdownOpen" class="dropdown-overlay" @click="isDropdownOpen = false"></div>
@@ -99,7 +102,7 @@
                 <div class="sub-nav-list">
 
                     <router-link 
-                        v-if="!user || user.role !== 'admin'" 
+                        v-if="!isLoggedIn" 
                         to="/" 
                         class="sub-nav-item"
                         :class="{ active: route.path === '/' }">
@@ -124,8 +127,7 @@
                         {{ t('nav.nature') }}
                     </router-link>
 
-                    <router-link to="/explore?tab=landmarks" class="sub-nav-item"
-                        :class="{ active: route.path === '/explore' && route.query.tab === 'landmarks' }">
+                    <router-link to="/landmarks" class="sub-nav-item" :class="{ active: route.path.includes('/landmarks') }">
                         {{ t('nav.landmarks') }}
                     </router-link>
                 </div>
@@ -156,8 +158,14 @@ const currentFlagLabel = computed(() => {
 })
 
 const switchLang = (code) => {
-    setLocale(code)
     isLangOpen.value = false
+    setLocale(code)
+}
+
+const getImageUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http') || url.startsWith('data:')) return url;
+    return `http://localhost:8000/${url.startsWith('/') ? url.slice(1) : url}`;
 }
 
 const checkAuth = () => {

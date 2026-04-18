@@ -15,6 +15,7 @@ import Hotels from '../pages/places/Hotels.vue'
 import HotelDetail from '../pages/places/HotelDetail.vue'
 import Restaurants from '../pages/places/Restaurants.vue'
 import nature from '../pages/places/Nature.vue'
+import Landmarks from '../pages/places/Landmarks.vue'
 import About from '../pages/main/About.vue'
 
 // --- Admin Components ---
@@ -92,6 +93,11 @@ const routes = [
         path: '/nature',
         name: 'Nature',
         component: nature
+    },
+    {
+        path: '/landmarks',
+        name: 'Landmarks',
+        component: Landmarks
     },
     {
         path: '/about',

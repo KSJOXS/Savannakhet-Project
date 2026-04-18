@@ -33,7 +33,7 @@ def login(user_data: schemas.UserLogin, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Invalid username or password.")
 
     token = auth.create_access_token(data={"sub": user.username, "id": user.id, "role": user.role})
-    return {"access_token": token, "user": {"id": user.id, "username": user.username, "role": user.role}}
+    return {"access_token": token, "user": {"id": user.id, "username": user.username, "role": user.role, "profile_image": user.profile_image}}
 
 @router.get("/users", response_model=list[schemas.UserResponse])
 def get_all_users(db: Session = Depends(get_db)):
@@ -46,32 +46,53 @@ def get_user_profile(user_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="User not found.")
     return user
 
+from typing import Optional
+from fastapi import UploadFile, File, Form, APIRouter, Depends, HTTPException, status
+import os
+import shutil
+
+UPLOAD_DIR_USERS = "static/users"
+
 @router.patch("/users/{user_id}", response_model=schemas.UserResponse)
-def update_user_profile(user_id: int, user_update: schemas.UserUpdate, db: Session = Depends(get_db)):
+async def update_user_profile(
+    user_id: int, 
+    username: Optional[str] = Form(None),
+    email: Optional[str] = Form(None),
+    password: Optional[str] = Form(None),
+    profile_image: Optional[UploadFile] = File(None),
+    db: Session = Depends(get_db)
+):
     db_user = db.query(models.User).filter(models.User.id == user_id).first()
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found.")
 
-    if user_update.username is not None:
+    if username is not None:
         existing = db.query(models.User).filter(
-            models.User.username == user_update.username,
+            models.User.username == username,
             models.User.id != user_id
         ).first()
         if existing:
             raise HTTPException(status_code=400, detail="This username is already taken.")
-        db_user.username = user_update.username
+        db_user.username = username
 
-    if user_update.email is not None:
+    if email is not None:
         existing = db.query(models.User).filter(
-            models.User.email == user_update.email,
+            models.User.email == email,
             models.User.id != user_id
         ).first()
         if existing:
             raise HTTPException(status_code=400, detail="This email is already registered.")
-        db_user.email = user_update.email
+        db_user.email = email
 
-    if user_update.password is not None and len(user_update.password) > 0:
-        db_user.password_hash = auth.get_password_hash(user_update.password)
+    if password is not None and len(password) > 0:
+        db_user.password_hash = auth.get_password_hash(password)
+
+    if profile_image and profile_image.filename:
+        os.makedirs(UPLOAD_DIR_USERS, exist_ok=True)
+        file_path = f"{UPLOAD_DIR_USERS}/{profile_image.filename}"
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(profile_image.file, buffer)
+        db_user.profile_image = f"/{file_path}"
 
     db.commit()
     db.refresh(db_user)

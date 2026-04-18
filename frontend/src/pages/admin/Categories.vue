@@ -36,6 +36,7 @@
                         <option value="restaurant">🍴 Restaurant</option>
                         <option value="hotel">🏨 Hotel</option>
                         <option value="culture">🏛️ Culture</option>
+                        <option value="landmark">🗿 Landmark</option>
                     </select>
                 </div>
 
@@ -160,6 +161,7 @@ const getIconForType = (type) => {
         restaurant: 'fas fa-utensils',
         hotel: 'fas fa-bed',
         culture: 'fas fa-landmark',
+        landmark: 'fas fa-gopuram',
         other: 'fas fa-folder'
     }
     return icons[type] || 'fas fa-folder'
@@ -384,6 +386,7 @@ onMounted(fetchCats)
 .parent-type-tag.restaurant { background: #fef9c3; color: #854d0e; }
 .parent-type-tag.hotel { background: #dbeafe; color: #1e40af; }
 .parent-type-tag.culture { background: #f3e8ff; color: #6b21a8; }
+.parent-type-tag.landmark { background: #ede9fe; color: #5b21b6; }
 .parent-type-tag.other { background: #f1f5f9; color: #475569; }
 
 .select-wrapper {

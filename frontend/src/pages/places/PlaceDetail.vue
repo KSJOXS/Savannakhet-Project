@@ -5,7 +5,7 @@
         <div class="ta-container" v-if="place">
             <div class="top-actions">
                 <button @click="router.back()" class="btn-back">
-                    <i class="fas fa-arrow-left"></i> กลับไปค้นหา
+                    <i class="fas fa-arrow-left"></i> {{ t('place.backToSearch') }}
                 </button>
             </div>
 
@@ -17,11 +17,11 @@
                             <i v-for="s in 5" :key="'h-' + s"
                                 :class="[(place.rating_avg || 0) >= s ? 'fas' : 'far', 'fa-circle']"></i>
                         </div>
-                        <span class="review-count">{{ comments.length }} รีวิว</span>
+                        <span class="review-count">{{ comments.length }} {{ t('place.reviews_count') }}</span>
                         <span class="divider">•</span>
                         <span class="category-link">{{ getCategoryName(place.category_id) }}</span>
                         <span class="divider">•</span>
-                        <span class="location-text top-location-link" @click="openMapOverlay" title="คลิกเพื่อดูแผนที่">
+                        <span class="location-text top-location-link" @click="openMapOverlay" :title="t('place.viewOnMap')">
                             <i class="fas fa-map-marker-alt"></i> {{ addressText }}
                         </span>
                     </div>
@@ -44,17 +44,17 @@
                         class="third-img" />
                     <div v-else class="empty-photo-slot"></div>
                 </div>
-                <button class="btn-view-photos"><i class="fas fa-th"></i> ดูรูปภาพทั้งหมด ({{ galleryImages.length }})</button>
+                <button class="btn-view-photos"><i class="fas fa-th"></i> {{ t('place.viewAllPhotos') }} ({{ galleryImages.length }})</button>
             </div>
 
             <!-- Sticky Navigation -->
             <div class="sticky-nav-wrapper" ref="stickyNavRef">
                 <div class="sticky-nav" :class="{ 'is-sticky': isSticky }">
                     <div class="nav-links">
-                        <a v-if="isHotel" href="#deals" :class="{ active: activeSection === 'deals' }" @click.prevent="scrollTo('deals')">ราคาพิเศษ</a>
-                        <a href="#about" :class="{ active: activeSection === 'about' }" @click.prevent="scrollTo('about')">เกี่ยวกับ</a>
-                        <a href="#location" :class="{ active: activeSection === 'location' }" @click.prevent="scrollTo('location')">ที่ตั้ง</a>
-                        <a href="#reviews" :class="{ active: activeSection === 'reviews' }" @click.prevent="scrollTo('reviews')">รีวิว</a>
+                        <a v-if="isHotel" href="#deals" :class="{ active: activeSection === 'deals' }" @click.prevent="scrollTo('deals')">{{ t('place.deals') }}</a>
+                        <a href="#about" :class="{ active: activeSection === 'about' }" @click.prevent="scrollTo('about')">{{ t('place.about') }}</a>
+                        <a href="#location" :class="{ active: activeSection === 'location' }" @click.prevent="scrollTo('location')">{{ t('place.location') }}</a>
+                        <a href="#reviews" :class="{ active: activeSection === 'reviews' }" @click.prevent="scrollTo('reviews')">{{ t('place.reviews') }}</a>
                     </div>
                 </div>
             </div>
@@ -62,20 +62,24 @@
             <div class="content-split">
                 <div class="main-column">
                     <section class="about-section" id="about">
-                        <h2>เกี่ยวกับสถานที่นี้</h2>
+                        <h2>{{ t('place.aboutThisPlace') }}</h2>
                         <p class="description-text">{{ place.description }}</p>
                     </section>
 
                     <hr class="section-divider" />
 
                     <section class="reviews-section" id="reviews">
-                        <h2>รีวิวจากนักเดินทาง ({{ comments.length }})</h2>
+                        <h2>{{ t('place.travelerReviews') }} ({{ comments.length }})</h2>
 
                         <div class="write-review-box" v-if="user && user.role !== 'admin'">
-                            <div class="u-avatar-large">{{ user.username ? user.username.charAt(0).toUpperCase() : 'U'
-                                }}</div>
+                            <div class="u-avatar-large" style="padding: 0; overflow: hidden; border: none; background: none;">
+                                <img v-if="user.profile_image" :src="getImageUrl(user.profile_image)" alt="avatar" style="width:100%; height:100%; object-fit:cover;" />
+                                <div v-else style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#ff6b6b; color:white; border-radius:50%; font-size:1.2rem; font-weight:bold;">
+                                    {{ user.username ? user.username.charAt(0).toUpperCase() : 'U' }}
+                                </div>
+                            </div>
                             <div class="review-input-area">
-                                <p class="prompt-text">คุณคิดอย่างไรกับสถานที่นี้?</p>
+                                <p class="prompt-text">{{ t('place.whatDoYouThink') }}</p>
                                 <div class="star-picker">
                                     <i v-for="star in 5" :key="'picker-' + star"
                                         :class="[newRating >= star ? 'fas' : 'far', 'fa-circle']"
@@ -83,34 +87,39 @@
                                     <span class="rating-label">{{ ratingLabels[newRating - 1] }}</span>
                                 </div>
                                 <textarea v-model="newComment"
-                                    placeholder="เขียนรีวิวของคุณเพื่อแบ่งปันประสบการณ์..."></textarea>
+                                    :placeholder="t('place.writeReviewPlaceholder')"></textarea>
                                 <div class="action-row">
                                     <button class="btn-submit" @click="submitComment"
                                         :disabled="submitting || !newComment.trim()">
-                                        {{ submitting ? 'กำลังส่ง...' : 'ส่งรีวิว' }}
+                                        {{ submitting ? t('place.submitting') : t('place.submitReviewBtn') }}
                                     </button>
                                 </div>
                                 <p v-if="reviewSuccess" class="success-msg"><i class="fas fa-check-circle"></i>
-                                    ส่งรีวิวสำเร็จ!</p>
+                                    {{ t('place.submitReviewSuccess') }}</p>
                             </div>
                         </div>
                         <div v-else-if="!user" class="login-prompt">
-                            <p>กรุณาเข้าสู่ระบบเพื่อเขียนรีวิว</p>
-                            <button @click="router.push('/login')" class="btn-login-outline">ลงชื่อเข้าใช้</button>
+                            <p>{{ t('place.pleaseLoginToReview') }}</p>
+                            <button @click="router.push('/login')" class="btn-login-outline">{{ t('nav.signIn') }}</button>
                         </div>
 
                         <div class="review-list">
                             <div v-if="comments.length === 0" class="no-reviews">
                                 <i class="far fa-comment-alt"></i>
-                                <p>ยังไม่มีรีวิวสำหรับสถานที่นี้ เป็นคนแรกที่รีวิวสิ!</p>
+                                <p>{{ t('place.noReviewsYet') }}</p>
                             </div>
 
                             <div v-for="comment in comments" :key="comment.id" class="review-item">
                                 <div class="reviewer-info">
-                                    <div class="r-avatar">{{ comment.username?.charAt(0).toUpperCase() }}</div>
+                                    <div class="r-avatar" style="padding: 0; overflow: hidden; border: none; background: none;">
+                                        <img v-if="comment.profile_image" :src="getImageUrl(comment.profile_image)" alt="avatar" style="width:100%; height:100%; object-fit:cover; border-radius:50%;" />
+                                        <div v-else style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#e2e8f0; color:#475569; font-weight:700; border-radius:50%;">
+                                            {{ comment.username?.charAt(0).toUpperCase() }}
+                                        </div>
+                                    </div>
                                     <div class="r-details">
                                         <strong>{{ comment.username }}</strong>
-                                        <span class="r-date">เขียนรีวิวเมื่อเร็วๆ นี้</span>
+                                        <span class="r-date">{{ t('place.recentReview') }}</span>
                                     </div>
                                 </div>
                                 <div class="review-content">
@@ -128,14 +137,14 @@
                 <div class="sidebar-column">
                     <!-- Hotel Booking Deals -->
                     <div class="sidebar-card booking-card" v-if="isHotel" id="deals">
-                        <h3>ตรวจสอบราคาที่พัก</h3>
+                        <h3>{{ t('place.checkPrices') }}</h3>
                         <div class="partner-deal">
                             <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/Booking.com_Logo_2022.png" height="24" alt="Booking.com" />
-                            <a :href="`https://www.booking.com/searchresults.html?ss=${place.name}`" target="_blank" class="btn-partner">ดูราคา</a>
+                            <a :href="`https://www.booking.com/searchresults.html?ss=${place.name}`" target="_blank" class="btn-partner">{{ t('place.viewPrices') }}</a>
                         </div>
                         <div class="partner-deal">
                             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Agoda_logo.svg/1200px-Agoda_logo.svg.png" height="24" alt="Agoda" />
-                            <a :href="`https://www.agoda.com/search?text=${place.name}`" target="_blank" class="btn-partner">ดูราคา</a>
+                            <a :href="`https://www.agoda.com/search?text=${place.name}`" target="_blank" class="btn-partner">{{ t('place.viewPrices') }}</a>
                         </div>
                     </div>
 
@@ -230,9 +239,39 @@
                 </div>
             </div>
 
-            <!-- Recommended Places Section -->
-            <div class="recommended-section" v-if="recommendedPlaces.length > 0">
-                <h2>สถานที่แนะนำเพิ่มเติม</h2>
+            <!-- AI Recommended Places Section -->
+            <div class="recommended-section" v-if="aiRecommendedPlaces.length > 0">
+                <h2 style="color: #6366f1; font-weight: 800; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-magic"></i> {{ t('recommend.ai_recom') }}
+                </h2>
+                <p style="color: #64748b; margin-top: -10px; margin-bottom: 20px;">{{ t('recommend.ai_desc') }}</p>
+                <div class="recommended-grid">
+                    <div v-for="rec in aiRecommendedPlaces" :key="rec.place.id" class="rec-card" @click="goToRecDetail(rec.place.id)" style="border: 2px solid #e0e7ff; box-shadow: 0 10px 25px rgba(99,102,241,0.15); transform: translateY(-5px); transition: 0.3s; cursor: pointer;">
+                        <div class="rec-img-wrapper" style="position: relative;">
+                            <img :src="getRecCoverImage(rec.place)" :alt="rec.place.name" />
+                            <span style="position: absolute; top: 12px; left: 12px; background: #6366f1; color: white; padding: 5px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+                                <i class="fas fa-sparkles"></i> AI Pick
+                            </span>
+                        </div>
+                        <div class="rec-info" style="padding: 18px;">
+                            <h4 style="font-size: 1.15rem; color: #1e293b; font-weight: 800; margin-bottom: 12px;">{{ rec.place.name }}</h4>
+                            <div style="background: #fefce8; color: #b45309; font-size: 0.85rem; padding: 10px 12px; border-radius: 8px; margin-bottom: 15px; font-weight: 600; border: 1px solid #fef08a;">
+                                <i class="fas fa-lightbulb" style="color: #f59e0b; margin-right: 5px;"></i> {{ rec.reason }}
+                            </div>
+                            <div class="rec-rating" style="display: flex; justify-content: space-between; align-items: center; color: #00aa6c; font-weight: 700;">
+                                <span class="bubbles">
+                                    <i v-for="s in 5" :key="s" :class="[(rec.place.rating_avg || 0) >= s ? 'fas' : 'far', 'fa-circle']" style="margin-right:2px;"></i>
+                                </span>
+                                <span>{{ t('place.scoreString') }} {{ rec.place.rating_avg || '0.0' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Standard Recommended Places Section (Fallback) -->
+            <div class="recommended-section" v-else-if="recommendedPlaces.length > 0">
+                <h2>{{ t('place.recommended') }}</h2>
                 <div class="recommended-grid">
                     <div v-for="rec in recommendedPlaces" :key="rec.id" class="rec-card" @click="goToRecDetail(rec.id)">
                         <div class="rec-img-wrapper">
@@ -254,7 +293,7 @@
 
         <div v-else class="loading-screen">
             <div class="spinner"></div>
-            <p>กำลังโหลดข้อมูล...</p>
+            <p>{{ t('common.loading') }}</p>
         </div>
 
         <div v-if="isLightboxOpen" class="lightbox-overlay" @click="closeLightbox" @wheel.prevent="handleScrollZoom">
@@ -280,26 +319,30 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, onUnmounted } from 'vue'
+import { ref, onMounted, computed, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { placeRepository } from '@/repositories/placeRepository'
 import { categoryRepository } from '@/repositories/categoryRepository'
 import { favoriteRepository } from '@/repositories/favoriteRepository'
+import { gnnRepository } from '@/repositories/gnnRepository'
+import { useI18n } from '@/composables/useI18n'
 import Navbar from '@/components/Navbar.vue'
 import MapOverlay from '@/components/MapOverlay.vue'
 import axios from 'axios'
 
 const route = useRoute()
 const router = useRouter()
+const { t } = useI18n()
 const place = ref(null)
 const categories = ref([])
 const comments = ref([])
 const user = ref(JSON.parse(localStorage.getItem('user')))
 const isFavorite = ref(false)
 const reviewSuccess = ref(false)
-const addressText = ref('กำลังค้นหาตำแหน่ง...')
+const addressText = ref(t('common.loading'))
 const showMapModal = ref(false)
 const allPlaces = ref([])
+const aiRecommendedPlaces = ref([])
 
 const newComment = ref('')
 const newRating = ref(5)
@@ -417,6 +460,12 @@ const getCommentCountText = (pl) => {
     return 0; // Fallback to 0 if we don't have it
 }
 
+const getImageUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http') || url.startsWith('data:')) return url;
+    return `http://localhost:8000/${url.startsWith('/') ? url.slice(1) : url}`;
+}
+
 const stickyNavRef = ref(null);
 const isSticky = ref(false);
 const activeSection = ref('about');
@@ -464,10 +513,15 @@ const getRecCoverImage = (p) => {
 };
 
 const goToRecDetail = (id) => {
-    router.push(`/places/${id}`).then(() => {
-        window.location.reload();
-    });
+    router.push(`/places/${id}`);
 };
+
+watch(() => route.params.id, (newId, oldId) => {
+    if (newId && newId !== oldId) {
+        fetchData()
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+})
 
 const handleScrollZoom = (e) => {
     const zoomStep = 0.15;
@@ -560,6 +614,25 @@ const fetchData = async () => {
         if (user.value && user.value.role !== 'admin') {
             const favRes = await favoriteRepository.getUserFavorites(user.value.id)
             isFavorite.value = favRes.data.some(f => f.place_id === parseInt(id))
+            
+            // Log 'view' action for GNN
+            try {
+                await gnnRepository.logInteraction({
+                    user_id: user.value.id,
+                    place_id: parseInt(id),
+                    action_type: 'view'
+                })
+            } catch (gnnErr) { console.warn("Failed to log view", gnnErr) }
+
+            // Fetch AI recommendations
+            try {
+                const recRes = await gnnRepository.getRecommendations(user.value.id)
+                if (recRes.data && recRes.data.recommended_places) {
+                    aiRecommendedPlaces.value = recRes.data.recommended_places
+                        .filter(r => r.place && r.place.id !== parseInt(id))
+                        .slice(0, 4);
+                }
+            } catch (recErr) { console.warn("No AI recommendations", recErr) }
         }
 
         try {
@@ -583,12 +656,11 @@ const submitComment = async () => {
         })
 
         try {
-            const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-            await axios.post(`${backendUrl}/api/interactions/`, {
+            await gnnRepository.logInteraction({
+                user_id: user.value.id,
                 place_id: parseInt(route.params.id),
-                rating: newRating.value,
-                comment: newComment.value,
-                interaction_type: 'review'
+                action_type: 'review',
+                score: newRating.value
             });
         } catch (aiErr) { console.warn("AI Log failed", aiErr); }
 
@@ -607,13 +679,13 @@ const toggleHeart = async () => {
         isFavorite.value = res.data.status === 'added'
 
         if (isFavorite.value) {
-            const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-            await axios.post(`${backendUrl}/api/interactions/`, {
-                place_id: parseInt(route.params.id),
-                rating: 5,
-                comment: "Liked",
-                interaction_type: 'like'
-            });
+            try {
+                await gnnRepository.logInteraction({
+                    user_id: user.value.id,
+                    place_id: parseInt(route.params.id),
+                    action_type: 'like'
+                });
+            } catch (err) { console.warn("AI Log failed", err); }
         }
     } catch (err) { console.error(err) }
 }

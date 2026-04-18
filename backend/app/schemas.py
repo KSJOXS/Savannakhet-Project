@@ -24,6 +24,7 @@ class UserResponse(UserBase):
     role: str
     deleted_at: Optional[datetime] = None
     class Config: from_attributes = True
+    profile_image: Optional[str] = None  
 
 # --- Place ---
 class PlaceBase(BaseModel):
@@ -100,3 +101,22 @@ class SiteSettingResponse(BaseModel):
     value: Optional[str] = None
     description: Optional[str] = None
     class Config: from_attributes = True
+
+# --- Interaction Log (GNN) ---
+class InteractionLogCreate(BaseModel):
+    user_id: int
+    place_id: int
+    action_type: str # 'view', 'like', 'review'
+    score: Optional[int] = None # ใช้กรณี review (1-5)
+
+# --- Recommendation ---
+class RecommendationDetail(BaseModel):
+    place: PlaceResponse
+    reason: str
+    score: float
+
+class RecommendationResponse(BaseModel):
+    status: str
+    user_id: int
+    dynamic_hero_category: Optional[str] = None
+    recommended_places: List[RecommendationDetail]

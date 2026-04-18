@@ -8,15 +8,15 @@
             </transition>
             <div class="hero-overlay"></div>
             <div class="hero-content">
-                <div class="badge-new">✨ AI-Powered Recommendation System</div>
-                <h1>Discover Savannakhet</h1>
-                <p>Experience the beauty of Southern Laos with our intelligent GNN travel guide.</p>
+                <div class="badge-new">{{ t('recommend.hero_badge') }}</div>
+                <h1>{{ t('recommend.hero_title') }}</h1>
+                <p>{{ t('recommend.hero_subtitle') }}</p>
                 <div class="hero-actions">
                     <button @click="executeSearch" class="btn-start">
-                        <i class="fas fa-rocket"></i> Start Exploring
+                        <i class="fas fa-rocket"></i> {{ t('recommend.btn_start') }}
                     </button>
                     <button v-if="!user" @click="router.push('/register')" class="btn-start btn-outline">
-                        <i class="fas fa-user-plus"></i> Join Free
+                        <i class="fas fa-user-plus"></i> {{ t('recommend.btn_join') }}
                     </button>
                 </div>
             </div>
@@ -32,17 +32,17 @@
         <div class="stats-bar">
             <div class="stat-item">
                 <span class="stat-num">50+</span>
-                <span class="stat-label">Places</span>
+                <span class="stat-label">{{ t('recommend.stat_places') }}</span>
             </div>
             <div class="stat-divider"></div>
             <div class="stat-item">
                 <span class="stat-num">AI</span>
-                <span class="stat-label">Powered</span>
+                <span class="stat-label">{{ t('recommend.stat_powered') }}</span>
             </div>
             <div class="stat-divider"></div>
             <div class="stat-item">
                 <span class="stat-num">Free</span>
-                <span class="stat-label">Forever</span>
+                <span class="stat-label">{{ t('recommend.stat_free') }}</span>
             </div>
         </div>
 
@@ -50,11 +50,11 @@
             <div class="container">
                 <div class="section-header">
                     <div>
-                        <p class="section-eyebrow">Handpicked for you</p>
-                        <h2>Featured Places</h2>
+                        <p class="section-eyebrow">{{ t('recommend.handpicked') }}</p>
+                        <h2>{{ t('recommend.featured') }}</h2>
                     </div>
                     <button @click="executeSearch" class="btn-view-all">
-                        View All <i class="fas fa-arrow-right"></i>
+                        {{ t('recommend.view_all') }} <i class="fas fa-arrow-right"></i>
                     </button>
                 </div>
 
@@ -81,7 +81,7 @@
                             <p class="desc">{{ place.description }}</p>
                             <div class="card-footer">
                                 <span class="location-tag"><i class="fas fa-map-marker-alt"></i> Savannakhet, Laos</span>
-                                <span class="btn-detail">View <i class="fas fa-arrow-right"></i></span>
+                                <span class="btn-detail">{{ t('place.viewOnMap') }} <i class="fas fa-arrow-right"></i></span>
                             </div>
                         </div>
                     </div>
@@ -92,8 +92,8 @@
         <div class="main-container">
             <section v-if="recommendedPlaces.length > 0" class="horizontal-section">
                 <div class="section-header">
-                    <h2>✨ Recommended for you</h2>
-                    <p>Browsing Savannakhet? We think you'll like these based on your activity.</p>
+                    <h2>{{ t('recommend.ai_recom') }}</h2>
+                    <p>{{ t('recommend.ai_desc') }}</p>
                 </div>
                 <div class="carousel-container">
                     <div v-for="place in recommendedPlaces" :key="'rec-'+place.id" class="ta-card ai-card" @click="goToDetail(place.id)">
@@ -117,8 +117,8 @@
 
             <section v-if="topRatedPlaces.length > 0" class="horizontal-section">
                 <div class="section-header">
-                    <h2>🏆 Top Rated Places</h2>
-                    <p>Highly rated by fellow travelers</p>
+                    <h2>{{ t('recommend.top_rated') }}</h2>
+                    <p>{{ t('recommend.top_desc') }}</p>
                 </div>
                 <div class="carousel-container">
                     <div v-for="place in topRatedPlaces" :key="'top-'+place.id" class="ta-card" @click="goToDetail(place.id)">
@@ -143,22 +143,22 @@
 
             <section class="explore-all-section" ref="exploreAllSection">
                 <div class="section-header mt-50">
-                    <h2>🔍 Explore All Places</h2>
+                    <h2>{{ t('recommend.explore_all') }}</h2>
                 </div>
                 <div class="explore-layout">
                     <aside class="sidebar">
                         <div class="filter-card">
-                            <h3>Filters</h3>
+                            <h3>{{ t('recommend.filters') }}</h3>
                             <div class="filter-group mt-15">
                                 <div class="input-with-icon">
                                     <i class="fas fa-search"></i>
-                                    <input v-model="searchQuery" type="text" placeholder="Search..." />
+                                    <input v-model="searchQuery" type="text" :placeholder="t('explore.search')" />
                                 </div>
                             </div>
                             <div class="filter-group">
-                                <h4>Categories</h4>
+                                <h4>{{ t('recommend.categories') }}</h4>
                                 <div class="category-list">
-                                    <button :class="['cat-pill', { active: !selectedCategory }]" @click="filterByCategory(null)">All</button>
+                                    <button :class="['cat-pill', { active: !selectedCategory }]" @click="filterByCategory(null)">{{ t('recommend.all') }}</button>
                                     <button v-for="cat in categories" :key="cat.id"
                                         :class="['cat-pill', { active: selectedCategory === cat.id }]"
                                         @click="filterByCategory(cat.id)">
@@ -166,17 +166,17 @@
                                     </button>
                                 </div>
                             </div>
-                            <button @click="resetFilters" class="btn-clear">Clear Filters</button>
+                            <button @click="resetFilters" class="btn-clear">{{ t('recommend.clear_filters') }}</button>
                         </div>
                     </aside>
 
                     <main class="content-area">
                         <div class="results-bar">
-                            <span>Found <strong>{{ filteredPlaces.length }}</strong> places</span>
+                            <span>{{ t('recommend.found_places').replace('{count}', filteredPlaces.length) }}</span>
                         </div>
 
                         <div v-if="loading" class="loading-state">
-                            <div class="spinner"></div><p>Searching...</p>
+                            <div class="spinner"></div><p>{{ t('recommend.searching') }}</p>
                         </div>
 
                         <div v-else class="places-grid">
@@ -201,7 +201,7 @@
 
                         <div v-if="!loading && filteredPlaces.length === 0" class="empty-state">
                             <i class="fas fa-map-marked-alt"></i>
-                            <p>No places found. Try adjusting your search.</p>
+                            <p>{{ t('recommend.no_places') }}</p>
                         </div>
                     </main>
                 </div>
@@ -210,10 +210,10 @@
 
         <section class="cta-section">
             <div class="cta-content">
-                <h2>Ready to Explore?</h2>
-                <p>Create a free account to save favorites and get personalized recommendations.</p>
+                <h2>{{ t('recommend.ready') }}</h2>
+                <p>{{ t('recommend.create_account') }}</p>
                 <button @click="router.push('/register')" class="btn-cta">
-                    <i class="fas fa-user-plus"></i> Get Started — It's Free
+                    <i class="fas fa-user-plus"></i> {{ t('recommend.get_started') }}
                 </button>
             </div>
         </section>
@@ -232,11 +232,13 @@ import { categoryRepository } from '@/repositories/categoryRepository'
 import settingRepository from '@/repositories/settingRepository'
 import { favoriteRepository } from '@/repositories/favoriteRepository'
 import { useAuth } from '@/composables/useAuth'
+import { useI18n } from '@/composables/useI18n'
 import Navbar from '@/components/Navbar.vue'
 import axios from 'axios'
 
 const router = useRouter()
 const { user } = useAuth()
+const { t } = useI18n()
 const places = ref([])
 const categories = ref([])
 const featuredPlaces = ref([])

@@ -48,6 +48,7 @@ class User(Base):
     role = Column(String(20), default="user")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     deleted_at = Column(DateTime, nullable=True)
+    profile_image = Column(String(255), nullable=True)
 
     # เชื่อมไปที่ Interactions
     interactions = relationship("Interaction", back_populates="user", cascade="all, delete")
@@ -85,3 +86,17 @@ class SiteSetting(Base):
     key_name = Column(String(100), primary_key=True, index=True)
     value = Column(LONGTEXT)
     description = Column(String(255))
+
+class InteractionLog(Base):
+    __tablename__ = "interaction_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
+    place_id = Column(Integer, ForeignKey("places.id", ondelete="CASCADE"))
+    action_type = Column(String(50)) # 'view', 'like', 'review'
+    interaction_weight = Column(Numeric(5, 2), default=1.0)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # เชื่อมกลับ
+    user = relationship("User", backref="interaction_logs")
+    place = relationship("Place", backref="interaction_logs")

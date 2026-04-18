@@ -15,6 +15,25 @@
                 </div>
                 
                 <form v-else @submit.prevent="handleUpdate" class="profile-form">
+                    
+                    <div class="avatar-section">
+                        <div class="avatar-wrapper" :class="{ 'is-editing': isEditing }" @click="isEditing && triggerImageUpload()">
+                            <img :src="currentProfileImage" alt="Profile Avatar" class="avatar-img" />
+                            <div v-if="isEditing" class="avatar-overlay">
+                                <i class="fas fa-camera"></i>
+                            </div>
+                        </div>
+                        <p v-if="isEditing" class="avatar-hint">Click the image to change</p>
+                        
+                        <input 
+                            type="file" 
+                            ref="fileInput" 
+                            class="hidden-input" 
+                            accept="image/jpeg,image/png,image/webp" 
+                            @change="onImageSelected" 
+                        />
+                    </div>
+
                     <div class="input-group">
                         <label>Username</label>
                         <input v-model="form.username" type="text" placeholder="Username" :disabled="!isEditing" />
@@ -56,7 +75,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import Navbar from '@/components/Navbar.vue'
 import { userRepository } from '@/repositories/userRepository'
@@ -71,16 +90,50 @@ const successMsg = ref('')
 const errorMsg = ref('')
 
 const originalData = ref({})
+const fileInput = ref(null)
+const selectedFile = ref(null)
+const imagePreview = ref(null)
 
 const form = ref({
     username: '',
     email: '',
-    password: ''
+    password: '',
+    profile_image: ''
 })
+
+// 📸 คำนวณรูปภาพที่จะแสดง (ถ้าเลือกรูปใหม่โชว์ Preview / ถ้าไม่มีใช้รูปจำลองจากชื่อ)
+const currentProfileImage = computed(() => {
+    if (imagePreview.value) return imagePreview.value;
+    
+    if (form.value.profile_image) {
+        const url = form.value.profile_image;
+        if (url.startsWith('http') || url.startsWith('data:')) return url;
+        return `http://localhost:8000/${url.startsWith('/') ? url.slice(1) : url}`;
+    }
+    
+    // รูปภาพ Default แบบ Generate จากชื่อ
+    return `https://ui-avatars.com/api/?name=${form.value.username || 'User'}&background=3498db&color=fff&size=150`;
+})
+
+// 📸 สั่งคลิก Input File
+const triggerImageUpload = () => {
+    fileInput.value.click()
+}
+
+// 📸 จัดการเมื่อผู้ใช้เลือกไฟล์
+const onImageSelected = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        selectedFile.value = file;
+        imagePreview.value = URL.createObjectURL(file);
+    }
+}
 
 const cancelEdit = () => {
     isEditing.value = false
     form.value = { ...originalData.value, password: '' }
+    selectedFile.value = null
+    imagePreview.value = null
     errorMsg.value = ''
     successMsg.value = ''
 }
@@ -96,7 +149,12 @@ const fetchProfile = async () => {
         const res = await userRepository.getProfile(user.value.id)
         form.value.username = res.data.username
         form.value.email = res.data.email
-        originalData.value = { username: res.data.username, email: res.data.email }
+        form.value.profile_image = res.data.profile_image // ดึงรูปโปรไฟล์มาเก็บ
+        originalData.value = { 
+            username: res.data.username, 
+            email: res.data.email, 
+            profile_image: res.data.profile_image 
+        }
     } catch (err) {
         console.error("Error fetching profile:", err)
         errorMsg.value = "ไม่สามารถดึงข้อมูลโปรไฟล์ได้"
@@ -110,25 +168,40 @@ const handleUpdate = async () => {
     successMsg.value = ''
     errorMsg.value = ''
     
-    const dataToSend = {}
-    if (form.value.username) dataToSend.username = form.value.username
-    if (form.value.email) dataToSend.email = form.value.email
-    if (form.value.password) dataToSend.password = form.value.password
+    // 📦 ใช้ FormData เพราะมีการอัปโหลดไฟล์รูปภาพ
+    const formData = new FormData()
+    if (form.value.username) formData.append('username', form.value.username)
+    if (form.value.email) formData.append('email', form.value.email)
+    if (form.value.password) formData.append('password', form.value.password)
+    
+    // แนบไฟล์รูปถ้ามีการเลือกรูปใหม่
+    if (selectedFile.value) {
+        formData.append('profile_image', selectedFile.value)
+    }
     
     try {
-        const res = await userRepository.updateProfile(user.value.id, dataToSend)
+        // 🚨 หมายเหตุ: Backend ของคุณต้องรองรับการรับค่าแบบ form-data ใน Endpoint นี้นะครับ
+        const res = await userRepository.updateProfile(user.value.id, formData)
         successMsg.value = "Profile updated successfully!"
-        // Note: re-login required if password changed
         
-        // Update local user context dynamically
+        // Update local storage
         const currentData = JSON.parse(localStorage.getItem('user') || '{}')
         currentData.username = res.data.username
+        currentData.profile_image = res.data.profile_image // อัปเดตรูปใหม่ใน LocalStorage
         localStorage.setItem('user', JSON.stringify(currentData))
-        user.value.username = res.data.username // update reactive composable
         
-        originalData.value = { username: res.data.username, email: res.data.email }
+        // Update user state
+        user.value.username = res.data.username 
+        if (res.data.profile_image) user.value.profile_image = res.data.profile_image
+        
+        // Update form state
+        form.value.profile_image = res.data.profile_image
+        originalData.value = { ...form.value }
+        
         isEditing.value = false
         form.value.password = ''
+        selectedFile.value = null
+        imagePreview.value = null
     } catch (err) {
         errorMsg.value = err.response?.data?.detail || "Something went wrong. Please try again."
     } finally {
@@ -176,6 +249,68 @@ onMounted(fetchProfile)
     font-size: 0.95rem;
 }
 
+/* 📸 Avatar Styles */
+.avatar-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.avatar-wrapper {
+    position: relative;
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 4px solid white;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: 0.3s;
+}
+
+.avatar-wrapper.is-editing {
+    cursor: pointer;
+}
+
+.avatar-wrapper.is-editing:hover {
+    box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+    transform: translateY(-2px);
+}
+
+.avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 1.8rem;
+    opacity: 0;
+    transition: 0.3s;
+}
+
+.avatar-wrapper.is-editing:hover .avatar-overlay {
+    opacity: 1;
+}
+
+.avatar-hint {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin-top: 10px;
+}
+
+.hidden-input {
+    display: none;
+}
+
+/* Form Styles */
 .profile-form {
     display: flex;
     flex-direction: column;
@@ -220,10 +355,8 @@ onMounted(fetchProfile)
     margin-top: 10px;
 }
 
-.btn-edit {
+.btn-edit, .btn-cancel, .btn-save {
     flex: 1;
-    background: #f59e0b;
-    color: white;
     padding: 12px;
     border-radius: 50px;
     border: none;
@@ -231,6 +364,11 @@ onMounted(fetchProfile)
     font-size: 1rem;
     cursor: pointer;
     transition: 0.3s;
+    color: white;
+}
+
+.btn-edit {
+    background: #f59e0b;
 }
 
 .btn-edit:hover {
@@ -240,16 +378,7 @@ onMounted(fetchProfile)
 }
 
 .btn-cancel {
-    flex: 1;
     background: #94a3b8;
-    color: white;
-    padding: 12px;
-    border-radius: 50px;
-    border: none;
-    font-weight: bold;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: 0.3s;
 }
 
 .btn-cancel:hover {
@@ -257,20 +386,11 @@ onMounted(fetchProfile)
 }
 
 .btn-save {
-    flex: 1;
     background: #3498db;
-    color: white;
-    padding: 12px;
-    border-radius: 50px;
-    border: none;
-    font-weight: bold;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: 0.3s;
     margin-top: 10px;
 }
 
-.btn-save:hover {
+.btn-save:hover:not(:disabled) {
     background: #2980b9;
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
@@ -279,31 +399,11 @@ onMounted(fetchProfile)
 .btn-save:disabled {
     background: #94a3b8;
     cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
 }
 
-.success-msg {
-    color: #10b981;
-    text-align: center;
-    margin-bottom: 10px;
-    font-size: 0.9rem;
-    font-weight: bold;
-}
-
-.error-msg {
-    color: #ef4444;
-    text-align: center;
-    margin-bottom: 10px;
-    font-size: 0.9rem;
-    font-weight: bold;
-}
-
-.loading-state {
-    text-align: center;
-    padding: 40px 0;
-    color: #64748b;
-}
+.success-msg { color: #10b981; text-align: center; margin-bottom: 10px; font-weight: bold; }
+.error-msg { color: #ef4444; text-align: center; margin-bottom: 10px; font-weight: bold; }
+.loading-state { text-align: center; padding: 40px 0; color: #64748b; }
 
 .spinner {
     border: 4px solid #f3f3f3;

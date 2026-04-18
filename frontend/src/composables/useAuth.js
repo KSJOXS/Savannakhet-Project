@@ -1,8 +1,8 @@
 import { ref } from 'vue'
 
-export function useAuth() {
-    const user = ref(JSON.parse(localStorage.getItem('user')) || null)
+const user = ref(JSON.parse(localStorage.getItem('user')) || null)
 
+export function useAuth() {
     const login = (userData, token) => {
         user.value = userData
         localStorage.setItem('user', JSON.stringify(userData))
