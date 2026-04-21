@@ -139,6 +139,29 @@
                         </div>
                     </div>
 
+                    <div class="card opening-hours-card">
+                        <div class="card-header">
+                            <i class="fas fa-clock"></i> Opening Hours
+                        </div>
+                        <div class="card-body">
+                            <div v-for="day in weekDays" :key="day.key" class="oh-row">
+                                <div class="oh-day">
+                                    <label class="oh-switch">
+                                        <input type="checkbox" v-model="openingHours[day.key].closed" :true-value="false" :false-value="true" />
+                                        <span class="oh-slider"></span>
+                                    </label>
+                                    <span class="oh-label">{{ day.label }}</span>
+                                </div>
+                                <div class="oh-times" v-if="!openingHours[day.key].closed">
+                                    <input type="time" v-model="openingHours[day.key].open" class="time-input" />
+                                    <span class="oh-dash">—</span>
+                                    <input type="time" v-model="openingHours[day.key].close" class="time-input" />
+                                </div>
+                                <div class="oh-closed-label" v-else>Closed</div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="card status-card">
                         <div class="card-header">
                             <i class="fas fa-cog"></i> Publishing Status
@@ -186,6 +209,28 @@ const map = ref(null)
 const marker = ref(null)
 const addressPaste = ref('')
 const isSaving = ref(false)
+
+const weekDays = [
+    { key: 'mon', label: 'Monday' },
+    { key: 'tue', label: 'Tuesday' },
+    { key: 'wed', label: 'Wednesday' },
+    { key: 'thu', label: 'Thursday' },
+    { key: 'fri', label: 'Friday' },
+    { key: 'sat', label: 'Saturday' },
+    { key: 'sun', label: 'Sunday' },
+]
+
+const defaultDayHours = () => ({ open: '08:00', close: '17:00', closed: false })
+
+const openingHours = ref({
+    mon: defaultDayHours(),
+    tue: defaultDayHours(),
+    wed: defaultDayHours(),
+    thu: defaultDayHours(),
+    fri: defaultDayHours(),
+    sat: defaultDayHours(),
+    sun: defaultDayHours(),
+})
 
 const images = ref([]) // เก็บ Base64 หรือ URL สำหรับโชว์ในหน้าเว็บ
 const rawFiles = ref([]) // เก็บก้อนไฟล์จริง (File object) เตรียมส่งให้ Backend
@@ -367,6 +412,15 @@ const fetchDetails = async () => {
             is_published: !!data.is_published
         }
         
+        // Load opening hours if present
+        if (data.opening_hours && typeof data.opening_hours === 'object') {
+            weekDays.forEach(d => {
+                if (data.opening_hours[d.key]) {
+                    openingHours.value[d.key] = { ...defaultDayHours(), ...data.opening_hours[d.key] }
+                }
+            })
+        }
+
         // โหลดรูปเก่ามาแสดง
         images.value = parseImages(data.image_url)
         // สำหรับรูปเก่า เราไม่รู้ว่าเป็นไฟล์อะไร (เพราะมันอยู่บนเซิร์ฟเวอร์แล้ว) 
@@ -394,6 +448,8 @@ const updatePlace = async () => {
         formData.append('is_published', form.value.is_published ? 1 : 0)
         formData.append('location_lat', form.value.location_lat)
         formData.append('location_lng', form.value.location_lng)
+
+        formData.append('opening_hours', JSON.stringify(openingHours.value))
 
         // ตรวจสอบรูปภาพ
         let hasNewImage = false;

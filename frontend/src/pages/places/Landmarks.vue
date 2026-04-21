@@ -194,6 +194,8 @@
                 </div>
             </main>
         </div>
+        
+        <SectionDivider icon="fas fa-monument" />
 
         <MapOverlay
             :is-open="showMapModal"
@@ -218,6 +220,7 @@ import { useAuth } from '@/composables/useAuth'
 import { useI18n } from '@/composables/useI18n'
 import Navbar from '@/components/Navbar.vue'
 import MapOverlay from '@/components/MapOverlay.vue'
+import SectionDivider from '@/components/SectionDivider.vue'
 import RecentlyViewed from '@/components/RecentlyViewed.vue'
 
 const router = useRouter()

@@ -29,6 +29,8 @@ class Place(Base):
     # แก้ไข: เปลี่ยนจาก String(255) เป็น LONGTEXT เพื่อแก้ Error 1406 (Data too long)
     image_url = Column(LONGTEXT) 
     
+    opening_hours = Column(JSON, nullable=True)  # {"mon":{"open":"08:00","close":"17:00","closed":false}, ...}
+    
     rating_avg = Column(Numeric(3, 2), default=0)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 

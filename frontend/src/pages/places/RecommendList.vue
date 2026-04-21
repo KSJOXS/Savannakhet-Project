@@ -208,13 +208,67 @@
             </section>
         </div>
 
+        <section class="history-section">
+            <div class="container history-container">
+                <div class="history-images">
+                    <img src="https://images.unsplash.com/photo-1540611025311-01df3cef54b5?q=80&w=800" alt="Savannakhet City" class="history-main-img" />
+                    <div class="history-float-img">
+                        <img src="https://images.unsplash.com/photo-1590352528795-9b2f6f5df5fb?q=80&w=400" alt="Lao Culture" />
+                    </div>
+                </div>
+                <div class="history-content">
+                    <p class="section-eyebrow">Discover The Heritage</p>
+                    <h2>เรื่องราวของนครไกสอน พมวิหาน <br>(แขวงสะหวันนะเขต)</h2>
+                    <p>
+                        <strong>"สะหวันนะเขต"</strong> หรือที่ปัจจุบันรู้จักกันในชื่อ <strong>นครไกสอน พมวิหาน</strong> เป็นแขวงที่ใหญ่ที่สุดและมีประชากรมากที่สุดในประเทศลาว ตั้งอยู่ริมฝั่งแม่น้ำโขง ตรงข้ามกับจังหวัดมุกดาหารของประเทศไทย
+                    </p>
+                    <p>
+                        เมืองแห่งนี้เต็มไปด้วยเสน่ห์ที่ผสมผสานระหว่างอารยธรรมดั้งเดิมและสถาปัตยกรรมยุคอาณานิคมฝรั่งเศส (French Colonial) ที่ยังคงหลงเหลืออยู่ตามตึกรามบ้านช่องใจกลางเมือง นอกจากนี้ยังมีแหล่งค้นพบฟอสซิลไดโนเสาร์แห่งแรกของลาวอีกด้วย
+                    </p>
+                    <ul class="history-highlights">
+                        <li>
+                            <div class="highlight-icon"><i class="fas fa-landmark"></i></div>
+                            <div>
+                                <strong>สถาปัตยกรรมโคโลเนียล</strong>
+                                <span>เดินชมตึกเก่าสุดคลาสสิกที่ใจกลางเมืองเก่า</span>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="highlight-icon"><i class="fas fa-vihara"></i></div>
+                            <div>
+                                <strong>พระธาตุอิงฮัง</strong>
+                                <span>ปูชนียสถานศักดิ์สิทธิ์ ศูนย์รวมจิตใจของชาวสะหวันนะเขต</span>
+                            </div>
+                        </li>
+                        <li>
+                            <div class="highlight-icon"><i class="fas fa-bone"></i></div>
+                            <div>
+                                <strong>พิพิธภัณฑ์ไดโนเสาร์</strong>
+                                <span>ชมฟอสซิลไดโนเสาร์อายุนับล้านปีที่ถูกค้นพบในแขวงนี้</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
         <section class="cta-section">
             <div class="cta-content">
-                <h2>{{ t('recommend.ready') }}</h2>
-                <p>{{ t('recommend.create_account') }}</p>
-                <button @click="router.push('/register')" class="btn-cta">
-                    <i class="fas fa-user-plus"></i> {{ t('recommend.get_started') }}
-                </button>
+                <template v-if="!user">
+                    <h2>{{ t('recommend.ready') }}</h2>
+                    <p>{{ t('recommend.create_account') }}</p>
+                    <button @click="router.push('/register')" class="btn-cta">
+                        <i class="fas fa-user-plus"></i> {{ t('recommend.get_started') }}
+                    </button>
+                </template>
+                
+                <template v-else>
+                    <h2>พร้อมที่จะออกเดินทางหรือยัง?</h2>
+                    <p>ค้นพบและบันทึกสถานที่ใหม่ๆ ในสไตล์ของคุณ</p>
+                    <button @click="executeSearch" class="btn-cta">
+                        <i class="fas fa-map-marked-alt"></i> ค้นหาสถานที่เพิ่มเติม
+                    </button>
+                </template>
             </div>
         </section>
 
@@ -491,6 +545,118 @@ onUnmounted(() => { if (heroInterval) clearInterval(heroInterval) })
 .results-bar { margin-bottom: 20px; font-size: 1.1rem; color: #1e293b;}
 .places-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
 .list-card { flex: none; }
+
+/* ─── 🚨 History Section CSS 🚨 ─── */
+.history-section {
+    background-color: #ffffff;
+    padding: 80px 20px;
+    border-top: 1px solid #e2e8f0;
+}
+.history-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    gap: 60px;
+    align-items: center;
+}
+.history-images {
+    position: relative;
+    width: 100%;
+}
+.history-main-img {
+    width: 90%;
+    height: 500px;
+    object-fit: cover;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+}
+.history-float-img {
+    position: absolute;
+    bottom: -30px;
+    right: 0;
+    width: 50%;
+    height: 250px;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 8px solid white;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+}
+.history-float-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.history-content {
+    padding-right: 20px;
+}
+.history-content h2 {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #1e293b;
+    line-height: 1.3;
+    margin-bottom: 20px;
+}
+.history-content p {
+    font-size: 1.05rem;
+    color: #475569;
+    line-height: 1.7;
+    margin-bottom: 16px;
+}
+.history-highlights {
+    list-style: none;
+    padding: 0;
+    margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.history-highlights li {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+.highlight-icon {
+    width: 45px;
+    height: 45px;
+    background: #f0f9ff;
+    color: #3498db;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+.history-highlights li strong {
+    display: block;
+    color: #1e293b;
+    font-size: 1.05rem;
+    margin-bottom: 4px;
+}
+.history-highlights li span {
+    color: #64748b;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+@media (max-width: 992px) {
+    .history-container {
+        grid-template-columns: 1fr;
+        gap: 50px;
+    }
+    .history-main-img {
+        width: 100%;
+        height: 400px;
+    }
+    .history-float-img {
+        width: 60%;
+        right: 20px;
+    }
+    .history-content {
+        padding-right: 0;
+    }
+}
 
 /* ─── CTA Section ─── */
 .cta-section { background: linear-gradient(135deg, #1e5799 0%, #2989d8 50%, #207cca 100%); padding: 80px 20px; text-align: center; color: white; }

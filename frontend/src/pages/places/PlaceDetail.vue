@@ -135,6 +135,30 @@
                 </div>
 
                 <div class="sidebar-column">
+                    <!-- Rating Summary Card -->
+                    <div class="sidebar-card rating-summary-card">
+                        <h3 style="font-size: 1rem; font-weight: 800; margin: 0 0 16px; color: #1e293b;">{{ t('place.travelerReviews') }}</h3>
+                        <div class="rating-overview">
+                            <div class="big-score">
+                                <span class="score-number">{{ place.rating_avg ? parseFloat(place.rating_avg).toFixed(1) : '0.0' }}</span>
+                                <div class="score-bubbles">
+                                    <i v-for="s in 5" :key="'sb-'+s" :class="[(place.rating_avg||0) >= s ? 'fas' : 'far', 'fa-circle']"></i>
+                                </div>
+                                <span class="score-label">{{ ratingLabels[Math.round(place.rating_avg || 0) - 1] || 'N/A' }}</span>
+                                <span class="score-count">({{ comments.length }})</span>
+                            </div>
+                            <div class="score-bars">
+                                <div v-for="lvl in ratingBreakdown" :key="lvl.label" class="score-bar-row">
+                                    <span class="bar-label">{{ lvl.label }}</span>
+                                    <div class="bar-track">
+                                        <div class="bar-fill" :style="{ width: lvl.percent + '%' }"></div>
+                                    </div>
+                                    <span class="bar-count">{{ lvl.count }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Hotel Booking Deals -->
                     <div class="sidebar-card booking-card" v-if="isHotel" id="deals">
                         <h3>{{ t('place.checkPrices') }}</h3>
@@ -151,16 +175,19 @@
 
                 </div>
             </div>
+            
+            <SectionDivider icon="fas fa-map-marked-alt" />
 
             <!-- Large Map Section -->
             <div class="large-map-section" id="location">
-                <h2>Location</h2>
-                <p class="map-address"><i class="fas fa-map-marker-alt"></i> {{ addressText }}</p>
+                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px;">
+                    <div>
+                        <h2>Location</h2>
+                        <p class="map-address" style="margin: 0;"><i class="fas fa-map-marker-alt"></i> {{ addressText }}</p>
+                    </div>
+                </div>
                 <div class="large-map-container" v-if="place.location_lat && place.location_lng">
-                    <iframe width="100%" height="450" frameborder="0" style="border:0;"
-                        :src="`https://maps.google.com/maps?q=${place.location_lat},${place.location_lng}&z=15&output=embed`"
-                        allowfullscreen>
-                    </iframe>
+                    <div id="detail-map" style="width: 100%; height: 450px; border-radius: 12px; z-index: 1; border: 1px solid #e2e8f0; overflow:hidden;"></div>
                 </div>
             </div>
 
@@ -268,6 +295,32 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Similar Places Section (Because you viewed this) -->
+            <div class="recommended-section" v-if="similarPlaces.length > 0">
+                <h2 style="color: #0ea5e9; font-weight: 800; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-project-diagram"></i> ผู้ที่สนใจสถานที่นี้ มักจะชอบ...
+                </h2>
+                <div class="recommended-grid">
+                    <div v-for="rec in similarPlaces" :key="rec.place.id" class="rec-card" @click="goToRecDetail(rec.place.id)" style="border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; cursor: pointer; transition: 0.3s;">
+                        <div class="rec-img-wrapper">
+                            <img :src="getRecCoverImage(rec.place)" :alt="rec.place.name" style="width: 100%; height: 180px; object-fit: cover;" />
+                        </div>
+                        <div class="rec-info" style="padding: 15px;">
+                            <h4 style="font-size: 1.1rem; color: #1e293b; font-weight: 700; margin-bottom: 8px;">{{ rec.place.name }}</h4>
+                            <div style="color: #64748b; font-size: 0.85rem; margin-bottom: 12px;">
+                                <i class="fas fa-info-circle"></i> {{ rec.reason }}
+                            </div>
+                            <div class="rec-rating" style="display: flex; justify-content: space-between; align-items: center; color: #00aa6c; font-weight: 700;">
+                                <span class="bubbles">
+                                    <i v-for="s in 5" :key="s" :class="[(rec.place.rating_avg || 0) >= s ? 'fas' : 'far', 'fa-circle']" style="margin-right:2px;"></i>
+                                </span>
+                                <span>{{ rec.place.rating_avg || '0.0' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <!-- Standard Recommended Places Section (Fallback) -->
             <div class="recommended-section" v-else-if="recommendedPlaces.length > 0">
@@ -306,6 +359,27 @@
                     class="fas fa-chevron-right"></i></button>
         </div>
 
+        <!-- Like interactive Popup -->
+        <div class="like-popup" :class="{ 'show': showLikePopup }">
+            <div class="popup-header">
+                <div class="icon-circle"><i class="fas fa-heart" style="color: #ef4444;"></i></div>
+                <div>
+                    <h4 style="margin: 0; font-size: 1rem; font-weight: 700; color: #1e293b;">บันทึกสถานที่สำเร็จ!</h4>
+                    <p style="margin: 0; font-size: 0.85rem; color: #64748b;">คุณอาจจะติดใจสถานที่ระดับแนะนำเหล่านี้ด้วย</p>
+                </div>
+                <button @click="showLikePopup = false" class="close-popup"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="popup-body" v-if="similarPlaces.length > 0">
+                <div v-for="rec in similarPlaces.slice(0, 2)" :key="'pop-'+rec.place.id" class="popup-rec-item" @click="goToRecDetail(rec.place.id)">
+                    <img :src="getRecCoverImage(rec.place)" alt="" />
+                    <div class="popup-rec-info">
+                        <strong>{{ rec.place.name }}</strong>
+                        <span><i class="fas fa-star" style="color: #eab308;"></i> {{ rec.place.rating_avg || '0.0' }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <MapOverlay 
             v-if="place"
             :is-open="showMapModal" 
@@ -319,7 +393,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, onUnmounted, watch } from 'vue'
+import { ref, onMounted, computed, onUnmounted, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { placeRepository } from '@/repositories/placeRepository'
 import { categoryRepository } from '@/repositories/categoryRepository'
@@ -328,6 +402,7 @@ import { gnnRepository } from '@/repositories/gnnRepository'
 import { useI18n } from '@/composables/useI18n'
 import Navbar from '@/components/Navbar.vue'
 import MapOverlay from '@/components/MapOverlay.vue'
+import SectionDivider from '@/components/SectionDivider.vue'
 import axios from 'axios'
 
 const route = useRoute()
@@ -343,6 +418,8 @@ const addressText = ref(t('common.loading'))
 const showMapModal = ref(false)
 const allPlaces = ref([])
 const aiRecommendedPlaces = ref([])
+const similarPlaces = ref([])
+const showLikePopup = ref(false)
 
 const newComment = ref('')
 const newRating = ref(5)
@@ -389,6 +466,21 @@ const isHotel = computed(() => {
     if (!place.value || !categories.value.length) return false;
     const cat = categories.value.find(c => c.id === place.value.category_id);
     return cat && (cat.name.toLowerCase().includes('hotel') || cat.parent_type === 'hotel');
+});
+
+const ratingBreakdown = computed(() => {
+    const levels = [
+        { label: 'ยอดเยี่ยม', value: 5 },
+        { label: 'ดี', value: 4 },
+        { label: 'ปานกลาง', value: 3 },
+        { label: 'แย่', value: 2 },
+        { label: 'แย่มาก', value: 1 },
+    ];
+    const total = comments.value.length;
+    return levels.map(lvl => {
+        const count = comments.value.filter(c => Math.round(c.rating) === lvl.value).length;
+        return { label: lvl.label, count, percent: total > 0 ? Math.round((count / total) * 100) : 0 };
+    });
 });
 
 const recommendedPlaces = computed(() => {
@@ -523,6 +615,91 @@ watch(() => route.params.id, (newId, oldId) => {
     }
 })
 
+let detailMap = null;
+let mapMarkers = [];
+
+const initDetailMap = () => {
+    if (!window.L) return;
+    if (!place.value || !place.value.location_lat || !place.value.location_lng) return;
+
+    if (detailMap) {
+        detailMap.remove();
+        detailMap = null;
+    }
+
+    const lat = parseFloat(place.value.location_lat);
+    const lng = parseFloat(place.value.location_lng);
+
+    detailMap = window.L.map('detail-map', {
+        zoomControl: false,
+        scrollWheelZoom: false
+    }).setView([lat, lng], 14);
+
+    window.L.control.zoom({ position: 'bottomright' }).addTo(detailMap);
+
+    window.L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+    }).addTo(detailMap);
+    
+    mapMarkers = [];
+
+    const createMarker = (p, isTarget=false) => {
+        const pLat = parseFloat(p.location_lat);
+        const pLng = parseFloat(p.location_lng);
+        if (isNaN(pLat) || isNaN(pLng)) return;
+
+        let ratingText = p.rating_avg ? parseFloat(p.rating_avg).toFixed(1) : '<i class="fas fa-map-marker-alt"></i>';
+        const markerHtml = `
+            <div class="custom-marker pill-style ${isTarget ? 'selected' : ''}">
+                <span class="m-text">${ratingText}</span>
+            </div>
+        `;
+        const customIcon = window.L.divIcon({
+            html: markerHtml,
+            className: 'empty-leaflet-icon',
+            iconSize: [40, 26],
+            iconAnchor: [20, 26],
+            popupAnchor: [0, -28]
+        });
+
+        let marker = window.L.marker([pLat, pLng], { icon: customIcon }).addTo(detailMap);
+        mapMarkers.push(marker);
+
+        const bubblesHtml = [1,2,3,4,5].map(s => `<i class="${(p.rating_avg || 0) >= s ? 'fas' : 'far'} fa-circle"></i>`).join('');
+        const popupContentHtml = `
+            <div class="leaflet-custom-card" onclick="window.open('/places/${p.id}', '_blank')" style="cursor:pointer; display:flex; flex-direction:column; background:white; font-family:'Inter', sans-serif;">
+                <div style="height: 120px; width: 100%;">
+                    <img src="${getRecCoverImage(p)}" style="width:100%; height:100%; object-fit:cover;" />
+                </div>
+                <div style="padding: 12px; color:#0f172a;">
+                    <h3 style="margin: 0 0 4px; font-size: 1rem; font-weight: 800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${p.name}</h3>
+                    <div style="display:flex; align-items:center;">
+                        <span style="color:#00aa6c; font-size:0.75rem;">${bubblesHtml}</span>
+                        <span style="color:#64748b; font-size:0.75rem; margin-left:6px; font-weight:600;">(${p.rating_avg || '0.0'})</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        marker.bindPopup(popupContentHtml, { closeButton: false, className: 'custom-tripadvisor-popup' });
+        if (isTarget) {
+            setTimeout(() => marker.openPopup(), 500);
+        }
+    }
+
+    createMarker(place.value, true);
+    
+    const allNearby = [...nearbyRestaurants.value, ...nearbyAttractions.value];
+    allNearby.forEach(p => createMarker(p, false));
+    
+    if (mapMarkers.length > 1) {
+        const group = window.L.featureGroup(mapMarkers);
+        // add slight delay to fit bounds correctly
+        setTimeout(() => {
+            if(detailMap) detailMap.fitBounds(group.getBounds(), { padding: [50, 50], maxZoom: 16 });
+        }, 100);
+    }
+}
+
 const handleScrollZoom = (e) => {
     const zoomStep = 0.15;
     if (e.deltaY < 0) zoomLevel.value = Math.min(zoomLevel.value + zoomStep, 5);
@@ -570,6 +747,10 @@ onUnmounted(() => {
     window.removeEventListener('keydown', handleKeydown)
     window.removeEventListener('scroll', handleScroll)
     document.body.style.overflow = 'auto'
+    if (detailMap) {
+        detailMap.remove();
+        detailMap = null;
+    }
 })
 
 const fetchData = async () => {
@@ -633,12 +814,26 @@ const fetchData = async () => {
                         .slice(0, 4);
                 }
             } catch (recErr) { console.warn("No AI recommendations", recErr) }
+            
+            // Fetch Similar Places
+            try {
+                const simRes = await gnnRepository.getSimilarPlaces(id)
+                if (simRes.data && simRes.data.similar_places) {
+                    similarPlaces.value = simRes.data.similar_places
+                        .filter(r => r.place && r.place.id !== parseInt(id))
+                        .slice(0, 3)
+                }
+            } catch (simErr) { console.warn("Failed to fetch similar places", simErr) }
         }
 
         try {
             const resComm = await placeRepository.getComments(id)
             comments.value = resComm.data
         } catch (e) { comments.value = [] }
+
+        nextTick(() => {
+            initDetailMap();
+        });
     } catch (err) { console.error(err) }
 }
 
@@ -685,6 +880,14 @@ const toggleHeart = async () => {
                     place_id: parseInt(route.params.id),
                     action_type: 'like'
                 });
+                
+                // Show Popup after liking
+                if (similarPlaces.value.length > 0) {
+                    showLikePopup.value = true;
+                    setTimeout(() => {
+                        showLikePopup.value = false;
+                    }, 6000);
+                }
             } catch (err) { console.warn("AI Log failed", err); }
         }
     } catch (err) { console.error(err) }
@@ -697,6 +900,78 @@ const openGoogleMaps = () => window.open(`https://www.google.com/maps/search/?ap
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+/* --- Map Markers --- */
+:deep(.empty-leaflet-icon) {
+    background: transparent;
+    border: none;
+}
+
+:deep(.custom-marker.pill-style) {
+    background: #004d40;
+    color: white;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 4px 10px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+    transition: 0.2s;
+    border: 2px solid white;
+    white-space: nowrap;
+    position: relative;
+    font-family: 'Inter', sans-serif;
+}
+
+:deep(.custom-marker.pill-style::after) {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 6px 6px 0;
+    border-style: solid;
+    border-color: white transparent transparent transparent;
+}
+
+:deep(.custom-marker.pill-style::before) {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 4px 4px 0;
+    border-style: solid;
+    border-color: #004d40 transparent transparent transparent;
+    z-index: 1;
+}
+
+:deep(.custom-marker.pill-style:hover), :deep(.custom-marker.pill-style.selected) {
+    transform: scale(1.15);
+    background: #00aa6c;
+    z-index: 9999 !important;
+}
+
+:deep(.custom-marker.pill-style:hover::before), :deep(.custom-marker.pill-style.selected::before) {
+    border-color: #00aa6c transparent transparent transparent;
+}
+
+/* leafelt popup style */
+:deep(.custom-tripadvisor-popup .leaflet-popup-content-wrapper) {
+    padding: 0;
+    overflow: hidden;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+:deep(.custom-tripadvisor-popup .leaflet-popup-content) {
+    margin: 0;
+    width: 260px !important;
+}
+:deep(.custom-tripadvisor-popup .leaflet-popup-tip) {
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
 
 /* --- พื้นหลังคลีนแบบ TripAdvisor --- */
 .ta-detail-page {
@@ -715,6 +990,91 @@ const openGoogleMaps = () => window.open(`https://www.google.com/maps/search/?ap
 /* --- Top Actions (Back Button) --- */
 .top-actions {
     margin-bottom: 15px;
+}
+
+/* --- Interactive Like Popup --- */
+.like-popup {
+    position: fixed;
+    bottom: -150%;
+    right: 30px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    border-radius: 16px;
+    width: 320px;
+    padding: 20px;
+    z-index: 9999;
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    opacity: 0;
+}
+.like-popup.show {
+    bottom: 30px;
+    opacity: 1;
+}
+.popup-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+    position: relative;
+}
+.icon-circle {
+    width: 40px;
+    height: 40px;
+    background: #fee2e2;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+.close-popup {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 1rem;
+}
+.close-popup:hover { color: #1e293b; }
+.popup-rec-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    border-radius: 10px;
+    transition: 0.2s;
+    cursor: pointer;
+    text-align: left;
+}
+.popup-rec-item:hover {
+    background: #f8fafc;
+}
+.popup-rec-item img {
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+.popup-rec-info {
+    display: flex;
+    flex-direction: column;
+}
+.popup-rec-info strong {
+    font-size: 0.9rem;
+    color: #1e293b;
+    margin-bottom: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+}
+.popup-rec-info span {
+    font-size: 0.8rem;
+    color: #64748b;
 }
 
 .btn-back {
@@ -1118,6 +1478,7 @@ textarea:focus {
     padding: 20px;
     position: sticky;
     top: 90px;
+    margin-bottom: 16px;
 }
 
 .sidebar-card h3 {
@@ -1126,6 +1487,89 @@ textarea:focus {
     font-weight: 800;
     border-bottom: 1px solid #e2e8f0;
     padding-bottom: 10px;
+}
+
+/* --- Rating Summary Card --- */
+.rating-summary-card {
+    position: relative; /* override sticky for this card */
+}
+.rating-overview {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+.big-score {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    min-width: 72px;
+}
+.score-number {
+    font-size: 3rem;
+    font-weight: 900;
+    color: #1e293b;
+    line-height: 1;
+    margin-bottom: 6px;
+}
+.score-bubbles {
+    display: flex;
+    gap: 2px;
+    margin-bottom: 4px;
+}
+.score-bubbles i {
+    color: #00aa6c;
+    font-size: 0.85rem;
+}
+.score-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #00aa6c;
+}
+.score-count {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    margin-top: 4px;
+}
+.score-bars {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+.score-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.bar-label {
+    font-size: 0.8rem;
+    color: #475569;
+    font-weight: 500;
+    width: 62px;
+    flex-shrink: 0;
+    text-align: right;
+}
+.bar-track {
+    flex: 1;
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 99px;
+    overflow: hidden;
+}
+.bar-fill {
+    height: 100%;
+    background: #00aa6c;
+    border-radius: 99px;
+    transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.bar-count {
+    font-size: 0.78rem;
+    color: #64748b;
+    font-weight: 600;
+    width: 24px;
+    text-align: right;
+    flex-shrink: 0;
 }
 
 .map-container {

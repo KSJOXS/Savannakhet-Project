@@ -124,3 +124,68 @@ def train_gnn_link_prediction(db: Session):
     # (สามารถใช้ Celery หรือ Background task เรียกใช้งานฟังก์ชันนี้)
     # เช่น การเทรนโมเดลด้วย Negative Sampling เพื่อทำ Link Prediction จริงๆ
     pass
+
+def get_similar_places(db: Session, target_place_id: int, top_k=3):
+    """
+    Find similar places based on GNN node embeddings (Item-Item Collaborative Filtering)
+    """
+    data, user_map, place_map = build_gnn_graph(db)
+    
+    if target_place_id not in place_map:
+        return {"status": "error", "message": "ยังไม่มีข้อมูล Interaction ของสถานที่นี้มากพอ (Cold Start)"}
+        
+    if not data.edge_index_dict:
+         return {"status": "error", "message": "ระบบยังไม่มีข้อมูล Interaction ใดๆ เลย"}
+
+    mapped_target_id = place_map[target_place_id]
+
+    model = SavannakhetRecommender(
+        hidden_channels=64,
+        num_users=data['user'].num_nodes,
+        num_places=data['place'].num_nodes,
+        data_metadata=data.metadata()
+    )
+    
+    model.eval()
+    with torch.no_grad():
+        edge_weight_dict = data.edge_weight_dict if hasattr(data, 'edge_weight_dict') else None
+        updated_features = model(data.edge_index_dict, edge_weight_dict)
+        all_place_features = updated_features['place']
+        
+        # Get embedding of the target place
+        target_feature = all_place_features[mapped_target_id].unsqueeze(0)
+        
+        # Calculate Cosine Similarity with all other places
+        similarities = F.cosine_similarity(target_feature, all_place_features)
+        
+        # top_k + 1 to exclude the place itself
+        actual_k = min(top_k + 1, all_place_features.size(0))
+        top_scores, top_indices = torch.topk(similarities, k=actual_k)
+        
+    reverse_place_map = {v: k for k, v in place_map.items()}
+    recommended_place_ids = []
+    
+    for i in range(actual_k):
+        idx = top_indices[i].item()
+        if idx == mapped_target_id:
+            continue
+        recommended_place_ids.append((reverse_place_map[idx], top_scores[i].item()))
+        if len(recommended_place_ids) == top_k:
+            break
+            
+    # Fetch data from DB
+    recommended_details = []
+    for place_id, score in recommended_place_ids:
+        place_obj = db.query(Place).filter(Place.id == place_id).first()
+        if place_obj:
+            recommended_details.append({
+                "place": place_obj,
+                "reason": "สถานที่นี้มีสไตล์และผู้เยี่ยมชมคล้ายคลึงกัน",
+                "score": round(score, 4)
+            })
+            
+    return {
+        "status": "success",
+        "target_place_id": target_place_id,
+        "similar_places": recommended_details
+    }

@@ -32,9 +32,10 @@ class PlaceBase(BaseModel):
     description: Optional[str] = None
     category_id: int
     image_url: Optional[str] = None
-    location_lat: float  # พิกัดละติจูด
-    location_lng: float  # พิกัดลองจิจูด
+    location_lat: float
+    location_lng: float
     is_published: bool = True
+    opening_hours: Optional[dict] = None
 
 class PlaceUpdate(PlaceBase):
     """ใช้สำหรับ PUT request ตอนแก้ไขข้อมูล"""
@@ -44,6 +45,7 @@ class PlaceResponse(PlaceBase):
     id: int
     rating_avg: float
     review_count: int = 0
+    opening_hours: Optional[dict] = None
     class Config: from_attributes = True
     location_lat: Optional[float] = None
     location_lng: Optional[float] = None

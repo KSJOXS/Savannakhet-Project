@@ -45,27 +45,32 @@ async def create_place(
     name: str = Form(...),
     description: str = Form(...),
     category_id: int = Form(...),
-    location_lat: Optional[float] = Form(None), # เปลี่ยนชื่อให้ตรงกับ Frontend
-    location_lng: Optional[float] = Form(None), # เปลี่ยนชื่อให้ตรงกับ Frontend
-    is_published: int = Form(1), # รับค่าจาก Frontend (1=Published, 0=Draft)
-    images: Optional[List[UploadFile]] = File(None), # รองรับการอัปโหลดหลายรูป
+    location_lat: Optional[float] = Form(None),
+    location_lng: Optional[float] = Form(None),
+    is_published: int = Form(1),
+    opening_hours: Optional[str] = Form(None),  # JSON string
+    images: Optional[List[UploadFile]] = File(None),
     db: Session = Depends(get_db)
 ):
     os.makedirs(UPLOAD_DIR, exist_ok=True)
     image_urls = []
 
-    # จัดการอัปโหลดไฟล์หลายรูป
     if images:
         for file in images:
-            if file.filename: # เช็คว่ามีไฟล์ส่งมาจริงๆ
+            if file.filename:
                 file_path = f"{UPLOAD_DIR}/{file.filename}"
                 with open(file_path, "wb") as buffer:
                     shutil.copyfileobj(file.file, buffer)
-                # เซฟแค่ Path พอครับ (Frontend เรามีฟังก์ชันแปะ http://localhost:8000 ให้แล้ว)
                 image_urls.append(f"/{file_path}")
 
-    # แปลง List เป็น JSON String เพื่อเซฟลง Database (เช่น '["/static/1.jpg", "/static/2.jpg"]')
     image_url_data = json.dumps(image_urls) if image_urls else "[]"
+
+    parsed_hours = None
+    if opening_hours:
+        try:
+            parsed_hours = json.loads(opening_hours)
+        except Exception:
+            parsed_hours = None
 
     new_place = models.Place(
         name=name,
@@ -75,6 +80,7 @@ async def create_place(
         location_lng=location_lng,
         image_url=image_url_data,
         is_published=bool(is_published),
+        opening_hours=parsed_hours,
         rating_avg=0.0
     )
     db.add(new_place)
@@ -92,6 +98,7 @@ async def update_place(
     location_lat: Optional[float] = Form(None),
     location_lng: Optional[float] = Form(None),
     is_published: int = Form(1),
+    opening_hours: Optional[str] = Form(None),  # JSON string
     images: Optional[List[UploadFile]] = File(None),
     db: Session = Depends(get_db)
 ):
@@ -106,7 +113,12 @@ async def update_place(
     db_place.location_lng = location_lng
     db_place.is_published = bool(is_published)
 
-    # ถ้ามีการอัปโหลดรูปภาพใหม่เข้ามาตอนแก้ไข ค่อยอัปเดตช่อง image_url
+    if opening_hours is not None:
+        try:
+            db_place.opening_hours = json.loads(opening_hours)
+        except Exception:
+            pass
+
     if images and images[0].filename:
         os.makedirs(UPLOAD_DIR, exist_ok=True)
         image_urls = []
