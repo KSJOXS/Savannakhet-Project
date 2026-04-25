@@ -139,27 +139,25 @@ const periods = ['Feb 2026', 'Mar 2026', 'Apr 2026', 'May 2026', 'Jun 2026']
 // ตั้งค่าเริ่มต้นให้แสดงเดือนกุมภาพันธ์
 const activePeriod = ref('Feb 2026')
 
-// ข้อมูล Timeline แปลงตามกระบวนการทำงานจริง
+// ข้อมูล Timeline แปลงตามกระบวนการทำงาน 11 สัปดาห์
 const timelineData = [
     // --- February 2026 ---
-    { period: 'Feb 2026', week: 'Week 1-2', label: 'Inception', title: 'Project Planning & Analysis', desc: 'รวบรวมแนวคิด ศึกษาความเป็นไปได้ของโปรเจกต์ และรวบรวมข้อมูลดิบของสถานที่ท่องเที่ยวในสะหวันนะเขต' },
-    { period: 'Feb 2026', week: 'Week 3-4', label: 'Architecture', title: 'System Architecture Design', desc: 'ออกแบบสถาปัตยกรรมระบบ เลือกใช้ Stack ที่เหมาะสม (Vue.js, FastAPI, MySQL, PyTorch)' },
+    { period: 'Feb 2026', week: 'Week 1', label: 'Research', title: 'Research & System Architecture', desc: 'ศึกษาเทคโนโลยี GNN, FastAPI, Vue.js, MySQL รวบรวมข้อมูลสถานที่ท่องเที่ยวสะหวันนะเขต และกำหนดสถาปัตยกรรมระบบ' },
+    { period: 'Feb 2026', week: 'Week 2-3', label: 'Database', title: 'Database Design & Graph Modeling', desc: 'ออกแบบฐานข้อมูล MySQL และสร้างโครงสร้างกราฟความสัมพันธ์ ผู้ใช้-สถานที่-ความชอบ เพื่อเตรียมสำหรับโมเดล GNN' },
     
     // --- March 2026 ---
-    { period: 'Mar 2026', week: 'Week 1-2', label: 'Database', title: 'Database & Graph Modeling', desc: 'สร้างและออกแบบฐานข้อมูล MySQL กำหนดความสัมพันธ์ของตาราง User, Places, และ Interactions' },
-    { period: 'Mar 2026', week: 'Week 3-4', label: 'Backend', title: 'FastAPI Backend Core', desc: 'พัฒนาระบบ Backend สร้าง API ยืนยันตัวตน (JWT) และ API พื้นฐานสำหรับดึงข้อมูลสถานที่' },
+    { period: 'Mar 2026', week: 'Week 4', label: 'Backend', title: 'FastAPI Backend Core', desc: 'พัฒนาระบบ Backend ด้วย FastAPI รวมถึงระบบยืนยันตัวตน (JWT) และ API จัดการข้อมูลสถานที่ ผู้ใช้งาน และความชอบ' },
+    { period: 'Mar 2026', week: 'Week 4-6', label: 'AI Model', title: 'GNN Model Training', desc: 'สร้างและฝึกสอน (Train) โมเดล AI ด้วย PyTorch Geometric โดยใช้ชุดข้อมูลความสัมพันธ์ของผู้ใช้และสถานที่ในสะหวันนะเขต' },
     
     // --- April 2026 ---
-    { period: 'Apr 2026', week: 'Week 1-2', label: 'AI Model', title: 'GNN Model Development', desc: 'เริ่มเขียนโค้ดและสร้างโมเดล Graph Neural Network ด้วย PyTorch Geometric เพื่อระบบแนะนำสถานที่' },
-    { period: 'Apr 2026', week: 'Week 3-4', label: 'Training', title: 'Model Training & Integration', desc: 'ฝึกสอน (Train) โมเดล AI ด้วยข้อมูลจำลอง และนำโมเดลไปเชื่อมต่อเข้ากับ FastAPI Backend' },
+    { period: 'Apr 2026', week: 'Week 6-7', label: 'Integration', title: 'AI Integration & Endpoints', desc: 'นำโมเดล GNN เข้าผสานกับ FastAPI เพื่อสร้าง API Endpoint สำหรับดึงข้อมูลแนะนำสถานที่แบบเฉพาะบุคคล (Personalized)' },
     
     // --- May 2026 ---
-    { period: 'May 2026', week: 'Week 1-2', label: 'Frontend', title: 'UI/UX & Vue.js Setup', desc: 'ออกแบบหน้าจอผู้ใช้งาน และเริ่มพัฒนาส่วนของ Frontend (Home, Explore, Place Details) ด้วย Vue.js' },
-    { period: 'May 2026', week: 'Week 3-4', label: 'Features', title: 'Interactive Features', desc: 'พัฒนาระบบรีวิว ระบบบันทึกสถานที่โปรด (Favorites) และการแสดงผลแผนที่ (Map Integration)' },
+    { period: 'May 2026', week: 'Week 8-9', label: 'Frontend', title: 'Vue.js UI Development', desc: 'พัฒนาหน้าจอผู้ใช้งานด้วย Vue.js 3 (หน้าแรก, ค้นหา, แนะนำสถานที่ด้วย GNN, รีวิว, โปรไฟล์) และเชื่อมต่อ API' },
     
     // --- June 2026 ---
-    { period: 'Jun 2026', week: 'Week 1-2', label: 'Admin', title: 'Dashboard & Management', desc: 'พัฒนาระบบหลังบ้าน (Admin Dashboard) สำหรับจัดการข้อมูล และดูสถิติการทำงานของระบบ AI' },
-    { period: 'Jun 2026', week: 'Week 3-4', label: 'Testing', title: 'System Testing & Go Live', desc: 'ทดสอบการทำงานของระบบทั้งหมด (End-to-End Testing) แก้ไขข้อบกพร่อง และเตรียมนำเสนอโปรเจกต์' },
+    { period: 'Jun 2026', week: 'Week 10', label: 'Dashboard', title: 'Admin Dashboard', desc: 'สร้างระบบสำหรับผู้ดูแล เพื่อจัดการสถานที่ ผู้ใช้ สถิติ และตรวจสอบประสิทธิภาพของ GNN Model (Precision, Recall, NDCG)' },
+    { period: 'Jun 2026', week: 'Week 11', label: 'Testing', title: 'Testing & Final Report', desc: 'ทดสอบระบบทั้งหมด (End-to-End Testing) ปรับปรุงความเร็วของ API และความแม่นยำของโมเดล พร้อมเขียนรายงานโปรเจกต์จบ' },
 ]
 
 // ฟิลเตอร์ข้อมูลให้แสดงเฉพาะเดือนที่เลือก
@@ -176,7 +174,7 @@ const filteredTimeline = computed(() => {
     min-height: 100vh;
     font-family: 'Inter', sans-serif;
     color: #1e293b;
-    padding-bottom: 0; /* เปลี่ยนเป็น 0 เพราะจะติดกับ Section สีน้ำเงินด้านล่าง */
+    padding-bottom: 0;
 }
 
 /* Header */
@@ -203,7 +201,7 @@ const filteredTimeline = computed(() => {
 /* Main Content */
 .main-layout {
     max-width: 1100px;
-    margin: 40px auto 100px; /* เพิ่ม margin-bottom ก่อนถึงส่วนโปรไฟล์ */
+    margin: 40px auto 100px;
     padding: 0 20px;
 }
 
@@ -304,7 +302,6 @@ const filteredTimeline = computed(() => {
     min-height: 500px;
 }
 
-/* ด้านซ้าย แถบสีฟ้า */
 .history-sidebar {
     width: 280px;
     background: #206fa3;
@@ -347,7 +344,6 @@ const filteredTimeline = computed(() => {
     z-index: 10;
 }
 
-/* ด้านขวา รายละเอียด Timeline */
 .history-content-area {
     flex: 1;
     padding: 80px 60px;
@@ -459,9 +455,9 @@ const filteredTimeline = computed(() => {
     position: absolute;
 }
 
-/* ─── 🚨 Developer Profile Section (อัปเดตใหม่) 🚨 ─── */
+/* ─── 🚨 Developer Profile Section 🚨 ─── */
 .developer-section {
-    background-color: #206fa3; /* สีพื้นหลังน้ำเงินแบบในรูป */
+    background-color: #206fa3;
     color: white;
     padding: 100px 0;
     position: relative;
@@ -519,7 +515,7 @@ const filteredTimeline = computed(() => {
 
 .dev-right {
     padding-top: 10px;
-    padding-right: 80px; /* เว้นที่ให้ลายน้ำ */
+    padding-right: 80px; 
 }
 
 .dev-right p {
@@ -534,7 +530,6 @@ const filteredTimeline = computed(() => {
     color: white;
 }
 
-/* ลายน้ำอักษรแนวตั้ง */
 .dev-watermark {
     position: absolute;
     right: -40px;
@@ -550,7 +545,6 @@ const filteredTimeline = computed(() => {
     white-space: nowrap;
 }
 
-/* วงกลมตกแต่ง */
 .deco-circle {
     position: absolute;
     bottom: -60px;
@@ -581,20 +575,9 @@ const filteredTimeline = computed(() => {
     .history-watermark { display: none; }
 
     /* Developer Section Responsive */
-    .developer-container {
-        grid-template-columns: 1fr;
-        gap: 30px;
-    }
-    .dev-right {
-        padding-right: 0;
-    }
-    .dev-watermark {
-        display: none;
-    }
-    .dev-img-wrapper {
-        width: 150px;
-        height: 150px;
-        border-radius: 50%;
-    }
+    .developer-container { grid-template-columns: 1fr; gap: 30px; }
+    .dev-right { padding-right: 0; }
+    .dev-watermark { display: none; }
+    .dev-img-wrapper { width: 150px; height: 150px; border-radius: 50%; }
 }
 </style>

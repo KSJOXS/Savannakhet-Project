@@ -17,6 +17,7 @@ import Restaurants from '../pages/places/Restaurants.vue'
 import nature from '../pages/places/Nature.vue'
 import Landmarks from '../pages/places/Landmarks.vue'
 import About from '../pages/main/About.vue'
+import Contact from '../pages/main/Contact.vue' // 🚨 นำเข้าคอมโพเนนต์ Contact
 
 // --- Admin Components ---
 import AdminLayout from '../pages/admin/AdminLayout.vue'
@@ -103,6 +104,12 @@ const routes = [
         path: '/about',
         name: 'About',
         component: About
+    },
+    {
+        // 🚨 เพิ่ม Route สำหรับหน้า Contact
+        path: '/contact',
+        name: 'Contact',
+        component: Contact
     },
 
     // --- Admin Routes with Sidebar System ---

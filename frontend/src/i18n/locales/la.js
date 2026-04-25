@@ -15,6 +15,31 @@ export default {
     profile: 'ໂປຣໄຟລ໌',
     accountInfo: 'ຂໍ້ມູນບັນຊີ',
     search: 'ຄົ້ນຫາ...',
+    contact: 'ຕິດຕໍ່ພວກເຮົາ', // 🚨 เพิ่มตรงนี้ (ໃນໝວດ nav)
+  },
+
+  // --- Contact Page ---
+  contact: {
+    title: 'ຕິດຕໍ່ພວກເຮົາ',
+    subtitle: 'ທ່ານມີຄຳຖາມ, ຂໍ້ສະເໜີແນະ ຫຼື ຕ້ອງການຄວາມຊ່ວຍເຫຼືອບໍ? ພວກເຮົາຢາກໄດ້ຍິນຈາກທ່ານ.',
+    getInTouch: 'ຊ່ອງທາງການຕິດຕໍ່',
+    description: 'ບໍ່ວ່າທ່ານຈະມີຂໍ້ສົງໄສກ່ຽວກັບການນຳໃຊ້ລະບົບແນະນຳສະຖານທີ່ AI ຂອງພວກເຮົາ, ຕ້ອງການລາຍງານບັນຫາ ຫຼື ມີຂໍ້ສະເໜີແນະໃດໆ, ທີມງານ Savannakhet Smart Travel ຍິນດີໃຫ້ບໍລິການສະເໝີ.',
+    emailLabel: 'ອີເມວ',
+    phoneLabel: 'ເບີໂທລະສັບ',
+    locationLabel: 'ທີ່ຕັ້ງ',
+    formTitle: 'ສົ່ງຂໍ້ຄວາມ',
+    formDesc: 'ສົ່ງຂໍ້ຄວາມຫາພວກເຮົາໂດຍກົງຜ່ານຟອມດ້ານລຸ່ມນີ້.',
+    yourName: 'ຊື່ຂອງທ່ານ',
+    namePlaceholder: 'ຈອນ ໂດ (John Doe)',
+    yourEmail: 'ອີເມວຂອງທ່ານ',
+    emailPlaceholder: 'john@example.com',
+    subject: 'ຫົວຂໍ້',
+    subjectPlaceholder: 'ພວກເຮົາສາມາດຊ່ວຍເຫຼືອທ່ານແນວໃດ?',
+    message: 'ຂໍ້ຄວາມ',
+    messagePlaceholder: 'ພິມຂໍ້ຄວາມຂອງທ່ານທີ່ນີ້...',
+    sending: 'ກຳລັງສົ່ງ...',
+    sendBtn: 'ສົ່ງຂໍ້ຄວາມ',
+    successMsg: 'ສົ່ງຂໍ້ຄວາມສຳເລັດແລ້ວ! ພວກເຮົາຈະຕິດຕໍ່ກັບຫາທ່ານໂດຍໄວທີ່ສຸດ.'
   },
 
   // --- Place Detail ---

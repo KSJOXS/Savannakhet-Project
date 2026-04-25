@@ -24,15 +24,32 @@
                         <span>{{ t('nav.discover') }}</span>
                     </router-link>
 
-                    <router-link to="/about" class="nav-item" :class="{ active: route.path === '/about' }">
-                        <i class="fas fa-info-circle"></i> <span>{{ t('nav.about') }}</span>
-                    </router-link>
+                    <div 
+                        class="nav-item-dropdown"
+                        @mouseenter="isAboutOpen = true"
+                        @mouseleave="isAboutOpen = false"
+                    >
+                        <div class="nav-item" :class="{ active: route.path === '/about' || route.path === '/contact' }">
+                            <i class="fas fa-info-circle"></i> <span>{{ t('nav.about') }}</span>
+                            <i class="fas fa-chevron-down dropdown-icon" :class="{ rotated: isAboutOpen }"></i>
+                        </div>
+
+                        <transition name="fade-slide">
+                            <div v-if="isAboutOpen" class="about-dropdown-menu">
+                                <router-link to="/about" class="about-dropdown-item" @click="isAboutOpen = false">
+                                    <i class="fas fa-building"></i> {{ t('nav.about') }}
+                                </router-link>
+                                <router-link to="/contact" class="about-dropdown-item" @click="isAboutOpen = false">
+                                    <i class="fas fa-headset"></i> {{ t('nav.contact') || 'Contact' }}
+                                </router-link>
+                            </div>
+                        </transition>
+                    </div>
 
                     <router-link v-if="isLoggedIn && (!user || user.role !== 'admin')" to="/favorites" class="nav-item">
                         <i class="far fa-heart"></i> <span>{{ t('nav.saves') }}</span>
                     </router-link>
 
-                    <!-- Language Switcher -->
                     <div class="lang-switcher">
                         <button class="lang-btn" @click="isLangOpen = !isLangOpen">
                             <span>{{ currentFlagLabel }}</span>
@@ -151,6 +168,7 @@ const isLoggedIn = ref(isAuthenticated())
 const username = ref(user.value ? user.value.username : '')
 const isDropdownOpen = ref(false)
 const isLangOpen = ref(false)
+const isAboutOpen = ref(false)
 
 const currentFlagLabel = computed(() => {
     const found = supportedLocales.find(l => l.code === locale.value)
@@ -179,6 +197,7 @@ watch(() => router.currentRoute.value.path, () => {
     checkAuth()
     isDropdownOpen.value = false
     isLangOpen.value = false
+    isAboutOpen.value = false
 })
 
 const handleLogoutAndClose = () => {
@@ -310,16 +329,75 @@ const handleLogoutAndClose = () => {
     display: flex;
     align-items: center;
     gap: 6px;
+    cursor: pointer;
 }
 
 .nav-item:hover {
     background: #f1f5f9;
 }
 
-/* 🌟 สีไฮไลท์เวลาอยู่หน้า About */
 .nav-item.active {
     background: #e2e8f0;
 }
+
+/* 🚨 About Dropdown Menu CSS 🚨 */
+.nav-item-dropdown {
+    position: relative;
+    padding: 10px 0;
+}
+
+.dropdown-icon {
+    font-size: 0.7rem;
+    transition: transform 0.2s;
+    margin-left: 2px;
+}
+
+.dropdown-icon.rotated {
+    transform: rotate(180deg);
+}
+
+.about-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    border: 1px solid #f1f5f9;
+    min-width: 180px;
+    overflow: hidden;
+    z-index: 1002;
+    padding: 8px 0;
+}
+
+.about-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    color: #0f172a;
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+
+.about-dropdown-item i {
+    color: #64748b;
+    width: 16px;
+    text-align: center;
+}
+
+.about-dropdown-item:hover {
+    background: #f8fafc;
+    color: #00aa6c;
+}
+
+.about-dropdown-item:hover i {
+    color: #00aa6c;
+}
+
 
 /* Auth & User Buttons */
 .auth-group {
@@ -580,7 +658,6 @@ const handleLogoutAndClose = () => {
 
     .nav-item span {
         display: none;
-        /* ซ่อนข้อความโชว์แค่ไอคอนบนมือถือ */
     }
 
     .nav-item i {

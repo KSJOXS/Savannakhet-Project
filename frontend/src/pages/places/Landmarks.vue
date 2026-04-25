@@ -692,7 +692,8 @@ onMounted(fetchData)
     margin-bottom: 22px;
     transition: all 0.3s;
     cursor: pointer;
-    height: 260px;
+    min-height: 260px;
+    align-items: stretch;
     box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 
@@ -704,6 +705,7 @@ onMounted(fetchData)
 
 .card-img-wrapper {
     width: 320px;
+    min-height: 260px;
     position: relative;
     flex-shrink: 0;
 }

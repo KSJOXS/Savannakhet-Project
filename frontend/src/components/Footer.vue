@@ -14,7 +14,7 @@
                     <a href="#">{{ t('footer.cookieConsent') }}</a>
                     <a href="#">{{ t('footer.sitemap') }}</a>
                     <a href="#">{{ t('footer.howItWorks') }}</a>
-                    <a href="#">{{ t('footer.contactUs') }}</a>
+                    <router-link to="/contact">{{ t('footer.contactUs') }}</router-link>
                 </div>
                 <div class="footer-disclaimer">
                     {{ t('footer.disclaimer') }}

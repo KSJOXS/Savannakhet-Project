@@ -15,6 +15,31 @@ export default {
     profile: 'Profile',
     accountInfo: 'Account info',
     search: 'Search...',
+    contact: 'Contact Us', // 🚨 เพิ่มตรงนี้
+  },
+
+  // --- Contact Page (🚨 เพิ่มหมวดหมู่นี้ใหม่ทั้งหมด) ---
+  contact: {
+    title: 'Contact Us',
+    subtitle: 'Have questions, feedback, or need assistance? We\'d love to hear from you.',
+    getInTouch: 'Get in Touch',
+    description: 'Whether you have questions about our AI recommendation system, want to report an issue, or have any suggestions, the Savannakhet Smart Travel team is here to help.',
+    emailLabel: 'Email Address',
+    phoneLabel: 'Phone Number',
+    locationLabel: 'Location',
+    formTitle: 'Send a Message',
+    formDesc: 'Send us a direct message using the form below.',
+    yourName: 'Your Name',
+    namePlaceholder: 'John Doe',
+    yourEmail: 'Email Address',
+    emailPlaceholder: 'john@example.com',
+    subject: 'Subject',
+    subjectPlaceholder: 'How can we help?',
+    message: 'Message',
+    messagePlaceholder: 'Type your message here...',
+    sending: 'Sending...',
+    sendBtn: 'Send Message',
+    successMsg: 'Message sent successfully! We will get back to you soon.'
   },
 
   // --- Place Detail ---

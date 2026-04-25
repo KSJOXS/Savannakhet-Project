@@ -47,7 +47,52 @@
                 <button class="btn-view-photos"><i class="fas fa-th"></i> {{ t('place.viewAllPhotos') }} ({{ galleryImages.length }})</button>
             </div>
 
-            <!-- Sticky Navigation -->
+            <!-- Full-Width Deals Banner (Hotel only) -->
+            <div class="deals-banner" v-if="isHotel" id="deals">
+                <div class="deals-banner-title">
+                    <i class="fas fa-tags"></i>
+                    <span>{{ t('place.checkPrices') }}</span>
+                </div>
+                <div class="deals-rows">
+                    <!-- Booking.com Row -->
+                    <a :href="`https://www.booking.com/searchresults.html?ss=${encodeURIComponent(place.name)}`"
+                       target="_blank" class="deals-row-item">
+                        <div class="deals-row-brand">
+                            <span class="booking-text">Booking<span class="booking-dot">.</span>com</span>
+                        </div>
+                        <div class="deals-row-price">
+                            <span class="deals-price-main">See prices on site</span>
+                        </div>
+                        <div class="deals-row-btn deals-btn-booking">ดูข้อเสนอ <i class="fas fa-external-link-alt"></i></div>
+                    </a>
+
+                    <div class="deals-row-divider"></div>
+
+                    <!-- Agoda Row -->
+                    <a :href="`https://www.agoda.com/search?query=${encodeURIComponent(place.name)}`"
+                       target="_blank" class="deals-row-item">
+                        <div class="deals-row-brand">
+                            <span class="agoda-text">agoda</span>
+                            <div class="agoda-dots-row">
+                                <span style="background:#e91e8c;"></span>
+                                <span style="background:#f8a316;"></span>
+                                <span style="background:#4caf50;"></span>
+                                <span style="background:#2196f3;"></span>
+                                <span style="background:#e91e8c;"></span>
+                            </div>
+                        </div>
+                        <div class="deals-row-price">
+                            <span class="deals-price-main">See prices on site</span>
+                        </div>
+                        <div class="deals-row-btn deals-btn-agoda">ดูข้อเสนอ <i class="fas fa-external-link-alt"></i></div>
+                    </a>
+                </div>
+                <p class="deals-disclaimer">
+                    <i class="fas fa-info-circle"></i>
+                    ราคาเป็นราคาเฉลี่ยอ้างอิงเท่านั้น ราคาจริงจะแสดงบนเว็บไซต์พาร์ทเนอร์
+                </p>
+            </div>
+
             <div class="sticky-nav-wrapper" ref="stickyNavRef">
                 <div class="sticky-nav" :class="{ 'is-sticky': isSticky }">
                     <div class="nav-links">
@@ -84,7 +129,7 @@
                                     <i v-for="star in 5" :key="'picker-' + star"
                                         :class="[newRating >= star ? 'fas' : 'far', 'fa-circle']"
                                         @click="newRating = star"></i>
-                                    <span class="rating-label">{{ ratingLabels[newRating - 1] }}</span>
+                                    <span class="rating-label">{{ t('place.ratingLabels')[newRating - 1] }}</span>
                                 </div>
                                 <textarea v-model="newComment"
                                     :placeholder="t('place.writeReviewPlaceholder')"></textarea>
@@ -135,7 +180,6 @@
                 </div>
 
                 <div class="sidebar-column">
-                    <!-- Rating Summary Card -->
                     <div class="sidebar-card rating-summary-card">
                         <h3 style="font-size: 1rem; font-weight: 800; margin: 0 0 16px; color: #1e293b;">{{ t('place.travelerReviews') }}</h3>
                         <div class="rating-overview">
@@ -144,12 +188,12 @@
                                 <div class="score-bubbles">
                                     <i v-for="s in 5" :key="'sb-'+s" :class="[(place.rating_avg||0) >= s ? 'fas' : 'far', 'fa-circle']"></i>
                                 </div>
-                                <span class="score-label">{{ ratingLabels[Math.round(place.rating_avg || 0) - 1] || 'N/A' }}</span>
+                                <span class="score-label">{{ t('place.ratingLabels')[Math.round(place.rating_avg || 0) - 1] || 'N/A' }}</span>
                                 <span class="score-count">({{ comments.length }})</span>
                             </div>
                             <div class="score-bars">
-                                <div v-for="lvl in ratingBreakdown" :key="lvl.label" class="score-bar-row">
-                                    <span class="bar-label">{{ lvl.label }}</span>
+                                <div v-for="lvl in ratingBreakdown" :key="lvl.value" class="score-bar-row">
+                                    <span class="bar-label">{{ t('place.ratingLabels')[lvl.value - 1] }}</span>
                                     <div class="bar-track">
                                         <div class="bar-fill" :style="{ width: lvl.percent + '%' }"></div>
                                     </div>
@@ -159,26 +203,12 @@
                         </div>
                     </div>
 
-                    <!-- Hotel Booking Deals -->
-                    <div class="sidebar-card booking-card" v-if="isHotel" id="deals">
-                        <h3>{{ t('place.checkPrices') }}</h3>
-                        <div class="partner-deal">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/Booking.com_Logo_2022.png" height="24" alt="Booking.com" />
-                            <a :href="`https://www.booking.com/searchresults.html?ss=${place.name}`" target="_blank" class="btn-partner">{{ t('place.viewPrices') }}</a>
-                        </div>
-                        <div class="partner-deal">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Agoda_logo.svg/1200px-Agoda_logo.svg.png" height="24" alt="Agoda" />
-                            <a :href="`https://www.agoda.com/search?text=${place.name}`" target="_blank" class="btn-partner">{{ t('place.viewPrices') }}</a>
-                        </div>
-                    </div>
-
 
                 </div>
             </div>
             
             <SectionDivider icon="fas fa-map-marked-alt" />
 
-            <!-- Large Map Section -->
             <div class="large-map-section" id="location">
                 <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px;">
                     <div>
@@ -191,10 +221,8 @@
                 </div>
             </div>
 
-            <!-- Nearby Area Section (Explore) -->
             <div class="nearby-section" v-if="nearbyRestaurants.length > 0 || nearbyAttractions.length > 0">
                 <div class="nearby-grid">
-                    <!-- Column 1: Getting There -->
                     <div class="nearby-col getting-there-col">
                         <h3>Getting there</h3>
                         <div class="walk-score-box">
@@ -210,7 +238,6 @@
                         </div>
                     </div>
 
-                    <!-- Column 2: Restaurants -->
                     <div class="nearby-col">
                         <div class="col-header">
                             <div>
@@ -237,7 +264,6 @@
                         </div>
                     </div>
 
-                    <!-- Column 3: Attractions -->
                     <div class="nearby-col right-col">
                         <div class="col-header">
                             <div>
@@ -266,7 +292,6 @@
                 </div>
             </div>
 
-            <!-- AI Recommended Places Section -->
             <div class="recommended-section" v-if="aiRecommendedPlaces.length > 0">
                 <h2 style="color: #6366f1; font-weight: 800; display: flex; align-items: center; gap: 10px;">
                     <i class="fas fa-magic"></i> {{ t('recommend.ai_recom') }}
@@ -296,7 +321,6 @@
                 </div>
             </div>
             
-            <!-- Similar Places Section (Because you viewed this) -->
             <div class="recommended-section" v-if="similarPlaces.length > 0">
                 <h2 style="color: #0ea5e9; font-weight: 800; display: flex; align-items: center; gap: 10px;">
                     <i class="fas fa-project-diagram"></i> ผู้ที่สนใจสถานที่นี้ มักจะชอบ...
@@ -322,7 +346,6 @@
                 </div>
             </div>
 
-            <!-- Standard Recommended Places Section (Fallback) -->
             <div class="recommended-section" v-else-if="recommendedPlaces.length > 0">
                 <h2>{{ t('place.recommended') }}</h2>
                 <div class="recommended-grid">
@@ -359,7 +382,6 @@
                     class="fas fa-chevron-right"></i></button>
         </div>
 
-        <!-- Like interactive Popup -->
         <div class="like-popup" :class="{ 'show': showLikePopup }">
             <div class="popup-header">
                 <div class="icon-circle"><i class="fas fa-heart" style="color: #ef4444;"></i></div>
@@ -425,7 +447,12 @@ const newComment = ref('')
 const newRating = ref(5)
 const submitting = ref(false)
 
-const ratingLabels = ['แย่มาก', 'พอใช้', 'ปานกลาง', 'ดี', 'ยอดเยี่ยม']
+// Booking date pickers
+const today = new Date()
+const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate() + 1)
+const dayAfter = new Date(today); dayAfter.setDate(dayAfter.getDate() + 2)
+const bookingCheckin = ref(tomorrow.toISOString().split('T')[0])
+const bookingCheckout = ref(dayAfter.toISOString().split('T')[0])
 
 const currentImageIndex = ref(0)
 const isLightboxOpen = ref(false)
@@ -468,18 +495,26 @@ const isHotel = computed(() => {
     return cat && (cat.name.toLowerCase().includes('hotel') || cat.parent_type === 'hotel');
 });
 
+// 🚨 อัปเดต computed property สำหรับคำนวณกราฟดาว 🚨
 const ratingBreakdown = computed(() => {
     const levels = [
-        { label: 'ยอดเยี่ยม', value: 5 },
-        { label: 'ดี', value: 4 },
-        { label: 'ปานกลาง', value: 3 },
-        { label: 'แย่', value: 2 },
-        { label: 'แย่มาก', value: 1 },
+        { value: 5 },
+        { value: 4 },
+        { value: 3 },
+        { value: 2 },
+        { value: 1 },
     ];
+    // ถ้าไม่มี comments เลย ก็ส่งคืน 0 สำหรับทุก level
+    if (!comments.value || comments.value.length === 0) {
+        return levels.map(lvl => ({ value: lvl.value, count: 0, percent: 0 }));
+    }
+    
     const total = comments.value.length;
     return levels.map(lvl => {
+        // นับจำนวนคอมเมนต์ที่มี rating ใกล้เคียงกับ level นี้
         const count = comments.value.filter(c => Math.round(c.rating) === lvl.value).length;
-        return { label: lvl.label, count, percent: total > 0 ? Math.round((count / total) * 100) : 0 };
+        // คำนวณเปอร์เซ็นต์
+        return { value: lvl.value, count, percent: Math.round((count / total) * 100) };
     });
 });
 
@@ -638,7 +673,7 @@ const initDetailMap = () => {
     window.L.control.zoom({ position: 'bottomright' }).addTo(detailMap);
 
     window.L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+        attribution: '© OpenStreetMap contributors © CARTO'
     }).addTo(detailMap);
     
     mapMarkers = [];
@@ -899,6 +934,55 @@ const openGoogleMaps = () => window.open(`https://www.google.com/maps/search/?ap
 </script>
 
 <style scoped>
+/* 🚨 ใส่กลับคืนมาเพื่อแก้ปัญหาเมนูแตกตามที่ตรวจสอบไปในครั้งที่แล้ว 🚨 */
+.sticky-nav-wrapper {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: white;
+    border-bottom: 1px solid #e0e0e0;
+    height: 60px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.sticky-nav {
+    display: flex;
+    align-items: center;
+    max-width: 1140px;
+    margin: 0 auto;
+    height: 100%;
+}
+
+.nav-links {
+    display: flex;
+    gap: 30px;
+    height: 100%;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: #475569;
+    font-weight: 700;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    border-bottom: 3px solid transparent;
+    transition: 0.2s;
+    height: 100%;
+    position: relative;
+    top: 1px;
+}
+
+.nav-links a:hover {
+    color: #000;
+}
+
+.nav-links a.active {
+    color: #00aa6c;
+    border-bottom-color: #00aa6c;
+}
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 /* --- Map Markers --- */
@@ -971,6 +1055,184 @@ const openGoogleMaps = () => window.open(`https://www.google.com/maps/search/?ap
 }
 :deep(.custom-tripadvisor-popup .leaflet-popup-tip) {
     box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+/* ===== DEALS BANNER (Full-Width, Vertical Rows) ===== */
+.deals-banner {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    margin-bottom: 24px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+}
+
+.deals-banner-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 24px;
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    color: white;
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.deals-banner-title i { font-size: 0.9rem; }
+
+/* Vertical rows container */
+.deals-rows {
+    padding: 8px 0;
+}
+
+/* Each partner row */
+.deals-row-item {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 16px 24px;
+    text-decoration: none;
+    color: inherit;
+    transition: background 0.2s;
+    cursor: pointer;
+}
+
+.deals-row-item:hover {
+    background: #f8fafc;
+}
+
+.deals-row-divider {
+    height: 1px;
+    background: #f1f5f9;
+    margin: 0 24px;
+}
+
+/* Brand logo column */
+.deals-row-brand {
+    min-width: 120px;
+    flex-shrink: 0;
+}
+
+/* Price column */
+.deals-row-price {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    padding-right: 16px;
+}
+
+.deals-price-original {
+    font-size: 0.82rem;
+    color: #ef4444;
+    text-decoration: line-through;
+    font-weight: 500;
+}
+
+.deals-price-main {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.deals-price-sale {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+/* CTA button column */
+.deals-row-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 22px;
+    border-radius: 50px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.deals-row-btn i { font-size: 0.7rem; }
+
+.deals-btn-booking {
+    background: #00aa6c;
+    color: white;
+    box-shadow: 0 3px 10px rgba(0,170,108,0.3);
+}
+.deals-row-item:hover .deals-btn-booking {
+    background: #009960;
+    box-shadow: 0 5px 14px rgba(0,170,108,0.4);
+    transform: translateY(-1px);
+}
+
+.deals-btn-agoda {
+    background: white;
+    color: #1e293b;
+    border: 1.5px solid #e2e8f0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+.deals-row-item:hover .deals-btn-agoda {
+    background: #fce4f3;
+    border-color: #e91e8c;
+    color: #e91e8c;
+    transform: translateY(-1px);
+}
+
+/* Brand text styles */
+.booking-text {
+    color: #003580;
+    font-weight: 900;
+    font-size: 1.05rem;
+    letter-spacing: -0.5px;
+}
+
+.booking-dot { color: #003580; }
+
+.agoda-text {
+    display: block;
+    color: #e91e8c;
+    font-weight: 900;
+    font-size: 1.15rem;
+    letter-spacing: -0.5px;
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.agoda-dots-row {
+    display: flex;
+    gap: 3px;
+}
+
+.agoda-dots-row span {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+/* Disclaimer */
+.deals-disclaimer {
+    font-size: 0.73rem;
+    color: #94a3b8;
+    padding: 10px 24px 14px;
+    background: #f8fafc;
+    border-top: 1px solid #f1f5f9;
+    margin: 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    line-height: 1.5;
+}
+
+.deals-disclaimer i {
+    color: #94a3b8;
+    margin-top: 1px;
+    flex-shrink: 0;
 }
 
 /* --- พื้นหลังคลีนแบบ TripAdvisor --- */
@@ -1535,20 +1797,21 @@ textarea:focus {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 7px;
+    gap: 12px;
 }
 .score-bar-row {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
 }
 .bar-label {
     font-size: 0.8rem;
     color: #475569;
     font-weight: 500;
-    width: 62px;
+    width: 80px; 
     flex-shrink: 0;
-    text-align: right;
+    text-align: left; 
+    white-space: nowrap; 
 }
 .bar-track {
     flex: 1;
@@ -1572,208 +1835,257 @@ textarea:focus {
     flex-shrink: 0;
 }
 
-.map-container {
-    border-radius: 8px;
-    overflow: hidden;
-    margin-bottom: 15px;
-    border: 1px solid #e2e8f0;
-}
-
-.real-address-info {
-    line-height: 1.6;
-}
-
-.contact-info p {
-    margin: 0 0 15px;
-    color: #334155;
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-
-.btn-directions {
-    width: 100%;
+/* ===== BOOKING COMPARE CARD ===== */
+.booking-compare-card {
     background: white;
-    border: 1px solid #000;
-    padding: 10px;
-    border-radius: 8px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: 0.2s;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.07);
 }
 
-.btn-directions:hover {
+.bcc-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+    color: white;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.bcc-header i { font-size: 1rem; }
+
+/* Date Row */
+.bcc-date-row {
+    display: flex;
+    align-items: stretch;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    margin: 16px 16px 10px;
+    overflow: hidden;
     background: #f8fafc;
 }
 
-/* --- Loading & Lightbox (คงเดิม) --- */
-.loading-screen {
+.bcc-date-field {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+}
+
+.bcc-date-field > i {
+    color: #0ea5e9;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.bcc-date-field > div {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 60vh;
+    width: 100%;
 }
 
-.spinner {
-    border: 4px solid #e2e8f0;
-    border-top: 4px solid #000;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    animation: spin 1s linear infinite;
-    margin-bottom: 15px;
+.bcc-date-sep {
+    width: 1px;
+    background: #e2e8f0;
+    margin: 8px 0;
 }
 
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
-.lightbox-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.9);
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.lightbox-img {
-    max-width: 90%;
-    max-height: 90vh;
-    object-fit: contain;
-    transition: transform 0.15s ease-out;
-}
-
-.btn-close-lightbox {
-    position: absolute;
-    top: 25px;
-    right: 35px;
-    background: none;
-    border: none;
-    color: white;
-    font-size: 2rem;
-    cursor: pointer;
-    opacity: 0.7;
-}
-
-.btn-close-lightbox:hover {
-    opacity: 1;
-}
-
-.btn-nav {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(255, 255, 255, 0.1);
-    border: none;
-    color: white;
-    font-size: 2.5rem;
-    cursor: pointer;
-    padding: 15px 25px;
-    border-radius: 12px;
-}
-
-.btn-nav.prev {
-    left: 30px;
-}
-
-.btn-nav.next {
-    right: 30px;
-}
-
-/* Sticky Navigation */
-.sticky-nav-wrapper {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: white;
-    border-bottom: 1px solid #e0e0e0;
-    height: 60px;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-}
-
-.sticky-nav {
-    display: flex;
-    align-items: center;
-    max-width: 1140px;
-    margin: 0 auto;
-    height: 100%;
-}
-
-.nav-links {
-    display: flex;
-    gap: 30px;
-    height: 100%;
-}
-
-.nav-links a {
-    text-decoration: none;
-    color: #475569;
+.bcc-date-label {
+    font-size: 0.7rem;
     font-weight: 700;
-    font-size: 0.95rem;
-    display: flex;
-    align-items: center;
-    border-bottom: 3px solid transparent;
-    transition: 0.2s;
-    height: 100%;
-    position: relative;
-    top: 1px;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
 }
 
-.nav-links a:hover {
-    color: #000;
-}
-
-.nav-links a.active {
-    color: #00aa6c;
-    border-bottom-color: #00aa6c;
-}
-
-/* Booking Deals in Sidebar */
-.booking-card {
-    margin-bottom: 20px;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-}
-
-.partner-deal {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 0;
-    border-bottom: 1px solid #e2e8f0;
-}
-
-.partner-deal:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
-}
-
-.btn-partner {
-    background: #fcd34d;
-    color: #000;
-    font-weight: 700;
-    text-decoration: none;
-    padding: 8px 16px;
-    border-radius: 8px;
+.bcc-date-input {
+    border: none;
+    background: transparent;
+    font-family: 'Inter', sans-serif;
     font-size: 0.85rem;
-    transition: 0.2s;
+    font-weight: 600;
+    color: #1e293b;
+    outline: none;
+    width: 100%;
+    cursor: pointer;
+    padding: 0;
 }
 
-.btn-partner:hover {
-    background: #f59e0b;
+.bcc-date-input::-webkit-calendar-picker-indicator {
+    opacity: 0;
+    position: absolute;
+    width: 100%;
+    cursor: pointer;
+}
+
+.bcc-guest-field {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 16px 16px;
+    padding: 10px 14px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #475569;
+    background: #f8fafc;
+    cursor: pointer;
+}
+
+.bcc-guest-field i {
+    color: #0ea5e9;
+}
+
+/* Partner rows */
+.bcc-partners {
+    border-top: 1px solid #f1f5f9;
+    padding: 0 16px;
+}
+
+.bcc-partner-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.bcc-partner-row:last-child {
+    border-bottom: none;
+}
+
+.bcc-brand {
+    width: 100px;
+    flex-shrink: 0;
+}
+
+.bcc-booking-logo {
+    display: flex;
+    align-items: center;
+    line-height: 1;
+}
+
+.bcc-agoda-logo {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    line-height: 1;
+}
+
+.agoda-dots {
+    display: flex;
+    gap: 3px;
+}
+
+.agoda-dots span {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.bcc-brand-logo {
+    max-height: 22px;
+    max-width: 100px;
+    object-fit: contain;
+    display: block;
+}
+
+.bcc-price-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    padding-right: 8px;
+}
+
+.bcc-price-original {
+    font-size: 0.78rem;
+    color: #94a3b8;
+    text-decoration: line-through;
+    font-weight: 500;
+}
+
+.bcc-price {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #64748b;
+}
+
+.bcc-price-sale {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.bcc-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 14px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.bcc-btn i { font-size: 0.7rem; }
+
+.bcc-btn-booking {
+    background: #003580;
+    color: white;
+    box-shadow: 0 3px 10px rgba(0,53,128,0.25);
+}
+.bcc-btn-booking:hover {
+    background: #00224f;
+    box-shadow: 0 5px 14px rgba(0,53,128,0.35);
+    transform: translateY(-1px);
+}
+
+.bcc-btn-agoda {
+    background: white;
+    color: #1e293b;
+    border: 1.5px solid #e2e8f0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+.bcc-btn-agoda:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+    transform: translateY(-1px);
+}
+
+.bcc-disclaimer {
+    font-size: 0.73rem;
+    color: #94a3b8;
+    padding: 12px 16px;
+    background: #f8fafc;
+    border-top: 1px solid #f1f5f9;
+    margin: 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    line-height: 1.5;
+}
+
+.bcc-disclaimer i {
+    color: #94a3b8;
+    margin-top: 1px;
+    flex-shrink: 0;
+}
+
+.popup-icon {
+    font-size: 0.7rem;
+    opacity: 0.8;
 }
 
 /* Recommended Places Section */

@@ -14,7 +14,31 @@ export default {
     signOut: 'Đăng xuất',
     profile: 'Hồ sơ',
     accountInfo: 'Thông tin tài khoản',
-    search: 'Tìm kiếm...',
+    contact: 'Liên hệ', // 🚨 เพิ่มตรงนี้ (trong phần nav)
+  },
+
+  // --- Contact Page ---
+  contact: {
+    title: 'Liên hệ với chúng tôi',
+    subtitle: 'Bạn có câu hỏi, phản hồi hoặc cần hỗ trợ? Chúng tôi rất muốn nghe từ bạn.',
+    getInTouch: 'Thông tin liên hệ',
+    description: 'Cho dù bạn có thắc mắc về hệ thống đề xuất AI của chúng tôi, muốn báo cáo sự cố hay có bất kỳ đề xuất nào, nhóm Savannakhet Smart Travel luôn sẵn sàng hỗ trợ.',
+    emailLabel: 'Địa chỉ Email',
+    phoneLabel: 'Số điện thoại',
+    locationLabel: 'Vị trí',
+    formTitle: 'Gửi tin nhắn',
+    formDesc: 'Gửi tin nhắn trực tiếp cho chúng tôi qua biểu mẫu dưới đây.',
+    yourName: 'Tên của bạn',
+    namePlaceholder: 'Nguyễn Văn A',
+    yourEmail: 'Địa chỉ Email',
+    emailPlaceholder: 'nguyenvana@example.com',
+    subject: 'Chủ đề',
+    subjectPlaceholder: 'Chúng tôi có thể giúp gì cho bạn?',
+    message: 'Tin nhắn',
+    messagePlaceholder: 'Nhập tin nhắn của bạn vào đây...',
+    sending: 'Đang gửi...',
+    sendBtn: 'Gửi tin nhắn',
+    successMsg: 'Gửi tin nhắn thành công! Chúng tôi sẽ phản hồi lại bạn sớm nhất có thể.'
   },
 
   // --- Place Detail ---
