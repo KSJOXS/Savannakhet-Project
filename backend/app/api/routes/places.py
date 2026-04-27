@@ -21,7 +21,7 @@ def get_places(
     from sqlalchemy.orm import selectinload
     query = db.query(models.Place).options(selectinload(models.Place.interactions))
     if not include_drafts:
-        query = query.filter(models.Place.is_published == True)
+        query = query.filter(models.Place.is_published == True, models.Place.status == 'approved')
     if category_id:
         query = query.filter(models.Place.category_id == category_id)
     
@@ -38,6 +38,57 @@ def get_place_detail(place_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Place not found.")
     place.review_count = len([i for i in place.interactions if i.comment])
     return place
+
+# --- User: Submit place ---
+@router.post("/places/submit")
+async def submit_place(
+    name: str = Form(...),
+    description: str = Form(...),
+    category_id: int = Form(...),
+    location_lat: Optional[float] = Form(None),
+    location_lng: Optional[float] = Form(None),
+    user_id: int = Form(...),
+    opening_hours: Optional[str] = Form(None),
+    images: Optional[List[UploadFile]] = File(None),
+    db: Session = Depends(get_db)
+):
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
+    image_urls = []
+
+    if images:
+        for file in images:
+            if file.filename:
+                file_path = f"{UPLOAD_DIR}/{file.filename}"
+                with open(file_path, "wb") as buffer:
+                    shutil.copyfileobj(file.file, buffer)
+                image_urls.append(f"/{file_path}")
+
+    image_url_data = json.dumps(image_urls) if image_urls else "[]"
+
+    parsed_hours = None
+    if opening_hours:
+        try:
+            parsed_hours = json.loads(opening_hours)
+        except Exception:
+            parsed_hours = None
+
+    new_place = models.Place(
+        name=name,
+        description=description,
+        category_id=category_id,
+        location_lat=location_lat,
+        location_lng=location_lng,
+        image_url=image_url_data,
+        is_published=False,
+        status="pending",
+        owner_id=user_id,
+        opening_hours=parsed_hours,
+        rating_avg=0.0
+    )
+    db.add(new_place)
+    db.commit()
+    db.refresh(new_place)
+    return {"message": "Place submitted successfully. Waiting for admin approval.", "id": new_place.id}
 
 # --- Admin: Create place ---
 @router.post("/admin/places")

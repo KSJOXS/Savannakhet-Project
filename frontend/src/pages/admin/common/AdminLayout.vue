@@ -11,6 +11,10 @@
                     <i class="fas fa-map-marker-alt"></i> Places
                 </router-link>
 
+                <router-link to="/admin/pending-places" class="nav-link" active-class="active">
+                    <i class="fas fa-clipboard-check"></i> Pending Approvals
+                </router-link>
+
                 <router-link to="/admin/categories" class="nav-link" active-class="active">
                     <i class="fas fa-tags"></i> Categories
                 </router-link>
@@ -19,8 +23,17 @@
                     <i class="fas fa-comments"></i> Reviews
                 </router-link>
 
+                <router-link to="/admin/messages" class="nav-link" active-class="active">
+                    <i class="fas fa-inbox"></i> Inbox
+                    <span v-if="unreadMessages > 0" class="badge-count">{{ unreadMessages }}</span>
+                </router-link>
+
                 <router-link to="/admin/manage-users" class="nav-link" active-class="active">
                     <i class="fas fa-users"></i> Users
+                </router-link>
+
+                <router-link to="/admin/pending-permissions" class="nav-link" active-class="active">
+                    <i class="fas fa-user-shield"></i> User Permissions
                 </router-link>
 
                 <router-link to="/admin/settings" class="nav-link" active-class="active">
@@ -59,8 +72,20 @@
 
 <script setup>
 import { useRouter } from 'vue-router'
+import { ref, onMounted } from 'vue'
+import api from '@/services/api'
 
 const router = useRouter()
+const unreadMessages = ref(0)
+
+const fetchUnreadCount = async () => {
+    try {
+        const res = await api.get('/api/admin/messages/unread-count')
+        unreadMessages.value = res.data.unread_count
+    } catch (error) {
+        console.error('Failed to fetch unread count:', error)
+    }
+}
 
 const logout = () => {
     if (confirm('Confirm sign out?')) {
@@ -72,6 +97,8 @@ const logout = () => {
         router.push('/login')
     }
 }
+
+onMounted(fetchUnreadCount)
 </script>
 
 <style scoped>
@@ -138,6 +165,16 @@ const logout = () => {
     background: #3498db;
     color: white;
     box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+}
+
+.badge-count {
+    background: #e74c3c;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-left: auto;
 }
 
 .nav-divider {

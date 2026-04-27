@@ -7,6 +7,45 @@ from typing import List
 
 router = APIRouter(tags=["Admin Dashboard"])
 
+# --- 0. Places Approval Management ---
+
+@router.get("/admin/places/pending", response_model=List[schemas.PlaceResponse])
+def get_pending_places(db: Session = Depends(get_db)):
+    from sqlalchemy.orm import selectinload
+    return db.query(models.Place).options(selectinload(models.Place.category)).filter(models.Place.status == "pending").all()
+
+from fastapi import Form
+@router.put("/admin/places/{place_id}/status")
+def update_place_status(place_id: int, status: str = Form(...), db: Session = Depends(get_db)):
+    place = db.query(models.Place).filter(models.Place.id == place_id).first()
+    if not place:
+        raise HTTPException(status_code=404, detail="Place not found.")
+    
+    place.status = status
+    if status == 'approved':
+        place.is_published = True
+    elif status == 'rejected':
+        place.is_published = False
+        
+    db.commit()
+    return {"message": f"Place status updated to {status}"}
+
+# --- 0.5 User Permissions Management ---
+
+@router.get("/admin/users/pending-permissions", response_model=List[schemas.UserResponse])
+def get_pending_user_permissions(db: Session = Depends(get_db)):
+    return db.query(models.User).filter(models.User.post_permission_status == "pending").all()
+
+@router.put("/admin/users/{user_id}/post-permission-status")
+def update_user_post_permission(user_id: int, status: str = Form(...), db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found.")
+    
+    user.post_permission_status = status
+    db.commit()
+    return {"message": f"User post permission updated to {status}"}
+
 # --- 1. Category Management ---
 
 @router.get("/categories", response_model=List[schemas.CategoryResponse])

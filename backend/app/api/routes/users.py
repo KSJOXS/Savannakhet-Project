@@ -1,10 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy import desc
 from app.database import get_db
 from app import models
 from app import schemas
 from app.core import security as auth
 from datetime import datetime
+import json
 
 router = APIRouter(tags=["Users Management"])
 
@@ -112,6 +114,75 @@ def restore(user_id: int, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found.")
+    
+    if user.deleted_at:
+        delta = datetime.utcnow() - user.deleted_at
+        if delta.days >= 3:
+            raise HTTPException(status_code=400, detail="Cannot restore account after 3 days of suspension.")
+            
     user.deleted_at = None
     db.commit()
     return {"message": "User restored successfully."}
+
+@router.post("/users/{user_id}/request-post-permission")
+def request_post_permission(user_id: int, db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found.")
+    user.post_permission_status = "pending"
+    db.commit()
+    return {"message": "Permission requested successfully."}
+
+def safe_json_load(data, default=[]):
+    if not data: return default
+    if isinstance(data, (list, dict)): return data
+    try:
+        if isinstance(data, str):
+            loaded = json.loads(data)
+            if isinstance(loaded, str):
+                return json.loads(loaded)
+            return loaded
+        return data
+    except:
+        return default
+
+@router.get("/users/{user_id}/reviews")
+def get_user_reviews(user_id: int, db: Session = Depends(get_db)):
+    results = db.query(
+        models.Interaction.id,
+        models.Interaction.rating,
+        models.Interaction.comment.label("comment_text"),
+        models.Interaction.images,
+        models.Interaction.liked_by,
+        models.Interaction.visited_at,
+        models.Place.id.label("place_id"),
+        models.Place.name.label("place_name"),
+        models.Place.image_url.label("place_image")
+    ).join(
+        models.Place, models.Interaction.place_id == models.Place.id
+    ).filter(
+        models.Interaction.user_id == user_id
+    ).order_by(desc(models.Interaction.visited_at)).all()
+    
+    output = []
+    for r in results:
+        try:
+            output.append({
+                "id": r.id,
+                "rating": r.rating,
+                "comment_text": r.comment_text,
+                "images": safe_json_load(r.images),
+                "liked_by": safe_json_load(r.liked_by),
+                "visited_at": r.visited_at,
+                "place_id": r.place_id,
+                "place_name": r.place_name,
+                "place_image": r.place_image
+            })
+        except:
+            continue
+    return output
+
+@router.get("/users/{user_id}/places", response_model=list[schemas.PlaceResponse])
+def get_user_places(user_id: int, db: Session = Depends(get_db)):
+    from sqlalchemy.orm import selectinload
+    return db.query(models.Place).options(selectinload(models.Place.category)).filter(models.Place.owner_id == user_id).all()

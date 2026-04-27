@@ -26,6 +26,31 @@
 
                     <div 
                         class="nav-item-dropdown"
+                        @mouseenter="isReviewOpen = true"
+                        @mouseleave="isReviewOpen = false"
+                    >
+                        <div class="nav-item" :class="{ active: route.path.includes('/review') || route.path.includes('/submit') }">
+                            <span>{{ t('nav.review') }}</span>
+                            <i class="fas fa-chevron-down dropdown-icon" :class="{ rotated: isReviewOpen }"></i>
+                        </div>
+
+                        <transition name="fade-slide">
+                            <div v-if="isReviewOpen" class="about-dropdown-menu">
+                                <router-link to="/profile?tab=reviews" class="about-dropdown-item" @click="isReviewOpen = false">
+                                    <i class="fas fa-pen-nib"></i> {{ t('nav.writeReview') }}
+                                </router-link>
+                                <router-link to="/submit-place" class="about-dropdown-item" @click="isReviewOpen = false">
+                                    <i class="fas fa-camera"></i> {{ t('nav.postPhoto') }}
+                                </router-link>
+                                <router-link to="/submit-place" class="about-dropdown-item" @click="isReviewOpen = false">
+                                    <i class="fas fa-plus-circle"></i> {{ t('nav.addPlace') }}
+                                </router-link>
+                            </div>
+                        </transition>
+                    </div>
+
+                    <div 
+                        class="nav-item-dropdown"
                         @mouseenter="isAboutOpen = true"
                         @mouseleave="isAboutOpen = false"
                     >
@@ -52,6 +77,8 @@
 
                     <div class="lang-switcher">
                         <button class="lang-btn" @click="isLangOpen = !isLangOpen">
+                            <i class="fas fa-globe"></i>
+                            <div class="lang-divider"></div>
                             <span>{{ currentFlagLabel }}</span>
                             <i class="fas fa-chevron-down" :class="{ rotated: isLangOpen }"></i>
                         </button>
@@ -92,19 +119,28 @@
                                 <div class="dropdown-arrow"></div>
 
                                 <router-link to="/favorites" class="dropdown-item" @click="isDropdownOpen = false">
-                                    {{ t('nav.saves') }}
+                                    <i class="fas fa-suitcase-rolling"></i> {{ t('nav.myTrips') }}
                                 </router-link>
                                 <router-link to="/profile" class="dropdown-item" @click="isDropdownOpen = false">
-                                    {{ t('nav.profile') }}
+                                    <i class="far fa-user-circle"></i> {{ t('nav.profile') }}
                                 </router-link>
-                                <router-link to="/settings" class="dropdown-item" @click="isDropdownOpen = false">
-                                    {{ t('nav.accountInfo') }}
+                                <router-link to="/profile?tab=reviews" class="dropdown-item" @click="isDropdownOpen = false">
+                                    <i class="fas fa-history"></i> {{ t('nav.socialHistory') || 'Social History' }}
+                                </router-link>
+                                <router-link to="/profile?tab=bookings" class="dropdown-item" @click="isDropdownOpen = false">
+                                    <i class="far fa-calendar-alt"></i> {{ t('nav.bookings') }}
+                                </router-link>
+                                <router-link to="/profile?tab=messages" class="dropdown-item" @click="isDropdownOpen = false">
+                                    <i class="far fa-envelope"></i> {{ t('nav.messages') }}
+                                </router-link>
+                                <router-link to="/profile?tab=settings" class="dropdown-item" @click="isDropdownOpen = false">
+                                    <i class="fas fa-user-cog"></i> {{ t('nav.accountInfo') }}
                                 </router-link>
 
                                 <div class="dropdown-divider"></div>
 
                                 <div class="dropdown-item logout" @click="handleLogoutAndClose">
-                                    {{ t('nav.signOut') }}
+                                    <i class="fas fa-sign-out-alt"></i> {{ t('nav.signOut') }}
                                 </div>
                             </div>
                         </transition>
@@ -147,6 +183,10 @@
                     <router-link to="/landmarks" class="sub-nav-item" :class="{ active: route.path.includes('/landmarks') }">
                         {{ t('nav.landmarks') }}
                     </router-link>
+                    
+                    <router-link to="/community" class="sub-nav-item" :class="{ active: route.path.includes('/community') }">
+                        <i class="fas fa-users"></i> {{ t('nav.community') || 'Community' }}
+                    </router-link>
                 </div>
             </div>
         </div>
@@ -169,10 +209,11 @@ const username = ref(user.value ? user.value.username : '')
 const isDropdownOpen = ref(false)
 const isLangOpen = ref(false)
 const isAboutOpen = ref(false)
+const isReviewOpen = ref(false)
 
 const currentFlagLabel = computed(() => {
     const found = supportedLocales.find(l => l.code === locale.value)
-    return found ? `${found.flag} ${found.code.toUpperCase()}` : '🇬🇧 EN'
+    return found ? found.label : 'English'
 })
 
 const switchLang = (code) => {
@@ -198,6 +239,7 @@ watch(() => router.currentRoute.value.path, () => {
     isDropdownOpen.value = false
     isLangOpen.value = false
     isAboutOpen.value = false
+    isReviewOpen.value = false
 })
 
 const handleLogoutAndClose = () => {
@@ -485,7 +527,9 @@ const handleLogoutAndClose = () => {
 }
 
 .dropdown-item {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: 12px;
     padding: 12px 20px;
     color: #0f172a;
     text-decoration: none;
@@ -495,8 +539,19 @@ const handleLogoutAndClose = () => {
     transition: background 0.2s;
 }
 
+.dropdown-item i {
+    width: 20px;
+    text-align: center;
+    color: #64748b;
+    font-size: 1.1rem;
+}
+
 .dropdown-item:hover {
     background: #f8fafc;
+}
+
+.dropdown-item:hover i {
+    color: #00aa6c;
 }
 
 .dropdown-divider {
@@ -509,6 +564,10 @@ const handleLogoutAndClose = () => {
     color: #ef4444;
 }
 
+.dropdown-item.logout i {
+    color: #ef4444;
+}
+
 /* Language Switcher */
 .lang-switcher {
     position: relative;
@@ -517,12 +576,11 @@ const handleLogoutAndClose = () => {
 .lang-btn {
     display: flex;
     align-items: center;
-    gap: 6px;
-    background: #f1f5f9;
-    border: 1px solid #e2e8f0;
-    border-radius: 24px;
-    padding: 8px 14px;
-    font-size: 0.85rem;
+    gap: 8px;
+    background: transparent;
+    border: none;
+    padding: 8px 12px;
+    font-size: 0.95rem;
     font-weight: 600;
     cursor: pointer;
     color: #0f172a;
@@ -530,8 +588,16 @@ const handleLogoutAndClose = () => {
     font-family: inherit;
 }
 
+.lang-divider {
+    width: 1px;
+    height: 16px;
+    background: #cbd5e1;
+    margin: 0 4px;
+}
+
 .lang-btn:hover {
-    background: #e2e8f0;
+    background: #f1f5f9;
+    border-radius: 24px;
 }
 
 .lang-btn .fa-chevron-down {

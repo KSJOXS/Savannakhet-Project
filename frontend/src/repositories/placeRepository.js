@@ -16,6 +16,29 @@ export const placeRepository = {
             }
         })
     },
+    
+    // User submit place
+    submit(data) {
+        return api.post('/places/submit', data, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        })
+    },
+
+    getPendingPlaces() {
+        return api.get('/admin/places/pending')
+    },
+    
+    updateStatus(id, status) {
+        const fd = new FormData();
+        fd.append('status', status);
+        return api.put(`/admin/places/${id}/status`, fd, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        })
+    },
 
     // 🛠️ สำหรับ FastAPI สามารถส่ง FormData ผ่าน PUT ได้โดยตรงเลยครับ 🎉
     update(id, data) {
@@ -32,13 +55,38 @@ export const placeRepository = {
     getComments(placeId) {
         return api.get(`/places/${placeId}/comments`)
     },
-    addComment(placeId, data) {
-        return api.post('/reviews', { place_id: parseInt(placeId), ...data })
+    addComment(data) {
+        // data should be FormData
+        return api.post('/reviews', data, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        })
+    },
+    getCommunityFeed() {
+        return api.get('/community/feed')
+    },
+    toggleLike(reviewId, userId) {
+        return api.post(`/reviews/${reviewId}/like?user_id=${userId}`)
     },
     getAllComments() {
         return api.get('/admin/all-comments')
     },
     deleteComment(id) {
-        return api.delete(`/comments/${id}`)
+        return api.delete(`/admin/comments/${id}`)
+    },
+    updateUserReview(reviewId, data) {
+        return api.put(`/reviews/${reviewId}`, data, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        })
+    },
+    deleteUserReview(reviewId, userId) {
+        return api.delete(`/reviews/${reviewId}?user_id=${userId}`)
+    },
+    addPostComment(reviewId, data) {
+        return api.post(`/reviews/${reviewId}/comments`, data, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        })
+    },
+    deletePostComment(commentId, userId) {
+        return api.delete(`/reviews/comments/${commentId}?user_id=${userId}`)
     }
 }

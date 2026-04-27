@@ -18,5 +18,26 @@ export const userRepository = {
     },
     restore(id) {
         return api.patch(`/users/${id}/restore`)
+    },
+    requestPostPermission(id) {
+        return api.post(`/users/${id}/request-post-permission`)
+    },
+    getPendingPermissions() {
+        return api.get('/admin/users/pending-permissions')
+    },
+    updatePostPermission(id, status) {
+        const fd = new FormData();
+        fd.append('status', status);
+        return api.put(`/admin/users/${id}/post-permission-status`, fd, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        })
+    },
+    getUserReviews(id) {
+        return api.get(`/users/${id}/reviews`)
+    },
+    getUserPlaces(id) {
+        return api.get(`/users/${id}/places`)
     }
 }

@@ -2,7 +2,6 @@
     <div class="admin-dashboard">
         <header class="dashboard-header">
             <h2><i class="fas fa-chart-line"></i> Dashboard Overview</h2>
-            <p>Welcome back, Admin. ข้อมูลอัปเดตจากระบบ</p>
         </header>
 
         <div v-if="loading" class="loading-state">

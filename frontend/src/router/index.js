@@ -7,26 +7,32 @@ import RecommendList from '../pages/places/RecommendList.vue'
 import Login from '../pages/auth/Login.vue'
 import Register from '../pages/auth/Register.vue'
 import PlaceDetail from '../pages/places/PlaceDetail.vue'
-import EditPlace from '../pages/admin/EditPlace.vue'
+import EditPlace from '../pages/admin/places/EditPlace.vue'
 import Favorites from '../pages/user/Favorites.vue'
 import Profile from '../pages/user/Profile.vue'
-import AddPlace from '../pages/admin/AddPlace.vue'
+import SubmitPlace from '../pages/user/SubmitPlace.vue'
+import AddPlace from '../pages/admin/places/AddPlace.vue'
 import Hotels from '../pages/places/Hotels.vue'
 import HotelDetail from '../pages/places/HotelDetail.vue'
 import Restaurants from '../pages/places/Restaurants.vue'
 import nature from '../pages/places/Nature.vue'
 import Landmarks from '../pages/places/Landmarks.vue'
 import About from '../pages/main/About.vue'
-import Contact from '../pages/main/Contact.vue' // 🚨 นำเข้าคอมโพเนนต์ Contact
+import Contact from '../pages/main/Contact.vue'
+import Community from '../pages/community/Community.vue'
 
 // --- Admin Components ---
-import AdminLayout from '../pages/admin/AdminLayout.vue'
-import AdminPlaces from '../pages/admin/Places.vue'
-import AdminCategories from '../pages/admin/Categories.vue'
-import AdminComments from '../pages/admin/Comments.vue'
-import AdminUsers from '../pages/admin/Users.vue'
-import AdminDashboard from '../pages/admin/Dashboard.vue'
-import AdminSettings from '../pages/admin/Settings.vue'
+import AdminLayout from '../pages/admin/common/AdminLayout.vue'
+import AdminPlaces from '../pages/admin/places/Places.vue'
+import AdminCategories from '../pages/admin/places/Categories.vue'
+import AdminComments from '../pages/admin/common/Comments.vue'
+import AdminUsers from '../pages/admin/users/Users.vue'
+import AdminDashboard from '../pages/admin/common/Dashboard.vue'
+import AdminSettings from '../pages/admin/settings/Settings.vue'
+import PendingPlaces from '../pages/admin/places/PendingPlaces.vue'
+import PendingPermissions from '../pages/admin/common/PendingPermissions.vue'
+import UserDetail from '../pages/admin/users/UserDetail.vue'
+import ContactMessages from '../pages/admin/common/ContactMessages.vue'
 
 const routes = [
     {
@@ -76,6 +82,11 @@ const routes = [
         component: Profile
     },
     {
+        path: '/submit-place',
+        name: 'SubmitPlace',
+        component: SubmitPlace
+    },
+    {
         path: '/hotels',
         name: 'Hotels',
         component: Hotels
@@ -106,10 +117,14 @@ const routes = [
         component: About
     },
     {
-        // 🚨 เพิ่ม Route สำหรับหน้า Contact
         path: '/contact',
         name: 'Contact',
         component: Contact
+    },
+    {
+        path: '/community',
+        name: 'Community',
+        component: Community
     },
 
     // --- Admin Routes with Sidebar System ---
@@ -136,6 +151,26 @@ const routes = [
                 path: 'manage-users',
                 name: 'AdminManageUsers',
                 component: AdminUsers
+            },
+            {
+                path: 'users/:id',
+                name: 'AdminUserDetail',
+                component: UserDetail
+            },
+            {
+                path: 'pending-places',
+                name: 'AdminPendingPlaces',
+                component: PendingPlaces
+            },
+            {
+                path: 'pending-permissions',
+                name: 'AdminPendingPermissions',
+                component: PendingPermissions
+            },
+            {
+                path: 'messages',
+                name: 'AdminMessages',
+                component: ContactMessages
             },
             {
                 path: '',

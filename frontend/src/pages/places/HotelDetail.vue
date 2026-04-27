@@ -96,14 +96,41 @@
                             <div v-for="comment in comments" :key="comment.id" class="review-item">
                                 <div class="reviewer">
                                     <div class="r-avatar">{{ comment.username.charAt(0) }}</div>
-                                    <div>
-                                        <strong>{{ comment.username }}</strong>
-                                        <div class="r-rating">
-                                            <i v-for="s in 5" :key="s" :class="[comment.rating >= s ? 'fas' : 'far', 'fa-circle']"></i>
+                                    <div style="flex-grow: 1; display: flex; justify-content: space-between; align-items: center;">
+                                        <div>
+                                            <strong>{{ comment.username }}</strong>
+                                            <div class="r-rating" v-if="editingCommentId !== comment.id">
+                                                <i v-for="s in 5" :key="s" :class="[comment.rating >= s ? 'fas' : 'far', 'fa-circle']"></i>
+                                            </div>
+                                        </div>
+                                        <div class="review-actions" v-if="user && user.username === comment.username" style="position: relative;">
+                                            <button @click="toggleDropdown(comment.id)" style="background: none; border: none; cursor: pointer; color: #64748b; padding: 5px; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; transition: background 0.2s;">
+                                                <i class="fas fa-ellipsis-h"></i>
+                                            </button>
+                                            <div v-if="showDropdownFor === comment.id" style="position: absolute; right: 0; top: 100%; background: white; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); z-index: 10; min-width: 120px; overflow: hidden;">
+                                                <button @click="startEdit(comment)" style="display: block; width: 100%; text-align: left; padding: 10px 15px; background: none; border: none; cursor: pointer; font-size: 0.9rem; color: #1e293b; transition: background 0.2s;">
+                                                    <i class="fas fa-pen" style="margin-right: 8px; color: #64748b;"></i> Edit
+                                                </button>
+                                                <button @click="deleteReview(comment.id)" style="display: block; width: 100%; text-align: left; padding: 10px 15px; background: none; border: none; cursor: pointer; font-size: 0.9rem; color: #ef4444; transition: background 0.2s;">
+                                                    <i class="fas fa-trash" style="margin-right: 8px;"></i> Delete
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                                <p class="r-text">{{ comment.comment_text }}</p>
+                                <div v-if="editingCommentId === comment.id" class="edit-comment-area" style="margin-top: 10px; background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                                    <div class="star-picker" style="margin-bottom: 10px;">
+                                        <i v-for="star in 5" :key="'edit-picker-' + star"
+                                            :class="[editRating >= star ? 'fas' : 'far', 'fa-circle']"
+                                            @click="editRating = star" style="cursor: pointer; color: #f59e0b; margin-right: 5px;"></i>
+                                    </div>
+                                    <textarea v-model="editCommentText" style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; resize: vertical; min-height: 80px; font-family: inherit; font-size: 0.95rem; margin-bottom: 10px;"></textarea>
+                                    <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                                        <button @click="cancelEdit" style="padding: 8px 16px; background: white; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; color: #475569; font-weight: 600;">Cancel</button>
+                                        <button @click="saveEdit(comment.id)" style="padding: 8px 16px; background: #3b82f6; border: none; border-radius: 6px; cursor: pointer; color: white; font-weight: 600;">Save</button>
+                                    </div>
+                                </div>
+                                <p v-else class="r-text">{{ comment.comment_text }}</p>
                             </div>
                         </div>
                     </section>
@@ -192,6 +219,62 @@ const isFavorite = ref(false)
 const newComment = ref('')
 const newRating = ref(5)
 const submitting = ref(false)
+
+const editingCommentId = ref(null)
+const editCommentText = ref('')
+const editRating = ref(5)
+const showDropdownFor = ref(null)
+
+const toggleDropdown = (id) => {
+    showDropdownFor.value = showDropdownFor.value === id ? null : id
+}
+
+const startEdit = (comment) => {
+    editingCommentId.value = comment.id
+    editCommentText.value = comment.comment_text || ''
+    editRating.value = comment.rating || 5
+    showDropdownFor.value = null
+}
+
+const cancelEdit = () => {
+    editingCommentId.value = null
+    editCommentText.value = ''
+    editRating.value = 5
+}
+
+const saveEdit = async (commentId) => {
+    if (!editCommentText.value.trim()) return
+    try {
+        const formData = new FormData()
+        formData.append('user_id', user.value.id)
+        formData.append('rating', editRating.value)
+        formData.append('comment_text', editCommentText.value)
+
+        await placeRepository.updateUserReview(commentId, formData)
+        
+        const comment = comments.value.find(c => c.id === commentId)
+        if (comment) {
+            comment.comment_text = editCommentText.value
+            comment.rating = editRating.value
+        }
+        cancelEdit()
+        fetchData()
+    } catch (err) {
+        console.error("Failed to update comment", err)
+    }
+}
+
+const deleteReview = async (commentId) => {
+    if (!confirm('Are you sure you want to delete this review?')) return
+    showDropdownFor.value = null
+    try {
+        await placeRepository.deleteUserReview(commentId, user.value.id)
+        comments.value = comments.value.filter(c => c.id !== commentId)
+        fetchData()
+    } catch (err) {
+        console.error("Failed to delete review", err)
+    }
+}
 
 const recommendedPlaces = ref([])
 const stickyNavRef = ref(null)

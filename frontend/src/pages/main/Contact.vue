@@ -95,9 +95,10 @@
 <script setup>
 import { ref } from 'vue'
 import Navbar from '@/components/Navbar.vue'
-import { useI18n } from '@/composables/useI18n' // 🚨 นำเข้า useI18n
+import { useI18n } from '@/composables/useI18n'
+import api from '@/services/api'
 
-const { t } = useI18n() // 🚨 เรียกใช้ฟังก์ชันแปลภาษา
+const { t } = useI18n()
 
 const form = ref({
     name: '',
@@ -109,12 +110,12 @@ const form = ref({
 const isSubmitting = ref(false)
 const showSuccess = ref(false)
 
-const submitForm = () => {
+const submitForm = async () => {
     isSubmitting.value = true
     showSuccess.value = false
 
-    // จำลองการส่ง API (หน่วงเวลา 1.5 วินาที)
-    setTimeout(() => {
+    try {
+        await api.post('/api/contact', form.value)
         isSubmitting.value = false
         showSuccess.value = true
         
@@ -130,7 +131,11 @@ const submitForm = () => {
         setTimeout(() => {
             showSuccess.value = false
         }, 5000)
-    }, 1500)
+    } catch (error) {
+        console.error('Failed to submit contact form:', error)
+        alert('Failed to send message. Please try again later.')
+        isSubmitting.value = false
+    }
 }
 </script>
 

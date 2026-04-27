@@ -31,6 +31,10 @@ class Place(Base):
     
     opening_hours = Column(JSON, nullable=True)  # {"mon":{"open":"08:00","close":"17:00","closed":false}, ...}
     
+    # User Submission
+    owner_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    status = Column(String(20), default="pending")  # 'pending', 'approved', 'rejected'
+    
     rating_avg = Column(Numeric(3, 2), default=0)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
@@ -38,6 +42,7 @@ class Place(Base):
     category = relationship("Category", back_populates="places")
     interactions = relationship("Interaction", back_populates="place")
     favorites = relationship("Favorite", back_populates="place", cascade="all, delete")
+    owner = relationship("User", back_populates="owned_places")
 
 class User(Base):
     __tablename__ = "users"
@@ -51,10 +56,12 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     deleted_at = Column(DateTime, nullable=True)
     profile_image = Column(String(255), nullable=True)
+    post_permission_status = Column(String(20), default="none") # 'none', 'pending', 'approved'
 
     # เชื่อมไปที่ Interactions
     interactions = relationship("Interaction", back_populates="user", cascade="all, delete")
     favorites = relationship("Favorite", back_populates="user", cascade="all, delete")
+    owned_places = relationship("Place", back_populates="owner")
 
 class Interaction(Base):
     __tablename__ = "user_interactions"
@@ -64,11 +71,26 @@ class Interaction(Base):
     place_id = Column(Integer, ForeignKey("places.id"))
     rating = Column(Integer)
     comment = Column(Text)
+    images = Column(LONGTEXT, nullable=True) # JSON array of image URLs
+    liked_by = Column(JSON, nullable=True) # JSON array of user IDs
     visited_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # เชื่อมกลับ
     user = relationship("User", back_populates="interactions")
     place = relationship("Place", back_populates="interactions")
+    post_comments = relationship("PostComment", back_populates="post", cascade="all, delete-orphan")
+
+class PostComment(Base):
+    __tablename__ = "post_comments"
+
+    id = Column(Integer, primary_key=True, index=True)
+    post_id = Column(Integer, ForeignKey("user_interactions.id", ondelete="CASCADE"))
+    user_id = Column(Integer, ForeignKey("users.id"))
+    comment_text = Column(Text, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    post = relationship("Interaction", back_populates="post_comments")
+    user = relationship("User", backref="post_comments")
 
 class Favorite(Base):
     __tablename__ = "favorites"
@@ -81,6 +103,18 @@ class Favorite(Base):
     # เชื่อมกลับ
     user = relationship("User", back_populates="favorites")
     place = relationship("Place", back_populates="favorites")
+
+class ContactMessage(Base):
+    __tablename__ = "contact_messages"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100), nullable=False)
+    email = Column(String(100), nullable=False)
+    subject = Column(String(255), nullable=False)
+    message = Column(Text, nullable=False)
+    is_read = Column(Boolean, default=False)
+    is_replied = Column(Boolean, default=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 class SiteSetting(Base):
     __tablename__ = "site_settings"

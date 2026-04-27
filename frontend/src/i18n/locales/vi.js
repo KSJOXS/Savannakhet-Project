@@ -14,7 +14,14 @@ export default {
     signOut: 'Đăng xuất',
     profile: 'Hồ sơ',
     accountInfo: 'Thông tin tài khoản',
-    contact: 'Liên hệ', // 🚨 เพิ่มตรงนี้ (trong phần nav)
+    contact: 'Liên hệ',
+    review: 'Đánh giá',
+    writeReview: 'Viết đánh giá',
+    postPhoto: 'Đăng ảnh',
+    addPlace: 'Thêm địa điểm',
+    myTrips: 'Chuyến đi của tôi',
+    bookings: 'Đặt chỗ',
+    messages: 'Tin nhắn',
   },
 
   // --- Contact Page ---

@@ -14,7 +14,8 @@
                     <p>Loading your profile...</p>
                 </div>
                 
-                <form v-else @submit.prevent="handleUpdate" class="profile-form">
+                <!-- TAB: Settings -->
+                <form v-if="!loading && activeTab === 'settings'" @submit.prevent="handleUpdate" class="profile-form">
                     
                     <div class="avatar-section">
                         <div class="avatar-wrapper" :class="{ 'is-editing': isEditing }" @click="isEditing && triggerImageUpload()">
@@ -69,25 +70,119 @@
                         </div>
                     </div>
                 </form>
+
+                <!-- TAB: Social History (formerly Reviews) -->
+                <div v-if="!loading && activeTab === 'reviews'" class="history-section fade-in">
+                    <div class="stats-row">
+                        <div class="stat-card">
+                            <span class="stat-value">{{ userReviews.length }}</span>
+                            <span class="stat-label">Total Posts</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-value">{{ averageRating }}</span>
+                            <span class="stat-label">Avg Rating</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-value">{{ userPlaces.length }}</span>
+                            <span class="stat-label">Places Submitted</span>
+                        </div>
+                    </div>
+
+                    <div v-if="userReviews.length === 0" class="empty-history">
+                        <div class="empty-icon-wrap"><i class="fas fa-comment-slash"></i></div>
+                        <p>You haven't shared any experiences yet.</p>
+                        <router-link to="/community" class="btn-primary-outline">Go to Community</router-link>
+                    </div>
+                    
+                    <div v-else class="social-history-feed">
+                        <div v-for="review in userReviews" :key="review.id" class="social-post-card">
+                            <div class="post-header">
+                                <div class="place-info">
+                                    <router-link :to="`/places/${review.place_id}`" class="place-name-link">
+                                        {{ review.place_name }}
+                                    </router-link>
+                                    <span class="post-date">{{ formatDate(review.visited_at) }}</span>
+                                </div>
+                                <div class="rating-badge">
+                                    <i class="fas fa-star"></i> {{ review.rating }}
+                                </div>
+                            </div>
+                            <div class="post-body">
+                                <p class="post-text">{{ review.comment_text }}</p>
+                                
+                                <div v-if="review.images && review.images.length > 0" class="post-images-grid">
+                                    <div v-for="(img, idx) in review.images" :key="idx" class="img-thumb" @click="openLightbox(review.images, idx)">
+                                        <img :src="getImageUrl(img)" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="post-footer">
+                                <span class="likes-count"><i class="fas fa-heart text-danger"></i> {{ review.liked_by?.length || 0 }} likes</span>
+                                <button class="btn-view-place" @click="$router.push(`/places/${review.place_id}`)">View Place</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: Places -->
+                <div v-if="!loading && activeTab === 'places'" class="history-section fade-in">
+                    <div class="section-header">
+                        <h3><i class="fas fa-map-marked-alt text-primary"></i> Places You Added</h3>
+                        <p class="text-muted">Locations you have contributed to the directory.</p>
+                    </div>
+                    <div v-if="userPlaces.length === 0" class="empty-history">
+                        <div class="empty-icon-wrap"><i class="fas fa-map-signs"></i></div>
+                        <p>You haven't submitted any places yet.</p>
+                        <router-link to="/submit-place" class="btn-primary-action mt-3">Submit a Place</router-link>
+                    </div>
+                    <div v-else class="place-grid">
+                        <div v-for="place in userPlaces" :key="place.id" class="history-card">
+                            <div class="card-img-wrapper">
+                                <img :src="getPlaceImage(place.image_url)" alt="place" class="history-card-img" />
+                                <div class="status-badge" :class="place.status">
+                                    {{ place.status === 'pending' ? '⏳ Pending' : (place.status === 'approved' ? '✅ Approved' : '❌ Rejected') }}
+                                </div>
+                            </div>
+                            <div class="history-card-body">
+                                <router-link :to="`/places/${place.id}`" class="place-link">
+                                    <h4>{{ place.name }}</h4>
+                                </router-link>
+                                <p class="desc-text">{{ truncate(place.description, 70) }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import Navbar from '@/components/Navbar.vue'
 import { userRepository } from '@/repositories/userRepository'
 import { useAuth } from '@/composables/useAuth'
 
 const router = useRouter()
+const route = useRoute()
 const { user } = useAuth()
 const loading = ref(true)
 const saving = ref(false)
 const isEditing = ref(false)
 const successMsg = ref('')
 const errorMsg = ref('')
+
+const activeTab = ref('settings')
+const userReviews = ref([])
+const userPlaces = ref([])
+
+const averageRating = computed(() => {
+    if (userReviews.value.length === 0) return '0.0'
+    const sum = userReviews.value.reduce((acc, r) => acc + r.rating, 0)
+    return (sum / userReviews.value.length).toFixed(1)
+})
 
 const originalData = ref({})
 const fileInput = ref(null)
@@ -155,6 +250,19 @@ const fetchProfile = async () => {
             email: res.data.email, 
             profile_image: res.data.profile_image 
         }
+        
+        // Fetch history parallelly
+        const [reviewsRes, placesRes] = await Promise.all([
+            userRepository.getUserReviews(user.value.id),
+            userRepository.getUserPlaces(user.value.id)
+        ])
+        userReviews.value = reviewsRes.data.map(r => ({
+            ...r,
+            images: r.images || [],
+            liked_by: r.liked_by || []
+        }))
+        userPlaces.value = placesRes.data
+        
     } catch (err) {
         console.error("Error fetching profile:", err)
         errorMsg.value = "ไม่สามารถดึงข้อมูลโปรไฟล์ได้"
@@ -209,7 +317,45 @@ const handleUpdate = async () => {
     }
 }
 
-onMounted(fetchProfile)
+const getPlaceImage = (imageString) => {
+    try {
+        if (!imageString || imageString === '[]') return '/placeholder-image.jpg'
+        const images = JSON.parse(imageString)
+        if (images.length > 0) {
+            return `http://localhost:8000${images[0]}`
+        }
+    } catch (e) {
+        // อาจเป็น string เปล่าๆ ไม่ใช่ JSON
+        if (imageString && !imageString.includes('[')) return `http://localhost:8000${imageString}`
+    }
+    return '/placeholder-image.jpg'
+}
+
+const truncate = (text, length) => {
+    if (!text) return ''
+    return text.length > length ? text.substring(0, length) + '...' : text
+}
+
+const formatDate = (dateString) => {
+    if (!dateString) return ''
+    const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }
+    return new Date(dateString).toLocaleDateString('en-US', options)
+}
+
+const getImageUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http') || url.startsWith('data:')) return url;
+    return `http://localhost:8000/${url.startsWith('/') ? url.slice(1) : url}`;
+}
+
+watch(() => route.query.tab, (newTab) => {
+    activeTab.value = newTab || 'settings'
+})
+
+onMounted(() => {
+    activeTab.value = route.query.tab || 'settings'
+    fetchProfile()
+})
 </script>
 
 <style scoped>
@@ -418,5 +564,316 @@ onMounted(fetchProfile)
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+/* Social History Feed Styles */
+.social-history-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.social-post-card {
+    background: #f8fafc;
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid #e2e8f0;
+    transition: 0.3s;
+}
+
+.social-post-card:hover {
+    border-color: #3b82f6;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.post-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    align-items: center;
+}
+
+.place-tag {
+    background: #e0f2fe;
+    color: #0369a1;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+/* 📊 Stats Row */
+.stats-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    flex: 1;
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    border: 1px solid #e2e8f0;
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #1e293b;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* 📱 Social History Feed */
+.social-history-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.social-post-card {
+    background: white;
+    border: 1px solid #eef2f6;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 10px;
+    transition: 0.3s;
+}
+
+.social-post-card:hover {
+    box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+    transform: translateY(-2px);
+}
+
+.post-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+}
+
+.place-name-link {
+    display: block;
+    font-weight: 700;
+    color: #1e293b;
+    font-size: 1.1rem;
+    text-decoration: none;
+}
+
+.place-name-link:hover {
+    color: #3498db;
+}
+
+.post-date {
+    font-size: 0.8rem;
+    color: #94a3b8;
+}
+
+.rating-badge {
+    background: #fef9c3;
+    color: #854d0e;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.post-text {
+    color: #334155;
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+
+.post-images-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.img-thumb {
+    aspect-ratio: 1;
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.img-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.post-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 15px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.likes-count {
+    font-size: 0.9rem;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.btn-view-place {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: none;
+    padding: 6px 15px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-view-place:hover {
+    background: #dbeafe;
+}
+
+.history-section {
+    padding: 10px 0;
+}
+
+.history-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    overflow: hidden;
+    transition: 0.3s;
+    display: flex;
+    flex-direction: column;
+}
+
+.history-card:hover {
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    transform: translateY(-4px);
+    border-color: #cbd5e1;
+}
+
+.card-img-wrapper {
+    position: relative;
+    height: 160px;
+    width: 100%;
+}
+
+.history-card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.rating-badge {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    background: rgba(0,0,0,0.7);
+    color: #fcd34d;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    backdrop-filter: blur(4px);
+}
+
+.status-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+.status-badge.approved { background: rgba(16, 185, 129, 0.9); color: white; }
+.status-badge.pending { background: rgba(245, 158, 11, 0.9); color: white; }
+.status-badge.rejected { background: rgba(239, 68, 68, 0.9); color: white; }
+
+.history-card-body {
+    padding: 18px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.place-link {
+    text-decoration: none;
+    color: #0f172a;
+}
+
+.place-link h4 {
+    margin: 0 0 10px 0;
+    font-size: 1.15rem;
+    transition: 0.2s;
+    line-height: 1.3;
+}
+
+.place-link:hover h4 {
+    color: #3b82f6;
+}
+
+.comment-text {
+    margin: 0 0 15px 0;
+    font-size: 0.9rem;
+    color: #475569;
+    line-height: 1.5;
+    flex: 1;
+}
+
+.quote-icon {
+    color: #cbd5e1;
+    font-size: 0.8rem;
+    margin-right: 4px;
+}
+
+.card-footer-info {
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px dashed #e2e8f0;
+}
+
+.date-text {
+    color: #94a3b8;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.desc-text {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #64748b;
+    line-height: 1.5;
+}
+
+.fade-in {
+    animation: fadeIn 0.4s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 600px) {
+    .profile-card { padding: 25px; }
+    .review-grid, .place-grid { grid-template-columns: 1fr; }
 }
 </style>

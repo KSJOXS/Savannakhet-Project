@@ -15,7 +15,14 @@ export default {
     profile: 'ໂປຣໄຟລ໌',
     accountInfo: 'ຂໍ້ມູນບັນຊີ',
     search: 'ຄົ້ນຫາ...',
-    contact: 'ຕິດຕໍ່ພວກເຮົາ', // 🚨 เพิ่มตรงนี้ (ໃນໝວດ nav)
+    contact: 'ຕິດຕໍ່ພວກເຮົາ',
+    review: 'ລີວິວ',
+    writeReview: 'ຂຽນລີວິວ',
+    postPhoto: 'ໂພສຮູບພາບ',
+    addPlace: 'ເພີ່ມສະຖານທີ່',
+    myTrips: 'ທຣິບຂອງຂ້ອຍ',
+    bookings: 'ການຈອງ',
+    messages: 'ຂໍ້ຄວາມ',
   },
 
   // --- Contact Page ---
