@@ -15,13 +15,9 @@
                 </div>
 
                 <div class="quick-filters">
-                    <button 
-                        v-for="cat in natureCategories" 
-                        :key="cat.id"
-                        class="filter-pill" 
+                    <button v-for="cat in natureCategories" :key="cat.id" class="filter-pill"
                         @click="toggleCategory(cat.name.toLowerCase())"
-                        :class="{ active: selectedCategories.includes(cat.name.toLowerCase()) }"
-                    >
+                        :class="{ active: selectedCategories.includes(cat.name.toLowerCase()) }">
                         <i :class="getIconForNature(cat.name)"></i> {{ cat.name }}
                     </button>
                 </div>
@@ -38,7 +34,7 @@
 
                 <div class="filter-group">
                     <h3>Category</h3>
-                    <label v-for="cat in natureCategories" :key="'sidebar-'+cat.id" class="filter-checkbox">
+                    <label v-for="cat in natureCategories" :key="'sidebar-' + cat.id" class="filter-checkbox">
                         <input type="checkbox" :value="cat.name.toLowerCase()" v-model="selectedCategories" />
                         <span>{{ cat.name }}</span>
                     </label>
@@ -84,13 +80,16 @@
 
                         <div class="card-img-wrapper">
                             <img :src="getCoverImage(place)" :alt="place.name" @error="handleImgError" />
-                            
+
                             <div class="slider-arrows" v-if="getPlaceImagesArray(place).length > 1">
-                                <button class="arrow-btn left" @click.stop="prevImage(place.id, place)"><i class="fas fa-chevron-left"></i></button>
-                                <button class="arrow-btn right" @click.stop="nextImage(place.id, place)"><i class="fas fa-chevron-right"></i></button>
+                                <button class="arrow-btn left" @click.stop="prevImage(place.id, place)"><i
+                                        class="fas fa-chevron-left"></i></button>
+                                <button class="arrow-btn right" @click.stop="nextImage(place.id, place)"><i
+                                        class="fas fa-chevron-right"></i></button>
                             </div>
                             <div class="slider-dots" v-if="getPlaceImagesArray(place).length > 1">
-                                <span v-for="(_, idx) in getPlaceImagesArray(place)" :key="idx" :class="['dot', { active: (currentImageIndices[place.id] || 0) === idx }]"></span>
+                                <span v-for="(_, idx) in getPlaceImagesArray(place)" :key="idx"
+                                    :class="['dot', { active: (currentImageIndices[place.id] || 0) === idx }]"></span>
                             </div>
 
                             <button class="btn-heart" :class="{ active: isFavorite(place.id) }"
@@ -123,9 +122,9 @@
                             </div>
 
                             <div class="card-footer">
-                                <button class="btn-contact" @click.stop="handleContact(place)">
+                                <!-- <button class="btn-contact" @click.stop="handleContact(place)">
                                     <i class="fas fa-phone-alt"></i> Contact
-                                </button>
+                                </button> -->
                                 <button class="btn-details">View Details</button>
                             </div>
                         </div>
@@ -133,17 +132,11 @@
                 </div>
             </main>
         </div>
-        
+
         <SectionDivider icon="fas fa-tree" />
 
-        <MapOverlay 
-            :is-open="showMapModal" 
-            :places="places" 
-            :categories="categories"
-            initial-filter="nature"
-            title="Nature & Parks" 
-            @close="showMapModal = false" 
-        />
+        <MapOverlay :is-open="showMapModal" :places="places" :categories="categories" initial-filter="nature"
+            title="Nature & Parks" @close="showMapModal = false" />
 
         <RecentlyViewed />
     </div>
@@ -233,22 +226,22 @@ const filteredNature = computed(() => {
 })
 
 // --- Image Carousel Logic ---
-const currentImageIndices = ref({}) 
+const currentImageIndices = ref({})
 
 const getPlaceImagesArray = (place) => {
     const noImageUrl = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22400%22%20height%3D%22300%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23e2e8f0%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20fill%3D%22%2364748b%22%20font-family%3D%22sans-serif%22%20font-size%3D%2220%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%3ENo%20Image%3C%2Ftext%3E%3C%2Fsvg%3E';
     let urls = [];
-    
+
     if (place.images && Array.isArray(place.images) && place.images.length > 0) {
         urls = place.images.map(img => img.image_url || img.url || img);
-    } else if (place.image_url) { 
+    } else if (place.image_url) {
         if (typeof place.image_url === 'string' && place.image_url.trim().startsWith('[')) {
             try { urls = JSON.parse(place.image_url); } catch (e) { urls = [place.image_url.replace(/^\["?|"?\]$/g, '').replace(/\\"/g, '')]; }
         } else {
             urls = [place.image_url];
         }
     }
-    
+
     if (urls.length === 0) return [noImageUrl];
 
     return urls.map(url => {
@@ -522,15 +515,69 @@ onMounted(fetchData)
     object-fit: cover;
 }
 
-.slider-arrows { opacity: 0; transition: opacity 0.2s ease-in-out; }
-.card-img-wrapper:hover .slider-arrows { opacity: 1; }
-.arrow-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255, 255, 255, 0.85); border: none; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #1e293b; box-shadow: 0 2px 6px rgba(0,0,0,0.2); z-index: 5; transition: 0.2s; }
-.arrow-btn:hover { background: white; transform: translateY(-50%) scale(1.1); }
-.arrow-btn.left { left: 8px; } .arrow-btn.right { right: 8px; }
+.slider-arrows {
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+}
 
-.slider-dots { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); display: flex; gap: 4px; z-index: 5; }
-.dot { width: 6px; height: 6px; background: rgba(255, 255, 255, 0.6); border-radius: 50%; transition: 0.2s; }
-.dot.active { background: white; transform: scale(1.3); }
+.card-img-wrapper:hover .slider-arrows {
+    opacity: 1;
+}
+
+.arrow-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.85);
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #1e293b;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    z-index: 5;
+    transition: 0.2s;
+}
+
+.arrow-btn:hover {
+    background: white;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.arrow-btn.left {
+    left: 8px;
+}
+
+.arrow-btn.right {
+    right: 8px;
+}
+
+.slider-dots {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 4px;
+    z-index: 5;
+}
+
+.dot {
+    width: 6px;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 50%;
+    transition: 0.2s;
+}
+
+.dot.active {
+    background: white;
+    transform: scale(1.3);
+}
 
 .btn-heart {
     position: absolute;

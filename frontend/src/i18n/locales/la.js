@@ -21,8 +21,15 @@ export default {
     postPhoto: 'ໂພສຮູບພາບ',
     addPlace: 'ເພີ່ມສະຖານທີ່',
     myTrips: 'ທຣິບຂອງຂ້ອຍ',
+    tools: 'ເຄື່ອງມືຊ່ວຍເຫຼືອ',
     bookings: 'ການຈອງ',
     messages: 'ຂໍ້ຄວາມ',
+    contribute: 'ຮ່ວມມື',
+    help: 'ຊ່ວຍເຫຼືອ',
+    faq: 'ຄຳຖາມທີ່ມັກຖາມ',
+    userGuide: 'ຄູ່ມືຜູ້ໃຊ້',
+    contactSupport: 'ຕິດຕໍ່ຝ່າຍການສະໜັບສະໜູນ',
+    reportIssue: 'ລາຍງານບັນຫາ',
   },
 
   // --- Contact Page ---
@@ -201,6 +208,15 @@ export default {
     seeAll: 'ເບິ່ງທັງໝົດ',
     new: 'ໃໝ່',
     min: 'ນາທີ',
+  },
+
+  // --- Utility Page ---
+  utility: {
+    title: 'ເຄື່ອງມືຊ່ວຍເຫຼືອ',
+    subtitle: 'ເຄື່ອງມືການທ່ອງທ່ຽວເພື່ອເຮັດໃຫ້ການເດີນທາງຂອງທ່ານງ່າຍຂຶ້ນ',
+    currencyConverter: 'ແປງສະກຸນເງິນ',
+    phrasebook: 'ສໍາມະນາກຳ',
+    transportGuide: 'ຄູ່ມືການຂົນສົ່ງ'
   },
 
   // --- Footer ---

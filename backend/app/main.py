@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app import models
 from app.database import engine
-from app.api.routes import users, places, reviews, admin, favorites, interactions, recommendations, settings, contact
+from app.api.routes import users, places, reviews, admin, favorites, interactions, recommendations, settings, contact, utilities
 
 # สร้างตารางใน DB
 models.Base.metadata.create_all(bind=engine)
@@ -38,6 +38,9 @@ app.include_router(settings.router, prefix="/api/settings", tags=["Settings"])
 
 # ✅ จดทะเบียน Contact Router
 app.include_router(contact.router)
+
+# ✅ จดทะเบียน Utilities Router
+app.include_router(utilities.router, prefix="/api/v1/utilities", tags=["Utilities"])
 
 @app.get("/")
 def home():

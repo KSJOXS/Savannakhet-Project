@@ -30,6 +30,42 @@ def get_places(
         p.review_count = len([i for i in p.interactions if i.comment])
     return places
 
+@router.get("/places/trending", response_model=List[schemas.PlaceResponse])
+def get_trending_places(limit: int = 10, db: Session = Depends(get_db)):
+    """
+    ดึงสถานที่ที่เป็นที่นิยม (Trending) โดยคำนวณจาก InteractionLog
+    """
+    from sqlalchemy import func
+    from sqlalchemy.orm import selectinload
+    
+    # คำนวณหา Place ID ที่มี Interaction Weight รวมสูงสุด
+    popular_ids = db.query(
+        models.InteractionLog.place_id,
+        func.sum(models.InteractionLog.interaction_weight).label('total_weight')
+    ).group_by(models.InteractionLog.place_id)\
+     .order_by(func.sum(models.InteractionLog.interaction_weight).desc())\
+     .limit(limit).all()
+    
+    if not popular_ids:
+        # Fallback to top rating if no logs
+        return db.query(models.Place).filter(models.Place.is_published == True, models.Place.status == 'approved').order_by(models.Place.rating_avg.desc()).limit(limit).all()
+        
+    ids = [p[0] for p in popular_ids]
+    
+    # ดึงข้อมูล Place ตาม ID ที่ได้
+    places = db.query(models.Place)\
+        .options(selectinload(models.Place.interactions))\
+        .filter(models.Place.id.in_(ids))\
+        .all()
+    
+    # เรียงลำดับตามความนิยมเดิม
+    places_sorted = sorted(places, key=lambda x: ids.index(x.id))
+    
+    for p in places_sorted:
+        p.review_count = len([i for i in p.interactions if i.comment])
+        
+    return places_sorted
+
 @router.get("/places/{place_id}", response_model=schemas.PlaceResponse)
 def get_place_detail(place_id: int, db: Session = Depends(get_db)):
     from sqlalchemy.orm import selectinload
@@ -38,6 +74,19 @@ def get_place_detail(place_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Place not found.")
     place.review_count = len([i for i in place.interactions if i.comment])
     return place
+
+@router.get("/places/{place_id}/fans", response_model=List[schemas.UserResponse])
+def get_place_fans(place_id: int, limit: int = 5, db: Session = Depends(get_db)):
+    """
+    ดึงข้อมูลผู้ใช้ที่เคยมี Interaction กับสถานที่นี้ (Social Proof)
+    """
+    from sqlalchemy import desc
+    fans = db.query(models.User).join(models.InteractionLog)\
+             .filter(models.InteractionLog.place_id == place_id)\
+             .order_by(desc(models.InteractionLog.created_at))\
+             .distinct()\
+             .limit(limit).all()
+    return fans
 
 # --- User: Submit place ---
 @router.post("/places/submit")

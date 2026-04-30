@@ -27,8 +27,15 @@ export default {
     writePost: 'Write Post',
     communityFeed: 'Community Feed',
     myTrips: 'My Trips',
+    tools: 'Travel Tools',
     bookings: 'Bookings',
     messages: 'Messages',
+    contribute: 'Contribute',
+    help: 'Help',
+    faq: 'FAQ',
+    userGuide: 'User Guide',
+    contactSupport: 'Contact Support',
+    reportIssue: 'Report an Issue',
   },
 
   // --- Contact Page (🚨 เพิ่มหมวดหมู่นี้ใหม่ทั้งหมด) ---
@@ -197,6 +204,32 @@ export default {
     ready: 'Ready to Explore?',
     create_account: 'Create a free account to save favorites and get personalized recommendations.',
     get_started: "Get Started — It's Free"
+  },
+
+  // --- FAQ Page ---
+  faq: {
+    title: 'Frequently Asked Questions',
+    subtitle: 'Find answers to common questions about Savannakhet Smart Travel',
+    stillNeedHelp: 'Still Need Help?',
+    contactUs: 'Can\'t find what you\'re looking for? Our support team is here to help!'
+  },
+
+  // --- User Guide Page ---
+  guide: {
+    title: 'User Guide',
+    subtitle: 'Learn how to make the most of Savannakhet Smart Travel',
+    tips: 'Helpful Tips',
+    needMoreHelp: 'Need More Help?',
+    visitContact: 'Can\'t find what you\'re looking for? Visit our contact page and we\'ll be happy to help!'
+  },
+
+  // --- Utility Page ---
+  utility: {
+    title: 'Helpful Tools',
+    subtitle: 'Travel utilities to make your Savannakhet trip easier',
+    currencyConverter: 'Currency Converter',
+    phrasebook: 'Phrasebook',
+    transportGuide: 'Transport Guide'
   },
 
   // --- Common ---

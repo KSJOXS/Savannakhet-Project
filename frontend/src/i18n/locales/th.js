@@ -27,8 +27,15 @@ export default {
     writePost: 'เขียนโพสต์ใหม่',
     communityFeed: 'ฟีดชุมชน',
     myTrips: 'ทริปของฉัน',
+    tools: 'เครื่องมือช่วยเหลือ',
     bookings: 'การจอง',
     messages: 'ข้อความ',
+    contribute: 'ร่วมมือ',
+    help: 'ช่วยเหลือ',
+    faq: 'คำถามที่พบบ่อย',
+    userGuide: 'คู่มือผู้ใช้',
+    contactSupport: 'ติดต่อฝ่ายสนับสนุน',
+    reportIssue: 'รายงานปัญหา',
   },
 
   // --- Contact Page ---
@@ -197,6 +204,32 @@ export default {
     ready: 'พร้อมที่จะสำรวจหรือยัง?',
     create_account: 'สร้างบัญชีฟรีเพื่อบันทึกรายการโปรดและรับคำแนะนำส่วนตัว',
     get_started: "เริ่มเลย — ฟรี"
+  },
+
+  // --- FAQ Page ---
+  faq: {
+    title: 'คำถามที่พบบ่อย',
+    subtitle: 'ค้นหาคำตอบสำหรับคำถามทั่วไปเกี่ยวกับ Savannakhet Smart Travel',
+    stillNeedHelp: 'ยังต้องการความช่วยเหลือหรือไม่?',
+    contactUs: 'ไม่พบสิ่งที่คุณกำลังมองหา? ทีมสนับสนุนของเราอยู่ที่นี่เพื่อช่วยเหลือ!'
+  },
+
+  // --- User Guide Page ---
+  guide: {
+    title: 'คู่มือผู้ใช้',
+    subtitle: 'เรียนรู้วิธีการใช้ประโยชน์สูงสุดจาก Savannakhet Smart Travel',
+    tips: 'เคล็ดลับที่มีประโยชน์',
+    needMoreHelp: 'ต้องการความช่วยเหลือเพิ่มเติมหรือไม่?',
+    visitContact: 'ไม่พบสิ่งที่คุณกำลังมองหา? ไปที่หน้าติดต่อและเรายินดีที่จะช่วยเหลือ!'
+  },
+
+  // --- Utility Page ---
+  utility: {
+    title: 'เครื่องมือช่วยเหลือ',
+    subtitle: 'เครื่องมือช่วยเดินทางเพื่อทำให้การเดินทางในสะหวันนะเขดของคุณง่ายขึ้น',
+    currencyConverter: 'แปลงสกุลเงิน',
+    phrasebook: 'หนังสือวลี',
+    transportGuide: 'คู่มือการขนส่ง'
   },
 
   // --- Common ---

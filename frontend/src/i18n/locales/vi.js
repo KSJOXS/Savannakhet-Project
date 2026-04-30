@@ -20,8 +20,15 @@ export default {
     postPhoto: 'Đăng ảnh',
     addPlace: 'Thêm địa điểm',
     myTrips: 'Chuyến đi của tôi',
+    tools: 'Công cụ',
     bookings: 'Đặt chỗ',
     messages: 'Tin nhắn',
+    contribute: 'Đóng góp',
+    help: 'Trợ giúp',
+    faq: 'Câu hỏi thường gặp',
+    userGuide: 'Hướng dẫn sử dụng',
+    contactSupport: 'Liên hệ hỗ trợ',
+    reportIssue: 'Báo cáo sự cố',
   },
 
   // --- Contact Page ---
@@ -200,6 +207,15 @@ export default {
     seeAll: 'Xem tất cả',
     new: 'Mới',
     min: 'phút',
+  },
+
+  // --- Utility Page ---
+  utility: {
+    title: 'Công cụ hữu ích',
+    subtitle: 'Các công cụ du lịch để giúp chuyến đi của bạn ở Savannakhet dễ dàng hơn',
+    currencyConverter: 'Chuyển đổi tiền tệ',
+    phrasebook: 'Cuốn sách cụm từ',
+    transportGuide: 'Hướng dẫn vận chuyển'
   },
 
   // --- Footer ---

@@ -1,27 +1,26 @@
 <template>
   <div class="community-page">
     <Navbar />
-    
+
     <div class="community-container">
       <div class="feed-header">
         <h1>{{ t('nav.communityFeed') || 'Community Feed' }}</h1>
         <p>{{ t('recommend.hero_subtitle') }}</p>
       </div>
 
-      <!-- Write Post Box -->
       <div v-if="user" class="write-post-card">
         <div class="write-post-header">
           <img :src="getUserAvatar(user.profile_image)" alt="avatar" class="mini-avatar" />
-          <div class="fake-input" @click="showPostModal = true">
-            {{ t('place.writeReviewPlaceholder') || "What's on your mind?" }}
+          <div class="fake-input" @click="goToWriteReview">
+            {{ t('place.writeReviewPlaceholder') || "What's on your mind? Share your experience..." }}
           </div>
         </div>
         <div class="write-post-footer">
-          <button class="btn-action" @click="showPostModal = true">
+          <button class="btn-action" @click="goToWriteReview">
             <i class="fas fa-camera text-success"></i> Photo/Video
           </button>
-          <button class="btn-action" @click="showPostModal = true">
-            <i class="fas fa-map-marker-alt text-danger"></i> Check In
+          <button class="btn-action" @click="goToWriteReview">
+            <i class="fas fa-map-marker-alt text-danger"></i> Check In Place
           </button>
         </div>
       </div>
@@ -57,13 +56,13 @@
             <div class="rating-stars" v-if="post.place_id && post.rating">
               <i v-for="s in 5" :key="s" :class="[post.rating >= s ? 'fas' : 'far', 'fa-star']"></i>
             </div>
-            <p class="comment-text">{{ post.comment }}</p>
+            <p class="comment-text" v-html="formatComment(post.comment)"></p>
           </div>
 
-          <!-- Image Gallery -->
           <div v-if="post.images && post.images.length > 0" class="post-images">
             <div class="image-grid" :class="`images-${Math.min(post.images.length, 3)}`">
-              <div v-for="(img, idx) in post.images.slice(0, 3)" :key="idx" class="img-wrapper" @click="openLightbox(post.images, idx)">
+              <div v-for="(img, idx) in post.images.slice(0, 3)" :key="idx" class="img-wrapper"
+                @click="openLightbox(post.images, idx)">
                 <img :src="getImageUrl(img)" alt="post image" />
                 <div v-if="idx === 2 && post.images.length > 3" class="more-overlay">
                   +{{ post.images.length - 3 }}
@@ -82,7 +81,6 @@
             </button>
           </div>
 
-          <!-- Comments Section -->
           <div v-if="showCommentsFor === post.id" class="comments-section">
             <div class="comments-list">
               <div v-for="c in post.post_comments" :key="c.id" class="comment-item">
@@ -94,7 +92,8 @@
                   </div>
                   <div class="comment-meta">
                     <span class="comment-time">{{ formatTimeAgo(c.created_at) }}</span>
-                    <button v-if="user && user.username === c.username" @click="deleteComment(post.id, c.id)" class="btn-delete-comment">Delete</button>
+                    <button v-if="user && user.username === c.username" @click="deleteComment(post.id, c.id)"
+                      class="btn-delete-comment">Delete</button>
                   </div>
                 </div>
               </div>
@@ -102,8 +101,10 @@
             <div v-if="user" class="comment-input-area">
               <img :src="getUserAvatar(user.profile_image)" alt="avatar" class="comment-avatar" />
               <div class="comment-input-wrapper">
-                <input type="text" v-model="newCommentTexts[post.id]" placeholder="Write a comment..." @keyup.enter="submitComment(post)" />
-                <button @click="submitComment(post)" :disabled="!newCommentTexts[post.id]?.trim()"><i class="fas fa-paper-plane"></i></button>
+                <input type="text" v-model="newCommentTexts[post.id]" placeholder="Write a comment..."
+                  @keyup.enter="submitComment(post)" />
+                <button @click="submitComment(post)" :disabled="!newCommentTexts[post.id]?.trim()"><i
+                    class="fas fa-paper-plane"></i></button>
               </div>
             </div>
           </div>
@@ -111,66 +112,6 @@
       </div>
     </div>
 
-    <!-- Create Post Modal -->
-    <div v-if="showPostModal" class="modal-overlay" @click="showPostModal = false">
-      <div class="modal-content" @click.stop>
-        <div class="modal-header">
-          <h2>{{ t('nav.writePost') || 'Create Post' }}</h2>
-          <button class="close-btn" @click="showPostModal = false">&times;</button>
-        </div>
-        <div class="modal-body">
-          <!-- Place Search -->
-          <div class="form-group">
-            <label><i class="fas fa-map-marker-alt"></i> Tag a Place (Optional)</label>
-            <div class="search-place-wrapper">
-              <input type="text" v-model="placeSearchQuery" @input="searchPlaces" placeholder="Search a place to tag..." />
-              <div v-if="searchResults.length > 0" class="search-results">
-                <div v-for="p in searchResults" :key="p.id" class="search-item" @click="selectPlace(p)">
-                  {{ p.name }}
-                </div>
-              </div>
-              <div v-if="selectedPlace" class="selected-place-badge">
-                {{ selectedPlace.name }} <i class="fas fa-times" @click="selectedPlace = null"></i>
-              </div>
-            </div>
-          </div>
-
-          <!-- Rating -->
-          <div class="form-group" v-if="selectedPlace">
-            <label>Rating</label>
-            <div class="rating-picker">
-              <i v-for="s in 5" :key="s" @click="newPost.rating = s" :class="[newPost.rating >= s ? 'fas' : 'far', 'fa-star']"></i>
-            </div>
-          </div>
-
-          <!-- Comment -->
-          <div class="form-group">
-            <textarea v-model="newPost.comment" placeholder="Describe your experience..."></textarea>
-          </div>
-
-          <!-- Images -->
-          <div class="form-group">
-            <label class="btn-upload">
-              <i class="fas fa-images"></i> Add Photos
-              <input type="file" multiple accept="image/*" @change="handleImageUpload" hidden />
-            </label>
-            <div class="image-previews">
-              <div v-for="(src, idx) in imagePreviews" :key="idx" class="preview-thumb">
-                <img :src="src" />
-                <button @click="removeImage(idx)">&times;</button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn-post" :disabled="submitting || !newPost.comment" @click="submitPost">
-            {{ submitting ? 'Posting...' : 'Post' }}
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Simple Lightbox -->
     <div v-if="lightbox.show" class="lightbox-overlay" @click="lightbox.show = false">
       <div class="lightbox-content" @click.stop>
         <button class="close-btn" @click="lightbox.show = false">&times;</button>
@@ -186,96 +127,30 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import Navbar from '@/components/Navbar.vue'
 import { placeRepository } from '@/repositories/placeRepository'
 import { useI18n } from '@/composables/useI18n'
 import { useAuth } from '@/composables/useAuth'
 
+const router = useRouter()
 const { t } = useI18n()
 const { user } = useAuth()
 const loading = ref(true)
 const feed = ref([])
-const showPostModal = ref(false)
-const submitting = ref(false)
 
-const placeSearchQuery = ref('')
-const searchResults = ref([])
-const selectedPlace = ref(null)
-
-const newPost = ref({
-  rating: 5,
-  comment: ''
-})
-const postImages = ref([])
-const imagePreviews = ref([])
-
-const searchPlaces = async () => {
-  if (placeSearchQuery.value.length < 2) {
-    searchResults.value = []
-    return
-  }
-  try {
-    const res = await placeRepository.getAll()
-    searchResults.value = res.data.filter(p => 
-      p.name.toLowerCase().includes(placeSearchQuery.value.toLowerCase())
-    ).slice(0, 5)
-  } catch (err) { console.error(err) }
+const goToWriteReview = () => {
+  router.push('/write-review')
 }
 
-const selectPlace = (p) => {
-  selectedPlace.value = p
-  placeSearchQuery.value = ''
-  searchResults.value = []
+// Format Comment
+const formatComment = (text) => {
+  if (!text) return '';
+  let formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  return formatted.replace(/\n/g, '<br>');
 }
 
-const handleImageUpload = (e) => {
-  const files = Array.from(e.target.files)
-  files.forEach(file => {
-    postImages.value.push(file)
-    imagePreviews.value.push(URL.createObjectURL(file))
-  })
-}
-
-const removeImage = (idx) => {
-  postImages.value.splice(idx, 1)
-  imagePreviews.value.splice(idx, 1)
-}
-
-const submitPost = async () => {
-  if (!user.value || !newPost.value.comment) return
-  submitting.value = true
-  try {
-    const fd = new FormData()
-    if (selectedPlace.value) {
-      fd.append('place_id', selectedPlace.value.id)
-      fd.append('rating', newPost.value.rating)
-    }
-    fd.append('user_id', user.value.id)
-    fd.append('comment_text', newPost.value.comment)
-    postImages.value.forEach(img => fd.append('images', img))
-
-    await placeRepository.addComment(fd)
-    
-    // Reset and close
-    showPostModal.value = false
-    selectedPlace.value = null
-    newPost.value = { rating: 5, comment: '' }
-    postImages.value = []
-    imagePreviews.value = []
-    fetchFeed()
-  } catch (err) {
-    console.error("Post failed:", err)
-    alert("Failed to post. Please try again.")
-  } finally {
-    submitting.value = false
-  }
-}
-
-const lightbox = ref({
-  show: false,
-  images: [],
-  index: 0
-})
+const lightbox = ref({ show: false, images: [], index: 0 })
 
 const fetchFeed = async () => {
   loading.value = true
@@ -301,51 +176,38 @@ const getUserAvatar = (url) => {
 }
 
 const formatDate = (date) => {
-  return new Date(date).toLocaleDateString('en-US', { 
-    year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' 
+  return new Date(date).toLocaleDateString('en-US', {
+    year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
   })
 }
 
-const isLiked = (post) => {
-  return user.value && post.liked_by.includes(user.value.id)
-}
+const isLiked = (post) => user.value && post.liked_by.includes(user.value.id)
 
 const handleLike = async (post) => {
   if (!user.value) return alert('Please login to like posts')
   try {
     const res = await placeRepository.toggleLike(post.id, user.value.id)
-    if (res.data.status === 'liked') {
-      post.liked_by.push(user.value.id)
-    } else {
-      post.liked_by = post.liked_by.filter(id => id !== user.value.id)
-    }
-  } catch (err) {
-    console.error("Like failed:", err)
-  }
+    if (res.data.status === 'liked') post.liked_by.push(user.value.id)
+    else post.liked_by = post.liked_by.filter(id => id !== user.value.id)
+  } catch (err) { console.error("Like failed:", err) }
 }
 
 const showCommentsFor = ref(null)
 const newCommentTexts = ref({})
 
-const toggleComments = (postId) => {
-  showCommentsFor.value = showCommentsFor.value === postId ? null : postId
-}
+const toggleComments = (postId) => showCommentsFor.value = showCommentsFor.value === postId ? null : postId
 
 const submitComment = async (post) => {
   const text = newCommentTexts.value[post.id]?.trim()
   if (!text || !user.value) return
-  
   try {
     const fd = new FormData()
     fd.append('user_id', user.value.id)
     fd.append('comment_text', text)
-    
     await placeRepository.addPostComment(post.id, fd)
     newCommentTexts.value[post.id] = ''
     fetchFeed()
-  } catch (err) {
-    console.error("Failed to post comment", err)
-  }
+  } catch (err) { console.error("Failed to post comment", err) }
 }
 
 const deleteComment = async (postId, commentId) => {
@@ -353,9 +215,7 @@ const deleteComment = async (postId, commentId) => {
   try {
     await placeRepository.deletePostComment(commentId, user.value.id)
     fetchFeed()
-  } catch (err) {
-    console.error("Failed to delete comment", err)
-  }
+  } catch (err) { console.error("Failed to delete comment", err) }
 }
 
 const formatTimeAgo = (dateStr) => {
@@ -369,31 +229,20 @@ const formatTimeAgo = (dateStr) => {
   return `${days}d`
 }
 
-const handleShare = (post) => {
-  const url = `${window.location.origin}/#/places/${post.place_id}`
-  navigator.clipboard.writeText(url)
-  alert('Link to place copied to clipboard!')
-}
-
-const openLightbox = (images, index) => {
-  lightbox.value = { show: true, images, index }
-}
-
-const nextImg = () => {
-  lightbox.value.index = (lightbox.value.index + 1) % lightbox.value.images.length
-}
-
-const prevImg = () => {
-  lightbox.value.index = (lightbox.value.index - 1 + lightbox.value.images.length) % lightbox.value.images.length
-}
+const openLightbox = (images, index) => lightbox.value = { show: true, images, index }
+const nextImg = () => lightbox.value.index = (lightbox.value.index + 1) % lightbox.value.images.length
+const prevImg = () => lightbox.value.index = (lightbox.value.index - 1 + lightbox.value.images.length) % lightbox.value.images.length
 
 onMounted(fetchFeed)
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
 .community-page {
   background: #f0f2f5;
   min-height: 100vh;
+  font-family: 'Inter', sans-serif;
 }
 
 .community-container {
@@ -402,12 +251,28 @@ onMounted(fetchFeed)
   padding: 0 15px;
 }
 
-/* Write Post Card */
+.feed-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.feed-header h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin-bottom: 10px;
+}
+
+.feed-header p {
+  color: #65676b;
+  font-size: 1.1rem;
+}
+
 .write-post-card {
   background: white;
   border-radius: 12px;
   padding: 15px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
 }
 
@@ -465,226 +330,25 @@ onMounted(fetchFeed)
   background: #f2f2f2;
 }
 
-.text-success { color: #45bd62; }
-.text-danger { color: #f3425f; }
-
-/* Modal Styles */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(5px);
-  z-index: 2000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
+.text-success {
+  color: #00aa6c;
 }
 
-.modal-content {
-  background: white;
-  width: 100%;
-  max-width: 550px;
-  border-radius: 12px;
-  box-shadow: 0 12px 28px rgba(0,0,0,0.2);
-  display: flex;
-  flex-direction: column;
-  max-height: 90vh;
-}
-
-.modal-header {
-  padding: 15px 20px;
-  border-bottom: 1px solid #e4e6eb;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.modal-header h2 {
-  font-size: 1.25rem;
-  font-weight: 700;
-}
-
-.modal-body {
-  padding: 20px;
-  overflow-y: auto;
-}
-
-.form-group {
-  margin-bottom: 20px;
-}
-
-.form-group label {
-  display: block;
-  font-weight: 600;
-  margin-bottom: 8px;
-  color: #1c1e21;
-}
-
-.search-place-wrapper {
-  position: relative;
-}
-
-.search-place-wrapper input {
-  width: 100%;
-  padding: 10px 15px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  outline: none;
-}
-
-.search-results {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  margin-top: 5px;
-  z-index: 10;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-.search-item {
-  padding: 10px 15px;
-  cursor: pointer;
-}
-
-.search-item:hover {
-  background: #f0f2f5;
-}
-
-.selected-place-badge {
-  margin-top: 10px;
-  background: #e7f3ff;
-  color: #1877f2;
-  padding: 8px 15px;
-  border-radius: 8px;
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 600;
-}
-
-.selected-place-badge i {
-  cursor: pointer;
-}
-
-.rating-picker {
-  display: flex;
-  gap: 10px;
-  font-size: 1.5rem;
-  color: #f5c330;
-}
-
-.rating-picker i {
-  cursor: pointer;
-}
-
-.modal-body textarea {
-  width: 100%;
-  height: 120px;
-  border: none;
-  font-size: 1.1rem;
-  resize: none;
-  outline: none;
-}
-
-.btn-upload {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.image-previews {
-  display: flex;
-  gap: 10px;
-  margin-top: 15px;
-  flex-wrap: wrap;
-}
-
-.preview-thumb {
-  position: relative;
-  width: 80px;
-  height: 80px;
-}
-
-.preview-thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 8px;
-}
-
-.preview-thumb button {
-  position: absolute;
-  top: -5px;
-  right: -5px;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 50%;
-  width: 20px;
-  height: 20px;
-  cursor: pointer;
-}
-
-.modal-footer {
-  padding: 15px 20px;
-  border-top: 1px solid #e4e6eb;
-}
-
-.btn-post {
-  width: 100%;
-  background: #1877f2;
-  color: white;
-  border: none;
-  padding: 12px;
-  border-radius: 8px;
-  font-weight: 700;
-  font-size: 1rem;
-  cursor: pointer;
-}
-
-.btn-post:disabled {
-  background: #e4e6eb;
-  color: #bcc0c4;
-  cursor: not-allowed;
-}
-
-.feed-header {
-  text-align: center;
-  margin-bottom: 30px;
-}
-
-.feed-header h1 {
-  font-size: 2.5rem;
-  font-weight: 800;
-  color: #1a1a1a;
-  margin-bottom: 10px;
-}
-
-.feed-header p {
-  color: #65676b;
-  font-size: 1.1rem;
+.text-danger {
+  color: #f3425f;
 }
 
 .post-card {
   background: white;
   border-radius: 12px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
   padding: 15px;
   transition: 0.3s;
 }
 
 .post-card:hover {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .post-header {
@@ -724,18 +388,19 @@ onMounted(fetchFeed)
 }
 
 .place-badge a {
-  background: #e7f3ff;
-  color: #1877f2;
+  background: #e6f7f0;
+  color: #00aa6c;
   padding: 6px 12px;
   border-radius: 20px;
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 700;
   text-decoration: none;
   transition: 0.2s;
 }
 
 .place-badge a:hover {
-  background: #dbeafe;
+  background: #00aa6c;
+  color: white;
 }
 
 .post-content {
@@ -743,19 +408,18 @@ onMounted(fetchFeed)
 }
 
 .rating-stars {
-  color: #f5c330;
+  color: #00aa6c;
   margin-bottom: 8px;
   font-size: 0.9rem;
 }
 
 .comment-text {
-  color: #050505;
-  line-height: 1.5;
+  color: #0f172a;
+  line-height: 1.6;
   font-size: 1rem;
   white-space: pre-wrap;
 }
 
-/* Image Gallery Styles */
 .post-images {
   margin: 0 -15px 15px;
   background: #f0f2f5;
@@ -767,9 +431,18 @@ onMounted(fetchFeed)
   height: 400px;
 }
 
-.images-1 { grid-template-columns: 1fr; }
-.images-2 { grid-template-columns: 1fr 1fr; }
-.images-3 { grid-template-columns: 2fr 1fr; grid-template-rows: 1fr 1fr; }
+.images-1 {
+  grid-template-columns: 1fr;
+}
+
+.images-2 {
+  grid-template-columns: 1fr 1fr;
+}
+
+.images-3 {
+  grid-template-columns: 2fr 1fr;
+  grid-template-rows: 1fr 1fr;
+}
 
 .images-3 .img-wrapper:first-child {
   grid-row: span 2;
@@ -795,7 +468,7 @@ onMounted(fetchFeed)
 .more-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   color: white;
   display: flex;
   align-items: center;
@@ -808,16 +481,17 @@ onMounted(fetchFeed)
   display: flex;
   gap: 10px;
   padding-top: 10px;
-  border-top: 1px solid #f0f2f5;
+  border-top: 1px solid #f1f5f9;
 }
 
-.btn-like, .btn-share {
+.btn-like,
+.btn-share {
   flex: 1;
   background: none;
   border: none;
   padding: 8px;
   border-radius: 6px;
-  color: #65676b;
+  color: #64748b;
   font-weight: 600;
   cursor: pointer;
   display: flex;
@@ -827,12 +501,13 @@ onMounted(fetchFeed)
   transition: 0.2s;
 }
 
-.btn-like:hover, .btn-share:hover {
-  background: #f2f2f2;
+.btn-like:hover,
+.btn-share:hover {
+  background: #f1f5f9;
 }
 
 .btn-like.liked {
-  color: #e0245e;
+  color: #ef4444;
 }
 
 .btn-like.liked i {
@@ -840,16 +515,23 @@ onMounted(fetchFeed)
 }
 
 @keyframes heartBeat {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.3); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.3);
+  }
+
+  100% {
+    transform: scale(1);
+  }
 }
 
-/* Lightbox */
 .lightbox-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.9);
+  background: rgba(0, 0, 0, 0.9);
   z-index: 10000;
   display: flex;
   align-items: center;
@@ -890,7 +572,7 @@ onMounted(fetchFeed)
 }
 
 .nav-btns button {
-  background: rgba(255,255,255,0.2);
+  background: rgba(255, 255, 255, 0.2);
   border: none;
   color: white;
   font-size: 2rem;
@@ -902,14 +584,14 @@ onMounted(fetchFeed)
 }
 
 .nav-btns button:hover {
-  background: rgba(255,255,255,0.5);
+  background: rgba(255, 255, 255, 0.5);
 }
 
 /* Comments Section */
 .comments-section {
   margin-top: 15px;
   padding-top: 15px;
-  border-top: 1px solid #f0f2f5;
+  border-top: 1px solid #f1f5f9;
 }
 
 .comment-item {
@@ -932,7 +614,7 @@ onMounted(fetchFeed)
 }
 
 .comment-bubble {
-  background: #f0f2f5;
+  background: #f1f5f9;
   padding: 8px 12px;
   border-radius: 18px;
   display: flex;
@@ -943,12 +625,12 @@ onMounted(fetchFeed)
 .comment-username {
   font-weight: 700;
   font-size: 0.85rem;
-  color: #050505;
+  color: #0f172a;
 }
 
 .comment-text-inline {
   font-size: 0.95rem;
-  color: #050505;
+  color: #334155;
 }
 
 .comment-meta {
@@ -957,13 +639,13 @@ onMounted(fetchFeed)
   margin-top: 2px;
   margin-left: 12px;
   font-size: 0.75rem;
-  color: #65676b;
+  color: #64748b;
 }
 
 .btn-delete-comment {
   background: none;
   border: none;
-  color: #65676b;
+  color: #ef4444;
   cursor: pointer;
   padding: 0;
   font-size: 0.75rem;
@@ -982,10 +664,11 @@ onMounted(fetchFeed)
 .comment-input-wrapper {
   flex: 1;
   display: flex;
-  background: #f0f2f5;
+  background: #f1f5f9;
   border-radius: 20px;
   overflow: hidden;
   padding-right: 5px;
+  border: 1px solid #cbd5e1;
 }
 
 .comment-input-wrapper input {
@@ -1000,48 +683,43 @@ onMounted(fetchFeed)
 .comment-input-wrapper button {
   background: transparent;
   border: none;
-  color: #1877f2;
+  color: #00aa6c;
   cursor: pointer;
   padding: 0 10px;
   font-size: 1.1rem;
 }
 
 .comment-input-wrapper button:disabled {
-  color: #bcc0c4;
+  color: #94a3b8;
   cursor: not-allowed;
 }
 
-@media (max-width: 600px) {
-  .feed-header h1 {
-    font-size: 2rem;
-  }
-}
-
-.loading-state, .empty-feed {
+.loading-state,
+.empty-feed {
   text-align: center;
   padding: 60px;
   background: white;
   border-radius: 12px;
-  color: #65676b;
+  color: #64748b;
 }
 
 .spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid #f3f3f3;
-  border-top: 4px solid #1877f2;
+  border: 4px solid #f1f5f9;
+  border-top: 4px solid #00aa6c;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 20px;
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
 @media (max-width: 600px) {
-  .feed-header h1 { font-size: 1.8rem; }
-  .post-images { height: 300px; }
+  .feed-header h1 {
+    font-size: 1.8rem;
+  }
+
+  .post-images {
+    height: 300px;
+  }
 }
 </style>

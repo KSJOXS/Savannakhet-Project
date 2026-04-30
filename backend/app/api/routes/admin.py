@@ -135,3 +135,17 @@ def get_system_stats(db: Session = Depends(get_db)):
     except Exception as e:
         print(f"ERROR Dashboard Stats: {str(e)}")
         raise HTTPException(status_code=500, detail="Database Query Error")
+
+# --- 4. AI / GNN Management ---
+
+@router.post("/admin/gnn/train")
+def trigger_gnn_training(db: Session = Depends(get_db)):
+    """
+    Trigger manual training for the GNN Recommendation Model.
+    This should be called when there is enough interaction data.
+    """
+    from app.services.recommendation import train_gnn_link_prediction
+    result = train_gnn_link_prediction(db)
+    if result.get("status") == "error":
+        raise HTTPException(status_code=400, detail=result.get("message"))
+    return result

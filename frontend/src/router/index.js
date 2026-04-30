@@ -19,7 +19,12 @@ import nature from '../pages/places/Nature.vue'
 import Landmarks from '../pages/places/Landmarks.vue'
 import About from '../pages/main/About.vue'
 import Contact from '../pages/main/Contact.vue'
+import FAQ from '../pages/main/FAQ.vue'
+import UserGuide from '../pages/main/UserGuide.vue'
 import Community from '../pages/community/Community.vue'
+import UtilityPage from '../pages/main/UtilityPage.vue'
+import WriteReview from '../pages/user/WriteReview.vue'
+import History from '../pages/main/History.vue'
 
 // --- Admin Components ---
 import AdminLayout from '../pages/admin/common/AdminLayout.vue'
@@ -44,6 +49,22 @@ const routes = [
         path: '/explore',
         name: 'Explore',
         component: RecommendList
+    },
+    {
+        path: '/utilities',
+        name: 'Utilities',
+        component: UtilityPage
+    },
+    {
+        path: '/history',
+        name: 'History',
+        component: History
+
+    },
+    {
+        path: '/write-review',
+        name: 'WriteReview',
+        component: WriteReview
     },
     {
         path: '/login',
@@ -120,6 +141,16 @@ const routes = [
         path: '/contact',
         name: 'Contact',
         component: Contact
+    },
+    {
+        path: '/faq',
+        name: 'FAQ',
+        component: FAQ
+    },
+    {
+        path: '/guide',
+        name: 'UserGuide',
+        component: UserGuide
     },
     {
         path: '/community',

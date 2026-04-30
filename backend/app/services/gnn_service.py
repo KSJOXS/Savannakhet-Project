@@ -12,13 +12,29 @@ def build_gnn_graph(db: Session):
     place_mapping = {place.id: i for i, place in enumerate(places)}
 
     data = HeteroData()
-    data['user'].num_nodes = len(users)
-    data['place'].num_nodes = len(places)
+    
+    # 1. User Features (Simple 1.0 placeholder or preferences if available)
+    user_features = []
+    for user in users:
+        # Placeholder: could expand to use user.preferences
+        user_features.append([1.0]) 
+    data['user'].x = torch.tensor(user_features, dtype=torch.float)
 
+    # 2. Place Features (Category ID normalized + Rating)
+    place_features = []
+    # Get max category ID for normalization
+    max_cat_id = db.query(func.max(Category.id)).scalar() or 1
+    
+    for place in places:
+        cat_feat = float(place.category_id) / max_cat_id
+        rat_feat = float(place.rating_avg) / 5.0
+        place_features.append([cat_feat, rat_feat])
+    data['place'].x = torch.tensor(place_features, dtype=torch.float)
+
+    # 3. Edges
     edges = []
     edge_weights = []
 
-    # Map interactions
     for log in logs:
         if log.user_id in user_mapping and log.place_id in place_mapping:
             u_idx = user_mapping[log.user_id]
@@ -28,17 +44,18 @@ def build_gnn_graph(db: Session):
             edge_weights.append(w)
 
     if edges:
-        data['user', 'interacts_with', 'place'].edge_index = torch.tensor(edges, dtype=torch.long).t().contiguous()
+        edge_index = torch.tensor(edges, dtype=torch.long).t().contiguous()
+        data['user', 'interacts_with', 'place'].edge_index = edge_index
         data['user', 'interacts_with', 'place'].edge_weight = torch.tensor(edge_weights, dtype=torch.float)
+        
+        # Add reverse edges for undirected message passing
+        edges_rev = [[e[1], e[0]] for e in edges]
+        data['place', 'rev_interacts_with', 'user'].edge_index = torch.tensor(edges_rev, dtype=torch.long).t().contiguous()
+        data['place', 'rev_interacts_with', 'user'].edge_weight = torch.tensor(edge_weights, dtype=torch.float)
     else:
-        # fallback empty
         data['user', 'interacts_with', 'place'].edge_index = torch.empty((2, 0), dtype=torch.long)
         data['user', 'interacts_with', 'place'].edge_weight = torch.empty((0,), dtype=torch.float)
-
-    # For undirected reasoning, we might want reverse edges
-    if edges:
-        edges_rev = [[e[1], e[0]] for e in edges]
-        data['place', 'interacted_by', 'user'].edge_index = torch.tensor(edges_rev, dtype=torch.long).t().contiguous()
-        data['place', 'interacted_by', 'user'].edge_weight = torch.tensor(edge_weights, dtype=torch.float)
+        data['place', 'rev_interacts_with', 'user'].edge_index = torch.empty((2, 0), dtype=torch.long)
+        data['place', 'rev_interacts_with', 'user'].edge_weight = torch.empty((0,), dtype=torch.float)
 
     return data, user_mapping, place_mapping
