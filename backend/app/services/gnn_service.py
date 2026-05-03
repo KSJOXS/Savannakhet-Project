@@ -1,4 +1,5 @@
 import torch
+import json
 from sqlalchemy.orm import Session
 from torch_geometric.data import HeteroData
 from app.models import User, Place, InteractionLog
@@ -13,11 +14,29 @@ def build_gnn_graph(db: Session):
 
     data = HeteroData()
     
-    # 1. User Features (Simple 1.0 placeholder or preferences if available)
+    # 1. User Features (Multi-hot encoding based on preferences)
+    # Categories: nature, culture, restaurant, hotel, shopping, nightlife
+    pref_cats = ['nature', 'culture', 'restaurant', 'hotel', 'shopping', 'nightlife']
     user_features = []
+    
     for user in users:
-        # Placeholder: could expand to use user.preferences
-        user_features.append([1.0]) 
+        # Load preferences (handle JSON string or list)
+        try:
+            prefs = user.preferences
+            if isinstance(prefs, str):
+                prefs = json.loads(prefs)
+            if not isinstance(prefs, list):
+                prefs = []
+        except:
+            prefs = []
+            
+        # Create multi-hot vector
+        feat = [1.0 if cat in prefs else 0.0 for cat in pref_cats]
+        # If no preferences, set all to 0.1 as a small baseline
+        if sum(feat) == 0:
+            feat = [0.1] * len(pref_cats)
+        user_features.append(feat)
+        
     data['user'].x = torch.tensor(user_features, dtype=torch.float)
 
     # 2. Place Features (Category ID normalized + Rating)

@@ -45,10 +45,21 @@
                 <span class="post-date">{{ formatDate(post.visited_at) }}</span>
               </div>
             </div>
-            <div class="place-badge" v-if="post.place_id">
-              <router-link :to="`/places/${post.place_id}`">
-                <i class="fas fa-map-marker-alt"></i> {{ post.place_name }}
-              </router-link>
+            <div class="header-right">
+              <div class="place-badge" v-if="post.place_id">
+                <router-link :to="`/places/${post.place_id}`">
+                  <i class="fas fa-map-marker-alt"></i> {{ post.place_name }}
+                </router-link>
+              </div>
+              <div v-if="user && user.id === post.user_id" class="post-options">
+                <button @click.stop="togglePostMenu(post.id)" class="btn-dots">
+                  <i class="fas fa-ellipsis-h"></i>
+                </button>
+                <div v-if="activePostMenu === post.id" class="options-dropdown" v-click-outside="() => activePostMenu = null">
+                  <button @click.stop="openEditModal(post)"><i class="fas fa-edit"></i> Edit</button>
+                  <button @click.stop="handleDeletePost(post.id)" class="text-danger"><i class="fas fa-trash"></i> Delete</button>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -112,6 +123,7 @@
       </div>
     </div>
 
+    <!-- Lightbox -->
     <div v-if="lightbox.show" class="lightbox-overlay" @click="lightbox.show = false">
       <div class="lightbox-content" @click.stop>
         <button class="close-btn" @click="lightbox.show = false">&times;</button>
@@ -122,6 +134,80 @@
         </div>
       </div>
     </div>
+
+    <!-- Edit Post Modal (Facebook Style) -->
+    <div v-if="editModal.show" class="modal-overlay" @click="closeEditModal">
+      <div class="edit-modal fb-style" @click.stop>
+        <div class="modal-header">
+          <h3>Edit Post</h3>
+          <button class="close-btn-circle" @click="closeEditModal">&times;</button>
+        </div>
+        
+        <div class="modal-body">
+          <div class="modal-body-content">
+            <!-- User Profile Info -->
+            <div class="modal-user-header">
+              <img :src="getUserAvatar(user?.profile_image)" class="modal-avatar" />
+              <div class="modal-user-info">
+                <span class="modal-username">{{ user?.username }}</span>
+                <div class="modal-privacy">
+                  <i class="fas fa-globe-asia"></i> Public <i class="fas fa-caret-down"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- Rating (if applicable) -->
+            <div class="modal-rating-section" v-if="editModal.post.place_id">
+              <label>Rating:</label>
+              <div class="ta-circle-rating">
+                <i v-for="s in 5" :key="s" @click="editModal.form.rating = s"
+                   :class="[editModal.form.rating >= s ? 'fas' : 'far', 'fa-circle']">
+                </i>
+              </div>
+            </div>
+
+            <!-- Comment Textarea -->
+            <div class="modal-content-area">
+              <textarea v-model="editModal.form.comment" class="fb-textarea" 
+                        :placeholder="`What's on your mind, ${user?.username}?`"></textarea>
+            </div>
+
+            <!-- Image Management Area -->
+            <div class="modal-image-area">
+              <!-- Combined Image List -->
+              <div v-if="editModal.form.existingImages.length > 0 || editModal.form.newImages.length > 0" class="modal-image-grid">
+                  <!-- Old Images -->
+                  <div v-for="(img, idx) in editModal.form.existingImages" :key="'old-'+idx" class="modal-img-wrap">
+                    <img :src="getImageUrl(img)" />
+                    <button class="btn-remove-img" @click="removeExistingImg(idx)">&times;</button>
+                  </div>
+                  <!-- New Images -->
+                  <div v-for="(img, idx) in editModal.form.newPreviews" :key="'new-'+idx" class="modal-img-wrap">
+                    <img :src="img" />
+                    <button class="btn-remove-img" @click="removeNewImg(idx)">&times;</button>
+                  </div>
+              </div>
+
+              <!-- Add Images Button -->
+              <label class="modal-add-img-btn" v-if="editModal.form.existingImages.length + editModal.form.newImages.length < 5">
+                <input type="file" multiple accept="image/*" @change="handleEditImageUpload" hidden />
+                <div class="add-img-content">
+                  <i class="fas fa-images"></i>
+                  <span>Add Photos/Videos</span>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer fb-footer">
+          <button class="btn-fb-save" @click="saveEdit" :disabled="saving || !editModal.form.comment.trim()">
+            {{ saving ? 'Updating...' : 'Save Changes' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -138,6 +224,24 @@ const { t } = useI18n()
 const { user } = useAuth()
 const loading = ref(true)
 const feed = ref([])
+const saving = ref(false)
+
+// Edit Modal State
+const editModal = ref({ 
+  show: false, 
+  post: {}, 
+  form: { 
+    rating: 0, 
+    comment: '',
+    existingImages: [],
+    newImages: [],
+    newPreviews: []
+  } 
+})
+
+const closeEditModal = () => {
+  editModal.value.show = false
+}
 
 const goToWriteReview = () => {
   router.push('/write-review')
@@ -232,6 +336,96 @@ const formatTimeAgo = (dateStr) => {
 const openLightbox = (images, index) => lightbox.value = { show: true, images, index }
 const nextImg = () => lightbox.value.index = (lightbox.value.index + 1) % lightbox.value.images.length
 const prevImg = () => lightbox.value.index = (lightbox.value.index - 1 + lightbox.value.images.length) % lightbox.value.images.length
+
+// Post Menu (Edit/Delete)
+const activePostMenu = ref(null)
+const togglePostMenu = (postId) => {
+  activePostMenu.value = activePostMenu.value === postId ? null : postId
+}
+
+const handleDeletePost = async (postId) => {
+  if (!confirm('Are you sure you want to delete this post?')) return
+  try {
+    await placeRepository.deleteUserReview(postId, user.value.id)
+    fetchFeed()
+  } catch (err) {
+    console.error("Delete failed:", err)
+    alert("Failed to delete post")
+  }
+}
+
+const openEditModal = (post) => {
+  editModal.value = {
+    show: true,
+    post: post,
+    form: {
+      rating: post.rating || 0,
+      comment: post.comment || '',
+      existingImages: [...(post.images || [])],
+      newImages: [],
+      newPreviews: []
+    }
+  }
+  activePostMenu.value = null
+}
+
+const handleEditImageUpload = (e) => {
+  const files = Array.from(e.target.files)
+  files.forEach(file => {
+    editModal.value.form.newImages.push(file)
+    editModal.value.form.newPreviews.push(URL.createObjectURL(file))
+  })
+}
+
+const removeExistingImg = (idx) => {
+  editModal.value.form.existingImages.splice(idx, 1)
+}
+
+const removeNewImg = (idx) => {
+  editModal.value.form.newImages.splice(idx, 1)
+  editModal.value.form.newPreviews.splice(idx, 1)
+}
+
+const saveEdit = async () => {
+  if (!editModal.value.form.comment.trim()) return
+  saving.value = true
+  try {
+    const fd = new FormData()
+    fd.append('user_id', user.value.id)
+    fd.append('rating', editModal.value.form.rating)
+    fd.append('comment_text', editModal.value.form.comment)
+    fd.append('existing_images', JSON.stringify(editModal.value.form.existingImages))
+    
+    // Append new images
+    editModal.value.form.newImages.forEach(img => {
+      fd.append('new_images', img)
+    })
+    
+    await placeRepository.updateUserReview(editModal.value.post.id, fd)
+    editModal.value.show = false
+    fetchFeed()
+  } catch (err) {
+    console.error("Edit failed:", err)
+    alert("Failed to update post")
+  } finally {
+    saving.value = false
+  }
+}
+
+// Custom directive for clicking outside
+const vClickOutside = {
+  mounted(el, binding) {
+    el.clickOutsideEvent = (event) => {
+      if (!(el === event.target || el.contains(event.target))) {
+        binding.value(event);
+      }
+    };
+    document.addEventListener('click', el.clickOutsideEvent);
+  },
+  unmounted(el) {
+    document.removeEventListener('click', el.clickOutsideEvent);
+  },
+}
 
 onMounted(fetchFeed)
 </script>
@@ -354,8 +548,72 @@ onMounted(fetchFeed)
 .post-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   margin-bottom: 15px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.post-options {
+  position: relative;
+}
+
+.btn-dots {
+  background: none;
+  border: none;
+  color: #65676b;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 50%;
+  transition: 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-dots:hover {
+  background: #f0f2f5;
+}
+
+.options-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  width: 150px;
+  overflow: hidden;
+  border: 1px solid #e4e6eb;
+}
+
+.options-dropdown button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 15px;
+  border: none;
+  background: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #050505;
+  cursor: pointer;
+  text-align: left;
+}
+
+.options-dropdown button:hover {
+  background: #f2f2f2;
+}
+
+.options-dropdown button.text-danger {
+  color: #f3425f;
 }
 
 .user-meta {
@@ -713,13 +971,281 @@ onMounted(fetchFeed)
   margin: 0 auto 20px;
 }
 
-@media (max-width: 600px) {
-  .feed-header h1 {
-    font-size: 1.8rem;
-  }
+/* Modals & Overlay */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 11000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
 
-  .post-images {
-    height: 300px;
+/* Facebook Style Edit Modal */
+.fb-style {
+  width: 95%;
+  max-width: 600px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.modal-header {
+  padding: 18px 20px;
+  border-bottom: 1px solid #e4e6eb;
+  position: relative;
+  text-align: center;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #050505;
+}
+
+.close-btn-circle {
+  position: absolute;
+  top: 12px;
+  right: 15px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #e4e6eb;
+  border: none;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #606770;
+  transition: background 0.2s;
+}
+
+.close-btn-circle:hover {
+  background: #d8dadf;
+}
+
+.modal-body {
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.modal-body-content {
+  padding: 0 4px;
+}
+
+.modal-user-header {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.modal-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #e4e6eb;
+}
+
+.modal-username {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: #050505;
+  display: block;
+}
+
+.modal-privacy {
+  background: #e4e6eb;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #050505;
+  margin-top: 2px;
+}
+
+.modal-content-area {
+  margin-bottom: 20px;
+}
+
+.fb-textarea {
+  width: 100%;
+  min-height: 150px;
+  border: none;
+  font-family: inherit;
+  font-size: 1.4rem;
+  outline: none;
+  resize: none;
+  color: #050505;
+  padding: 5px 0;
+}
+
+.modal-rating-section {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 18px;
+  padding: 12px;
+  background: #f7f8fa;
+  border-radius: 8px;
+}
+
+.modal-rating-section label {
+  font-weight: 700;
+  font-size: 1rem;
+  color: #65676b;
+}
+
+.ta-circle-rating {
+  display: flex;
+  gap: 10px;
+  color: #00aa6c;
+  font-size: 1.8rem;
+}
+
+.ta-circle-rating i {
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.ta-circle-rating i:hover {
+  transform: scale(1.1);
+}
+
+.modal-image-area {
+  border: 1px solid #ced0d4;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 5px;
+}
+
+.modal-image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.modal-img-wrap {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+.modal-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.btn-remove-img {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  transition: 0.2s;
+}
+
+.btn-remove-img:hover {
+  background: white;
+  transform: scale(1.1);
+}
+
+.modal-add-img-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f2f5;
+  border-radius: 10px;
+  padding: 40px;
+  cursor: pointer;
+  transition: 0.2s;
+  border: 2px dashed #ced0d4;
+}
+
+.modal-add-img-btn:hover {
+  background: #e4e6eb;
+  border-color: #bcc0c4;
+}
+
+.add-img-content {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.add-img-content i {
+  font-size: 2rem;
+  color: #45bd62;
+}
+
+.add-img-content span {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #050505;
+}
+
+.fb-footer {
+  padding: 16px 20px 20px;
+}
+
+.btn-fb-save {
+  width: 100%;
+  background: #00aa6c;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-fb-save:hover:not(:disabled) {
+  background: #008f5a;
+}
+
+.btn-fb-save:disabled {
+  background: #e4e6eb;
+  color: #bcc0c4;
+  cursor: not-allowed;
+}
+
+.text-primary { color: #1877f2; }
+.text-warning { color: #f7b928; }
+.text-danger { color: #f02849; }
+.text-success { color: #45bd62; }
+
+@media (max-width: 600px) {
+  .edit-modal.fb-style {
+    width: 95%;
   }
 }
 </style>

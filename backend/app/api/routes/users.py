@@ -5,10 +5,65 @@ from app.database import get_db
 from app import models
 from app import schemas
 from app.core import security as auth
+from app.core.email_service import send_reset_password_email
 from datetime import datetime
 import json
+import secrets
 
 router = APIRouter(tags=["Users Management"])
+
+@router.post("/forgot-password")
+def forgot_password(request: schemas.ForgotPasswordRequest, db: Session = Depends(get_db)):
+    """
+    ขอกู้คืนรหัสผ่าน โดยส่ง Email เพื่อรับ Token
+    """
+    user = db.query(models.User).filter(models.User.email == request.email).first()
+    # ส่งข้อความเดียวกันเสมอเพื่อความปลอดภัย (Prevent User Enumeration)
+    # ส่งสถานะสำเร็จเสมอเพื่อความปลอดภัย
+    msg = {"status": "success", "message": "RESET_LINK_SENT"}
+    
+    if not user:
+        return msg
+    
+    # สร้าง Token แบบสุ่ม
+    token = secrets.token_urlsafe(32)
+    
+    # บันทึก Token ลง DB
+    new_reset = models.PasswordReset(email=request.email, token=token)
+    db.add(new_reset)
+    db.commit()
+    
+    # 📧 ส่งอีเมลจริง
+    success = send_reset_password_email(request.email, token)
+    
+    if success:
+        print(f"✅ Email sent successfully to {request.email}")
+    else:
+        print(f"❌ Failed to send email to {request.email} (Check SMTP settings)")
+    
+    return msg
+
+@router.post("/reset-password")
+def reset_password(data: schemas.PasswordResetConfirm, db: Session = Depends(get_db)):
+    """
+    ยืนยันการตั้งรหัสผ่านใหม่ด้วย Token
+    """
+    reset_entry = db.query(models.PasswordReset).filter(models.PasswordReset.token == data.token).first()
+    if not reset_entry:
+        raise HTTPException(status_code=400, detail="Token ไม่ถูกต้อง หรือหมดอายุแล้ว")
+    
+    user = db.query(models.User).filter(models.User.email == reset_entry.email).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="ไม่พบผู้ใช้งานที่เกี่ยวข้องกับ Token นี้")
+    
+    # อัปเดตรหัสผ่านใหม่ (Hash ด้วย bcrypt)
+    user.password_hash = auth.get_password_hash(data.new_password)
+    
+    # ลบ Token ที่ใช้แล้วทิ้ง
+    db.delete(reset_entry)
+    db.commit()
+    
+    return {"message": "ตั้งรหัสผ่านใหม่สำเร็จแล้ว! คุณสามารถเข้าสู่ระบบด้วยรหัสผ่านใหม่ได้ทันที"}
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)
 def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
@@ -20,7 +75,9 @@ def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="This email is already registered.")
     new_user = models.User(
         username=user.username, email=user.email,
-        password_hash=auth.get_password_hash(user.password), role="user"
+        password_hash=auth.get_password_hash(user.password), 
+        preferences=user.preferences,
+        role="user"
     )
     db.add(new_user)
     db.commit()
@@ -35,7 +92,16 @@ def login(user_data: schemas.UserLogin, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Invalid username or password.")
 
     token = auth.create_access_token(data={"sub": user.username, "id": user.id, "role": user.role})
-    return {"access_token": token, "user": {"id": user.id, "username": user.username, "role": user.role, "profile_image": user.profile_image}}
+    return {
+        "access_token": token, 
+        "user": {
+            "id": user.id, 
+            "username": user.username, 
+            "role": user.role, 
+            "profile_image": user.profile_image,
+            "preferences": user.preferences
+        }
+    }
 
 @router.get("/users", response_model=list[schemas.UserResponse])
 def get_all_users(db: Session = Depends(get_db)):

@@ -88,5 +88,18 @@ export const placeRepository = {
     },
     deletePostComment(commentId, userId) {
         return api.delete(`/reviews/comments/${commentId}?user_id=${userId}`)
+    },
+    // 🤖 GNN Interaction Logging — records user behavior for AI learning
+    logInteraction(userId, placeId, actionType, score = null) {
+        return api.post('/interactions/log', {
+            user_id: userId,
+            place_id: placeId,
+            action_type: actionType,  // 'view', 'like', 'review'
+            score: score
+        })
+    },
+    // 🤖 GNN Recommendations — fetch personalized places from AI
+    getGnnRecommendations(userId, topK = 8) {
+        return api.get(`/api/recommendations/${userId}?top_k=${topK}`)
     }
 }

@@ -44,12 +44,9 @@
                 </div>
 
                 <div class="ta-rm-right">
-                    <div class="ta-form-section" :class="{ 'disabled-section': !selectedPlace }">
-                        <div class="ta-overlay-lock" v-if="!selectedPlace">
-                            <p>{{ t('review.selectFirst') || 'Please select a place on the left first 👈' }}</p>
-                        </div>
+                    <div class="ta-form-section">
 
-                        <div class="ta-field">
+                        <div class="ta-field" v-if="selectedPlace">
                             <label>{{ t('review.rateExperience') || 'How would you rate your experience?' }}</label>
                             <div class="ta-circle-rating">
                                 <i v-for="s in 5" :key="s" @click="newPost.rating = s" @mouseenter="hoverRating = s"
@@ -58,21 +55,6 @@
                                 </i>
                                 <span class="ta-rating-text" v-if="newPost.rating || hoverRating">
                                     {{ ratingLabels[(hoverRating || newPost.rating) - 1] }}
-                                </span>
-                            </div>
-                        </div>
-
-                        <div class="ta-field">
-                            <label>{{ t('review.whenDidYouGo') || 'When did you go?' }}</label>
-                            <input type="month" v-model="newPost.visitDate" class="ta-input" />
-                        </div>
-
-                        <div class="ta-field">
-                            <label>{{ t('review.whoWith') || 'Who did you go with?' }}</label>
-                            <div class="ta-pills">
-                                <span v-for="type in companions" :key="type" class="ta-pill"
-                                    :class="{ active: newPost.companion === type }" @click="newPost.companion = type">
-                                    {{ type }}
                                 </span>
                             </div>
                         </div>
@@ -115,10 +97,17 @@
                                 <span>{{ t('review.certify') || `I certify that this review is based on my own
                                     experience and is my genuine opinion.` }}</span>
                             </label>
-                            <button class="ta-btn-submit" :disabled="submitting || !newPost.comment || !newPost.agreed"
+
+                            <!-- Validation hints -->
+                            <div v-if="validationMsg" class="ta-validation-msg">
+                                ⚠️ {{ validationMsg }}
+                            </div>
+
+                            <button class="ta-btn-submit"
+                                :disabled="submitting || !newPost.comment || !newPost.agreed"
                                 @click="submitPost">
-                                {{ submitting ? (t('common.sending') || 'Sending...') : (t('review.submitBtn') ||
-                                    'Submit Review') }}
+                                <span v-if="submitting">⏳ {{ t('common.sending') || 'Sending...' }}</span>
+                                <span v-else>{{ t('review.submitBtn') || 'Submit Review' }}</span>
                             </button>
                         </div>
 
@@ -128,6 +117,13 @@
             </div>
         </div>
     </div>
+    <!-- Toast Notification -->
+    <transition name="toast-slide">
+        <div v-if="toast.show" class="wr-toast" :class="toast.type">
+            <span class="toast-icon">{{ toast.type === 'success' ? '✅' : '❌' }}</span>
+            <span>{{ toast.message }}</span>
+        </div>
+    </transition>
 </template>
 
 <script setup>
@@ -136,12 +132,20 @@ import { useRouter } from 'vue-router'
 import Navbar from '@/components/Navbar.vue'
 import { placeRepository } from '@/repositories/placeRepository'
 import { useAuth } from '@/composables/useAuth'
-import { useI18n } from '@/composables/useI18n' // Imported for translations
+import { useI18n } from '@/composables/useI18n'
 
 const router = useRouter()
 const { user } = useAuth()
 const { t } = useI18n()
 const submitting = ref(false)
+const validationMsg = ref('')
+
+// Toast notification
+const toast = ref({ show: false, message: '', type: 'success' })
+const showToast = (message, type = 'success') => {
+    toast.value = { show: true, message, type }
+    setTimeout(() => { toast.value.show = false }, 3500)
+}
 
 const placeSearchQuery = ref('')
 const searchResults = ref([])
@@ -232,31 +236,38 @@ const removeImage = (idx) => {
 }
 
 const submitPost = async () => {
-    if (!user.value || !newPost.value.comment || !selectedPlace.value) {
-        if (!user.value) {
-            alert(t('error.loginRequired') || "Please sign in to write a review.")
-            router.push('/login')
-        }
+    validationMsg.value = ''
+
+    // Check login
+    if (!user.value) {
+        showToast('กรุณาเข้าสู่ระบบก่อนเขียนรีวิว', 'error')
+        setTimeout(() => router.push('/login'), 1500)
+        return
+    }
+    if (!newPost.value.comment.trim()) {
+        validationMsg.value = 'กรุณาเขียนรีวิวของคุณก่อน'
+        return
+    }
+    if (!newPost.value.agreed) {
+        validationMsg.value = 'กรุณายืนยันว่ารีวิวนี้เป็นความคิดเห็นของคุณจริงๆ'
         return
     }
 
     submitting.value = true
     try {
         const fd = new FormData()
-        fd.append('place_id', selectedPlace.value.id)
-        fd.append('rating', newPost.value.rating || 5)
         fd.append('user_id', user.value.id)
 
-        let finalCommentText = newPost.value.comment;
-        let extras = [];
-
-        if (newPost.value.title) finalCommentText = `**${newPost.value.title}**\n${finalCommentText}`;
-        if (newPost.value.visitDate) extras.push(`📅 Visited: ${newPost.value.visitDate}`);
-        if (newPost.value.companion) extras.push(`👥 With: ${newPost.value.companion}`);
-
-        if (extras.length > 0) {
-            finalCommentText += `\n\n--- \n*${extras.join(' | ')}*`;
+        // Place and rating are optional
+        if (selectedPlace.value) {
+            fd.append('place_id', selectedPlace.value.id)
+            if (newPost.value.rating) {
+                fd.append('rating', newPost.value.rating)
+            }
         }
+
+        let finalCommentText = newPost.value.comment.trim()
+        if (newPost.value.title) finalCommentText = `**${newPost.value.title}**\n${finalCommentText}`
 
         fd.append('comment_text', finalCommentText)
 
@@ -265,11 +276,19 @@ const submitPost = async () => {
 
         await placeRepository.addComment(fd)
 
-        // Redirect back to Community Feed
-        router.push('/community')
+        showToast('ส่งรีวิวสำเร็จ! 🎉 กำลังพาคุณกลับไปยัง Community...', 'success')
+
+        // Reset form
+        newPost.value = { rating: 0, title: '', comment: '', agreed: false }
+        postImages.value = []
+        imagePreviews.value = []
+        selectedPlace.value = null
+
+        setTimeout(() => router.push('/community'), 2000)
     } catch (err) {
-        console.error("Post failed:", err)
-        alert(t('error.postFailed') || "Failed to submit review. Please try again.")
+        console.error('Post failed:', err)
+        const errMsg = err?.response?.data?.detail || 'ไม่สามารถส่งรีวิวได้ กรุณาลองใหม่อีกครั้ง'
+        showToast(errMsg, 'error')
     } finally {
         submitting.value = false
     }
@@ -704,6 +723,62 @@ const submitPost = async () => {
 .ta-btn-submit:disabled {
     background: #cbd5e1;
     cursor: not-allowed;
+}
+
+/* Validation Message */
+.ta-validation-msg {
+    background: #fff7ed;
+    border: 1px solid #fed7aa;
+    color: #c2410c;
+    padding: 10px 15px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+/* Toast Notification */
+.wr-toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 24px;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    z-index: 9999;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    min-width: 260px;
+    justify-content: center;
+}
+
+.wr-toast.success {
+    background: #0f172a;
+    color: white;
+}
+
+.wr-toast.error {
+    background: #ef4444;
+    color: white;
+}
+
+.toast-icon {
+    font-size: 1.2rem;
+}
+
+/* Toast animation */
+.toast-slide-enter-active,
+.toast-slide-leave-active {
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.toast-slide-enter-from,
+.toast-slide-leave-to {
+    opacity: 0;
+    transform: translateX(-50%) translateY(30px);
 }
 
 /* Responsive */

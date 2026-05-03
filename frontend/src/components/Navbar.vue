@@ -36,6 +36,10 @@
                                 <router-link to="/history" class="ta-dropdown-item" @click="isDiscoverOpen = false">
                                     <i class="fas fa-book-open"></i> Story of Savannakhet
                                 </router-link>
+                                <div class="dropdown-divider"></div>
+                                <router-link to="/trip-planner" class="ta-dropdown-item" @click="isDiscoverOpen = false">
+                                    <i class="fas fa-magic" style="color: #f59e0b;"></i> Smart Trip Planner
+                                </router-link>
                             </div>
                         </transition>
                     </div>
@@ -441,6 +445,7 @@ const handleLogoutAndClose = () => {
     align-items: center;
     gap: 8px;
     cursor: pointer;
+    white-space: nowrap;
 }
 
 .nav-item:hover,

@@ -180,6 +180,7 @@ async def create_place(
         location_lng=location_lng,
         image_url=image_url_data,
         is_published=bool(is_published),
+        status="approved",
         opening_hours=parsed_hours,
         rating_avg=0.0
     )

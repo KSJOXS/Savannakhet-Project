@@ -151,12 +151,14 @@ for place_data in landmark_places_data:
 
     existing = db.query(Place).filter(Place.name == place_data["name"]).first()
     if existing:
-        print(f"  [SKIP] Place already exists: {place_data['name']}")
+        print(f"  [UPDATE] Place exists, setting status to approved: {place_data['name']}")
+        existing.status = "approved"
         continue
 
     place = Place(
         category_id=cat_id,
         is_published=True,
+        status="approved",
         **place_data
     )
     db.add(place)

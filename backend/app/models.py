@@ -136,3 +136,37 @@ class InteractionLog(Base):
     # เชื่อมกลับ
     user = relationship("User", backref="interaction_logs")
     place = relationship("Place", backref="interaction_logs")
+
+class PasswordReset(Base):
+    __tablename__ = "password_resets"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String(100), index=True)
+    token = Column(String(255), unique=True, index=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+# --- Itinerary Models ---
+class Itinerary(Base):
+    __tablename__ = "itineraries"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    title = Column(String(255), nullable=False)
+    days = Column(Integer, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    user = relationship("User", backref="itineraries")
+    items = relationship("ItineraryItem", back_populates="itinerary", cascade="all, delete-orphan")
+
+class ItineraryItem(Base):
+    __tablename__ = "itinerary_items"
+
+    id = Column(Integer, primary_key=True, index=True)
+    itinerary_id = Column(Integer, ForeignKey("itineraries.id", ondelete="CASCADE"), nullable=False)
+    day = Column(Integer, nullable=False)
+    time_slot = Column(String(50), nullable=False)  # Morning, Afternoon, Evening
+    time = Column(String(20), nullable=False)       # 09:00, 14:00, 19:00
+    place_id = Column(Integer, ForeignKey("places.id", ondelete="CASCADE"), nullable=False)
+    
+    itinerary = relationship("Itinerary", back_populates="items")
+    place = relationship("Place")

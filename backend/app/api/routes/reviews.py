@@ -268,19 +268,38 @@ def delete_review(comment_id: int, db: Session = Depends(get_db)):
 
 # PUT /reviews/{review_id} — สำหรับ User แก้ไขคอมเมนต์ตัวเอง
 @router.put("/reviews/{review_id}")
-def update_user_review(
+async def update_user_review(
     review_id: int,
     user_id: int = Form(...),
     rating: Optional[int] = Form(None),
     comment_text: Optional[str] = Form(None),
+    existing_images: str = Form("[]"), # JSON list of URLs to keep
+    new_images: List[UploadFile] = File([]),
     db: Session = Depends(get_db)
 ):
     review = db.query(models.Interaction).filter(models.Interaction.id == review_id, models.Interaction.user_id == user_id).first()
     if not review:
         raise HTTPException(status_code=404, detail="Review not found or unauthorized")
     
+    # 1. Start with existing images to keep
+    try:
+        keep_images = json.loads(existing_images)
+    except:
+        keep_images = []
+
+    # 2. Save new images
+    if new_images:
+        os.makedirs(UPLOAD_DIR_REVIEWS, exist_ok=True)
+        for img in new_images:
+            if not img.filename: continue
+            file_path = f"{UPLOAD_DIR_REVIEWS}/{datetime.now().timestamp()}_{img.filename}"
+            with open(file_path, "wb") as buffer:
+                shutil.copyfileobj(img.file, buffer)
+            keep_images.append(f"/{file_path}")
+
     review.rating = rating
     review.comment = comment_text
+    review.images = json.dumps(keep_images)
     db.commit()
 
     # Recalculate avg rating

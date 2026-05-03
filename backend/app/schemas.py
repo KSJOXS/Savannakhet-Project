@@ -1,6 +1,10 @@
-from pydantic import BaseModel, EmailStr
-from typing import Optional, List
+from pydantic import BaseModel, EmailStr, Field
+from typing import Optional, List, Dict, Any
 from datetime import datetime
+
+class ItineraryRequest(BaseModel):
+    days: int = Field(default=1, ge=1, le=5)
+    user_id: Optional[int] = None
 
 # --- User ---
 class UserBase(BaseModel):
@@ -9,6 +13,7 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str
+    preferences: Optional[List[str]] = None
 
 class UserLogin(BaseModel):
     username: str
@@ -18,12 +23,14 @@ class UserUpdate(BaseModel):
     username: Optional[str] = None
     email: Optional[EmailStr] = None
     password: Optional[str] = None
+    preferences: Optional[List[str]] = None
 
 class UserResponse(UserBase):
     id: int
     role: str
     deleted_at: Optional[datetime] = None
     profile_image: Optional[str] = None  
+    preferences: Optional[List[str]] = None
     post_permission_status: str = "none"
     class Config: from_attributes = True
 
@@ -158,4 +165,43 @@ class ContactMessageResponse(BaseModel):
     is_read: bool
     is_replied: bool
     created_at: datetime
+    class Config: from_attributes = True
+
+# --- Password Reset ---
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+class PasswordResetConfirm(BaseModel):
+    token: str
+    new_password: str
+
+# --- Itinerary ---
+class ItineraryItemCreate(BaseModel):
+    day: int
+    time_slot: str
+    time: str
+    place_id: int
+
+class ItineraryCreate(BaseModel):
+    user_id: int
+    title: str
+    days: int
+    items: List[ItineraryItemCreate]
+
+class ItineraryItemResponse(BaseModel):
+    id: int
+    day: int
+    time_slot: str
+    time: str
+    place_id: int
+    place: Optional[PlaceResponse] = None
+    class Config: from_attributes = True
+
+class ItineraryResponse(BaseModel):
+    id: int
+    user_id: int
+    title: str
+    days: int
+    created_at: datetime
+    items: List[ItineraryItemResponse]
     class Config: from_attributes = True

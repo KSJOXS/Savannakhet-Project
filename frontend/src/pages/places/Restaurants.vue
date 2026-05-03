@@ -180,7 +180,7 @@ const fetchData = async () => {
 const filteredRestaurants = computed(() => {
     let results = places.value.filter(p => {
         const cat = categories.value.find(c => c.id === p.category_id)
-        return cat && cat.parent_type === 'restaurant'
+        return cat && ['restaurant', 'cafe', 'local_food'].includes(cat.parent_type)
     })
 
     if (selectedCategories.value.length > 0) {
@@ -193,7 +193,7 @@ const filteredRestaurants = computed(() => {
 })
 
 const restaurantCategories = computed(() => {
-    return categories.value.filter(c => c.parent_type === 'restaurant')
+    return categories.value.filter(c => ['restaurant', 'cafe', 'local_food'].includes(c.parent_type))
 })
 
 const toggleCategory = (name) => {

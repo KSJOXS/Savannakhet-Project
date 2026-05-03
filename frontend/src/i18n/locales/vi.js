@@ -184,6 +184,10 @@ export default {
     view_all: 'Xem Tất cả',
     ai_recom: '✨ Đề xuất cho bạn',
     ai_desc: "Đang tìm kiếm ở Savannakhet? Bạn có thể sẽ thích những địa điểm này.",
+    interest_title: 'Dựa trên sở thích của bạn',
+    interest_subtitle: 'Những địa điểm bạn có thể thích dựa trên sở thích cá nhân',
+    for_you: 'Dành cho bạn',
+    ai_pick: 'AI chọn',
     top_rated: '🏆 Địa điểm Xếp hạng Cao',
     top_desc: 'Được đánh giá cao bởi du khách',
     explore_all: '🔍 Khám phá Tất cả Địa điểm',
@@ -199,6 +203,51 @@ export default {
     get_started: "Bắt đầu — Hoàn toàn Miễn phí"
   },
 
+  // --- Write Review Page ---
+  review: {
+    tellUsTitle: 'Hãy cho chúng tôi biết chuyến thăm của bạn thế nào?',
+    searchLabel: 'Tìm kiếm địa điểm bạn đã ghé thăm:',
+    searchPlaceholder: 'Tìm khách sạn, nhà hàng, địa danh...',
+    changePlace: 'Đổi Địa điểm',
+    selectFirst: 'Vui lòng chọn địa điểm bên trái trước 👈',
+    rateExperience: 'Bạn đánh giá trải nghiệm của mình thế nào?',
+    whenDidYouGo: 'Bạn đã đi khi nào?',
+    whoWith: 'Bạn đã đi với ai?',
+    titleLabel: 'Đặt tiêu đề đánh giá',
+    titlePlaceholder: 'Tóm tắt chuyến thăm hoặc nêu bật chi tiết thú vị...',
+    writeLabel: 'Viết đánh giá của bạn',
+    writePlaceholder: 'Chia sẻ chi tiết trải nghiệm của bạn...',
+    addPhotos: 'Thêm ảnh (Tùy chọn)',
+    clickToAdd: 'Nhấn để thêm ảnh',
+    orDrag: 'hoặc kéo và thả',
+    certify: 'Tôi xác nhận rằng đánh giá này dựa trên trải nghiệm cá nhân và là ý kiến trung thực của tôi.',
+    submitBtn: 'Gửi Đánh giá',
+  },
+
+  // --- Rating Labels ---
+  rating: {
+    terrible: 'Rất tệ',
+    poor: 'Tệ',
+    average: 'Trung bình',
+    good: 'Tốt',
+    excellent: 'Tuyệt vời',
+  },
+
+  // --- Companion Types ---
+  companion: {
+    business: 'Công việc',
+    couples: 'Cặp đôi',
+    family: 'Gia đình',
+    friends: 'Bạn bè',
+    solo: 'Một mình',
+  },
+
+  // --- Error Messages ---
+  error: {
+    loginRequired: 'Vui lòng đăng nhập để viết đánh giá.',
+    postFailed: 'Không thể gửi đánh giá. Vui lòng thử lại.',
+  },
+
   // --- Common ---
   common: {
     loading: 'Đang tải...',
@@ -207,6 +256,8 @@ export default {
     seeAll: 'Xem tất cả',
     new: 'Mới',
     min: 'phút',
+    sending: 'Đang gửi...',
+    characters: 'ký tự',
   },
 
   // --- Utility Page ---
@@ -230,5 +281,23 @@ export default {
     contactLabel: 'Liên hệ:',
     disclaimer: 'Trang web này là nền tảng nguyên mẫu cho dự án Du lịch Thông minh Savannakhet. Thông tin và nội dung hiển thị có thể thay đổi. Chúng tôi không đảm bảo độ chính xác — luôn xác minh trực tiếp với địa điểm hoặc nhà cung cấp dịch vụ.',
     disclaimer2: 'Savannakhet Smart Travel không phải là đại lý đặt phòng hay công ty du lịch. Luôn xem xét chính sách đặt phòng của khách sạn hoặc địa điểm trước khi di chuyển.',
+  },
+
+  // --- Auth Pages ---
+  auth: {
+    forgot_title: 'Quên mật khẩu?',
+    forgot_subtitle: 'Đừng lo lắng, chúng tôi sẽ gửi hướng dẫn đặt lại mật khẩu cho bạn.',
+    email_label: 'Địa chỉ Email',
+    email_placeholder: 'Nhập email của bạn',
+    send_link: 'Gửi liên kết đặt lại',
+    back_to_login: 'Quay lại Đăng nhập',
+    reset_sent_msg: 'Nếu email này tồn tại trong hệ thống, bạn sẽ sớm nhận được liên kết đặt lại mật khẩu.',
+    reset_title: 'Đặt mật khẩu mới',
+    reset_subtitle: 'Vui lòng nhập mật khẩu mới của bạn bên dưới.',
+    new_password: 'Mật khẩu mới',
+    confirm_password: 'Xác nhận mật khẩu mới',
+    confirm_placeholder: 'Nhập lại mật khẩu mới',
+    update_btn: 'Cập nhật mật khẩu',
+    update_success: 'Cập nhật mật khẩu thành công! Bây giờ bạn có thể đăng nhập.',
   },
 }

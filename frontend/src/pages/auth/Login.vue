@@ -29,6 +29,9 @@
                         <i class="fas fa-lock"></i>
                         <input v-model="form.password" type="password" placeholder="Enter your password" required>
                     </div>
+                    <div class="forgot-pwd-wrap">
+                        <router-link to="/forgot-password" class="forgot-link">Forgot Password?</router-link>
+                    </div>
                 </div>
                 <p v-if="error" class="error-msg">⚠️ {{ error }}</p>
                 <button type="submit" :disabled="loading" class="btn-submit">

@@ -153,7 +153,17 @@ def get_recommendations_for_user(db: Session, user_id_from_db: int, top_k=5):
         if place_obj:
             reason = get_explainability(db, user_id_from_db, place_id)
             recommended_details.append({
-                "place": place_obj,
+                "place": {
+                    "id": place_obj.id,
+                    "name": place_obj.name,
+                    "description": place_obj.description,
+                    "image_url": place_obj.image_url,
+                    "rating_avg": float(place_obj.rating_avg) if place_obj.rating_avg else 0.0,
+                    "category_id": place_obj.category_id,
+                    "location_lat": float(place_obj.location_lat) if place_obj.location_lat else None,
+                    "location_lng": float(place_obj.location_lng) if place_obj.location_lng else None,
+                    "is_published": place_obj.is_published,
+                },
                 "reason": reason,
                 "score": round(scores[idx], 4)
             })

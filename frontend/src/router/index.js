@@ -6,6 +6,8 @@ import HomeView from '../pages/main/HomeView.vue'
 import RecommendList from '../pages/places/RecommendList.vue'
 import Login from '../pages/auth/Login.vue'
 import Register from '../pages/auth/Register.vue'
+import ForgotPassword from '../pages/auth/ForgotPassword.vue'
+import ResetPassword from '../pages/auth/ResetPassword.vue'
 import PlaceDetail from '../pages/places/PlaceDetail.vue'
 import EditPlace from '../pages/admin/places/EditPlace.vue'
 import Favorites from '../pages/user/Favorites.vue'
@@ -21,6 +23,7 @@ import About from '../pages/main/About.vue'
 import Contact from '../pages/main/Contact.vue'
 import FAQ from '../pages/main/FAQ.vue'
 import UserGuide from '../pages/main/UserGuide.vue'
+import TripPlanner from '../pages/places/TripPlanner.vue'
 import Community from '../pages/community/Community.vue'
 import UtilityPage from '../pages/main/UtilityPage.vue'
 import WriteReview from '../pages/user/WriteReview.vue'
@@ -75,6 +78,21 @@ const routes = [
         path: '/register',
         name: 'Register',
         component: Register
+    },
+    {
+        path: '/forgot-password',
+        name: 'ForgotPassword',
+        component: ForgotPassword
+    },
+    {
+        path: '/reset-password',
+        name: 'ResetPassword',
+        component: ResetPassword
+    },
+    {
+        path: '/trip-planner',
+        name: 'TripPlanner',
+        component: TripPlanner
     },
     {
         path: '/places/:id',

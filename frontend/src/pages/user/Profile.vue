@@ -153,6 +153,52 @@
                     </div>
                 </div>
 
+                <!-- TAB: Trips -->
+                <div v-if="!loading && activeTab === 'trips'" class="history-section fade-in">
+                    <div class="section-header">
+                        <h3><i class="fas fa-route text-success"></i> Your Saved Trips</h3>
+                        <p class="text-muted">Personalized travel plans you have saved.</p>
+                    </div>
+                    
+                    <div v-if="userItineraries.length === 0" class="empty-history">
+                        <div class="empty-icon-wrap"><i class="fas fa-suitcase-rolling"></i></div>
+                        <p>You haven't saved any trip plans yet.</p>
+                        <router-link to="/trip-planner" class="btn-primary-action mt-3">Plan a New Trip</router-link>
+                    </div>
+
+                    <div v-else class="itinerary-list">
+                        <div v-for="itinerary in userItineraries" :key="itinerary.id" class="itinerary-card">
+                            <div class="itinerary-card-header">
+                                <div>
+                                    <h4>{{ itinerary.title }}</h4>
+                                    <span class="itinerary-meta">
+                                        <i class="fas fa-calendar-day"></i> {{ itinerary.days }} Days 
+                                        <span class="dot">•</span> 
+                                        <i class="fas fa-clock"></i> {{ formatDate(itinerary.created_at) }}
+                                    </span>
+                                </div>
+                                <button class="btn-delete-itinerary" @click="confirmDeleteItinerary(itinerary.id)" title="Delete Plan">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="itinerary-card-body">
+                                <div class="itinerary-items-preview">
+                                    <div v-for="day in itinerary.days" :key="day" class="day-preview">
+                                        <span class="day-num">Day {{ day }}</span>
+                                        <div class="day-dots">
+                                            <div v-for="item in itinerary.items.filter(i => i.day === day)" :key="item.id" 
+                                                 class="item-dot" :title="item.time_slot"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <router-link :to="{ name: 'TripPlanner', query: { id: itinerary.id }}" class="btn-view-itinerary">
+                                    View Full Plan <i class="fas fa-chevron-right"></i>
+                                </router-link>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -177,6 +223,7 @@ const errorMsg = ref('')
 const activeTab = ref('settings')
 const userReviews = ref([])
 const userPlaces = ref([])
+const userItineraries = ref([])
 
 const averageRating = computed(() => {
     if (userReviews.value.length === 0) return '0.0'
@@ -252,9 +299,10 @@ const fetchProfile = async () => {
         }
         
         // Fetch history parallelly
-        const [reviewsRes, placesRes] = await Promise.all([
+        const [reviewsRes, placesRes, itinerariesRes] = await Promise.all([
             userRepository.getUserReviews(user.value.id),
-            userRepository.getUserPlaces(user.value.id)
+            userRepository.getUserPlaces(user.value.id),
+            userRepository.getItineraries(user.value.id)
         ])
         userReviews.value = reviewsRes.data.map(r => ({
             ...r,
@@ -262,6 +310,7 @@ const fetchProfile = async () => {
             liked_by: r.liked_by || []
         }))
         userPlaces.value = placesRes.data
+        userItineraries.value = itinerariesRes.data
         
     } catch (err) {
         console.error("Error fetching profile:", err)
@@ -351,6 +400,18 @@ const getImageUrl = (url) => {
 watch(() => route.query.tab, (newTab) => {
     activeTab.value = newTab || 'settings'
 })
+
+const confirmDeleteItinerary = async (id) => {
+    if (confirm("Are you sure you want to delete this trip plan?")) {
+        try {
+            await userRepository.deleteItinerary(id)
+            userItineraries.value = userItineraries.value.filter(it => it.id !== id)
+        } catch (err) {
+            console.error("Error deleting itinerary:", err)
+            alert("Failed to delete itinerary.")
+        }
+    }
+}
 
 onMounted(() => {
     activeTab.value = route.query.tab || 'settings'

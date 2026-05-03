@@ -6,7 +6,7 @@ from app import schemas
 
 router = APIRouter()
 
-@router.get("/{user_id}", response_model=schemas.RecommendationResponse)
+@router.get("/{user_id}")
 def get_user_recommendations(user_id: int, top_k: int = 5, db: Session = Depends(get_db)):
     """
     ดึงข้อมูลสถานที่แนะนำสำหรับ User ID ที่ระบุ โดยใช้ AI (GNN Model)

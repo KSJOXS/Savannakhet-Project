@@ -39,5 +39,11 @@ export const userRepository = {
     },
     getUserPlaces(id) {
         return api.get(`/users/${id}/places`)
+    },
+    getItineraries(userId) {
+        return api.get(`/api/itinerary/user/${userId}`)
+    },
+    deleteItinerary(id) {
+        return api.delete(`/api/itinerary/${id}`)
     }
 }

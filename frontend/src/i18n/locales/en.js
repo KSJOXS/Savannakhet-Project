@@ -191,6 +191,10 @@ export default {
     view_all: 'View All',
     ai_recom: '✨ Recommended for you',
     ai_desc: "Browsing Savannakhet? We think you'll like these based on your activity.",
+    interest_title: 'Based on Your Interests',
+    interest_subtitle: 'Places you might like because of your favorites',
+    for_you: 'For You',
+    ai_pick: 'AI Pick',
     top_rated: '🏆 Top Rated Places',
     top_desc: 'Highly rated by fellow travelers',
     explore_all: '🔍 Explore All Places',
@@ -232,6 +236,51 @@ export default {
     transportGuide: 'Transport Guide'
   },
 
+  // --- Write Review Page ---
+  review: {
+    tellUsTitle: 'Tell us, how was your visit?',
+    searchLabel: 'Search for the place you visited:',
+    searchPlaceholder: 'Search hotels, restaurants, landmarks...',
+    changePlace: 'Change Place',
+    selectFirst: 'Please select a place on the left first 👈',
+    rateExperience: 'How would you rate your experience?',
+    whenDidYouGo: 'When did you go?',
+    whoWith: 'Who did you go with?',
+    titleLabel: 'Title your review',
+    titlePlaceholder: 'Summarize your visit or highlight an interesting detail...',
+    writeLabel: 'Write your review',
+    writePlaceholder: 'Share the details of your experience...',
+    addPhotos: 'Add some photos (Optional)',
+    clickToAdd: 'Click to add photos',
+    orDrag: 'or drag and drop',
+    certify: 'I certify that this review is based on my own experience and is my genuine opinion.',
+    submitBtn: 'Submit Review',
+  },
+
+  // --- Rating Labels ---
+  rating: {
+    terrible: 'Terrible',
+    poor: 'Poor',
+    average: 'Average',
+    good: 'Good',
+    excellent: 'Excellent',
+  },
+
+  // --- Companion Types ---
+  companion: {
+    business: 'Business',
+    couples: 'Couples',
+    family: 'Family',
+    friends: 'Friends',
+    solo: 'Solo',
+  },
+
+  // --- Error Messages ---
+  error: {
+    loginRequired: 'Please sign in to write a review.',
+    postFailed: 'Failed to submit review. Please try again.',
+  },
+
   // --- Common ---
   common: {
     loading: 'Loading...',
@@ -240,6 +289,8 @@ export default {
     seeAll: 'See all',
     new: 'New',
     min: 'min',
+    sending: 'Sending...',
+    characters: 'chars',
   },
 
   // --- Footer ---
@@ -254,5 +305,23 @@ export default {
     contactLabel: 'Contact us:',
     disclaimer: 'This website is a prototype platform for the Savannakhet Smart Travel project. Information and content displayed may change. We do not guarantee accuracy — always verify directly with the venue or service provider.',
     disclaimer2: 'Savannakhet Smart Travel is not a booking agent or tour operator. Always review the booking policy of the hotel or venue before travel.',
+  },
+
+  // --- Auth Pages ---
+  auth: {
+    forgot_title: 'Forgot Password?',
+    forgot_subtitle: 'No worries, we\'ll send you reset instructions.',
+    email_label: 'Email Address',
+    email_placeholder: 'Enter your email',
+    send_link: 'Send Reset Link',
+    back_to_login: 'Back to Login',
+    reset_sent_msg: 'If this email exists in our system, you will receive a reset link shortly.',
+    reset_title: 'Set New Password',
+    reset_subtitle: 'Please enter your new password below.',
+    new_password: 'New Password',
+    confirm_password: 'Confirm New Password',
+    confirm_placeholder: 'Repeat your new password',
+    update_btn: 'Update Password',
+    update_success: 'Password updated successfully! You can now log in.',
   },
 }

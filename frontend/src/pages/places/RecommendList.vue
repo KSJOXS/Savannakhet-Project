@@ -8,17 +8,8 @@
             </transition>
             <div class="hero-overlay"></div>
             <div class="hero-content">
-                <div class="badge-new">{{ t('recommend.hero_badge') }}</div>
                 <h1>{{ t('recommend.hero_title') }}</h1>
                 <p>{{ t('recommend.hero_subtitle') }}</p>
-                <div class="hero-actions">
-                    <button @click="executeSearch" class="btn-start">
-                        <i class="fas fa-rocket"></i> {{ t('recommend.btn_start') }}
-                    </button>
-                    <button v-if="!user" @click="router.push('/register')" class="btn-start btn-outline">
-                        <i class="fas fa-user-plus"></i> {{ t('recommend.btn_join') }}
-                    </button>
-                </div>
             </div>
 
             <div v-if="heroImages.length > 1" class="hero-dots">
@@ -29,24 +20,8 @@
             </div>
         </header>
 
-        <div class="stats-bar">
-            <div class="stat-item">
-                <span class="stat-num">50+</span>
-                <span class="stat-label">{{ t('recommend.stat_places') }}</span>
-            </div>
-            <div class="stat-divider"></div>
-            <div class="stat-item">
-                <span class="stat-num">AI</span>
-                <span class="stat-label">{{ t('recommend.stat_powered') }}</span>
-            </div>
-            <div class="stat-divider"></div>
-            <div class="stat-item">
-                <span class="stat-num">Free</span>
-                <span class="stat-label">{{ t('recommend.stat_free') }}</span>
-            </div>
-        </div>
 
-        <section class="featured-section">
+        <section v-if="!user" class="featured-section">
             <div class="container">
                 <div class="section-header">
                     <div>
@@ -89,65 +64,60 @@
             </div>
         </section>
 
-        <div class="main-container">
-            <section v-if="recommendedPlaces.length > 0" class="horizontal-section">
-                <div class="section-header">
-                    <h2>{{ t('recommend.ai_recom') }}</h2>
-                    <p>{{ t('recommend.ai_desc') }}</p>
+        <!-- 🤖 GNN AI Recommendations -->
+        <section v-if="recommendedPlaces.length > 0" class="horizontal-section" style="padding: 60px 0; background: white;">
+            <div class="container">
+                <div class="section-header" style="margin-bottom: 35px; text-align: left;">
+                    <p class="section-eyebrow" style="color: #8b5cf6; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-size: 0.85rem; margin-bottom: 8px;">🤖 AI Powered by GNN</p>
+                    <h2 style="font-size: 2.2rem; color: #0f172a; font-weight: 800; line-height: 1.2;">{{ t('recommend.ai_recom') }}</h2>
+                    <p style="margin: 6px 0 0; font-size: 1.05rem; color: #64748b;">{{ t('recommend.ai_desc') }}</p>
                 </div>
-                <div class="carousel-container">
-                    <div v-for="place in recommendedPlaces" :key="'rec-'+place.id" class="ta-card ai-card" @click="goToDetail(place.id)">
+                <div class="places-grid">
+                    <div v-for="item in recommendedPlaces" :key="'rec-'+item.place.id" class="ta-card list-card" @click="goToDetail(item.place.id)">
                         <div class="card-img-wrapper">
-                            <img :src="getCoverImage(place)" :alt="place.name" />
-                            <button v-if="!user || user.role !== 'admin'" class="btn-heart" :class="{ active: isFavorite(place.id) }" @click.stop="toggleHeart(place.id)">
+                            <img :src="getCoverImage(item.place)" :alt="item.place.name" />
+                            <div class="ai-badge">✨ {{ t('recommend.ai_pick') }}</div>
+                            <button v-if="!user || user.role !== 'admin'" class="btn-heart" :class="{ active: isFavorite(item.place.id) }" @click.stop="toggleHeart(item.place.id)">
                                 <i class="fas fa-heart"></i>
                             </button>
                         </div>
                         <div class="card-info">
-                            <h3 class="truncate">{{ place.name }}</h3>
-                            <div class="rating-row">
-                                <span class="bubbles"><i class="fas fa-star" style="color: #f59e0b;"></i></span>
-                                <span class="rating-num">{{ place.rating_avg || '0.0' }}</span>
-                            </div>
-                            <p class="cat-text"><i class="fas fa-map-marker-alt"></i> {{ getCategoryName(place.category_id) }}</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section v-if="topRatedPlaces.length > 0" class="horizontal-section">
-                <div class="section-header">
-                    <h2>{{ t('recommend.top_rated') }}</h2>
-                    <p>{{ t('recommend.top_desc') }}</p>
-                </div>
-                <div class="carousel-container">
-                    <div v-for="place in topRatedPlaces" :key="'top-'+place.id" class="ta-card" @click="goToDetail(place.id)">
-                        <div class="card-img-wrapper">
-                            <img :src="getCoverImage(place)" :alt="place.name" />
-                            <div class="rank-badge">Top Rated</div>
-                            <button v-if="!user || user.role !== 'admin'" class="btn-heart" :class="{ active: isFavorite(place.id) }" @click.stop="toggleHeart(place.id)">
-                                <i class="fas fa-heart"></i>
-                            </button>
-                        </div>
-                        <div class="card-info">
-                            <h3 class="truncate">{{ place.name }}</h3>
-                            <div class="rating-row">
+                            <h3 class="truncate">{{ item.place.name }}</h3>
+                            <div class="rating-row mb-10">
                                 <i class="fas fa-star" style="color: #f59e0b;"></i>
-                                <span class="rating-num">{{ place.rating_avg || '0.0' }}</span>
+                                <span class="rating-num">{{ item.place.rating_avg || '0.0' }}</span>
+                                <span class="cat-text" style="margin-left: 10px;">• <i class="fas fa-map-marker-alt"></i> {{ getCategoryName(item.place.category_id) }}</span>
                             </div>
-                            <p class="cat-text"><i class="fas fa-map-marker-alt"></i> {{ getCategoryName(place.category_id) }}</p>
+                            <p class="description">{{ item.place.description }}</p>
                         </div>
                     </div>
                 </div>
-            </section>
+            </div>
+        </section>
 
+        <div class="main-container">
             <section class="explore-all-section" ref="exploreAllSection">
-                <div class="section-header mt-50">
+                <div class="section-header">
                     <h2>{{ t('recommend.explore_all') }}</h2>
                 </div>
+                
+
+
                 <div class="explore-layout">
                     <aside class="sidebar">
-                        <div class="filter-card">
+                        <!-- Smart Trip Planner Banner -->
+                        <div class="trip-planner-banner" @click="router.push('/trip-planner')">
+                            <div class="banner-icon">
+                                <i class="fas fa-magic"></i>
+                            </div>
+                            <div class="banner-text">
+                                <h3>AI Trip Planner</h3>
+                                <p>Plan a 2-3 day trip easily!</p>
+                            </div>
+                            <i class="fas fa-arrow-right arrow-icon"></i>
+                        </div>
+
+                        <div class="filter-card mt-20">
                             <h3>{{ t('recommend.filters') }}</h3>
                             <div class="filter-group mt-15">
                                 <div class="input-with-icon">
@@ -183,6 +153,8 @@
                             <div v-for="place in filteredPlaces" :key="place.id" class="ta-card list-card" @click="goToDetail(place.id)">
                                 <div class="card-img-wrapper">
                                     <img :src="getCoverImage(place)" :alt="place.name" />
+                                    <!-- ✨ Lifestyle Badge for Prioritized Items -->
+                                    <div v-if="userPreferredCategoryIds.includes(place.category_id)" class="interest-badge" style="background: #f59e0b; top: 10px; left: 10px; position: absolute; z-index: 5;">🔥 Lifestyle</div>
                                     <button v-if="!user || user.role !== 'admin'" class="btn-heart" :class="{ active: isFavorite(place.id) }" @click.stop="toggleHeart(place.id)">
                                         <i class="fas fa-heart"></i>
                                     </button>
@@ -206,7 +178,65 @@
                     </main>
                 </div>
             </section>
+
+            <section v-if="topRatedPlaces.length > 0" class="horizontal-section">
+                <div class="section-header">
+                    <h2>{{ t('recommend.top_rated') }}</h2>
+                    <p>{{ t('recommend.top_desc') }}</p>
+                </div>
+                <div class="carousel-container">
+                    <div v-for="place in topRatedPlaces" :key="'top-'+place.id" class="ta-card" @click="goToDetail(place.id)">
+                        <div class="card-img-wrapper">
+                            <img :src="getCoverImage(place)" :alt="place.name" />
+                            <div class="rank-badge">Top Rated</div>
+                            <button v-if="!user || user.role !== 'admin'" class="btn-heart" :class="{ active: isFavorite(place.id) }" @click.stop="toggleHeart(place.id)">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                        </div>
+                        <div class="card-info">
+                            <h3 class="truncate">{{ place.name }}</h3>
+                            <div class="rating-row">
+                                <i class="fas fa-star" style="color: #f59e0b;"></i>
+                                <span class="rating-num">{{ place.rating_avg || '0.0' }}</span>
+                            </div>
+                            <p class="cat-text"><i class="fas fa-map-marker-alt"></i> {{ getCategoryName(place.category_id) }}</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
         </div>
+
+        <!-- ❤️ Based on your favorites (Warm Start - Shows at bottom) -->
+        <section v-if="favoriteRecommendations.length > 0" class="horizontal-section" style="background: #f8fafc; padding: 60px 0;">
+            <div class="container">
+                <div class="section-header" style="margin-bottom: 35px; text-align: left;">
+                    <p class="section-eyebrow" style="color: #f59e0b; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-size: 0.85rem; margin-bottom: 8px;">❤️ {{ t('recommend.interest_title') || 'อ้างอิงจากความสนใจของคุณ' }}</p>
+                    <h2 style="font-size: 2.2rem; color: #0f172a; font-weight: 800; line-height: 1.2;">{{ t('recommend.interest_title') || 'อ้างอิงจากความสนใจของคุณ' }}</h2>
+                    <p style="margin: 6px 0 0; font-size: 1.05rem; color: #64748b;">{{ t('recommend.interest_subtitle') || 'สถานที่ที่คุณน่าจะชอบจากรายการโปรดของคุณ' }}</p>
+                </div>
+                <div class="places-grid">
+                    <div v-for="place in favoriteRecommendations" :key="'fav-'+place.id" class="ta-card list-card" @click="goToDetail(place.id)">
+                        <div class="card-img-wrapper">
+                            <img :src="getCoverImage(place)" :alt="place.name" />
+                            <div class="interest-badge">❤️ {{ t('recommend.for_you') || 'แนะนำสำหรับคุณ' }}</div>
+                            <button v-if="!user || user.role !== 'admin'" class="btn-heart" :class="{ active: isFavorite(place.id) }" @click.stop="toggleHeart(place.id)">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                        </div>
+                        <div class="card-info">
+                            <h3 class="truncate">{{ place.name }}</h3>
+                            <div class="rating-row mb-10">
+                                <i class="fas fa-star" style="color: #f59e0b;"></i>
+                                <span class="rating-num">{{ place.rating_avg || '0.0' }}</span>
+                                <span class="cat-text" style="margin-left: 10px;">• <i class="fas fa-map-marker-alt"></i> {{ getCategoryName(place.category_id) }}</span>
+                            </div>
+                            <p class="description">{{ place.description }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
         <section class="history-section">
             <div class="container history-container">
@@ -250,28 +280,7 @@
                     </ul>
                 </div>
             </div>
-        </section>
-
-        <section class="cta-section">
-            <div class="cta-content">
-                <template v-if="!user">
-                    <h2>{{ t('recommend.ready') }}</h2>
-                    <p>{{ t('recommend.create_account') }}</p>
-                    <button @click="router.push('/register')" class="btn-cta">
-                        <i class="fas fa-user-plus"></i> {{ t('recommend.get_started') }}
-                    </button>
-                </template>
-                
-                <template v-else>
-                    <h2>พร้อมที่จะออกเดินทางหรือยัง?</h2>
-                    <p>ค้นพบและบันทึกสถานที่ใหม่ๆ ในสไตล์ของคุณ</p>
-                    <button @click="executeSearch" class="btn-cta">
-                        <i class="fas fa-map-marked-alt"></i> ค้นหาสถานที่เพิ่มเติม
-                    </button>
-                </template>
-            </div>
-        </section>
-
+            </section>
         <footer class="simple-footer">
             <p>🌴 Savannakhet Smart Travel &copy; 2026 — Powered by GNN Recommendation</p>
         </footer>
@@ -373,17 +382,24 @@ const fetchData = async () => {
             try {
                 const favRes = await favoriteRepository.getUserFavorites(user.value.id)
                 favoriteIds.value = favRes.data.map(f => f.place_id)
-            } catch (err) { console.warn("Cannot fetch favorites", err) }
+            } catch (err) { 
+                console.warn("Cannot fetch favorites", err) 
+            }
+            
+            // 🎯 Smart Interest-based Recommendations (works immediately, no GNN training needed)
+            fetchInterestBasedRecommendations()
 
             try {
+                // 🤖 Call GNN Recommendation Engine
                 const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-                const aiRes = await axios.get(`${backendUrl}/api/recommendations/${user.value.id}?top_k=8`);
-                if (aiRes.data.status === 'success') {
-                    recommendedPlaces.value = aiRes.data.recommended_place_ids
-                        .map(id => places.value.find(p => p.id === id))
-                        .filter(p => p !== undefined);
+                const aiRes = await axios.get(`${backendUrl}/api/recommendations/${user.value.id}?top_k=12`);
+                if (aiRes.data.status === 'success' && aiRes.data.recommended_places?.length > 0) {
+                    // Response format: { recommended_places: [{place: {...}, reason: "...", score: 0.9}] }
+                    recommendedPlaces.value = aiRes.data.recommended_places.filter(item => item.place != null);
                 }
-            } catch (aiErr) { console.warn("AI Not ready", aiErr); }
+            } catch (aiErr) { 
+                console.warn("GNN not ready yet — will show top-rated instead", aiErr); 
+            }
         }
     } catch (err) { console.error("API Error:", err) } finally { loading.value = false }
 
@@ -405,11 +421,67 @@ const fetchData = async () => {
     }
 }
 
+// 🎯 Fetch places from same categories as user's favorites AND user preferences
+const favoriteRecommendations = ref([])
+
+
+// 🎯 Check which categories the user prefers (Cold start)
+const userPreferredCategoryIds = computed(() => {
+    if (!user.value || !user.value.preferences) return []
+    let prefs = user.value.preferences
+    if (typeof prefs === 'string') {
+        try { prefs = JSON.parse(prefs) } catch(e) { prefs = [] }
+    }
+    if (Array.isArray(prefs) && prefs.length > 0) {
+        return categories.value
+            .filter(c => prefs.includes(c.parent_type))
+            .map(c => c.id)
+    }
+    return []
+})
+
+const fetchInterestBasedRecommendations = () => {
+    if (!places.value.length) return
+    
+    // 1. Favorites based (Only shows if they have favorites)
+    if (favoriteIds.value.length) {
+        const likedCategoryIds = favoriteIds.value
+            .map(fid => places.value.find(p => p.id === fid)?.category_id)
+            .filter(Boolean)
+        
+        if (likedCategoryIds.length) {
+            const catCount = {}
+            likedCategoryIds.forEach(cid => catCount[cid] = (catCount[cid] || 0) + 1)
+            const targetFavoriteCatIds = Object.entries(catCount)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 2)
+                .map(e => parseInt(e[0]))
+                
+            favoriteRecommendations.value = places.value
+                .filter(p => targetFavoriteCatIds.includes(p.category_id) && !favoriteIds.value.includes(p.id))
+                .sort((a, b) => (parseFloat(b.rating_avg) || 0) - (parseFloat(a.rating_avg) || 0))
+                .slice(0, 12)
+        }
+    }
+}
+
 const filteredPlaces = computed(() => {
-    return places.value.filter(p => {
+    const results = places.value.filter(p => {
         const matchesSearch = p.name.toLowerCase().includes(searchQuery.value.toLowerCase())
         const matchesCat = !selectedCategory.value || p.category_id === selectedCategory.value
         return matchesSearch && matchesCat
+    })
+
+    // Sort: Preferred categories first, then by rating
+    return [...results].sort((a, b) => {
+        const aIsPreferred = userPreferredCategoryIds.value.includes(a.category_id)
+        const bIsPreferred = userPreferredCategoryIds.value.includes(b.category_id)
+        
+        if (aIsPreferred && !bIsPreferred) return -1
+        if (!aIsPreferred && bIsPreferred) return 1
+        
+        // Otherwise sort by rating
+        return (parseFloat(b.rating_avg) || 0) - (parseFloat(a.rating_avg) || 0)
     })
 })
 
@@ -423,8 +495,15 @@ const toggleHeart = async (placeId) => {
     if (!user.value) return router.push('/login')
     try {
         const res = await favoriteRepository.toggleFavorite(user.value.id, placeId)
-        if (res.data.status === 'added') favoriteIds.value.push(placeId)
-        else favoriteIds.value = favoriteIds.value.filter(id => id !== placeId)
+        if (res.data.status === 'added') {
+            favoriteIds.value.push(placeId)
+            // 🤖 Log this "like" interaction for GNN learning (weight = 5.0)
+            placeRepository.logInteraction(user.value.id, placeId, 'like').catch(() => {})
+        } else {
+            favoriteIds.value = favoriteIds.value.filter(id => id !== placeId)
+        }
+        // Re-calculate interest-based recommendations immediately
+        fetchInterestBasedRecommendations()
     } catch (err) { console.error(err) }
 }
 const isFavorite = (id) => favoriteIds.value.includes(id)
@@ -439,34 +518,27 @@ onUnmounted(() => { if (heroInterval) clearInterval(heroInterval) })
 .explore-page { background-color: #f7f9fa; min-height: 100vh; font-family: 'Inter', sans-serif; color: #1e293b; }
 
 /* ─── Hero ─── */
-.hero { position: relative; min-height: 580px; display: flex; align-items: center; justify-content: center; text-align: center; color: white; overflow: hidden; z-index: 50; }
+.hero { position: relative; min-height: 220px; display: flex; align-items: center; justify-content: center; text-align: center; color: white; overflow: hidden; z-index: 50; }
 .hero-bg { position: absolute; inset: 0; background-position: center; background-size: cover; z-index: 0; }
 .slide-fade-enter-active { transition: opacity 1s ease; }
 .slide-fade-leave-active { transition: opacity 1s ease; position: absolute; inset: 0; }
 .slide-fade-enter-from, .slide-fade-leave-to { opacity: 0; }
 
-.hero-dots { position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 55; }
+.hero-dots { position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 55; }
 .dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.7); background: transparent; cursor: pointer; transition: 0.3s; }
 .dot.active { background: white; transform: scale(1.3); }
 
 .hero-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.5) 100%); z-index: 1; }
 .hero-content { position: relative; z-index: 2; max-width: 820px; padding: 0 24px; }
-.badge-new { background: rgba(255, 255, 255, 0.18); border: 1px solid rgba(255, 255, 255, 0.3); padding: 7px 18px; border-radius: 50px; display: inline-block; margin-bottom: 22px; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.5px; backdrop-filter: blur(4px); }
-.hero-content h1 { font-size: 3.8rem; font-weight: 800; margin-bottom: 16px; line-height: 1.15; text-shadow: 0 2px 20px rgba(0,0,0,0.2); }
-.hero-content p { font-size: 1.15rem; margin-bottom: 36px; line-height: 1.6; font-weight: 500; }
+.badge-new { background: rgba(255, 255, 255, 0.18); border: 1px solid rgba(255, 255, 255, 0.3); padding: 5px 15px; border-radius: 50px; display: inline-block; margin-bottom: 8px; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.5px; backdrop-filter: blur(4px); }
+.hero-content h1 { font-size: 1.8rem; font-weight: 800; margin-bottom: 6px; line-height: 1.1; text-shadow: 0 2px 15px rgba(0,0,0,0.2); }
+.hero-content p { font-size: 0.85rem; margin-bottom: 14px; line-height: 1.5; font-weight: 500; opacity: 0.95; }
 .hero-actions { display: flex; gap: 14px; justify-content: center; }
 
-.btn-start { background: #3498db; color: white; border: none; padding: 15px 38px; border-radius: 50px; font-size: 1rem; font-weight: 700; cursor: pointer; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25); transition: 0.3s; display: inline-flex; align-items: center; gap: 9px; font-family: 'Inter', sans-serif; }
+.btn-start { background: #3498db; color: white; border: none; padding: 8px 24px; border-radius: 50px; font-size: 0.82rem; font-weight: 700; cursor: pointer; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2); transition: 0.3s; display: inline-flex; align-items: center; gap: 8px; font-family: 'Inter', sans-serif; }
 .btn-start:hover { background: #2980b9; transform: translateY(-4px); box-shadow: 0 14px 30px rgba(0, 0, 0, 0.3); }
 .btn-outline { background: rgba(255, 255, 255, 0.15); border: 1.5px solid rgba(255, 255, 255, 0.6); backdrop-filter: blur(4px); }
 .btn-outline:hover { background: rgba(255, 255, 255, 0.28); }
-
-/* ─── Stats Bar ─── */
-.stats-bar { background: white; display: flex; justify-content: center; align-items: center; gap: 48px; padding: 22px 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
-.stat-item { display: flex; flex-direction: column; align-items: center; }
-.stat-num { font-size: 1.6rem; font-weight: 800; color: #3498db; line-height: 1; }
-.stat-label { font-size: 0.78rem; color: #94a3b8; font-weight: 500; margin-top: 3px; }
-.stat-divider { width: 1px; height: 36px; background: #e2e8f0; }
 
 /* ─── Featured Section ─── */
 .featured-section { padding: 80px 20px; background: #f8fafc; }
@@ -477,12 +549,86 @@ onUnmounted(() => { if (heroInterval) clearInterval(heroInterval) })
 .btn-view-all { background: none; border: none; color: #3498db; font-weight: 700; cursor: pointer; font-size: 0.92rem; display: flex; align-items: center; gap: 6px; transition: 0.2s; font-family: 'Inter', sans-serif; }
 .btn-view-all:hover { gap: 10px; color: #2980b9; }
 
+/* Trip Planner Banner */
+.trip-planner-banner {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border-radius: 16px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    color: white;
+    cursor: pointer;
+    transition: 0.3s;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
+    margin-bottom: 20px;
+}
+
+.trip-planner-banner:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+}
+
+.banner-icon {
+    background: rgba(255, 255, 255, 0.2);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.banner-text h3 {
+    margin: 0 0 4px;
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+.banner-text p {
+    margin: 0;
+    font-size: 0.8rem;
+    opacity: 0.9;
+}
+
+.arrow-icon {
+    margin-left: auto;
+    font-size: 1.1rem;
+}
+
+.mt-20 { margin-top: 20px; }
+
 /* ─── Cards ─── */
 .featured-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 28px; }
 .place-card, .ta-card { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06); transition: all 0.3s ease; cursor: pointer; border: 1px solid #f1f5f9; }
 .ta-card { flex: 0 0 280px; scroll-snap-align: start; }
 .place-card:hover, .ta-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12); }
-.ai-card { border: 2px solid #3498db; }
+.ai-card { border: 2px solid #8b5cf6; }
+.ai-badge { 
+    position: absolute; top: 10px; left: 10px; 
+    background: linear-gradient(135deg, #8b5cf6, #6d28d9); 
+    color: white; padding: 4px 10px; border-radius: 50px; 
+    font-size: 0.72rem; font-weight: 700; 
+    box-shadow: 0 2px 8px rgba(109,40,217,0.4);
+}
+.ai-reason {
+    font-size: 0.78rem;
+    color: #8b5cf6;
+    margin: 6px 0 0;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.interest-card { border: 2px solid #f59e0b; }
+.interest-badge { 
+    position: absolute; top: 10px; left: 10px; 
+    background: linear-gradient(135deg, #f59e0b, #d97706); 
+    color: white; padding: 4px 10px; border-radius: 50px; 
+    font-size: 0.72rem; font-weight: 700; 
+    box-shadow: 0 2px 8px rgba(217,119,6,0.4);
+}
 
 .card-img-wrapper { position: relative; height: 220px; overflow: hidden; }
 .ta-card .card-img-wrapper { height: 190px; }
@@ -680,5 +826,5 @@ onUnmounted(() => { if (heroInterval) clearInterval(heroInterval) })
 .simple-footer { text-align: center; padding: 32px 40px; color: #94a3b8; border-top: 1px solid #e2e8f0; font-size: 0.88rem; background: white; }
 
 @media (max-width: 992px) { .explore-layout { grid-template-columns: 1fr; } .sidebar { position: relative; top: 0; margin-bottom: 20px; } }
-@media (max-width: 768px) { .hero-content h1 { font-size: 2.2rem; } .hero-content p { font-size: 1rem; margin-bottom: 25px;} }
+@media (max-width: 768px) { .hero-content h1 { font-size: 1.8rem; } .hero-content p { font-size: 0.9rem; margin-bottom: 20px;} }
 </style>
