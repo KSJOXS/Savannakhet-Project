@@ -27,7 +27,10 @@ export default {
     writePost: 'Write Post',
     communityFeed: 'Community Feed',
     myTrips: 'My Trips',
-    tools: 'Travel Tools',
+    planYourTrip: 'Plan Your Trip',
+    destinations: 'Destinations',
+    tools: 'Tools',
+
     bookings: 'Bookings',
     messages: 'Messages',
     contribute: 'Contribute',
@@ -107,16 +110,38 @@ export default {
     ratingLabels: ['Terrible', 'Poor', 'Average', 'Good', 'Excellent'],
     locationCoord: '📍 Coordinates (Lat: {lat}, Lng: {lng})',
     locationNotFound: 'Location not found',
+    quick_details: 'Quick Details',
+    category_label: 'Category',
+    rating_label: 'Rating',
+  },
+
+  recommend: {
+    ai_recom: 'AI Recommendation',
+    ai_desc: 'Personalized recommendations based on your preferences.',
+    similar: 'Similar Places',
   },
 
   // --- Hotels Page ---
   hotels: {
     title: 'Hotels in Savannakhet',
-    subtitle: 'Find the perfect place to stay',
+    subtitle: 'Find the best places to stay',
+    whereTo: 'Where to?',
+    savannakhetLaos: 'Savannakhet, Laos',
+    checkInCheckOut: 'Check In - Check Out',
+    addDates: 'Add dates',
+    guests: 'Guests',
+    adultsRoom: '2 adults, 1 room',
+    update: 'Update',
     filterAll: 'All',
     noResults: 'No hotels found.',
     bookOnAgoda: 'View on Agoda',
     bookOnBooking: 'View on Booking.com',
+    amenities: 'Property amenities',
+    view_prices_dates: 'View prices for your travel dates',
+    checkin: 'Check In',
+    checkout: 'Check Out',
+    free_cancel: 'Free cancellation on most rooms',
+    check_availability: 'Check availability',
   },
 
   // --- Restaurants Page ---
@@ -163,6 +188,8 @@ export default {
     viewDetails: 'View Details',
     province: 'Savannakhet Province',
     defaultDesc: 'Discover the historic significance and cultural beauty of this landmark in Savannakhet.',
+    openGuide: 'OPEN GUIDE',
+    verified: 'Verified',
   },
 
   // --- Recently Viewed ---
@@ -227,14 +254,7 @@ export default {
     visitContact: 'Can\'t find what you\'re looking for? Visit our contact page and we\'ll be happy to help!'
   },
 
-  // --- Utility Page ---
-  utility: {
-    title: 'Helpful Tools',
-    subtitle: 'Travel utilities to make your Savannakhet trip easier',
-    currencyConverter: 'Currency Converter',
-    phrasebook: 'Phrasebook',
-    transportGuide: 'Transport Guide'
-  },
+
 
   // --- Write Review Page ---
   review: {
@@ -281,6 +301,24 @@ export default {
     postFailed: 'Failed to submit review. Please try again.',
   },
 
+  // --- Trip Planner ---
+  tripPlanner: {
+    title: 'Smart Trip Planner',
+    subtitle: 'Experience Savannakhet like a local with our intelligent, personalized travel guide.',
+    badge: 'AI-Powered Itinerary',
+    interests: 'INTERESTS',
+    selectInterests: 'Select what you love',
+    duration: 'DURATION',
+    day: 'Day',
+    days: 'Days',
+    generate: 'Generate',
+    yourItinerary: 'Your {days}-Day Savannakhet Itinerary',
+    saveToTrips: 'Save to My Trips',
+    saving: 'Saving...',
+    planAnother: 'Plan Another Trip',
+    saveSuccess: 'Itinerary saved successfully! You can find it in your profile.',
+  },
+
   // --- Common ---
   common: {
     loading: 'Loading...',
@@ -291,6 +329,16 @@ export default {
     min: 'min',
     sending: 'Sending...',
     characters: 'chars',
+    clear: 'Clear',
+    monday: 'Monday',
+    tuesday: 'Tuesday',
+    wednesday: 'Wednesday',
+    thursday: 'Thursday',
+    friday: 'Friday',
+    saturday: 'Saturday',
+    sunday: 'Sunday',
+    viewOnMap: 'View on map',
+    reviews: 'reviews',
   },
 
   // --- Footer ---

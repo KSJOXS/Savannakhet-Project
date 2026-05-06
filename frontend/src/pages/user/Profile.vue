@@ -192,9 +192,62 @@
                                         </div>
                                     </div>
                                 </div>
-                                <router-link :to="{ name: 'TripPlanner', query: { id: itinerary.id }}" class="btn-view-itinerary">
+                                <button @click="openItineraryModal(itinerary)" class="btn-view-itinerary" style="background: none; border: none; cursor: pointer;">
                                     View Full Plan <i class="fas fa-chevron-right"></i>
-                                </router-link>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Itinerary Modal -->
+        <div v-if="selectedItinerary" class="modal-overlay" @click="closeItineraryModal">
+            <div class="modal-content itinerary-modal" @click.stop>
+                <div class="modal-header">
+                    <h2>{{ selectedItinerary.title }}</h2>
+                    <button class="btn-close" @click="closeItineraryModal"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="modal-body">
+                    <div class="itinerary-meta-large">
+                        <span class="meta-pill"><i class="fas fa-calendar-day"></i> {{ selectedItinerary.days }} Days</span>
+                        <span class="meta-pill"><i class="fas fa-clock"></i> {{ formatDate(selectedItinerary.created_at) }}</span>
+                    </div>
+                    
+                    <div class="timeline-container-mini">
+                        <div class="day-section" v-for="day in selectedItinerary.days" :key="day">
+                            <h3 class="day-heading">Day {{ day }}</h3>
+                            <div class="timeline">
+                                <div class="timeline-item" v-for="item in selectedItinerary.items.filter(i => i.day === day)" :key="item.id">
+                                    <div class="time-marker">
+                                        <span class="time">{{ item.time }}</span>
+                                        <div class="marker-dot"></div>
+                                        <div class="marker-line"></div>
+                                    </div>
+                                    
+                                    <div class="timeline-content">
+                                        <div class="slot-label">
+                                            <i v-if="item.time_slot === 'Morning'" class="fas fa-sun text-warning"></i>
+                                            <i v-else-if="item.time_slot === 'Afternoon'" class="fas fa-cloud-sun text-orange"></i>
+                                            <i v-else class="fas fa-moon text-indigo"></i>
+                                            {{ item.time_slot }}
+                                        </div>
+                                        
+                                        <div class="place-card-mini" @click="$router.push(`/places/${item.place_id}`)">
+                                            <div class="place-img-mini">
+                                                <img :src="getPlaceImage(item.place?.image_url)" alt="place" />
+                                            </div>
+                                            <div class="place-info-mini">
+                                                <h4>{{ item.place?.name || 'Unknown Place' }}</h4>
+                                                <div class="rating-mini">
+                                                    <i class="fas fa-star text-warning"></i> {{ item.place?.rating_avg || 'New' }}
+                                                </div>
+                                            </div>
+                                            <i class="fas fa-chevron-right arrow-icon"></i>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -224,6 +277,17 @@ const activeTab = ref('settings')
 const userReviews = ref([])
 const userPlaces = ref([])
 const userItineraries = ref([])
+const selectedItinerary = ref(null)
+
+const openItineraryModal = (itinerary) => {
+    selectedItinerary.value = itinerary
+    document.body.style.overflow = 'hidden' // Prevent scrolling
+}
+
+const closeItineraryModal = () => {
+    selectedItinerary.value = null
+    document.body.style.overflow = ''
+}
 
 const averageRating = computed(() => {
     if (userReviews.value.length === 0) return '0.0'
@@ -936,5 +1000,246 @@ onMounted(() => {
 @media (max-width: 600px) {
     .profile-card { padding: 25px; }
     .review-grid, .place-grid { grid-template-columns: 1fr; }
+}
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.modal-content.itinerary-modal {
+    background: white;
+    width: 100%;
+    max-width: 600px;
+    max-height: 85vh;
+    border-radius: 24px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    animation: slideUp 0.3s ease-out;
+    overflow: hidden;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    border-bottom: 1px solid #e2e8f0;
+    background: #f8fafc;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.4rem;
+    color: #0f172a;
+    font-weight: 800;
+}
+
+.btn-close {
+    background: #e2e8f0;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #64748b;
+    transition: 0.2s;
+}
+
+.btn-close:hover {
+    background: #cbd5e1;
+    color: #0f172a;
+}
+
+.modal-body {
+    padding: 25px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.itinerary-meta-large {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+.meta-pill {
+    background: #f1f5f9;
+    color: #475569;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Timeline Mini */
+.timeline-container-mini {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.day-heading {
+    font-size: 1.2rem;
+    color: #22c55e;
+    font-weight: 800;
+    margin: 0 0 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px dashed #e2e8f0;
+}
+
+.timeline {
+    padding-left: 5px;
+}
+
+.timeline-item {
+    display: flex;
+    gap: 20px;
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timeline-item:last-child {
+    margin-bottom: 0;
+}
+
+.timeline-item:last-child .marker-line {
+    display: none;
+}
+
+.time-marker {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 60px;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.time {
+    font-weight: 800;
+    font-size: 0.95rem;
+    color: #0f172a;
+    background: #f1f5f9;
+    padding: 4px 8px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.marker-dot {
+    width: 14px;
+    height: 14px;
+    background: white;
+    border: 3px solid #3b82f6;
+    border-radius: 50%;
+    z-index: 2;
+}
+
+.marker-line {
+    position: absolute;
+    top: 40px;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    background: #e2e8f0;
+    z-index: 1;
+}
+
+.timeline-content {
+    flex: 1;
+    padding-top: 5px;
+}
+
+.slot-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #64748b;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.text-warning { color: #f59e0b; }
+.text-orange { color: #f97316; }
+.text-indigo { color: #6366f1; }
+
+.place-card-mini {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 10px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.place-card-mini:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+    transform: translateX(4px);
+}
+
+.place-img-mini {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.place-img-mini img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.place-info-mini {
+    flex: 1;
+}
+
+.place-info-mini h4 {
+    margin: 0 0 4px;
+    font-size: 1rem;
+    color: #1e293b;
+}
+
+.rating-mini {
+    font-size: 0.85rem;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.arrow-icon {
+    color: #cbd5e1;
+    font-size: 1.2rem;
+    margin-right: 10px;
+}
+
+.place-card-mini:hover .arrow-icon {
+    color: #3b82f6;
 }
 </style>

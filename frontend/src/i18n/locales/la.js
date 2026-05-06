@@ -21,7 +21,10 @@ export default {
     postPhoto: 'ໂພສຮູບພາບ',
     addPlace: 'ເພີ່ມສະຖານທີ່',
     myTrips: 'ທຣິບຂອງຂ້ອຍ',
-    tools: 'ເຄື່ອງມືຊ່ວຍເຫຼືອ',
+    planYourTrip: 'ວາງແຜນການເດີນທາງ',
+    destinations: 'ຈຸດໝາຍປາຍທາງ',
+    tools: 'ເຄື່ອງມື',
+
     bookings: 'ການຈອງ',
     messages: 'ຂໍ້ຄວາມ',
     contribute: 'ຮ່ວມມື',
@@ -97,18 +100,40 @@ export default {
     recentReview: 'ລີວິວໃໝ່ລ່າສຸດ',
     checkPrices: 'ກວດສອບລາຄາທີ່ພັກ',
     viewPrices: 'ເບິ່ງລາຄາ',
-    scoreString: 'ຄະແນນ',
+    scoreString: 'ຄະແນน',
     ratingLabels: ['ແຍ່ຫຼາຍ', 'ພໍໃຊ້', 'ປານກາງ', 'ດີ', 'ດີເລີດ'],
     locationCoord: '📍 ພິກັດ (Lat: {lat}, Lng: {lng})',
     locationNotFound: 'ບໍ່ພົບຂໍ້ມູນຕຳແໜ່ງ',
+    quick_details: 'ຂໍ້ມູນໂດຍຫຍໍ້',
+    category_label: 'ໝວດໝູ່',
+    rating_label: 'ຄະແນນ',
+  },
+
+  recommend: {
+    ai_recom: 'ຄຳແນະນຳຈາກ AI',
+    ai_desc: 'ແນະນຳສະຖານທີ່ທີ່ເໝາະສົມກັບທ່ານໂດຍໃຊ້ລະບົບ AI.',
+    similar: 'ສະຖານที่ທີ່ຄ້າຍຄືກັນ',
   },
 
   // --- Hotels Page ---
   hotels: {
     title: 'ໂຮງແຮມໃນສະຫວັນນະເຂດ',
-    subtitle: 'ຊອກຫາທີ່ພັກທີ່ດີທີ່ສຸດ',
+    subtitle: 'ຊອກຫາທີ່ພັກທີ່ດີທີ່สุด',
+    whereTo: 'ໄປໃສ?',
+    savannakhetLaos: 'ສະຫວັນນະເຂດ, ລາວ',
+    checkInCheckOut: 'ເຊັກອິນ - ເຊັກເອົາ',
+    addDates: 'ເພີ່ມວັນທີ',
+    guests: 'ແຂກ',
+    adultsRoom: 'ຜູ້ໃຫຍ່ 2, ຫ້ອງ 1',
+    update: 'ອັບເດດ',
     filterAll: 'ທັງໝົດ',
     noResults: 'ບໍ່ພົບໂຮງແຮມ.',
+    amenities: 'ສິ່ງອຳນວຍຄວາມສະດວກ',
+    view_prices_dates: 'ເບິ່ງລາຄາສຳລັບວັນທີເດີນທາງຂອງທ່ານ',
+    checkin: 'ເຊັກອິນ',
+    checkout: 'ເຊັກເອົາ',
+    free_cancel: 'ຍົກເລີກການຈອງຟຣີในຫຼາຍໆຫ້ອງ',
+    check_availability: 'ກວດສອບຄວາມພ້ອມ',
     bookOnAgoda: 'ເບິ່ງໃນ Agoda',
     bookOnBooking: 'ເບິ່ງໃນ Booking.com',
   },
@@ -157,6 +182,8 @@ export default {
     viewDetails: 'ເບິ່ງລາຍລະອຽດ',
     province: 'ແຂວງສະຫວັນນະເຂດ',
     defaultDesc: 'ຄົ້ນພົບຄວາມສຳຄັນທາງປະຫວັດສາດ ແລະ ຄວາມງາມທາງວັດທະນະທຳຂອງສະຖານທີ່ນີ້.',
+    openGuide: 'ເປີດຄູ່ມື',
+    verified: 'ຜ່ານການກວດສອບແລ້ວ',
   },
 
   // --- Recently Viewed ---
@@ -249,6 +276,24 @@ export default {
     postFailed: 'ບໍ່ສາມາດສົ່ງລີວິວໄດ້ ກະລຸນາລອງໃໝ່',
   },
 
+  // --- Trip Planner ---
+  tripPlanner: {
+    title: 'ລະບົບວາງແຜນການເດີນທາງອັດສະລິຍະ',
+    subtitle: 'ສຳຜັດປະສົບການໃນສະຫວັນນະເຂດຄືກັບຄົນທ້ອງຖິ່ນດ້ວຍຄູ່ມືການເດີนທາງ AI ທີ່ອອກແບບມາເພື່ອທ່ານ.',
+    badge: 'ແຜນການເດີນທາງດ້ວຍ AI',
+    interests: 'ຄວາມສົນໃຈ',
+    selectInterests: 'ເລືອກສິ່ງທີ່ທ່ານມັກ',
+    duration: 'ໄລຍະເວລາ',
+    day: 'ມື້',
+    days: 'ມື້',
+    generate: 'ສ້າງແຜນ',
+    yourItinerary: 'ແຜນການເດີນທາງ {days} ມື້ ໃນສະຫວັນນະເຂດຂອງທ່ານ',
+    saveToTrips: 'ບັນທຶກໄວ້ໃນທຣິບຂອງຂ້ອຍ',
+    saving: 'ກຳລັງບັນທຶກ...',
+    planAnother: 'ວາງແຜນໃໝ່',
+    saveSuccess: 'ບັນທຶກແຜນການເດີນທາງສຳເລັດແລ້ວ! ທ່ານສາມາດເບິ່ງໄດ້ໃນໂປຣໄຟລ໌ຂອງທ່ານ.',
+  },
+
   // --- Common ---
   common: {
     loading: 'ກຳລັງໂຫຼດ...',
@@ -259,16 +304,19 @@ export default {
     min: 'ນາທີ',
     sending: 'ກຳລັງສົ່ງ...',
     characters: 'ຕົວອັກສອນ',
+    clear: 'ລ້າງຂໍ້ມູນ',
+    monday: 'ວັນຈັນ',
+    tuesday: 'ວັນອັງຄານ',
+    wednesday: 'ວັນພຸດ',
+    thursday: 'ວັນພະຫັດ',
+    friday: 'ວັນສຸກ',
+    saturday: 'ວັນເສົາ',
+    sunday: 'ວັນອາທິດ',
+    viewOnMap: 'ເບິ່ງໃນແຜนທີ່',
+    reviews: 'ລີວິວ',
   },
 
-  // --- Utility Page ---
-  utility: {
-    title: 'ເຄື່ອງມືຊ່ວຍເຫຼືອ',
-    subtitle: 'ເຄື່ອງມືການທ່ອງທ່ຽວເພື່ອເຮັດໃຫ້ການເດີນທາງຂອງທ່ານງ່າຍຂຶ້ນ',
-    currencyConverter: 'ແປງສະກຸນເງິນ',
-    phrasebook: 'ສໍາມະນາກຳ',
-    transportGuide: 'ຄູ່ມືການຂົນສົ່ງ'
-  },
+
 
   // --- Footer ---
   footer: {

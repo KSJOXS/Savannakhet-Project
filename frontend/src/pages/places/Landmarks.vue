@@ -84,7 +84,6 @@
                 </div>
             </aside>
 
-            <!-- Main Content -->
             <main class="landmarks-list-area">
                 <div class="list-header">
                     <h2>
@@ -116,8 +115,8 @@
                     </button>
                 </div>
 
-                <!-- Cards -->
-                <div v-else>
+                <!-- Cards Grid -->
+                <div v-else class="landmarks-grid">
                     <div
                         class="landmark-card"
                         v-for="(place, index) in sortedLandmarks"
@@ -126,25 +125,7 @@
                     >
                         <div class="card-img-wrapper">
                             <img :src="getCoverImage(place)" :alt="place.name" @error="handleImgError" />
-
-                            <div class="slider-arrows" v-if="getPlaceImagesArray(place).length > 1">
-                                <button class="arrow-btn left" @click.stop="prevImage(place.id, place)">
-                                    <i class="fas fa-chevron-left"></i>
-                                </button>
-                                <button class="arrow-btn right" @click.stop="nextImage(place.id, place)">
-                                    <i class="fas fa-chevron-right"></i>
-                                </button>
-                            </div>
-                            <div class="slider-dots" v-if="getPlaceImagesArray(place).length > 1">
-                                <span
-                                    v-for="(_, idx) in getPlaceImagesArray(place)"
-                                    :key="idx"
-                                    :class="['dot', { active: (currentImageIndices[place.id] || 0) === idx }]"
-                                ></span>
-                            </div>
-
                             <div class="card-rank-badge">#{{ index + 1 }}</div>
-
                             <button
                                 class="btn-heart"
                                 :class="{ active: isFavorite(place.id) }"
@@ -155,39 +136,20 @@
                         </div>
 
                         <div class="card-info">
-                            <div>
-                                <h3 class="place-name">{{ place.name }}</h3>
-
-                                <div class="rating-row">
-                                    <span class="bubbles">
-                                        <i
-                                            v-for="s in 5"
-                                            :key="s"
-                                            :class="[(place.rating_avg || 0) >= s ? 'fas' : 'far', 'fa-circle']"
-                                        ></i>
-                                    </span>
-                                    <span class="review-count">{{ place.rating_avg || '0.0' }} {{ t('landmarks.rating') }}</span>
-                                </div>
-
-                                <div class="category-row">
-                                    <span class="cat-label">
-                                        <i :class="getIconForLandmark(getCategoryName(place.category_id))"></i>
-                                        {{ getCategoryName(place.category_id) }}
-                                    </span>
-                                    <span class="divider">•</span>
-                                    <span>{{ t('landmarks.province') }}</span>
-                                </div>
-
-                                <div class="description-snippet">
-                                    <p>{{ place.description || t('landmarks.defaultDesc') }}</p>
-                                </div>
+                            <span class="category-tag">{{ getCategoryName(place.category_id) }}</span>
+                            <h3 class="place-name">{{ place.name }}</h3>
+                            <div class="rating-row">
+                                <span class="bubbles">
+                                    <i v-for="s in 5" :key="s" :class="[(place.rating_avg || 0) >= s ? 'fas' : 'far', 'fa-circle']"></i>
+                                </span>
+                                <span class="review-count">{{ place.rating_avg || '0.0' }}</span>
                             </div>
-
+                            <div class="description-snippet">
+                                <p>{{ place.description || t('landmarks.defaultDesc') }}</p>
+                            </div>
                             <div class="card-footer">
-                                <button class="btn-contact" @click.stop="handleContact(place)">
-                                    <i class="fas fa-phone-alt"></i> {{ t('landmarks.contact') }}
-                                </button>
-                                <button class="btn-details">{{ t('landmarks.viewDetails') }}</button>
+                                <span class="location-tag">✨ {{ t('landmarks.verified') }}</span>
+                                <span class="btn-details">{{ t('landmarks.openGuide') }} →</span>
                             </div>
                         </div>
                     </div>
@@ -387,10 +349,10 @@ onMounted(fetchData)
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700;800;900&display=swap');
 
 .landmarks-page {
-    background-color: #f7f8fc;
+    background-color: #faf9f6;
     min-height: 100vh;
     font-family: 'Inter', sans-serif;
     color: #1e293b;
@@ -683,37 +645,55 @@ onMounted(fetchData)
 }
 
 /* ===== LANDMARK CARD ===== */
+.landmarks-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+}
+
 .landmark-card {
-    display: flex;
-    background: white;
-    border: 1px solid #ede9fe;
-    border-radius: 18px;
+    position: relative;
+    background: #0f172a;
+    border-radius: 4px;
     overflow: hidden;
-    margin-bottom: 22px;
-    transition: all 0.3s;
+    height: 500px;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
-    min-height: 260px;
-    align-items: stretch;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    border: none;
+    display: flex;
+    flex-direction: column;
 }
 
 .landmark-card:hover {
-    box-shadow: 0 16px 40px rgba(124, 58, 237, 0.12);
-    transform: translateY(-5px);
-    border-color: #c4b5fd;
+    transform: translateY(-5px) scale(1.01);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
 .card-img-wrapper {
-    width: 320px;
-    min-height: 260px;
-    position: relative;
-    flex-shrink: 0;
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    overflow: hidden;
+    z-index: 0;
+}
+
+.card-img-wrapper::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, 
+        rgba(0,0,0,0) 0%, 
+        rgba(0,0,0,0.2) 40%, 
+        rgba(0,0,0,0.8) 80%, 
+        rgba(0,0,0,0.95) 100%);
+    z-index: 1;
 }
 
 .card-img-wrapper img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 0.4s ease;
 }
 
 /* Rank Badge */
@@ -784,20 +764,33 @@ onMounted(fetchData)
 
 /* Card Info */
 .card-info {
-    flex: 1;
-    padding: 24px 28px;
+    position: relative;
+    z-index: 2;
+    padding: 30px 24px;
+    margin-top: auto;
+    color: white;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: flex-end;
+}
+
+.category-tag {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
 }
 
 .place-name {
-    font-size: 1.45rem;
+    font-size: 2.2rem;
     font-weight: 800;
-    color: #1e1b4b;
+    font-family: 'Playfair Display', serif;
+    color: white;
+    letter-spacing: -0.5px;
+    line-height: 1.1;
     margin: 0 0 10px;
-    transition: 0.2s;
-    line-height: 1.2;
 }
 
 .landmark-card:hover .place-name {

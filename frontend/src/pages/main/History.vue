@@ -129,17 +129,14 @@
 
         </main>
 
-        <footer class="history-footer">
-            <div class="footer-content">
+        <section class="history-cta">
+            <div class="cta-content">
                 <h2>พร้อมที่จะค้นพบสะหวันนะเขตในแบบของคุณแล้วหรือยัง?</h2>
                 <button class="btn-primary-large" @click="router.push('/explore')">
                     <i class="fas fa-compass"></i> เริ่มต้นการสำรวจ
                 </button>
             </div>
-            <div class="footer-bottom">
-                <p>🌴 Savannakhet Smart Travel &copy; 2026 — Powered by GNN Recommendation</p>
-            </div>
-        </footer>
+        </section>
     </div>
 </template>
 
@@ -467,7 +464,7 @@ const router = useRouter()
 /* ==========================================================================
    Footer Action Area
    ========================================================================== */
-.history-footer {
+.history-cta {
     background: #0f172a;
     color: white;
     text-align: center;
@@ -501,16 +498,7 @@ const router = useRouter()
     transform: translateY(-3px);
 }
 
-.footer-bottom {
-    background: #020617;
-    padding: 20px;
-    font-size: 0.85rem;
-    color: #64748b;
-}
 
-.footer-bottom p {
-    margin: 0;
-}
 
 /* ==========================================================================
    Responsive Design

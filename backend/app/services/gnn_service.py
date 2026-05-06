@@ -1,8 +1,9 @@
 import torch
 import json
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 from torch_geometric.data import HeteroData
-from app.models import User, Place, InteractionLog
+from app.models import User, Place, InteractionLog, Category
 
 def build_gnn_graph(db: Session):
     users = db.query(User).all()

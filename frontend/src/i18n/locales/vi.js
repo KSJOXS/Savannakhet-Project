@@ -20,7 +20,10 @@ export default {
     postPhoto: 'Đăng ảnh',
     addPlace: 'Thêm địa điểm',
     myTrips: 'Chuyến đi của tôi',
+    planYourTrip: 'Lập kế hoạch chuyến đi',
+    destinations: 'Điểm đến',
     tools: 'Công cụ',
+
     bookings: 'Đặt chỗ',
     messages: 'Tin nhắn',
     contribute: 'Đóng góp',
@@ -100,14 +103,36 @@ export default {
     ratingLabels: ['Rất tệ', 'Tệ', 'Trung bình', 'Tốt', 'Tuyệt vời'],
     locationCoord: '📍 Tọa độ (Lat: {lat}, Lng: {lng})',
     locationNotFound: 'Không tìm thấy vị trí',
+    quick_details: 'Chi tiết nhanh',
+    category_label: 'Danh mục',
+    rating_label: 'Đánh giá',
+  },
+
+  recommend: {
+    ai_recom: 'Gợi ý bởi AI',
+    ai_desc: 'Gợi ý địa điểm phù hợp với sở thích của bạn bằng AI.',
+    similar: 'Địa điểm tương tự',
   },
 
   // --- Hotels Page ---
   hotels: {
-    title: 'Khách sạn ở Savannakhet',
+    title: 'Khách sạn tại Savannakhet',
     subtitle: 'Tìm nơi lưu trú hoàn hảo',
+    whereTo: 'Đi đâu?',
+    savannakhetLaos: 'Savannakhet, Lào',
+    checkInCheckOut: 'Nhận phòng - Trả phòng',
+    addDates: 'Thêm ngày',
+    guests: 'Khách',
+    adultsRoom: '2 người lớn, 1 phòng',
+    update: 'Cập nhật',
     filterAll: 'Tất cả',
     noResults: 'Không tìm thấy khách sạn.',
+    amenities: 'Tiện nghi chỗ nghỉ',
+    view_prices_dates: 'Xem giá cho ngày đi của bạn',
+    checkin: 'Nhận phòng',
+    checkout: 'Trả phòng',
+    free_cancel: 'Hủy miễn phí cho hầu hết các phòng',
+    check_availability: 'Kiểm tra phòng trống',
     bookOnAgoda: 'Xem trên Agoda',
     bookOnBooking: 'Xem trên Booking.com',
   },
@@ -156,6 +181,8 @@ export default {
     viewDetails: 'Xem Chi tiết',
     province: 'Tỉnh Savannakhet',
     defaultDesc: 'Khám phá tầm quan trọng lịch sử và vẻ đẹp văn hóa của địa danh này tại Savannakhet.',
+    openGuide: 'Mở hướng dẫn',
+    verified: 'Đã xác minh',
   },
 
   // --- Recently Viewed ---
@@ -248,6 +275,24 @@ export default {
     postFailed: 'Không thể gửi đánh giá. Vui lòng thử lại.',
   },
 
+  // --- Trip Planner ---
+  tripPlanner: {
+    title: 'Công cụ Lập kế hoạch Chuyến đi Thông minh',
+    subtitle: 'Trải nghiệm Savannakhet như một người địa phương với hướng dẫn du lịch AI thông minh, cá nhân hóa.',
+    badge: 'Hành trình do AI hỗ trợ',
+    interests: 'SỞ THÍCH',
+    selectInterests: 'Chọn những gì bạn thích',
+    duration: 'THỜI GIAN',
+    day: 'Ngày',
+    days: 'Ngày',
+    generate: 'Tạo hành trình',
+    yourItinerary: 'Hành trình Savannakhet {days} ngày của bạn',
+    saveToTrips: 'Lưu vào Chuyến đi của tôi',
+    saving: 'Đang lưu...',
+    planAnother: 'Lập kế hoạch khác',
+    saveSuccess: 'Đã lưu hành trình thành công! Bạn có thể tìm thấy trong hồ sơ của mình.',
+  },
+
   // --- Common ---
   common: {
     loading: 'Đang tải...',
@@ -258,16 +303,19 @@ export default {
     min: 'phút',
     sending: 'Đang gửi...',
     characters: 'ký tự',
+    clear: 'Xóa',
+    monday: 'Thứ Hai',
+    tuesday: 'Thứ Ba',
+    wednesday: 'Thứ Tư',
+    thursday: 'Thứ Năm',
+    friday: 'Thứ Sáu',
+    saturday: 'Thứ Bảy',
+    sunday: 'Chủ Nhật',
+    viewOnMap: 'Xem trên bản đồ',
+    reviews: 'đánh giá',
   },
 
-  // --- Utility Page ---
-  utility: {
-    title: 'Công cụ hữu ích',
-    subtitle: 'Các công cụ du lịch để giúp chuyến đi của bạn ở Savannakhet dễ dàng hơn',
-    currencyConverter: 'Chuyển đổi tiền tệ',
-    phrasebook: 'Cuốn sách cụm từ',
-    transportGuide: 'Hướng dẫn vận chuyển'
-  },
+
 
   // --- Footer ---
   footer: {

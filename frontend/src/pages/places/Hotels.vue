@@ -4,14 +4,14 @@
 
         <div class="hotel-search-header">
             <div class="search-container">
-                <h1>Hotels in Savannakhet</h1>
+                <h1>{{ t('hotels.title') }}</h1>
                 
                 <div class="booking-bar">
                     <div class="booking-input destination">
                         <i class="fas fa-map-marker-alt"></i>
                         <div class="input-content">
-                            <label>Where to?</label>
-                            <input type="text" value="Savannakhet, Laos" readonly />
+                            <label>{{ t('hotels.whereTo') }}</label>
+                            <input type="text" :value="t('hotels.savannakhetLaos')" readonly />
                         </div>
                     </div>
                     
@@ -20,8 +20,8 @@
                     <div class="booking-input dates">
                         <i class="far fa-calendar-alt"></i>
                         <div class="input-content">
-                            <label>Check In - Check Out</label>
-                            <input type="text" placeholder="Add dates" />
+                            <label>{{ t('hotels.checkInCheckOut') }}</label>
+                            <input type="text" :placeholder="t('hotels.addDates')" />
                         </div>
                     </div>
                     
@@ -30,12 +30,12 @@
                     <div class="booking-input guests">
                         <i class="far fa-user"></i>
                         <div class="input-content">
-                            <label>Guests</label>
-                            <input type="text" value="2 adults, 1 room" readonly />
+                            <label>{{ t('hotels.guests') }}</label>
+                            <input type="text" :value="t('hotels.adultsRoom')" readonly />
                         </div>
                     </div>
                     
-                    <button class="btn-update-search">Update</button>
+                    <button class="btn-update-search">{{ t('hotels.update') }}</button>
                 </div>
             </div>
         </div>
@@ -44,7 +44,7 @@
             <aside class="filter-sidebar">
                 <div class="map-preview" @click="showMapModal = true">
                     <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" alt="Map View" />
-                    <button class="btn-view-map"><i class="fas fa-map"></i> View on map</button>
+                    <button class="btn-view-map"><i class="fas fa-map"></i> {{ t('common.viewOnMap') }}</button>
                 </div>
 
                 <div class="filter-group">
@@ -79,46 +79,36 @@
                     <p>No hotels found matching your search.</p>
                 </div>
 
-                <div v-else class="hotel-card" v-for="(hotel, index) in filteredHotels" :key="hotel.id" @click="goToDetail(hotel.id)">
-                    
-                    <div class="hotel-img-wrapper">
-                        <img :src="getCoverImage(hotel)" :alt="hotel.name" />
+                <div class="hotels-grid">
+                    <div class="hotel-card" v-for="(hotel, index) in filteredHotels" :key="hotel.id" @click="goToDetail(hotel.id)">
                         
-                        <div class="slider-arrows" v-if="getPlaceImagesArray(hotel).length > 1">
-                            <button class="arrow-btn left" @click.stop="prevImage(hotel.id, hotel)"><i class="fas fa-chevron-left"></i></button>
-                            <button class="arrow-btn right" @click.stop="nextImage(hotel.id, hotel)"><i class="fas fa-chevron-right"></i></button>
-                        </div>
-                        <div class="slider-dots" v-if="getPlaceImagesArray(hotel).length > 1">
-                            <span v-for="(_, idx) in getPlaceImagesArray(hotel)" :key="idx" :class="['dot', { active: (currentImageIndices[hotel.id] || 0) === idx }]"></span>
-                        </div>
-
-                        <button class="btn-heart" :class="{ active: isFavorite(hotel.id) }" @click.stop="toggleHeart(hotel.id)">
-                            <i class="fas fa-heart"></i>
-                        </button>
-                    </div>
-
-                    <div class="hotel-info">
-                        <div class="rank-text" v-if="index === 0"><strong>#1 Best Value</strong> in Savannakhet</div>
-                        <h3 class="hotel-name">{{ index + 1 }}. {{ hotel.name }}</h3>
-                        
-                        <div class="rating-row">
-                            <span class="bubbles">
-                                <i v-for="s in 5" :key="s" :class="[(hotel.rating_avg || 0) >= s ? 'fas' : 'far', 'fa-circle']"></i>
-                            </span>
-                            <span class="review-count">{{ hotel.rating_avg || '0.0' }} Rating</span>
-                        </div>
-                        
-                        <div class="hotel-amenities">
-                            <span><i class="fas fa-map-marker-alt"></i> {{ getCategoryName(hotel.category_id) }}</span>
+                        <div class="card-img-wrapper">
+                            <img :src="getCoverImage(hotel)" :alt="hotel.name" />
+                            <button class="btn-heart" :class="{ active: isFavorite(hotel.id) }" @click.stop="toggleHeart(hotel.id)">
+                                <i class="fas fa-heart"></i>
+                            </button>
                         </div>
 
-                        <p class="hotel-desc">
-                            "{{ hotel.description || 'Experience comfort and luxury in the heart of Savannakhet.' }}"
-                        </p>
-                    </div>
+                        <div class="card-info">
+                            <span class="category-tag">{{ getCategoryName(hotel.category_id) }}</span>
+                            <h3 class="place-name">{{ hotel.name }}</h3>
+                            
+                            <div class="rating-row">
+                                <span class="bubbles">
+                                    <i v-for="s in 5" :key="s" :class="[(hotel.rating_avg || 0) >= s ? 'fas' : 'far', 'fa-circle']"></i>
+                                </span>
+                                <span class="review-count">{{ hotel.rating_avg || '0.0' }}</span>
+                            </div>
 
-                    <div class="hotel-deals">
-                        <button class="btn-view-deal" @click.stop="goToDetail(hotel.id)">View Place</button>
+                            <p class="description">
+                                {{ hotel.description || 'Experience comfort and luxury in the heart of Savannakhet.' }}
+                            </p>
+
+                            <div class="card-footer">
+                                <span class="location-tag">✨ {{ t('landmarks.verified') }}</span>
+                                <span class="btn-details">{{ t('landmarks.openGuide') }} →</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </main>
@@ -146,6 +136,7 @@ import { placeRepository } from '@/repositories/placeRepository'
 import { categoryRepository } from '@/repositories/categoryRepository'
 import { favoriteRepository } from '@/repositories/favoriteRepository'
 import { useAuth } from '@/composables/useAuth'
+import { useI18n } from '@/composables/useI18n'
 import Navbar from '@/components/Navbar.vue'
 import MapOverlay from '@/components/MapOverlay.vue'
 import SectionDivider from '@/components/SectionDivider.vue'
@@ -153,6 +144,7 @@ import RecentlyViewed from '@/components/RecentlyViewed.vue'
 
 const router = useRouter()
 const { user } = useAuth()
+const { t } = useI18n()
 const places = ref([])
 const categories = ref([])
 const favoriteIds = ref([])
@@ -170,9 +162,13 @@ const fetchData = async () => {
         places.value = resPlaces.data
         categories.value = resCats.data
 
+        // Fetch favorites asynchronously to not block UI rendering
         if (user.value) {
-            const favRes = await favoriteRepository.getUserFavorites(user.value.id)
-            favoriteIds.value = favRes.data.map(f => f.place_id)
+            favoriteRepository.getUserFavorites(user.value.id)
+                .then(favRes => {
+                    favoriteIds.value = favRes.data.map(f => f.place_id)
+                })
+                .catch(err => console.error("Error fetching favorites:", err))
         }
     } catch (err) {
         console.error("Error fetching hotels:", err)
@@ -183,8 +179,8 @@ const fetchData = async () => {
 
 const filteredHotels = computed(() => {
     let results = places.value.filter(p => {
-        const cat = categories.value.find(c => c.id === p.category_id)
-        return cat && cat.parent_type === 'hotel'
+        const cat = categories.value.find(c => c.id == p.category_id)
+        return cat && cat.parent_type?.toLowerCase() === 'hotel'
     })
 
     if (selectedCategories.value.length > 0) {
@@ -264,10 +260,10 @@ onMounted(fetchData)
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700;800;900&display=swap');
 
 .hotels-page {
-    background-color: #f2f2f2; /* สีเทาอ่อนๆ แบบ TripAdvisor */
+    background-color: #faf9f6;
     min-height: 100vh;
     font-family: 'Inter', sans-serif;
     color: #1e293b;
@@ -380,21 +376,56 @@ onMounted(fetchData)
 .sort-by select { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-weight: 600; outline: none; cursor: pointer;}
 
 /* 🏨 Hotel Card (Horizontal List View) */
-.hotel-card {
-    display: flex;
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    overflow: hidden;
-    margin-bottom: 20px;
-    transition: 0.2s;
-    height: 240px; /* Fix height for perfect alignment */
+.hotels-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
 }
-.hotel-card:hover { box-shadow: 0 10px 20px rgba(0,0,0,0.08); }
 
-/* Left: Image */
-.hotel-img-wrapper { width: 280px; position: relative; flex-shrink: 0;}
-.hotel-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+.hotel-card {
+    position: relative;
+    background: #0f172a;
+    border-radius: 4px;
+    overflow: hidden;
+    height: 500px;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    border: none;
+    display: flex;
+    flex-direction: column;
+}
+
+.hotel-card:hover {
+    transform: translateY(-5px) scale(1.01);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.card-img-wrapper {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    overflow: hidden;
+    z-index: 0;
+}
+
+.card-img-wrapper::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, 
+        rgba(0,0,0,0) 0%, 
+        rgba(0,0,0,0.2) 40%, 
+        rgba(0,0,0,0.8) 80%, 
+        rgba(0,0,0,0.95) 100%);
+    z-index: 1;
+}
+
+.card-img-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
 
 .slider-arrows { opacity: 0; transition: opacity 0.2s ease-in-out; }
 .hotel-img-wrapper:hover .slider-arrows { opacity: 1; }
@@ -412,32 +443,68 @@ onMounted(fetchData)
 .img-counter { position: absolute; bottom: 15px; left: 15px; background: rgba(0,0,0,0.6); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; gap: 6px;}
 
 /* Middle: Details */
-.hotel-info { flex: 1; padding: 20px; border-right: 1px solid #e2e8f0; display: flex; flex-direction: column;}
-.rank-text { font-size: 0.8rem; color: #64748b; margin-bottom: 5px; }
-.rank-text strong { color: #000; }
-.hotel-name { font-size: 1.35rem; font-weight: 800; color: #000; margin: 0 0 10px; cursor: pointer; transition: 0.2s;}
-.hotel-name:hover { text-decoration: underline; }
+.card-info {
+    position: relative;
+    z-index: 2;
+    padding: 30px 24px;
+    margin-top: auto;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
 
-.rating-row { display: flex; align-items: center; margin-bottom: 12px; }
-.bubbles i { color: #00aa6c; font-size: 0.9rem; margin-right: 2px; }
-.review-count { font-size: 0.85rem; color: #475569; font-weight: 600; margin-left: 10px; text-decoration: underline; cursor: pointer;}
+.category-tag {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+}
 
-.hotel-amenities { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 12px;}
-.hotel-amenities span { font-size: 0.8rem; color: #475569; display: flex; align-items: center; gap: 6px; font-weight: 500;}
-.hotel-amenities i { color: #000; }
+.place-name {
+    font-size: 2.2rem;
+    font-weight: 800;
+    font-family: 'Playfair Display', serif;
+    color: white;
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+    margin: 0 0 10px;
+}
 
-.hotel-desc { font-size: 0.85rem; color: #64748b; line-height: 1.5; margin: auto 0 0; font-style: italic;}
+.description {
+    margin: 0 0 15px;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
 
-/* Right: Pricing Box */
-.hotel-deals { width: 220px; padding: 20px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; background: #fdfdfd; flex-shrink: 0;}
-.deal-provider { font-size: 0.85rem; font-weight: 700; color: #000; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;}
-.deal-provider i { font-size: 0.7rem; color: #64748b; }
-.deal-price { margin-bottom: 12px; display: flex; align-items: flex-end; justify-content: center; gap: 8px;}
-.price-strike { font-size: 1rem; color: #ef4444; text-decoration: line-through; font-weight: 600; margin-bottom: 3px;}
-.price-current { font-size: 2rem; font-weight: 900; color: #000; line-height: 1;}
+.card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
 
-.btn-view-deal { background: #fcd34d; /* สีเหลือง TripAdvisor */ color: #000; border: none; padding: 12px 24px; border-radius: 50px; font-size: 1rem; font-weight: 800; cursor: pointer; width: 100%; transition: 0.2s; margin-bottom: 15px;}
-.btn-view-deal:hover { background: #f59e0b; }
+.location-tag {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.btn-details {
+    color: white;
+    font-weight: 800;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+}
 
 .other-deals { width: 100%; border-top: 1px solid #e2e8f0; padding-top: 15px;}
 .mini-deal { display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: #475569; margin-bottom: 6px;}

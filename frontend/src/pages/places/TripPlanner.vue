@@ -7,59 +7,92 @@
                 <div class="text-zone">
                     <div class="header-badge">
                         <i class="fas fa-magic"></i>
-                        <span>AI Powered Itinerary</span>
+                        <span>{{ t('tripPlanner.badge') }}</span>
                     </div>
-                    <h1>Smart Trip Planner</h1>
-                    <p class="subtitle">Let us organize your perfect trip to Savannakhet based on your lifestyle.</p>
+                    <h1>{{ t('tripPlanner.title') }}</h1>
+                    <p class="subtitle">{{ t('tripPlanner.subtitle') }}</p>
                 </div>
             </div>
         </div>
 
         <div class="planner-container">
             <!-- Input Form -->
-            <div class="planner-card setup-card" v-if="!itinerary">
-                <h2>How many days do you want to travel?</h2>
-                <div class="days-selector">
-                    <div class="day-option" :class="{ active: days === 1 }" @click="days = 1">
-                        <span class="num">1</span>
-                        <span class="text">Day</span>
+            <div class="search-bar-wrapper" v-if="!itinerary">
+                <div class="search-bar">
+                    <!-- Interests Section -->
+                    <div class="search-section" @click.stop="showInterestDropdown = !showInterestDropdown; showDaysDropdown = false">
+                        <div class="section-content">
+                            <div class="section-label">{{ t('tripPlanner.interests') }}</div>
+                            <div class="section-value" :class="{ 'has-value': selectedPreferences.length > 0 }">
+                                {{ selectedPreferencesText }}
+                            </div>
+                        </div>
+                        
+                        <!-- Dropdown -->
+                        <div class="dropdown-menu" v-if="showInterestDropdown" @click.stop>
+                            <div class="dropdown-header">{{ t('tripPlanner.selectInterests') }}</div>
+                            <div class="pref-list">
+                                <div class="pref-item" 
+                                     v-for="pref in availablePreferences" 
+                                     :key="pref.id"
+                                     :class="{ active: selectedPreferences.includes(pref.id) }"
+                                     @click="togglePreference(pref.id)">
+                                    <i :class="pref.icon"></i>
+                                    <span>{{ pref.label }}</span>
+                                    <i class="fas fa-check check-icon" v-if="selectedPreferences.includes(pref.id)"></i>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="day-option" :class="{ active: days === 2 }" @click="days = 2">
-                        <span class="num">2</span>
-                        <span class="text">Days</span>
+                    
+                    <div class="divider"></div>
+                    
+                    <!-- Days Section -->
+                    <div class="search-section" @click.stop="showDaysDropdown = !showDaysDropdown; showInterestDropdown = false">
+                        <div class="section-content">
+                            <div class="section-label">{{ t('tripPlanner.duration') }}</div>
+                            <div class="section-value has-value">
+                                {{ days }} {{ days === 1 ? t('tripPlanner.day') : t('tripPlanner.days') }}
+                            </div>
+                        </div>
+                        
+                        <!-- Dropdown -->
+                        <div class="dropdown-menu days-dropdown" v-if="showDaysDropdown" @click.stop>
+                            <div class="day-item" v-for="d in 5" :key="d" :class="{active: days === d}" @click="days = d; showDaysDropdown = false">
+                                {{ d }} {{ d === 1 ? t('tripPlanner.day') : t('tripPlanner.days') }}
+                            </div>
+                        </div>
                     </div>
-                    <div class="day-option" :class="{ active: days === 3 }" @click="days = 3">
-                        <span class="num">3</span>
-                        <span class="text">Days</span>
+                    
+                    <!-- Generate Button -->
+                    <div class="search-action">
+                        <button class="btn-generate-bar" @click="generateItinerary" :disabled="loading">
+                            <i class="fas fa-spinner fa-spin" v-if="loading"></i>
+                            <span v-else>{{ t('tripPlanner.generate') }}</span>
+                        </button>
                     </div>
                 </div>
-
-                <button class="btn-generate" @click="generateItinerary" :disabled="loading">
-                    <i class="fas fa-spinner fa-spin" v-if="loading"></i>
-                    <i class="fas fa-magic" v-else></i>
-                    {{ loading ? 'Creating your perfect trip...' : 'Generate My Itinerary' }}
-                </button>
             </div>
 
             <!-- Itinerary Result -->
             <div class="itinerary-result" v-else>
                 <div class="result-header">
-                    <h2>Your {{ days }}-Day Savannakhet Itinerary</h2>
+                    <h2>{{ t('tripPlanner.yourItinerary', { days }) }}</h2>
                     <div class="action-buttons">
                         <button v-if="user" class="btn-save" @click="saveItinerary" :disabled="saving">
                             <i class="fas fa-spinner fa-spin" v-if="saving"></i>
                             <i class="fas fa-bookmark" v-else></i>
-                            {{ saving ? 'Saving...' : 'Save to My Trips' }}
+                            {{ saving ? t('tripPlanner.saving') : t('tripPlanner.saveToTrips') }}
                         </button>
                         <button class="btn-outline" @click="resetPlanner">
-                            <i class="fas fa-redo"></i> Plan Another Trip
+                            <i class="fas fa-redo"></i> {{ t('tripPlanner.planAnother') }}
                         </button>
                     </div>
                 </div>
 
                 <div v-if="saveSuccess" class="save-success-alert">
                     <i class="fas fa-check-circle"></i>
-                    <span>Itinerary saved successfully! You can find it in your profile.</span>
+                    <span>{{ t('tripPlanner.saveSuccess') }}</span>
                 </div>
 
                 <div class="timeline-container">
@@ -113,7 +146,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
 import Navbar from '@/components/Navbar.vue'
@@ -130,10 +163,56 @@ const saving = ref(false)
 const saveSuccess = ref(false)
 const itinerary = ref(null)
 
+const availablePreferences = [
+    { id: 'nature', label: 'Nature', icon: 'fas fa-tree' },
+    { id: 'culture', label: 'Culture & Temple', icon: 'fas fa-vihara' },
+    { id: 'local_food', label: 'Local Food', icon: 'fas fa-utensils' },
+    { id: 'cafe', label: 'Cafe & Sweets', icon: 'fas fa-coffee' },
+    { id: 'landmark', label: 'Landmarks', icon: 'fas fa-camera' },
+    { id: 'chill', label: 'Chill & Nightlife', icon: 'fas fa-glass-cheers' }
+]
+const selectedPreferences = ref([])
+
+const togglePreference = (id) => {
+    const index = selectedPreferences.value.indexOf(id)
+    if (index > -1) {
+        selectedPreferences.value.splice(index, 1)
+    } else {
+        selectedPreferences.value.push(id)
+    }
+}
+
+const showInterestDropdown = ref(false)
+const showDaysDropdown = ref(false)
+
+const closeDropdowns = () => {
+    showInterestDropdown.value = false
+    showDaysDropdown.value = false
+}
+
+onMounted(() => {
+    document.addEventListener('click', closeDropdowns)
+})
+
+onUnmounted(() => {
+    document.removeEventListener('click', closeDropdowns)
+})
+
+const selectedPreferencesText = computed(() => {
+    if (selectedPreferences.value.length === 0) return 'Any Interests'
+    if (selectedPreferences.value.length === 1) {
+        return availablePreferences.find(p => p.id === selectedPreferences.value[0]).label
+    }
+    return `${selectedPreferences.value.length} Selected`
+})
+
 const generateItinerary = async () => {
     loading.value = true
     try {
-        const payload = { days: days.value }
+        const payload = { 
+            days: days.value,
+            preferences: selectedPreferences.value.length > 0 ? selectedPreferences.value : null
+        }
         if (user.value) {
             payload.user_id = user.value.id
         }
@@ -242,7 +321,7 @@ onMounted(() => {
 })
 
 const getCoverImage = (imgData) => {
-    const noImageUrl = 'https://via.placeholder.com/400x300?text=No+Image'
+    const noImageUrl = 'https://images.unsplash.com/photo-1540611025311-01df3cef54b5?q=80&w=800'
     if (!imgData) return noImageUrl
     
     let urls = []
@@ -255,8 +334,9 @@ const getCoverImage = (imgData) => {
     if (urls.length === 0) return noImageUrl
     const url = urls[0]
     
-    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) return url
-    return `http://localhost:8000${url.startsWith('/') ? '' : '/'}${url}`
+    if (url.startsWith('http')) return url
+    const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+    return `${backendUrl}${url.startsWith('/') ? '' : '/'}${url}`
 }
 
 const handleImgError = (e) => {
@@ -275,10 +355,10 @@ const handleImgError = (e) => {
 }
 
 .planner-header {
-    background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
-    padding: 60px 20px 40px;
-    border-bottom: 1px solid #bbf7d0;
+    background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);
+    padding: 80px 20px 60px;
     text-align: center;
+    border-bottom: 1px solid #e2e8f0;
 }
 
 .header-container {
@@ -290,28 +370,34 @@ const handleImgError = (e) => {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: #dcfce7;
-    color: #166534;
-    padding: 6px 16px;
+    background: #dbeafe;
+    color: #2563eb;
+    padding: 8px 20px;
     border-radius: 50px;
-    font-size: 0.85rem;
-    font-weight: 700;
-    margin-bottom: 15px;
-    border: 1px solid #bbf7d0;
+    font-size: 0.8rem;
+    font-weight: 800;
+    margin-bottom: 20px;
+    border: 1px solid #bfdbfe;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .header-container h1 {
-    font-size: 2.8rem;
+    font-size: 3.5rem;
     font-weight: 900;
-    color: #14532d;
-    margin: 0 0 10px;
-    letter-spacing: -1px;
+    color: #0f172a;
+    margin: 0 0 15px;
+    letter-spacing: -2px;
+    line-height: 1.1;
 }
 
 .subtitle {
-    font-size: 1.1rem;
-    color: #166534;
-    opacity: 0.8;
+    font-size: 1.2rem;
+    color: #475569;
+    max-width: 600px;
+    margin: 0 auto;
+    font-weight: 500;
+    line-height: 1.6;
 }
 
 .planner-container {
@@ -320,96 +406,190 @@ const handleImgError = (e) => {
     padding: 0 20px;
 }
 
-/* Setup Card */
-.setup-card {
-    background: white;
-    border-radius: 20px;
-    padding: 40px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.05);
-    text-align: center;
-    border: 1px solid #e2e8f0;
-}
-
-.setup-card h2 {
-    font-size: 1.5rem;
-    font-weight: 800;
-    margin-bottom: 30px;
-}
-
-.days-selector {
+/* Setup Bar Style */
+.search-bar-wrapper {
     display: flex;
     justify-content: center;
-    gap: 20px;
     margin-bottom: 40px;
 }
 
-.day-option {
-    width: 100px;
-    height: 100px;
-    border: 2px solid #e2e8f0;
-    border-radius: 16px;
+.search-bar {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    justify-content: center;
+    background: white;
+    border-radius: 24px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.04);
+    border: 1px solid #e2e8f0;
+    padding: 12px;
+    width: 100%;
+    max-width: 680px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.search-bar:focus-within {
+    border-color: #3b82f6;
+    box-shadow: 0 15px 50px rgba(59, 130, 246, 0.1);
+}
+
+.search-section {
+    flex: 1;
+    padding: 10px 25px;
     cursor: pointer;
-    transition: all 0.2s;
-    background: #f8fafc;
+    border-radius: 40px;
+    transition: 0.2s;
+    position: relative;
 }
 
-.day-option:hover {
-    border-color: #22c55e;
-    background: #f0fdf4;
+.search-section:hover {
+    background: #f1f5f9;
 }
 
-.day-option.active {
-    border-color: #22c55e;
-    background: #22c55e;
-    color: white;
-    box-shadow: 0 8px 20px rgba(34, 197, 94, 0.3);
-}
-
-.day-option .num {
-    font-size: 2rem;
+.section-label {
+    font-size: 0.75rem;
     font-weight: 800;
-    line-height: 1;
+    color: #0f172a;
+    margin-bottom: 4px;
+    letter-spacing: 0.5px;
 }
 
-.day-option .text {
-    font-size: 0.9rem;
+.section-value {
+    font-size: 0.95rem;
+    color: #94a3b8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.section-value.has-value {
+    color: #0f172a;
     font-weight: 600;
-    margin-top: 5px;
 }
 
-.btn-generate {
-    background: #0f172a;
+.divider {
+    width: 1px;
+    height: 40px;
+    background: #e2e8f0;
+    margin: 0 5px;
+}
+
+.search-action {
+    padding-left: 10px;
+}
+
+.btn-generate-bar {
+    background: #2563eb;
     color: white;
     border: none;
-    padding: 16px 32px;
-    border-radius: 50px;
-    font-size: 1.1rem;
-    font-weight: 700;
+    padding: 14px 34px;
+    border-radius: 16px;
+    font-size: 1rem;
+    font-weight: 800;
     cursor: pointer;
-    transition: 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    width: 100%;
-    max-width: 400px;
-    margin: 0 auto;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.2);
 }
 
-.btn-generate:hover {
-    background: #1e293b;
+.btn-generate-bar:hover {
+    background: #1d4ed8;
     transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.2);
+    box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
 }
 
-.btn-generate:disabled {
+.btn-generate-bar:disabled {
     opacity: 0.7;
     cursor: not-allowed;
     transform: none;
+}
+
+/* Dropdowns */
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 15px;
+    background: white;
+    border-radius: 24px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    border: 1px solid #e2e8f0;
+    width: 350px;
+    z-index: 100;
+    padding: 20px;
+    cursor: default;
+}
+
+.days-dropdown {
+    width: 200px;
+    left: auto;
+    right: 0;
+}
+
+.dropdown-header {
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+}
+
+.pref-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.pref-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: 0.2s;
+    font-weight: 600;
+    color: #475569;
+}
+
+.pref-item i:first-child {
+    width: 30px;
+    font-size: 1.2rem;
+    color: #94a3b8;
+}
+
+.pref-item:hover {
+    background: #f8fafc;
+}
+
+.pref-item.active {
+    background: #eff6ff;
+    color: #3b82f6;
+}
+
+.pref-item.active i:first-child {
+    color: #3b82f6;
+}
+
+.check-icon {
+    margin-left: auto;
+    color: #3b82f6;
+}
+
+.day-item {
+    padding: 12px 20px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: 0.2s;
+    font-weight: 600;
+    color: #475569;
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+.day-item:hover {
+    background: #f1f5f9;
+}
+
+.day-item.active {
+    background: #22c55e;
+    color: white;
 }
 
 /* Itinerary Result */

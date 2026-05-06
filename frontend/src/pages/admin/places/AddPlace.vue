@@ -37,7 +37,8 @@
                             </div>
 
                             <div class="input-group" style="margin-top: 10px;">
-                                <label style="color: #6366f1;"><i class="fas fa-paste"></i> Paste Google Maps Plus Code/Address</label>
+                                <label style="color: #6366f1;"><i class="fas fa-paste"></i> Paste Google Maps Plus
+                                    Code/Address</label>
                                 <div style="display: flex; gap: 10px;">
                                     <input v-model="addressPaste" @paste="handlePasteAddress"
                                         placeholder="E.g., HP4W+G5V or Place Name..."
@@ -51,7 +52,8 @@
 
                             <div class="input-group">
                                 <label>Description <span class="text-danger">*</span></label>
-                                <textarea v-model="form.description" rows="4" placeholder="Place details..." required></textarea>
+                                <textarea v-model="form.description" rows="4" placeholder="Place details..."
+                                    required></textarea>
                             </div>
                         </div>
                     </div>
@@ -81,8 +83,7 @@
                         </div>
                         <div class="card-body">
                             <div class="gallery-grid" v-if="images.length > 0">
-                                <div v-for="(img, index) in images" :key="index"
-                                    class="gallery-item"
+                                <div v-for="(img, index) in images" :key="index" class="gallery-item"
                                     :class="{ 'is-cover': index === 0 }">
                                     <img :src="img" class="gallery-img" alt="Place image">
 
@@ -91,16 +92,12 @@
                                     </div>
 
                                     <div class="gallery-overlay">
-                                        <button v-if="index !== 0" type="button"
-                                            class="img-action-btn set-cover-btn"
-                                            @click="setCover(index)"
-                                            title="Set as Cover">
+                                        <button v-if="index !== 0" type="button" class="img-action-btn set-cover-btn"
+                                            @click="setCover(index)" title="Set as Cover">
                                             <i class="fas fa-star"></i>
                                         </button>
-                                        <button type="button"
-                                            class="img-action-btn delete-img-btn"
-                                            @click="removeImage(index)"
-                                            title="Remove">
+                                        <button type="button" class="img-action-btn delete-img-btn"
+                                            @click="removeImage(index)" title="Remove">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </div>
@@ -129,6 +126,41 @@
                         </div>
                     </div>
 
+                    <div class="card opening-hours-card">
+                        <div class="card-header">
+                            <i class="fas fa-clock"></i> <span>Opening Hours</span>
+                            <div class="oh-actions">
+                                <button type="button" @click="setAllClosed(false)" class="btn-oh-action">Open</button>
+                                <button type="button" @click="setAllClosed(true)" class="btn-oh-action">Close</button>
+                                <button type="button" @click="copyMondayToAll" class="btn-oh-action highlight">Copy Mon</button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div v-for="day in weekDays" :key="day.key" class="oh-row" :class="{'is-closed': openingHours[day.key].closed}">
+                                <div class="oh-day">
+                                    <label class="oh-switch">
+                                        <input type="checkbox" v-model="openingHours[day.key].closed"
+                                            :true-value="false" :false-value="true" />
+                                        <span class="oh-slider"></span>
+                                    </label>
+                                    <span class="oh-label">{{ day.label }}</span>
+                                </div>
+                                <div class="oh-times" v-if="!openingHours[day.key].closed">
+                                    <div class="time-box">
+                                        <input type="time" v-model="openingHours[day.key].open" class="time-input" />
+                                    </div>
+                                    <span class="oh-dash"><i class="fas fa-arrow-right"></i></span>
+                                    <div class="time-box">
+                                        <input type="time" v-model="openingHours[day.key].close" class="time-input" />
+                                    </div>
+                                </div>
+                                <div class="oh-closed-container" v-else>
+                                    <span class="oh-closed-badge">Closed</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="card status-card">
                         <div class="card-header">
                             <i class="fas fa-cog"></i> Publishing Status
@@ -147,7 +179,7 @@
 
                             <div class="btn-group-vertical">
                                 <button type="submit" class="btn-submit-full" :disabled="isSaving">
-                                    <i class="fas" :class="isSaving ? 'fa-spinner fa-spin' : 'fa-check-circle'"></i> 
+                                    <i class="fas" :class="isSaving ? 'fa-spinner fa-spin' : 'fa-check-circle'"></i>
                                     {{ isSaving ? 'Saving...' : 'Create Place' }}
                                 </button>
                                 <button type="button" class="btn-cancel-full" @click="$router.push('/admin/places')">
@@ -179,8 +211,8 @@ const isSaving = ref(false)
 // 💡 สร้าง 2 Array: 
 // 1. images ไว้เก็บ Base64 โชว์ให้แอดมินดูหน้าเว็บ
 // 2. rawFiles ไว้เก็บก้อนไฟล์ดิบๆ สำหรับยิงไปหา FastAPI
-const images = ref([]) 
-const rawFiles = ref([]) 
+const images = ref([])
+const rawFiles = ref([])
 
 const form = ref({
     name: '',
@@ -190,7 +222,42 @@ const form = ref({
     location_lng: 104.7525,
     is_published: true
 })
+const weekDays = [
+    { key: 'mon', label: 'Monday' },
+    { key: 'tue', label: 'Tuesday' },
+    { key: 'wed', label: 'Wednesday' },
+    { key: 'thu', label: 'Thursday' },
+    { key: 'fri', label: 'Friday' },
+    { key: 'sat', label: 'Saturday' },
+    { key: 'sun', label: 'Sunday' },
+]
 
+const defaultDayHours = () => ({ open: '08:00', close: '17:00', closed: false })
+
+const openingHours = ref({
+    mon: defaultDayHours(),
+    tue: defaultDayHours(),
+    wed: defaultDayHours(),
+    thu: defaultDayHours(),
+    fri: defaultDayHours(),
+    sat: defaultDayHours(),
+    sun: defaultDayHours()
+})
+
+const setAllClosed = (isClosed) => {
+    weekDays.forEach(day => {
+        openingHours.value[day.key].closed = isClosed
+    })
+}
+
+const copyMondayToAll = () => {
+    const mon = openingHours.value.mon
+    weekDays.forEach(day => {
+        if (day.key !== 'mon') {
+            openingHours.value[day.key] = { ...mon }
+        }
+    })
+}
 // --- จัดการแผนที่ (Map) ---
 const initMap = () => {
     if (map.value) return;
@@ -227,7 +294,7 @@ const searchFromAddress = () => {
 
     // 1. ตรวจสอบว่าเป็นการวางลิงก์ Google Maps ที่มีพิกัด (เช่น /@16.5401,104.7570,15z)
     const urlMatch = input.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/)
-    
+
     // 2. ตรวจสอบว่าเป็นการวางพิกัดตรงๆ (เช่น 16.5401, 104.7570)
     const coordMatch = input.match(/^(-?\d+\.\d+)[\s,]+(-?\d+\.\d+)$/)
 
@@ -274,7 +341,7 @@ const onFileChange = (e) => {
     const files = Array.from(e.target.files)
     files.forEach(file => {
         if (images.value.length >= 10) return
-        
+
         // เช็คขนาด 5MB
         if (file.size > 5 * 1024 * 1024) {
             alert(`File ${file.name} is too large (Max 5MB).`)
@@ -302,7 +369,7 @@ const removeImage = (index) => {
 const setCover = (index) => {
     // สลับพรีวิวมาไว้ตำแหน่งแรก (Cover)
     const [img] = images.value.splice(index, 1)
-    images.value.unshift(img) 
+    images.value.unshift(img)
 
     // สลับไฟล์ดิบมาไว้ตำแหน่งแรกด้วย (เพื่อส่งให้ API ตามลำดับ)
     const [file] = rawFiles.value.splice(index, 1)
@@ -326,14 +393,15 @@ const savePlace = async () => {
         formData.append('is_published', form.value.is_published ? 1 : 0)
         formData.append('location_lat', form.value.location_lat)
         formData.append('location_lng', form.value.location_lng)
+        formData.append('opening_hours', JSON.stringify(openingHours.value))
 
         // ยัดไฟล์ทั้งหมดใส่ Key 'images' ให้ FastAPI แปลงเป็น List[UploadFile]
         rawFiles.value.forEach((file) => {
-            formData.append('images', file) 
+            formData.append('images', file)
         })
 
         await placeRepository.create(formData)
-        
+
         alert('✅ Place added successfully!')
         router.push('/admin/places') // กลับไปหน้าตาราง
     } catch (error) {
@@ -366,7 +434,9 @@ onMounted(async () => {
     color: #1e293b;
 }
 
-.text-danger { color: #e74c3c; }
+.text-danger {
+    color: #e74c3c;
+}
 
 .header-section {
     background: white;
@@ -417,7 +487,9 @@ onMounted(async () => {
 }
 
 @media (max-width: 1024px) {
-    .form-grid { grid-template-columns: 1fr; }
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 .card {
@@ -460,7 +532,9 @@ onMounted(async () => {
 }
 
 @media (max-width: 600px) {
-    .input-row { grid-template-columns: 1fr; }
+    .input-row {
+        grid-template-columns: 1fr;
+    }
 }
 
 .input-group {
@@ -475,7 +549,9 @@ label {
     color: #475569;
 }
 
-input, select, textarea {
+input,
+select,
+textarea {
     width: 100%;
     padding: 12px;
     border: 1px solid #cbd5e1;
@@ -485,7 +561,9 @@ input, select, textarea {
     box-sizing: border-box;
 }
 
-input:focus, select:focus, textarea:focus {
+input:focus,
+select:focus,
+textarea:focus {
     border-color: #3b82f6;
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
@@ -497,7 +575,10 @@ input:focus, select:focus, textarea:focus {
     overflow: hidden;
 }
 
-#map-container { height: 100%; width: 100%; }
+#map-container {
+    height: 100%;
+    width: 100%;
+}
 
 .coords-display {
     margin-left: auto;
@@ -566,7 +647,9 @@ input:focus, select:focus, textarea:focus {
     transition: 0.25s;
 }
 
-.gallery-item:hover .gallery-overlay { opacity: 1; }
+.gallery-item:hover .gallery-overlay {
+    opacity: 1;
+}
 
 .img-action-btn {
     width: 34px;
@@ -581,11 +664,25 @@ input:focus, select:focus, textarea:focus {
     transition: 0.2s;
 }
 
-.set-cover-btn { background: #f59e0b; color: white; }
-.set-cover-btn:hover { background: #d97706; transform: scale(1.1); }
+.set-cover-btn {
+    background: #f59e0b;
+    color: white;
+}
 
-.delete-img-btn { background: #f43f5e; color: white; }
-.delete-img-btn:hover { background: #e11d48; transform: scale(1.1); }
+.set-cover-btn:hover {
+    background: #d97706;
+    transform: scale(1.1);
+}
+
+.delete-img-btn {
+    background: #f43f5e;
+    color: white;
+}
+
+.delete-img-btn:hover {
+    background: #e11d48;
+    transform: scale(1.1);
+}
 
 .gallery-add-btn {
     aspect-ratio: 4/3;
@@ -609,7 +706,192 @@ input:focus, select:focus, textarea:focus {
     background: #eff6ff;
 }
 
-.gallery-add-btn i { font-size: 1.4rem; }
+.gallery-add-btn i {
+    font-size: 1.4rem;
+}
+
+/* ===================== OPENING HOURS STYLES ===================== */
+.opening-hours-card .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.oh-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.btn-oh-action {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    color: #475569;
+    font-size: 0.65rem;
+    padding: 3px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: 0.2s;
+    font-family: 'Kanit', sans-serif;
+    white-space: nowrap;
+}
+
+.btn-oh-action:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+}
+
+.btn-oh-action.highlight {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+    color: #3b82f6;
+}
+
+.opening-hours-card .card-body {
+    padding: 10px 15px 15px;
+}
+
+.oh-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 8px;
+    margin: 0 -8px;
+    border-radius: 10px;
+    border-bottom: 1px solid #f1f5f9;
+    transition: 0.2s;
+}
+
+.oh-row:hover {
+    background: #f8fafc;
+}
+
+.oh-row.is-closed {
+    opacity: 0.6;
+}
+
+.oh-row:last-child {
+    border-bottom: none;
+    padding-bottom: 12px;
+}
+
+.oh-day {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100px;
+}
+
+.oh-label {
+    font-weight: 600;
+    color: #334155;
+    font-size: 0.85rem;
+}
+
+.oh-row.is-closed .oh-label {
+    color: #94a3b8;
+}
+
+.oh-times {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    justify-content: flex-end;
+}
+
+.time-box {
+    position: relative;
+}
+
+.time-input {
+    padding: 8px 10px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    background: white;
+    color: #0f172a;
+    font-family: 'Kanit', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    width: 95px;
+    outline: none;
+    transition: 0.2s;
+    text-align: center;
+}
+
+.time-input:focus {
+    border-color: #3b82f6;
+    background: #f0f7ff;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.oh-dash {
+    color: #cbd5e1;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+}
+
+.oh-closed-container {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.oh-closed-badge {
+    color: #94a3b8;
+    font-weight: 700;
+    font-size: 0.75rem;
+    background: #f1f5f9;
+    padding: 4px 12px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+/* Custom switch for Opening Hours */
+.oh-switch {
+    position: relative;
+    display: inline-block;
+    width: 38px;
+    height: 20px;
+}
+
+.oh-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.oh-slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background: #e2e8f0;
+    border-radius: 999px;
+    transition: 0.3s;
+}
+
+.oh-slider:before {
+    content: '';
+    position: absolute;
+    height: 14px;
+    width: 14px;
+    left: 3px;
+    top: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: 0.3s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.oh-switch input:checked+.oh-slider {
+    background: #10b981;
+}
+
+.oh-switch input:checked+.oh-slider:before {
+    transform: translateX(18px);
+}
 
 /* Empty upload state */
 .upload-empty-state {
@@ -626,8 +908,14 @@ input:focus, select:focus, textarea:focus {
     gap: 12px;
 }
 
-.upload-empty-state i { font-size: 2.5rem; }
-.upload-empty-state p { margin: 0; font-weight: 500; }
+.upload-empty-state i {
+    font-size: 2.5rem;
+}
+
+.upload-empty-state p {
+    margin: 0;
+    font-weight: 500;
+}
 
 .upload-first-btn {
     background: #3b82f6;
@@ -642,7 +930,10 @@ input:focus, select:focus, textarea:focus {
     font-family: 'Kanit', sans-serif;
     transition: 0.2s;
 }
-.upload-first-btn:hover { background: #2563eb; }
+
+.upload-first-btn:hover {
+    background: #2563eb;
+}
 
 .upload-hint {
     font-size: 0.8rem;
@@ -663,8 +954,16 @@ input:focus, select:focus, textarea:focus {
     border-radius: 12px;
     margin-bottom: 20px;
 }
-.status-toggle-box.active { background: #ecfdf5; border: 1px solid #a7f3d0; }
-.status-toggle-box.draft  { background: #fff1f2; border: 1px solid #fecdd3; }
+
+.status-toggle-box.active {
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+}
+
+.status-toggle-box.draft {
+    background: #fff1f2;
+    border: 1px solid #fecdd3;
+}
 
 .btn-submit-full {
     background: #10b981;
@@ -678,8 +977,15 @@ input:focus, select:focus, textarea:focus {
     cursor: pointer;
     transition: 0.2s;
 }
-.btn-submit-full:hover:not(:disabled) { background: #059669; }
-.btn-submit-full:disabled { opacity: 0.7; cursor: not-allowed; }
+
+.btn-submit-full:hover:not(:disabled) {
+    background: #059669;
+}
+
+.btn-submit-full:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
 
 .btn-cancel-full {
     background: white;
@@ -693,21 +999,50 @@ input:focus, select:focus, textarea:focus {
     font-family: 'Kanit', sans-serif;
     transition: 0.2s;
 }
-.btn-cancel-full:hover { background: #f8fafc; }
+
+.btn-cancel-full:hover {
+    background: #f8fafc;
+}
 
 /* Switch Toggle */
-.switch { position: relative; width: 50px; height: 26px; }
-.switch input { opacity: 0; width: 0; height: 0; }
+.switch {
+    position: relative;
+    width: 50px;
+    height: 26px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
 .slider {
-    position: absolute; cursor: pointer; inset: 0;
-    background: #cbd5e1; transition: .4s; border-radius: 34px;
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background: #cbd5e1;
+    transition: .4s;
+    border-radius: 34px;
 }
+
 .slider:before {
-    position: absolute; content: "";
-    height: 18px; width: 18px;
-    left: 4px; bottom: 4px;
-    background: white; transition: .4s; border-radius: 50%;
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 4px;
+    bottom: 4px;
+    background: white;
+    transition: .4s;
+    border-radius: 50%;
 }
-input:checked + .slider { background: #10b981; }
-input:checked + .slider:before { transform: translateX(24px); }
+
+input:checked+.slider {
+    background: #10b981;
+}
+
+input:checked+.slider:before {
+    transform: translateX(24px);
+}
 </style>

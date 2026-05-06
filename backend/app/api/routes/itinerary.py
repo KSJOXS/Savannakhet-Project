@@ -20,9 +20,9 @@ def parse_preferences(pref_data):
 
 @router.post("/generate", response_model=Dict[str, List[Dict[str, Any]]])
 def generate_itinerary(request: schemas.ItineraryRequest, db: Session = Depends(get_db)):
-    user_prefs = []
+    user_prefs = request.preferences or []
     
-    if request.user_id:
+    if not user_prefs and request.user_id:
         user = db.query(models.User).filter(models.User.id == request.user_id).first()
         if user:
             user_prefs = parse_preferences(user.preferences)
@@ -47,7 +47,7 @@ def generate_itinerary(request: schemas.ItineraryRequest, db: Session = Depends(
             "category": cat.name,
             "parent_type": ptype,
             "is_preferred": is_preferred,
-            "rating": place.rating_avg or 0.0
+            "rating": float(place.rating_avg or 0.0)
         }
 
         if ptype in ['nature', 'culture', 'landmark']:
@@ -59,9 +59,10 @@ def generate_itinerary(request: schemas.ItineraryRequest, db: Session = Depends(
         if ptype in ['local_food', 'restaurant', 'chill', 'nightlife']:
             evening_spots.append(place_data)
 
-    # Helper function to sort by preference and rating
+    # Helper function to sort by preference and rating + randomness
     def sort_spots(spots):
-        return sorted(spots, key=lambda x: (x['is_preferred'], x['rating']), reverse=True)
+        random.shuffle(spots)
+        return sorted(spots, key=lambda x: (x['is_preferred'], x['rating'] + random.uniform(-1.0, 1.0)), reverse=True)
 
     morning_spots = sort_spots(morning_spots)
     afternoon_spots = sort_spots(afternoon_spots)

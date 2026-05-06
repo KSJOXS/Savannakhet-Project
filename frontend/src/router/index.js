@@ -25,7 +25,7 @@ import FAQ from '../pages/main/FAQ.vue'
 import UserGuide from '../pages/main/UserGuide.vue'
 import TripPlanner from '../pages/places/TripPlanner.vue'
 import Community from '../pages/community/Community.vue'
-import UtilityPage from '../pages/main/UtilityPage.vue'
+
 import WriteReview from '../pages/user/WriteReview.vue'
 import History from '../pages/main/History.vue'
 
@@ -53,11 +53,7 @@ const routes = [
         name: 'Explore',
         component: RecommendList
     },
-    {
-        path: '/utilities',
-        name: 'Utilities',
-        component: UtilityPage
-    },
+
     {
         path: '/history',
         name: 'History',

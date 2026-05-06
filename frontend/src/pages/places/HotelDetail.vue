@@ -1,57 +1,105 @@
 <template>
     <div class="ta-hotel-detail">
-        <Navbar />
+        <!-- Removed standard Navbar for immersive experience -->
 
-        <div class="container-main" v-if="hotel">
-            <div class="hotel-header-section">
-                <div class="breadcrumb">
-                    Savannakhet Hotels > <span class="active">{{ hotel.name }}</span>
-                </div>
-                
-                <div class="header-content">
-                    <div class="title-area">
-                        <h1>{{ hotel.name }}</h1>
-                        <div class="meta-row">
-                            <div class="bubbles">
-                                <i v-for="s in 5" :key="s" :class="[(hotel.rating_avg || 0) >= s ? 'fas' : 'far', 'fa-circle']"></i>
+        <div v-if="hotel">
+            <div class="premium-hero-wrapper">
+                <header class="premium-hero" :style="{ backgroundImage: `url(${galleryImages[0]})` }">
+                    <div class="hero-overlay"></div>
+
+                    <!-- Immersive Hero Navbar -->
+                    <nav class="hero-nav">
+                        <div class="nav-left">
+                            <div class="logo" @click="router.push('/')">
+                                <span class="logo-main">Savannakhet</span><span class="logo-sub">.travel</span>
                             </div>
-                            <span class="review-count">{{ comments.length }} reviews</span>
-                            <span class="divider">#1 of 15 hotels in Savannakhet</span>
+                        </div>
+                        <div class="nav-right">
+                            <div class="nav-items">
+                                <a @click="router.push('/landmarks')">{{ t('nav.destinations') }}</a>
+                                <a @click="router.push('/trip-planner')">{{ t('nav.tools') }}</a>
+                                <a @click="router.push('/hotels')">{{ t('nav.hotels') }}</a>
+                                <a @click="router.push('/nature')">{{ t('nav.nature') }}</a>
+                            </div>
+                            <button class="btn-plan" @click="router.push('/trip-planner')">{{ t('nav.planYourTrip') }}</button>
+                        </div>
+                    </nav>
+
+                    <div class="hero-content">
+                        <div class="top-row">
+                            <button @click="router.back()" class="btn-back-minimal">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <div class="breadcrumb">SAVANNAKHET HOTELS › {{ hotel.name }}</div>
+                        </div>
+
+                        <div class="hero-main-info">
+                            <h1 class="serif-title">{{ hotel.name }}</h1>
+                            <p class="local-name">Luxury Stay in Savannakhet</p>
+                            <p class="hero-description">{{ hotel.description }}</p>
                         </div>
                     </div>
-                    <div class="header-actions">
-                        <button class="btn-action" @click="toggleHeart" :class="{ active: isFavorite }">
-                            <i class="fas fa-heart"></i> {{ isFavorite ? 'Saved' : 'Save' }}
-                        </button>
-                        <button class="btn-action"><i class="fas fa-share-square"></i> Share</button>
+                </header>
+
+                <div class="stats-bar">
+                    <div class="stat-item">
+                        <label>CHECK-IN</label>
+                        <div class="stat-value">14:00 PM</div>
+                    </div>
+                    <div class="stat-item">
+                        <label>IDEAL STAY</label>
+                        <div class="stat-value">1 – 2 Nights</div>
+                    </div>
+                    <div class="stat-item">
+                        <label>PRICE RANGE</label>
+                        <div class="stat-value">$$ – $$$</div>
+                    </div>
+                    <div class="stat-item">
+                        <label>RATING</label>
+                        <div class="stat-value">⭐ {{ hotel.rating_avg || '4.5' }}</div>
+                    </div>
+                </div>
+
+                <div class="tags-container">
+                    <div class="tag-column best-for">
+                        <label>AMENITIES</label>
+                        <div class="tag-list">
+                            <span class="tag">Free WiFi</span>
+                            <span class="tag">Swimming Pool</span>
+                            <span class="tag">Fitness Center</span>
+                            <span class="tag">Restaurant</span>
+                        </div>
+                    </div>
+                    <div class="tag-column avoid-if">
+                        <label>GOOD TO KNOW</label>
+                        <div class="tag-list">
+                            <span class="tag">Pet Friendly</span>
+                            <span class="tag">24h Reception</span>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="gallery-grid" @click="openLightbox">
-                <div class="main-img">
-                    <img :src="galleryImages[0]" alt="Hotel Main Image" />
+            <div class="container-main">
+                <div class="gallery-preview-strip" @click="openLightbox">
+                <div v-for="(img, idx) in galleryImages.slice(0, 4)" :key="'strip-'+idx" class="strip-item">
+                    <img :src="img" alt="Gallery preview" />
                 </div>
-                <div class="sub-imgs">
-                    <img v-for="(img, i) in galleryImages.slice(1, 3)" :key="i" :src="img" alt="Sub Image" />
-                    <div class="more-photos-overlay" v-if="galleryImages.length > 3">
-                        <img :src="galleryImages[3]" alt="More" />
-                        <div class="text">+{{ galleryImages.length - 3 }} Photos</div>
-                    </div>
-                </div>
+                <div v-if="galleryImages.length > 4" class="more-indicator">+{{ galleryImages.length - 4 }}</div>
             </div>
 
-            <!-- Sticky Navigation -->
+
+                <!-- Sticky Navigation -->
             <div class="sticky-nav-wrapper" ref="stickyNavRef">
                 <div class="sticky-nav" :class="{ 'is-sticky': isSticky }">
                     <div class="nav-links">
-                        <a href="#deals" :class="{ active: activeSection === 'deals' }" @click.prevent="scrollTo('deals')">Deals</a>
-                        <a href="#about" :class="{ active: activeSection === 'about' }" @click.prevent="scrollTo('about')">About</a>
-                        <a href="#location" :class="{ active: activeSection === 'location' }" @click.prevent="scrollTo('location')">Location</a>
-                        <a href="#reviews" :class="{ active: activeSection === 'reviews' }" @click.prevent="scrollTo('reviews')">Reviews</a>
+                        <a href="#deals" :class="{ active: activeSection === 'deals' }" @click.prevent="scrollTo('deals')">{{ t('place.deals') }}</a>
+                        <a href="#about" :class="{ active: activeSection === 'about' }" @click.prevent="scrollTo('about')">{{ t('place.about') }}</a>
+                        <a href="#location" :class="{ active: activeSection === 'location' }" @click.prevent="scrollTo('location')">{{ t('place.location') }}</a>
+                        <a href="#reviews" :class="{ active: activeSection === 'reviews' }" @click.prevent="scrollTo('reviews')">{{ t('place.reviews') }}</a>
                     </div>
                     <div class="nav-action" v-if="isSticky">
-                        <button class="btn-check-availability" @click="scrollTo('deals')">Check availability</button>
+                        <button class="btn-check-availability" @click="scrollTo('deals')">{{ t('hotels.check_availability') }}</button>
                     </div>
                 </div>
             </div>
@@ -59,12 +107,12 @@
             <div class="content-layout">
                 <div class="left-col">
                     <section class="about-hotel" id="about">
-                        <h2>About</h2>
+                        <h2>{{ t('place.about') }}</h2>
                         <p class="hotel-desc">{{ hotel.description }}</p>
                     </section>
 
                     <div class="amenities-box">
-                        <h3>Property amenities</h3>
+                        <h3>{{ t('hotels.amenities') }}</h3>
                         <div class="amenities-grid">
                             <div class="amenity-item"><i class="fas fa-parking"></i> Free parking</div>
                             <div class="amenity-item"><i class="fas fa-wifi"></i> Free High Speed Internet (WiFi)</div>
@@ -139,16 +187,16 @@
                 <div class="right-col">
                     <div class="booking-widget" id="deals">
                         <div class="price-header">
-                            <span class="label" style="font-size: 1.1rem; font-weight: 700;">View prices for your travel dates</span>
+                            <span class="label" style="font-size: 1.1rem; font-weight: 700;">{{ t('hotels.view_prices_dates') }}</span>
                         </div>
                         
                         <div class="date-picker-box">
                             <div class="date-input">
-                                <small>Check In</small>
+                                <small>{{ t('hotels.checkin') }}</small>
                                 <div style="font-weight: 600;">Mon 12/04</div>
                             </div>
                             <div class="date-input">
-                                <small>Check Out</small>
+                                <small>{{ t('hotels.checkout') }}</small>
                                 <div style="font-weight: 600;">Wed 14/04</div>
                             </div>
                         </div>
@@ -163,7 +211,7 @@
                             <a :href="`https://www.agoda.com/search?text=${hotel?.name || 'Savannakhet'}`" target="_blank" class="btn-partner">View deal</a>
                         </div>
 
-                        <p class="free-cancel"><i class="fas fa-check"></i> Free cancellation on most rooms</p>
+                        <p class="free-cancel"><i class="fas fa-check"></i> {{ t('hotels.free_cancel') }}</p>
                     </div>
 
                     <div class="mini-map-card" id="location">
@@ -171,14 +219,14 @@
                             :src="`https://maps.google.com/maps?q=${hotel.location_lat},${hotel.location_lng}&z=15&output=embed`"
                             allowfullscreen>
                         </iframe>
-                        <button class="btn-map-link" @click="openMap">Show on Map</button>
+                        <button class="btn-map-link" @click="openMap">{{ t('place.viewOnMap') }}</button>
                     </div>
                 </div>
             </div>
 
             <!-- Recommended Places -->
             <div class="recommended-section" v-if="recommendedPlaces.length > 0">
-                <h2>You might also like</h2>
+                <h2>{{ t('place.recommended') }}</h2>
                 <div class="recommended-grid">
                     <div v-for="rec in recommendedPlaces" :key="rec.id" class="rec-card" @click="goToRecDetail(rec.id)">
                         <div class="rec-img-wrapper">
@@ -197,8 +245,17 @@
                     </div>
                 </div>
             </div>
+
+            <MapOverlay :is-open="showMapModal" :places="allPlaces" :categories="categories"
+                :initial-selected-id="hotel.id" title="Explore Hotels" @close="showMapModal = false" />
         </div>
     </div>
+    
+    <div v-else class="loading-screen">
+        <div class="spinner"></div>
+        <p>{{ t('common.loading') }}</p>
+    </div>
+</div>
 </template>
 
 <script setup>
@@ -207,14 +264,21 @@ import { useRoute, useRouter } from 'vue-router'
 import { placeRepository } from '@/repositories/placeRepository'
 import { favoriteRepository } from '@/repositories/favoriteRepository'
 import Navbar from '@/components/Navbar.vue'
+import MapOverlay from '@/components/MapOverlay.vue'
+import { categoryRepository } from '@/repositories/categoryRepository'
+import { useI18n } from '@/composables/useI18n'
 import axios from 'axios'
 
 const route = useRoute()
 const router = useRouter()
+const { t } = useI18n()
 const hotel = ref(null)
 const comments = ref([])
 const user = ref(JSON.parse(localStorage.getItem('user')))
 const isFavorite = ref(false)
+const showMapModal = ref(false)
+const allPlaces = ref([])
+const categories = ref([])
 
 const newComment = ref('')
 const newRating = ref(5)
@@ -313,14 +377,33 @@ const scrollTo = (id) => {
 
 // 🖼️ จัดการรูปภาพ
 const galleryImages = computed(() => {
-    if (!hotel.value) return []
+    if (!hotel.value) return ['https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1920&q=80']
+    
+    const getValidUrl = (rawUrl) => {
+        if (!rawUrl || rawUrl === 'null' || rawUrl === 'undefined') return 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1920&q=80';
+        let url = rawUrl;
+        if (typeof url === 'string' && url.trim().startsWith('[')) {
+            try {
+                const parsed = JSON.parse(url);
+                if (Array.isArray(parsed) && parsed.length > 0) url = parsed[0];
+            } catch (e) {
+                url = url.replace(/^\["?|"?\]$/g, '').replace(/\\"/g, '');
+            }
+        }
+        if (typeof url !== 'string') return 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1920&q=80';
+        if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) return url;
+        return `http://localhost:8000${url.startsWith('/') ? '' : '/'}${url}`;
+    }
+
     let urls = []
     if (hotel.value.image_url?.startsWith('[')) {
         try { urls = JSON.parse(hotel.value.image_url) } catch(e) { urls = [hotel.value.image_url] }
     } else {
         urls = [hotel.value.image_url]
     }
-    return urls.map(url => url.startsWith('http') ? url : `http://localhost:8000/${url}`)
+    
+    const results = urls.map(url => getValidUrl(url))
+    return results.length > 0 ? results : ['https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1920&q=80'];
 })
 
 const fetchData = async () => {
@@ -329,20 +412,30 @@ const fetchData = async () => {
         const res = await placeRepository.getById(id)
         hotel.value = res.data
         
-        // ดึงรีวิว
-        const revRes = await placeRepository.getComments(id)
-        comments.value = revRes.data
+        // Fetch secondary data asynchronously
+        placeRepository.getComments(id)
+            .then(revRes => { comments.value = revRes.data })
+            .catch(() => { comments.value = [] })
 
-        // ดึง Recommendations (สถานที่อื่นๆ ใน category เดียวกัน)
-        const allRes = await placeRepository.getAll()
-        recommendedPlaces.value = allRes.data
-            .filter(p => p.category_id === hotel.value.category_id && p.id !== parseInt(id))
-            .slice(0, 4)
+        placeRepository.getAll()
+            .then(allRes => {
+                allPlaces.value = allRes.data
+                recommendedPlaces.value = allRes.data
+                    .filter(p => p.category_id === hotel.value.category_id && p.id !== parseInt(id))
+                    .slice(0, 4)
+            })
+            .catch(err => console.error(err))
 
-        // เช็ค Favorite
+        categoryRepository.getAll()
+            .then(catRes => { categories.value = catRes.data })
+            .catch(err => console.error(err))
+
         if (user.value) {
-            const favRes = await favoriteRepository.getUserFavorites(user.value.id)
-            isFavorite.value = favRes.data.some(f => f.place_id === parseInt(id))
+            favoriteRepository.getUserFavorites(user.value.id)
+                .then(favRes => {
+                    isFavorite.value = favRes.data.some(f => f.place_id === parseInt(id))
+                })
+                .catch(err => console.error(err))
         }
     } catch (err) { console.error(err) }
 }
@@ -373,7 +466,9 @@ const submitComment = async () => {
     } catch (err) { console.error(err) } finally { submitting.value = false }
 }
 
-const openMap = () => window.open(`https://www.google.com/maps/search/?api=1&query=${hotel.value.location_lat},${hotel.value.location_lng}`, '_blank')
+const openMap = () => {
+    showMapModal.value = true
+}
 
 const getRecCoverImage = (place) => {
     let url = ''
@@ -409,8 +504,395 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.ta-hotel-detail { background: #f2f2f2; min-height: 100vh; font-family: 'Inter', sans-serif; color: #000; }
-.container-main { max-width: 1140px; margin: 0 auto; padding: 20px; }
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;800;900&display=swap');
+
+.ta-hotel-detail {
+    background-color: #ffffff;
+    min-height: 100vh;
+    font-family: 'Inter', sans-serif;
+    color: #1e293b;
+}
+
+/* Premium Hero Section */
+.premium-hero-wrapper {
+    margin-bottom: 40px;
+}
+
+.premium-hero {
+    position: relative;
+    height: 85vh;
+    background-size: cover;
+    background-position: center;
+    color: white;
+    display: flex;
+    flex-direction: column;
+}
+
+.hero-nav {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 100%);
+}
+
+.logo {
+    cursor: pointer;
+    font-size: 1.5rem;
+    font-weight: 900;
+}
+
+.logo-main {
+    color: white;
+}
+
+.logo-sub {
+    color: #4ade80;
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.nav-items {
+    display: flex;
+    gap: 25px;
+}
+
+.nav-items a {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.nav-items a:hover {
+    color: white;
+}
+
+.btn-plan {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    color: white;
+    padding: 8px 20px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-plan:hover {
+    background: white;
+    color: black;
+}
+
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.8) 100%);
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 0 40px 60px;
+}
+
+.top-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: auto;
+}
+
+.btn-back-minimal {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-back-minimal:hover {
+    background: white;
+    color: black;
+}
+
+.breadcrumb {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.hero-main-info {
+    margin-top: auto;
+    max-width: 800px;
+}
+
+.verified-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(34, 197, 94, 0.2);
+    border: 1px solid rgba(34, 197, 94, 0.4);
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: #4ade80;
+    margin-bottom: 20px;
+}
+
+.status-dot {
+    width: 6px;
+    height: 6px;
+    background: #4ade80;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #4ade80;
+}
+
+.date-sep {
+    opacity: 0.3;
+}
+
+.serif-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 8rem;
+    font-weight: 900;
+    line-height: 0.85;
+    margin: 0;
+    letter-spacing: -4px;
+    text-transform: capitalize;
+}
+
+.local-name {
+    font-size: 2rem;
+    color: rgba(255, 255, 255, 0.5);
+    margin: 10px 0 30px;
+    font-weight: 500;
+    font-family: 'Inter', sans-serif;
+}
+
+.hero-description {
+    font-size: 1.3rem;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 400;
+    max-width: 800px;
+}
+
+/* Stats Bar */
+.stats-bar {
+    max-width: 1280px;
+    margin: 0 auto 0;
+    background: white;
+    position: relative;
+    z-index: 5;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+.stat-item {
+    padding: 30px 40px;
+    border-right: 1px solid #f1f5f9;
+}
+
+.stat-item:last-child {
+    border-right: none;
+}
+
+.stat-item label {
+    display: block;
+    font-size: 0.6rem;
+    font-weight: 900;
+    color: #8c8c8c;
+    letter-spacing: 3px;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+}
+
+.stat-value {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #111111;
+    font-family: 'Playfair Display', serif;
+}
+
+/* Tags Section */
+.tags-container {
+    max-width: 1280px;
+    margin: 40px auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+.tag-column {
+    padding: 30px 35px;
+    background: white;
+    border: 1px solid #f1f5f9;
+}
+
+.tag-column label {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 900;
+    letter-spacing: 2.5px;
+    margin-bottom: 20px;
+    color: #8c8c8c;
+}
+
+.best-for {
+    border-left: 3px solid #1a735c;
+}
+
+.avoid-if {
+    border-left: 3px solid #b04c36;
+}
+
+.tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tag {
+    padding: 6px 12px;
+    border-radius: 2px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.best-for .tag {
+    background: #eaf4f1;
+    color: #1a735c;
+    border: 1px solid #d3e8e1;
+}
+
+.avoid-if .tag {
+    background: #faebe7;
+    color: #b04c36;
+    border: 1px solid #f5d5cc;
+}
+
+
+
+.tag-column {
+    padding: 30px;
+    border: 1px solid #e2e8f0;
+}
+
+.tag-column label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+}
+
+
+
+.best-for {
+    border-left: 4px solid #4ade80;
+}
+
+.avoid-if {
+    border-left: 4px solid #f87171;
+}
+
+.tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.tag {
+    background: #f1f5f9;
+    padding: 6px 14px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #475569;
+}
+
+.best-for .tag {
+    background: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+
+.avoid-if .tag {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+/* Gallery Strip */
+.gallery-preview-strip {
+    max-width: 1280px;
+    margin: 40px auto;
+    display: flex;
+    gap: 15px;
+    height: 450px;
+    cursor: pointer;
+}
+
+.strip-item {
+    flex: 1;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.strip-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: 0.3s;
+}
+
+.strip-item:hover img {
+    transform: scale(1.05);
+}
+
+.more-indicator {
+    width: 120px;
+    background: #f1f5f9;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    color: #64748b;
+}
+
+.container-main {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 40px 60px;
+}
 
 /* Header */
 .hotel-header-section { background: white; padding: 20px; border-radius: 12px 12px 0 0; border-bottom: 1px solid #e0e0e0; }
@@ -642,9 +1124,35 @@ textarea { width: 100%; height: 80px; padding: 10px; margin: 10px 0; border: 1px
         grid-template-columns: repeat(2, 1fr);
     }
 }
+
 @media (max-width: 480px) {
     .recommended-grid {
         grid-template-columns: 1fr;
     }
+}
+
+.loading-screen {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: white;
+    z-index: 9999;
+    color: #1e293b;
+}
+
+.spinner {
+    width: 40px; height: 40px;
+    border: 4px solid #f1f5f9;
+    border-top: 4px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 15px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 </style>

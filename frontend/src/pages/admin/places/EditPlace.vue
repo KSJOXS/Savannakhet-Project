@@ -141,10 +141,15 @@
 
                     <div class="card opening-hours-card">
                         <div class="card-header">
-                            <i class="fas fa-clock"></i> Opening Hours
+                            <i class="fas fa-clock"></i> <span>Opening Hours</span>
+                            <div class="oh-actions">
+                                <button type="button" @click="setAllClosed(false)" class="btn-oh-action">Open</button>
+                                <button type="button" @click="setAllClosed(true)" class="btn-oh-action">Close</button>
+                                <button type="button" @click="copyMondayToAll" class="btn-oh-action highlight">Copy Mon</button>
+                            </div>
                         </div>
                         <div class="card-body">
-                            <div v-for="day in weekDays" :key="day.key" class="oh-row">
+                            <div v-for="day in weekDays" :key="day.key" class="oh-row" :class="{'is-closed': openingHours[day.key].closed}">
                                 <div class="oh-day">
                                     <label class="oh-switch">
                                         <input type="checkbox" v-model="openingHours[day.key].closed" :true-value="false" :false-value="true" />
@@ -153,11 +158,17 @@
                                     <span class="oh-label">{{ day.label }}</span>
                                 </div>
                                 <div class="oh-times" v-if="!openingHours[day.key].closed">
-                                    <input type="time" v-model="openingHours[day.key].open" class="time-input" />
-                                    <span class="oh-dash">—</span>
-                                    <input type="time" v-model="openingHours[day.key].close" class="time-input" />
+                                    <div class="time-box">
+                                        <input type="time" v-model="openingHours[day.key].open" class="time-input" />
+                                    </div>
+                                    <span class="oh-dash"><i class="fas fa-arrow-right"></i></span>
+                                    <div class="time-box">
+                                        <input type="time" v-model="openingHours[day.key].close" class="time-input" />
+                                    </div>
                                 </div>
-                                <div class="oh-closed-label" v-else>Closed</div>
+                                <div class="oh-closed-container" v-else>
+                                    <span class="oh-closed-badge">Closed</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -231,6 +242,21 @@ const openingHours = ref({
     sat: defaultDayHours(),
     sun: defaultDayHours(),
 })
+
+const setAllClosed = (isClosed) => {
+    weekDays.forEach(day => {
+        openingHours.value[day.key].closed = isClosed
+    })
+}
+
+const copyMondayToAll = () => {
+    const mon = openingHours.value.mon
+    weekDays.forEach(day => {
+        if (day.key !== 'mon') {
+            openingHours.value[day.key] = { ...mon }
+        }
+    })
+}
 
 const images = ref([]) // เก็บ Base64 หรือ URL สำหรับโชว์ในหน้าเว็บ
 const rawFiles = ref([]) // เก็บก้อนไฟล์จริง (File object) เตรียมส่งให้ Backend
@@ -855,5 +881,183 @@ input:checked + .slider:before { transform: translateX(24px); }
     display: flex;
     align-items: center;
     gap: 5px;
+}
+
+/* ===================== OPENING HOURS STYLES ===================== */
+.opening-hours-card .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.oh-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.btn-oh-action {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    color: #475569;
+    font-size: 0.65rem;
+    padding: 3px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: 0.2s;
+    font-family: 'Kanit', sans-serif;
+    white-space: nowrap;
+}
+
+.btn-oh-action:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+}
+
+.btn-oh-action.highlight {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+    color: #3b82f6;
+}
+
+.opening-hours-card .card-body {
+    padding: 10px 15px 15px;
+}
+
+.oh-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 8px;
+    margin: 0 -8px;
+    border-radius: 10px;
+    border-bottom: 1px solid #f1f5f9;
+    transition: 0.2s;
+}
+
+.oh-row:hover {
+    background: #f8fafc;
+}
+
+.oh-row.is-closed {
+    opacity: 0.6;
+}
+
+.oh-row:last-child {
+    border-bottom: none;
+    padding-bottom: 12px;
+}
+
+.oh-day {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100px; /* Reduced from 140px */
+}
+
+.oh-label {
+    font-weight: 600;
+    color: #334155;
+    font-size: 0.85rem; /* Reduced font size */
+}
+
+.oh-row.is-closed .oh-label {
+    color: #94a3b8;
+}
+
+.oh-times {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    justify-content: flex-end;
+}
+
+.time-box {
+    position: relative;
+}
+
+.time-input {
+    padding: 8px 10px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    background: white;
+    color: #0f172a;
+    font-family: 'Kanit', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    width: 95px; /* Reduced from 130px */
+    outline: none;
+    transition: 0.2s;
+    text-align: center;
+}
+
+.time-input:focus {
+    border-color: #3b82f6;
+    background: #f0f7ff;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.oh-dash {
+    color: #cbd5e1;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+}
+
+.oh-closed-container {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.oh-closed-badge {
+    color: #94a3b8;
+    font-weight: 700;
+    font-size: 0.75rem;
+    background: #f1f5f9;
+    padding: 4px 12px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+/* Custom switch for Opening Hours */
+.oh-switch {
+    position: relative;
+    display: inline-block;
+    width: 38px;
+    height: 20px;
+}
+.oh-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.oh-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #e2e8f0;
+    transition: .4s;
+    border-radius: 34px;
+}
+.oh-slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.oh-switch input:checked + .oh-slider {
+    background-color: #10b981;
+}
+.oh-switch input:checked + .oh-slider:before {
+    transform: translateX(18px);
 }
 </style>

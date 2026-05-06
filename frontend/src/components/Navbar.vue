@@ -70,32 +70,7 @@
                         </transition>
                     </div>
 
-                    <div class="nav-item-dropdown" @mouseenter="isUtilitiesOpen = true"
-                        @mouseleave="isUtilitiesOpen = false">
-                        <div class="nav-item" :class="{ active: route.path.includes('/utilities') || isUtilitiesOpen }">
-                            <i class="fas fa-toolbox"></i>
-                            <span>{{ getTranslation('nav.tools', 'Tools') }}</span>
-                            <i class="fas fa-chevron-down dropdown-icon" :class="{ rotated: isUtilitiesOpen }"></i>
-                        </div>
-                        <transition name="fade-slide">
-                            <div v-if="isUtilitiesOpen" class="ta-dropdown-menu">
-                                <router-link to="/utilities?tab=currency" class="ta-dropdown-item"
-                                    @click="isUtilitiesOpen = false">
-                                    <i class="fas fa-exchange-alt"></i> {{ getTranslation('nav.currency', `Currency
-                                    Converter`) }}
-                                </router-link>
-                                <router-link to="/utilities?tab=phrasebook" class="ta-dropdown-item"
-                                    @click="isUtilitiesOpen = false">
-                                    <i class="fas fa-language"></i> {{ getTranslation('nav.phrasebook', `Lao
-                                    Phrasebook`) }}
-                                </router-link>
-                                <router-link to="/utilities?tab=transport" class="ta-dropdown-item"
-                                    @click="isUtilitiesOpen = false">
-                                    <i class="fas fa-bus"></i> {{ getTranslation('nav.transport', `Transport Guide`) }}
-                                </router-link>
-                            </div>
-                        </transition>
-                    </div>
+
 
                     <div class="nav-item-dropdown" @mouseenter="isSupportOpen = true"
                         @mouseleave="isSupportOpen = false">
@@ -251,7 +226,7 @@ const supportedLocales = i18n.supportedLocales || []
 // State ควบคุม Dropdown 
 const isDiscoverOpen = ref(false) // 🚨 ตัวแปรใหม่สำหรับ Discover
 const isContributeOpen = ref(false)
-const isUtilitiesOpen = ref(false)
+
 const isSupportOpen = ref(false)
 const isLangOpen = ref(false)
 const isProfileOpen = ref(false)
@@ -310,7 +285,7 @@ watch(() => route.path, () => {
     checkAuth()
     isDiscoverOpen.value = false
     isContributeOpen.value = false
-    isUtilitiesOpen.value = false
+
     isSupportOpen.value = false
     isLangOpen.value = false
     isProfileOpen.value = false

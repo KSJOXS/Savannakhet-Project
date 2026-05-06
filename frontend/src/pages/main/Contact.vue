@@ -86,9 +86,7 @@
             </div>
         </div>
 
-        <footer class="simple-footer">
-            <p>🌴 Savannakhet Smart Travel &copy; 2026 — Powered by GNN Recommendation</p>
-        </footer>
+
     </div>
 </template>
 
@@ -378,15 +376,7 @@ const submitForm = async () => {
 }
 
 /* Footer */
-.simple-footer {
-    text-align: center;
-    padding: 32px 40px;
-    color: #94a3b8;
-    border-top: 1px solid #e2e8f0;
-    font-size: 0.88rem;
-    background: white;
-    margin-top: auto;
-}
+
 
 /* Responsive */
 @media (max-width: 992px) {

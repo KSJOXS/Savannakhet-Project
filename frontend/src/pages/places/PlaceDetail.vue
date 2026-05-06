@@ -1,56 +1,95 @@
 <template>
     <div class="ta-detail-page">
-        <Navbar />
+        <!-- Removed standard Navbar for immersive experience -->
 
-        <div class="ta-container" v-if="place">
-            <div class="top-actions">
-                <button @click="router.back()" class="btn-back">
-                    <i class="fas fa-arrow-left"></i> {{ t('place.backToSearch') }}
-                </button>
-            </div>
-
-            <div class="place-header">
-                <div class="header-main">
-                    <h1>{{ place.name }}</h1>
-                    <div class="meta-row">
-                        <div class="rating-bubbles">
-                            <i v-for="s in 5" :key="'h-' + s"
-                                :class="[(place.rating_avg || 0) >= s ? 'fas' : 'far', 'fa-circle']"></i>
+        <div v-if="place">
+            <div class="premium-hero-wrapper">
+                <header class="premium-hero" :style="{ backgroundImage: `url(${galleryImages[0]})` }">
+                    <div class="hero-overlay"></div>
+                    
+                    <!-- Immersive Hero Navbar -->
+                    <nav class="hero-nav">
+                        <div class="nav-left">
+                            <div class="logo" @click="router.push('/')">
+                                <span class="logo-main">Savannakhet</span><span class="logo-sub">.travel</span>
+                            </div>
                         </div>
-                        <span class="review-count" @click="scrollTo('reviews')">{{ comments.length }} {{
-                            t('place.reviews_count') }}</span>
-                        <span class="divider">•</span>
-                        <span class="category-link">{{ getCategoryName(place.category_id) }}</span>
-                        <span class="divider">•</span>
-                        <span class="location-text top-location-link" @click="openMapOverlay"
-                            :title="t('place.viewOnMap')">
-                            <i class="fas fa-map-marker-alt"></i> {{ addressText }}
-                        </span>
+                        <div class="nav-right">
+                            <div class="nav-items">
+                                <a @click="router.push('/landmarks')">{{ t('nav.destinations') }}</a>
+                                <a @click="router.push('/trip-planner')">{{ t('nav.tools') }}</a>
+                                <a @click="router.push('/hotels')">{{ t('nav.hotels') }}</a>
+                                <a @click="router.push('/nature')">{{ t('nav.nature') }}</a>
+                            </div>
+                            <button class="btn-plan" @click="router.push('/trip-planner')">{{ t('nav.planYourTrip') }}</button>
+                        </div>
+                    </nav>
+
+                    <div class="hero-content">
+                        <div class="top-row">
+                            <button @click="router.back()" class="btn-back-minimal">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <div class="breadcrumb">HOME › DESTINATIONS › {{ getCategoryName(place.category_id) }}</div>
+                        </div>
+
+                        <div class="hero-main-info">
+                            <h1 class="serif-title">{{ place.name }}</h1>
+                            <p class="local-name">{{ place.name_local || place.name }}</p>
+                            <p class="hero-description">{{ place.description }}</p>
+                        </div>
+                    </div>
+                </header>
+
+                <div class="stats-bar">
+                    <div class="stat-item">
+                        <label>BEST MONTHS</label>
+                        <div class="stat-value">Nov – Feb</div>
+                    </div>
+                    <div class="stat-item">
+                        <label>IDEAL STAY</label>
+                        <div class="stat-value">2 – 3 Days</div>
+                    </div>
+                    <div class="stat-item">
+                        <label>DAILY BUDGET</label>
+                        <div class="stat-value">₭ 150k – 500k</div>
+                    </div>
+                    <div class="stat-item">
+                        <label>LOCATION</label>
+                        <div class="stat-value">Savannakhet</div>
                     </div>
                 </div>
-                <div class="header-actions">
-                    <button v-if="!user || user.role !== 'admin'"
-                        :class="['btn-action btn-save', { active: isFavorite }]" @click="toggleHeart">
-                        <i class="fas fa-heart"></i> {{ isFavorite ? 'Saved' : 'Save' }}
-                    </button>
+
+                <div class="tags-container">
+                    <div class="tag-column best-for">
+                        <label>BEST FOR</label>
+                        <div class="tag-list">
+                            <span class="tag">Local Heritage</span>
+                            <span class="tag">Photography</span>
+                            <span class="tag">Architecture</span>
+                            <span class="tag">Slow Travel</span>
+                        </div>
+                    </div>
+                    <div class="tag-column avoid-if">
+                        <label>AVOID IF</label>
+                        <div class="tag-list">
+                            <span class="tag">Rainy Season</span>
+                            <span class="tag">You dislike walking</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="gallery-grid" @click="openLightbox">
-                <div class="main-photo">
-                    <img :src="galleryImages[0]" alt="Main Place Image" />
+            <div class="ta-container">
+                <div class="gallery-preview-strip" @click="openLightbox">
+                <div v-for="(img, idx) in galleryImages.slice(0, 4)" :key="'strip-'+idx" class="strip-item">
+                    <img :src="img" alt="Gallery preview" />
                 </div>
-                <div class="side-photos" v-if="galleryImages.length > 1">
-                    <img :src="galleryImages[1]" alt="Place Image 2" />
-                    <img v-if="galleryImages.length > 2" :src="galleryImages[2]" alt="Place Image 3"
-                        class="third-img" />
-                    <div v-else class="empty-photo-slot"></div>
-                </div>
-                <button class="btn-view-photos"><i class="fas fa-th"></i> {{ t('place.viewAllPhotos') }} ({{
-                    galleryImages.length }})</button>
+                <div v-if="galleryImages.length > 4" class="more-indicator">+{{ galleryImages.length - 4 }}</div>
             </div>
 
-            <div class="deals-banner" v-if="isHotel" id="deals">
+
+                <div class="deals-banner" v-if="isHotel" id="deals">
                 <div class="deals-banner-title">
                     <i class="fas fa-tags"></i>
                     <span>{{ t('place.checkPrices') }}</span>
@@ -112,9 +151,14 @@
 
             <div class="content-split">
                 <div class="main-column">
-                    <section class="about-section" id="about">
-                        <h2>{{ t('place.aboutThisPlace') }}</h2>
-                        <p class="description-text">{{ place.description }}</p>
+                    <section class="about-section" id="about" style="background: white; padding: 30px; border-radius: 20px; box-shadow: 0 4px 25px rgba(0,0,0,0.04); border: 1px solid #f1f5f9; margin-bottom: 30px;">
+                        <h2 style="font-size: 1.6rem; font-weight: 800; margin-top: 0; margin-bottom: 15px; color: #0f172a; display: flex; align-items: center; gap: 12px;">
+                            <div style="background: #eff6ff; padding: 8px; border-radius: 10px; color: #3b82f6; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-info-circle" style="font-size: 1.2rem;"></i>
+                            </div>
+                            {{ t('place.aboutThisPlace') }}
+                        </h2>
+                        <p class="description-text" style="font-size: 1.05rem; line-height: 1.8; color: #334155; white-space: pre-line; margin: 0;">{{ place.description || 'No description available for this place yet.' }}</p>
                     </section>
 
                     <hr class="section-divider" />
@@ -264,6 +308,38 @@
                 </div>
 
                 <div class="sidebar-column">
+                    <div class="sidebar-card place-summary-card" style="background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid #f1f5f9; margin-bottom: 20px;">
+                        <h3 style="font-size: 1.1rem; font-weight: 800; margin: 0 0 16px; color: #1e293b; display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-list-ul" style="color: #6366f1;"></i> {{ t('place.quick_details') }}
+                        </h3>
+                        <div class="place-summary-meta" style="display: flex; flex-direction: column; gap: 12px; font-size: 0.95rem; color: #475569;">
+                            <span style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px dashed #e2e8f0; padding-bottom: 8px;">
+                                <span style="display: flex; align-items: center; gap: 8px;"><i class="fas fa-tag" style="color: #3b82f6; width: 16px; text-align: center;"></i> <strong>{{ t('place.category_label') }}</strong></span>
+                                <span style="font-weight: 600; color: #0f172a; background: #f1f5f9; padding: 2px 8px; border-radius: 6px; font-size: 0.85rem;">{{ getCategoryName(place.category_id) }}</span>
+                            </span>
+                            <span style="display: flex; align-items: center; justify-content: space-between;">
+                                <span style="display: flex; align-items: center; gap: 8px;"><i class="fas fa-star" style="color: #eab308; width: 16px; text-align: center;"></i> <strong>{{ t('place.rating_label') }}</strong></span>
+                                <span style="font-weight: 700; color: #00aa6c; display: flex; align-items: center; gap: 4px;">
+                                    {{ place.rating_avg ? parseFloat(place.rating_avg).toFixed(1) : 'N/A' }}
+                                </span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-card opening-hours-card">
+                        <h3 style="font-size: 1rem; font-weight: 800; margin: 0 0 16px; color: #1e293b;">{{ t('place.openingHours') || 'Opening Hours' }}
+                        </h3>
+                        <div class="opening-hours-list" v-if="openingHoursList.length">
+                            <div v-for="day in openingHoursList" :key="day.key" class="opening-hours-row">
+                                <span>{{ day.label }}</span>
+                                <span :class="['opening-hours-value', { closed: day.closed }]">
+                                    {{ day.closed ? (t('place.closed') || 'Closed') : `${day.open} - ${day.close}` }}
+                                </span>
+                            </div>
+                        </div>
+                        <p v-else class="no-opening-hours">{{ t('place.noOpeningHours') || 'No opening hours available.' }}</p>
+                    </div>
+
                     <div class="sidebar-card rating-summary-card">
                         <h3 style="font-size: 1rem; font-weight: 800; margin: 0 0 16px; color: #1e293b;">{{
                             t('place.travelerReviews') }}</h3>
@@ -300,12 +376,12 @@
             <div class="large-map-section" id="location">
                 <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px;">
                     <div>
-                        <h2>Location</h2>
+                        <h2>{{ t('place.location') }}</h2>
                         <p class="map-address" style="margin: 0;"><i class="fas fa-map-marker-alt"></i> {{ addressText
                             }}</p>
                     </div>
-                    <button class="btn-action" @click="openGoogleMaps">
-                        <i class="fas fa-external-link-alt"></i> Open in Maps
+                    <button class="btn-action" @click="showMapModal = true">
+                        <i class="fas fa-external-link-alt"></i> {{ t('place.viewOnMap') }}
                     </button>
                 </div>
                 <div class="large-map-container" v-if="place.location_lat && place.location_lng">
@@ -318,11 +394,11 @@
             <div class="nearby-section" v-if="nearbyRestaurants.length > 0 || nearbyAttractions.length > 0">
                 <div class="nearby-grid">
                     <div class="nearby-col getting-there-col">
-                        <h3>Getting there</h3>
+                        <h3>{{ t('place.gettingThere') }}</h3>
                         <div class="walk-score-box">
                             <div class="score-text">
-                                <span class="score-title">Somewhat walkable <i class="fas fa-info-circle"></i></span>
-                                <span class="score-desc">Grade: 64 out of 100</span>
+                                <span class="score-title">{{ t('place.somewhatWalkable') }} <i class="fas fa-info-circle"></i></span>
+                                <span class="score-desc">{{ t('place.grade') }}: 64 {{ t('place.outOf') }} 100</span>
                             </div>
                             <div class="score-number">64</div>
                         </div>
@@ -335,10 +411,10 @@
                     <div class="nearby-col">
                         <div class="col-header">
                             <div>
-                                <h3>{{ nearbyRestaurantsTotal }} Restaurants</h3>
-                                <span>within 0.75 miles</span>
+                                <h3>{{ nearbyRestaurantsTotal }} {{ t('place.restaurants') }}</h3>
+                                <span>{{ t('place.within') }} 10 km</span>
                             </div>
-                            <button class="btn-text-link" @click="openMapOverlay">View on map</button>
+                            <button class="btn-text-link" @click="openMapOverlay">{{ t('common.viewOnMap') }}</button>
                         </div>
 
                         <div class="nearby-list">
@@ -351,12 +427,12 @@
                                         <i v-for="s in 5" :key="s"
                                             :class="[(n.rating_avg || 0) >= s ? 'fas' : 'far', 'fa-circle']"></i>
                                     </div>
-                                    <span class="n-reviews">({{ getCommentCountText(n) }} reviews)</span>
+                                    <span class="n-reviews">({{ getCommentCountText(n) }} {{ t('common.reviews') }})</span>
                                 </div>
                                 <div class="n-meta">
                                     <i class="fas fa-walking"></i> {{ getDistanceText(n._distance) }} <span
                                         class="dot-divider">•</span> $$ - $$$ <span class="dot-divider">•</span> {{
-                                    getCategoryName(n.category_id) }}
+                                            getCategoryName(n.category_id) }}
                                 </div>
                             </div>
                         </div>
@@ -365,10 +441,10 @@
                     <div class="nearby-col right-col">
                         <div class="col-header">
                             <div>
-                                <h3>{{ nearbyAttractionsTotal }} Attractions</h3>
-                                <span>within 0.75 miles</span>
+                                <h3>{{ nearbyAttractionsTotal }} {{ t('place.attractions') }}</h3>
+                                <span>{{ t('place.within') }} 10 km</span>
                             </div>
-                            <button class="btn-text-link" @click="openMapOverlay">View on map</button>
+                            <button class="btn-text-link" @click="openMapOverlay">{{ t('common.viewOnMap') }}</button>
                         </div>
 
                         <div class="nearby-list">
@@ -381,7 +457,7 @@
                                         <i v-for="s in 5" :key="s"
                                             :class="[(n.rating_avg || 0) >= s ? 'fas' : 'far', 'fa-circle']"></i>
                                     </div>
-                                    <span class="n-reviews">({{ getCommentCountText(n) }} reviews)</span>
+                                    <span class="n-reviews">({{ getCommentCountText(n) }} {{ t('common.reviews') }})</span>
                                 </div>
                                 <div class="n-meta">
                                     <i class="fas fa-walking"></i> {{ getDistanceText(n._distance) }} <span
@@ -415,7 +491,7 @@
                             <div
                                 style="background: #fefce8; color: #b45309; font-size: 0.85rem; padding: 10px 12px; border-radius: 8px; margin-bottom: 15px; font-weight: 600; border: 1px solid #fef08a;">
                                 <i class="fas fa-lightbulb" style="color: #f59e0b; margin-right: 5px;"></i> {{
-                                rec.reason }}
+                                    rec.reason }}
                             </div>
                             <div class="rec-rating"
                                 style="display: flex; justify-content: space-between; align-items: center; color: #00aa6c; font-weight: 700;">
@@ -484,6 +560,7 @@
                 </div>
             </div>
         </div>
+    </div>
 
         <div v-else class="loading-screen">
             <div class="spinner"></div>
@@ -525,7 +602,7 @@
 
         <MapOverlay v-if="place" :is-open="showMapModal" :places="allPlaces" :categories="categories"
             :initial-selected-id="place.id" title="Explore Places" @close="showMapModal = false" />
-    </div>
+    </div> <!-- End ta-detail-page -->
 </template>
 
 <script setup>
@@ -649,7 +726,7 @@ const zoomLevel = ref(1)
 
 const galleryImages = computed(() => {
     const getValidImageUrl = (rawUrl) => {
-        if (!rawUrl) return null;
+        if (!rawUrl || rawUrl === 'null' || rawUrl === 'undefined') return 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1920&q=80';
         let url = rawUrl;
         if (typeof url === 'string' && url.trim().startsWith('[')) {
             try {
@@ -659,23 +736,31 @@ const galleryImages = computed(() => {
                 url = url.replace(/^\["?|"?\]$/g, '').replace(/\\"/g, '');
             }
         }
+        if (typeof url !== 'string') return 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1920&q=80';
         if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) return url;
         return `http://localhost:8000${url.startsWith('/') ? '' : '/'}${url}`;
     }
 
+    const imgs = [];
     if (place.value?.images && Array.isArray(place.value.images) && place.value.images.length > 0) {
-        return place.value.images.map(img => getValidImageUrl(img.image_url || img.url || img));
-    }
-    else if (place.value?.image_url) {
+        place.value.images.forEach(img => imgs.push(getValidImageUrl(img.image_url || img.url || img)));
+    } else if (place.value?.image_url) {
         let parsedArray = [];
         if (typeof place.value.image_url === 'string' && place.value.image_url.trim().startsWith('[')) {
             try { parsedArray = JSON.parse(place.value.image_url); } catch (e) { }
         }
-        if (parsedArray.length > 0) return parsedArray.map(img => getValidImageUrl(img));
-        else return [getValidImageUrl(place.value.image_url)];
+        
+        if (parsedArray.length > 0) {
+            parsedArray.forEach(url => imgs.push(getValidImageUrl(url)));
+        } else {
+            imgs.push(getValidImageUrl(place.value.image_url));
+        }
     }
-
-    return ['data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22800%22%20height%3D%22450%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23e2e8f0%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20fill%3D%22%2364748b%22%20font-family%3D%22sans-serif%22%20font-size%3D%2224%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%3ENo%20Image%20Available%3C%2Ftext%3E%3C%2Fsvg%3E']
+    
+    if (imgs.length === 0) {
+        imgs.push('https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1920&q=80');
+    }
+    return imgs;
 })
 
 const isHotel = computed(() => {
@@ -683,6 +768,37 @@ const isHotel = computed(() => {
     const cat = categories.value.find(c => c.id === place.value.category_id);
     return cat && (cat.name.toLowerCase().includes('hotel') || cat.parent_type === 'hotel');
 });
+
+const weekDays = computed(() => [
+    { key: 'mon', label: t('common.monday') },
+    { key: 'tue', label: t('common.tuesday') },
+    { key: 'wed', label: t('common.wednesday') },
+    { key: 'thu', label: t('common.thursday') },
+    { key: 'fri', label: t('common.friday') },
+    { key: 'sat', label: t('common.saturday') },
+    { key: 'sun', label: t('common.sunday') },
+])
+
+const openingHoursList = computed(() => {
+    if (!place.value) return []
+    let hours = place.value.opening_hours
+    if (typeof hours === 'string') {
+        try { hours = JSON.parse(hours) } catch (e) { hours = null }
+    }
+    if (!hours || typeof hours !== 'object') return []
+
+    return weekDays.map(day => {
+        const values = hours[day.key] || {}
+        const closed = values.closed === true || values.closed === 'true' || values.closed === 1 || values.closed === '1'
+        return {
+            key: day.key,
+            label: day.label,
+            open: values.open || '08:00',
+            close: values.close || '17:00',
+            closed
+        }
+    })
+})
 
 // คำนวณกราฟดาว
 const ratingBreakdown = computed(() => {
@@ -735,8 +851,8 @@ const nearbyRestaurants = computed(() => {
         if (!cat || cat.parent_type !== 'restaurant') return false;
 
         p._distance = getDistance(lat1, lng1, parseFloat(p.location_lat), parseFloat(p.location_lng));
-        return p._distance === null || p._distance < 1.2; // roughly 0.75 miles
-    }).sort((a, b) => (a._distance || 0) - (b._distance || 0));
+        return p._distance !== null && p._distance < 10.0;
+    }).sort((a, b) => (a._distance === null ? 9999 : a._distance) - (b._distance === null ? 9999 : b._distance));
 
     nearbyRestaurantsTotal.value = filtered.length;
     return filtered.slice(0, 4);
@@ -753,17 +869,20 @@ const nearbyAttractions = computed(() => {
         if (!cat || cat.parent_type === 'restaurant' || cat.parent_type === 'hotel') return false;
 
         p._distance = getDistance(lat1, lng1, parseFloat(p.location_lat), parseFloat(p.location_lng));
-        return p._distance === null || p._distance < 1.2;
-    }).sort((a, b) => (a._distance || 0) - (b._distance || 0));
+        return p._distance !== null && p._distance < 10.0;
+    }).sort((a, b) => (a._distance === null ? 9999 : a._distance) - (b._distance === null ? 9999 : b._distance));
 
     nearbyAttractionsTotal.value = filtered.length;
     return filtered.slice(0, 4);
 });
 
 const getDistanceText = (km) => {
-    if (km === null || km === undefined) return "5 min";
-    const min = Math.round(km * 12);
-    return min < 1 ? "1 min" : min + " min";
+    if (km === null || km === undefined) return "N/A";
+    if (km < 1) {
+        const min = Math.round(km * 12);
+        return min < 1 ? "1 min walk" : min + " min walk";
+    }
+    return km.toFixed(1) + " km";
 }
 
 const getCommentCountText = (pl) => {
@@ -997,31 +1116,35 @@ onUnmounted(() => {
 const fetchData = async () => {
     const id = route.params.id
     try {
-        const [resPlace, resCats, resAll] = await Promise.all([
-            placeRepository.getById(id),
+        // Fetch the main place first to show content immediately
+        const resPlace = await placeRepository.getById(id)
+        place.value = resPlace.data
+
+        // Then fetch secondary data in the background
+        const [resCats, resAll] = await Promise.all([
             categoryRepository.getAll(),
             placeRepository.getAll()
         ])
-        place.value = resPlace.data
         categories.value = resCats.data
         allPlaces.value = resAll.data
 
-        // แปลงพิกัดเป็นชื่อสถานที่ (Reverse Geocoding)
+        // แปลงพิกัดเป็นชื่อสถานที่ (Reverse Geocoding) - Non-blocking
         if (place.value.location_lat && place.value.location_lng) {
             const lat = parseFloat(place.value.location_lat)
             const lng = parseFloat(place.value.location_lng)
 
-            try {
-                const mapRes = await axios.get(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=th,en`)
-                if (mapRes.data && mapRes.data.display_name) {
-                    const parts = mapRes.data.display_name.split(', ')
-                    addressText.value = parts.length > 3 ? parts.slice(0, 3).join(', ') : mapRes.data.display_name
-                } else {
+            axios.get(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=th,en`)
+                .then(mapRes => {
+                    if (mapRes.data && mapRes.data.display_name) {
+                        const parts = mapRes.data.display_name.split(', ')
+                        addressText.value = parts.length > 3 ? parts.slice(0, 3).join(', ') : mapRes.data.display_name
+                    } else {
+                        addressText.value = `📍 พิกัด (Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)})`
+                    }
+                })
+                .catch(() => {
                     addressText.value = `📍 พิกัด (Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)})`
-                }
-            } catch (e) {
-                addressText.value = `📍 พิกัด (Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)})`
-            }
+                })
         } else {
             addressText.value = 'ไม่พบข้อมูลตำแหน่ง'
         }
@@ -1034,37 +1157,40 @@ const fetchData = async () => {
         localStorage.setItem('recently_viewed', JSON.stringify(rv))
 
         if (user.value && user.value.role !== 'admin') {
-            const favRes = await favoriteRepository.getUserFavorites(user.value.id)
-            isFavorite.value = favRes.data.some(f => f.place_id === parseInt(id))
+            favoriteRepository.getUserFavorites(user.value.id)
+                .then(favRes => {
+                    isFavorite.value = favRes.data.some(f => f.place_id === parseInt(id))
+                })
+                .catch(err => console.warn("Failed to fetch favorites", err))
 
             // Log 'view' action for GNN
-            try {
-                await gnnRepository.logInteraction({
-                    user_id: user.value.id,
-                    place_id: parseInt(id),
-                    action_type: 'view'
-                })
-            } catch (gnnErr) { console.warn("Failed to log view", gnnErr) }
+            gnnRepository.logInteraction({
+                user_id: user.value.id,
+                place_id: parseInt(id),
+                action_type: 'view'
+            }).catch(gnnErr => console.warn("Failed to log view", gnnErr))
 
             // Fetch AI recommendations
-            try {
-                const recRes = await gnnRepository.getRecommendations(user.value.id)
-                if (recRes.data && recRes.data.recommended_places) {
-                    aiRecommendedPlaces.value = recRes.data.recommended_places
-                        .filter(r => r.place && r.place.id !== parseInt(id))
-                        .slice(0, 4);
-                }
-            } catch (recErr) { console.warn("No AI recommendations", recErr) }
+            gnnRepository.getRecommendations(user.value.id)
+                .then(recRes => {
+                    if (recRes.data && recRes.data.recommended_places) {
+                        aiRecommendedPlaces.value = recRes.data.recommended_places
+                            .filter(r => r.place && r.place.id !== parseInt(id))
+                            .slice(0, 4);
+                    }
+                })
+                .catch(recErr => console.warn("No AI recommendations", recErr))
 
             // Fetch Similar Places
-            try {
-                const simRes = await gnnRepository.getSimilarPlaces(id)
-                if (simRes.data && simRes.data.similar_places) {
-                    similarPlaces.value = simRes.data.similar_places
-                        .filter(r => r.place && r.place.id !== parseInt(id))
-                        .slice(0, 3)
-                }
-            } catch (simErr) { console.warn("Failed to fetch similar places", simErr) }
+            gnnRepository.getSimilarPlaces(id)
+                .then(simRes => {
+                    if (simRes.data && simRes.data.similar_places) {
+                        similarPlaces.value = simRes.data.similar_places
+                            .filter(r => r.place && r.place.id !== parseInt(id))
+                            .slice(0, 3)
+                    }
+                })
+                .catch(simErr => console.warn("Failed to fetch similar places", simErr))
         }
 
         try {
@@ -1168,10 +1294,347 @@ const openGoogleMaps = () => {
         window.open(`https://maps.google.com/?q=${place.value.location_lat},${place.value.location_lng}`, '_blank');
     }
 }
+
+const placeSummary = computed(() => {
+    if (!place.value || !place.value.description) return 'No description available.'
+    const text = place.value.description.trim()
+    return text.length > 220 ? text.slice(0, 220).trim() + '...' : text
+})
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;800;900&display=swap');
+
+.ta-detail-page {
+    background-color: #ffffff;
+    min-height: 100vh;
+    font-family: 'Inter', sans-serif;
+    color: #1e293b;
+}
+
+/* Premium Hero Section */
+.premium-hero-wrapper {
+    margin-bottom: 40px;
+}
+
+.premium-hero {
+    position: relative;
+    height: 85vh;
+    background-size: cover;
+    background-position: center;
+    color: white;
+    display: flex;
+    flex-direction: column;
+}
+
+.hero-nav {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 100%);
+}
+
+.logo {
+    cursor: pointer;
+    font-size: 1.5rem;
+    font-weight: 900;
+}
+
+.logo-main {
+    color: white;
+}
+
+.logo-sub {
+    color: #4ade80;
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.nav-items {
+    display: flex;
+    gap: 25px;
+}
+
+.nav-items a {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.nav-items a:hover {
+    color: white;
+}
+
+.btn-plan {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    color: white;
+    padding: 8px 20px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-plan:hover {
+    background: white;
+    color: black;
+}
+
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.8) 100%);
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 0 40px 60px;
+}
+
+.top-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: auto;
+}
+
+.btn-back-minimal {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-back-minimal:hover {
+    background: white;
+    color: black;
+}
+
+.breadcrumb {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.hero-main-info {
+    margin-top: auto;
+    max-width: 800px;
+}
+
+.verified-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(34, 197, 94, 0.2);
+    border: 1px solid rgba(34, 197, 94, 0.4);
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: #4ade80;
+    margin-bottom: 20px;
+}
+
+.status-dot {
+    width: 6px;
+    height: 6px;
+    background: #4ade80;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #4ade80;
+}
+
+.date-sep {
+    opacity: 0.3;
+}
+
+.serif-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 8rem;
+    font-weight: 900;
+    line-height: 0.85;
+    margin: 0;
+    letter-spacing: -4px;
+    text-transform: capitalize;
+}
+
+.local-name {
+    font-size: 2rem;
+    color: rgba(255, 255, 255, 0.5);
+    margin: 10px 0 30px;
+    font-weight: 500;
+    font-family: 'Inter', sans-serif;
+}
+
+.hero-description {
+    font-size: 1.3rem;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 400;
+    max-width: 800px;
+}
+
+/* Stats Bar */
+.stats-bar {
+    max-width: 1280px;
+    margin: 0 auto 0;
+    background: white;
+    position: relative;
+    z-index: 5;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+.stat-item {
+    padding: 30px 40px;
+    border-right: 1px solid #f1f5f9;
+}
+
+.stat-item:last-child {
+    border-right: none;
+}
+
+.stat-item label {
+    display: block;
+    font-size: 0.6rem;
+    font-weight: 900;
+    color: #8c8c8c;
+    letter-spacing: 3px;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+}
+
+.stat-value {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #111111;
+    font-family: 'Playfair Display', serif;
+}
+
+/* Tags Section */
+.tags-container {
+    max-width: 1280px;
+    margin: 40px auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+.tag-column {
+    padding: 30px 35px;
+    background: white;
+    border: 1px solid #f1f5f9;
+}
+
+.tag-column label {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 900;
+    letter-spacing: 2.5px;
+    margin-bottom: 20px;
+    color: #8c8c8c;
+}
+
+.best-for {
+    border-left: 3px solid #1a735c;
+}
+
+.avoid-if {
+    border-left: 3px solid #b04c36;
+}
+
+.tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tag {
+    padding: 6px 12px;
+    border-radius: 2px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.best-for .tag {
+    background: #eaf4f1;
+    color: #1a735c;
+    border: 1px solid #d3e8e1;
+}
+
+.avoid-if .tag {
+    background: #faebe7;
+    color: #b04c36;
+    border: 1px solid #f5d5cc;
+}
+
+/* Gallery Strip */
+.gallery-preview-strip {
+    max-width: 1280px;
+    margin: 40px auto;
+    display: flex;
+    gap: 15px;
+    height: 450px;
+    cursor: pointer;
+}
+
+.strip-item {
+    flex: 1;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.strip-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: 0.3s;
+}
+
+.strip-item:hover img {
+    transform: scale(1.05);
+}
+
+.more-indicator {
+    width: 120px;
+    background: #f1f5f9;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    color: #64748b;
+}
 
 /* 🚨 ใส่กลับคืนมาเพื่อแก้ปัญหาเมนูแตกตามที่ตรวจสอบไปในครั้งที่แล้ว 🚨 */
 .sticky-nav-wrapper {
@@ -1220,6 +1683,34 @@ const openGoogleMaps = () => {
 .nav-links a.active {
     color: #00aa6c;
     border-bottom-color: #00aa6c;
+}
+
+.opening-hours-list {
+    display: grid;
+    gap: 12px;
+}
+
+.opening-hours-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    font-size: 0.95rem;
+    color: #1f2937;
+}
+
+.opening-hours-value.closed {
+    color: #dc2626;
+    font-weight: 700;
+}
+
+.no-opening-hours {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.95rem;
 }
 
 /* --- Map Markers --- */
@@ -1485,17 +1976,12 @@ const openGoogleMaps = () => {
 }
 
 /* --- พื้นหลังคลีนแบบ TripAdvisor --- */
-.ta-detail-page {
-    background-color: #f7f9fa;
-    min-height: 100vh;
-    font-family: 'Inter', sans-serif;
-    color: #1e293b;
-}
+/* (Updated by Premium Theme) */
 
 .ta-container {
-    max-width: 1140px;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 20px 20px 60px;
+    padding: 0 40px 60px;
 }
 
 /* --- Top Actions (Back Button) --- */
@@ -1788,6 +2274,11 @@ const openGoogleMaps = () => {
 @media (max-width: 992px) {
     .content-split {
         grid-template-columns: 1fr;
+    }
+
+    .sidebar-column {
+        position: static;
+        top: auto;
     }
 }
 
@@ -2106,13 +2597,17 @@ textarea:focus {
 }
 
 /* Sidebar Column */
+.sidebar-column {
+    position: sticky;
+    top: 90px;
+    align-self: start;
+}
+
 .sidebar-card {
     background: white;
     border: 1px solid #e2e8f0;
     border-radius: 12px;
     padding: 20px;
-    position: sticky;
-    top: 90px;
     margin-bottom: 16px;
 }
 
@@ -2122,6 +2617,27 @@ textarea:focus {
     font-weight: 800;
     border-bottom: 1px solid #e2e8f0;
     padding-bottom: 10px;
+}
+
+.place-summary-text {
+    margin: 0 0 16px;
+    color: #475569;
+    line-height: 1.7;
+    font-size: 0.95rem;
+}
+
+.place-summary-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.place-summary-meta span {
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
 }
 
 /* --- Rating Summary Card --- */
@@ -2858,5 +3374,30 @@ textarea:focus {
 
 .btn-nav.next {
     right: 30px;
+}
+
+.loading-screen {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: white;
+    z-index: 9999;
+    color: #1e293b;
+}
+
+.spinner {
+    width: 40px; height: 40px;
+    border: 4px solid #f1f5f9;
+    border-top: 4px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 15px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 </style>

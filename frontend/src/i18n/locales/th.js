@@ -27,7 +27,10 @@ export default {
     writePost: 'เขียนโพสต์ใหม่',
     communityFeed: 'ฟีดชุมชน',
     myTrips: 'ทริปของฉัน',
-    tools: 'เครื่องมือช่วยเหลือ',
+    planYourTrip: 'วางแผนการเดินทาง',
+    destinations: 'จุดหมายปลายทาง',
+    tools: 'เครื่องมือ',
+
     bookings: 'การจอง',
     messages: 'ข้อความ',
     contribute: 'ร่วมมือ',
@@ -107,14 +110,36 @@ export default {
     ratingLabels: ['แย่มาก', 'พอใช้', 'ปานกลาง', 'ดี', 'ดีเยี่ยม'],
     locationCoord: '📍 พิกัด (Lat: {lat}, Lng: {lng})',
     locationNotFound: 'ไม่พบที่ตั้ง',
+    quick_details: 'ข้อมูลโดยสังเขป',
+    category_label: 'หมวดหมู่',
+    rating_label: 'คะแนน',
+  },
+
+  recommend: {
+    ai_recom: 'คำแนะนำโดย AI',
+    ai_desc: 'คำแนะนำสถานที่ที่คัดสรรมาเพื่อคุณโดยเฉพาะด้วยระบบ AI',
+    similar: 'สถานที่ที่คล้ายกัน',
   },
 
   // --- Hotels Page ---
   hotels: {
     title: 'โรงแรมในสะหวันนะเขด',
     subtitle: 'ค้นหาที่พักที่สมบูรณ์แบบ',
+    whereTo: 'ไปที่ไหน?',
+    savannakhetLaos: 'สะหวันนะเขด, ลาว',
+    checkInCheckOut: 'เช็คอิน - เช็คเอาท์',
+    addDates: 'เพิ่มวันที่',
+    guests: 'ผู้เข้าพัก',
+    adultsRoom: 'ผู้ใหญ่ 2, 1 ห้อง',
+    update: 'อัปเดต',
     filterAll: 'ทั้งหมด',
     noResults: 'ไม่พบโรงแรม',
+    amenities: 'สิ่งอำนวยความสะดวก',
+    view_prices_dates: 'ดูราคาสำหรับวันที่คุณเดินทาง',
+    checkin: 'เช็คอิน',
+    checkout: 'เช็คเอาท์',
+    free_cancel: 'ยกเลิกฟรีในห้องส่วนใหญ่',
+    check_availability: 'ตรวจสอบสถานะว่าง',
     bookOnAgoda: 'ดูบน Agoda',
     bookOnBooking: 'ดูบน Booking.com',
   },
@@ -163,6 +188,8 @@ export default {
     viewDetails: 'ดูรายละเอียด',
     province: 'แขวงสะหวันนะเขด',
     defaultDesc: 'ค้นพบความสำคัญทางประวัติศาสตร์และความงามทางวัฒนธรรมของสถานที่แห่งนี้ในสะหวันนะเขด',
+    openGuide: 'เปิดคู่มือ',
+    verified: 'ตรวจสอบแล้ว',
   },
 
   // --- Recently Viewed ---
@@ -227,14 +254,7 @@ export default {
     visitContact: 'ไม่พบสิ่งที่คุณกำลังมองหา? ไปที่หน้าติดต่อและเรายินดีที่จะช่วยเหลือ!'
   },
 
-  // --- Utility Page ---
-  utility: {
-    title: 'เครื่องมือช่วยเหลือ',
-    subtitle: 'เครื่องมือช่วยเดินทางเพื่อทำให้การเดินทางในสะหวันนะเขดของคุณง่ายขึ้น',
-    currencyConverter: 'แปลงสกุลเงิน',
-    phrasebook: 'หนังสือวลี',
-    transportGuide: 'คู่มือการขนส่ง'
-  },
+
 
   // --- Write Review Page ---
   review: {
@@ -281,6 +301,24 @@ export default {
     postFailed: 'ไม่สามารถส่งรีวิวได้ กรุณาลองใหม่อีกครั้ง',
   },
 
+  // --- Trip Planner ---
+  tripPlanner: {
+    title: 'ระบบวางแผนการเดินทางอัจฉริยะ',
+    subtitle: 'สัมผัสประสบการณ์ในสะหวันนะเขดแบบคนท้องถิ่นด้วยคู่มือการเดินทาง AI ที่ออกแบบมาเพื่อคุณ',
+    badge: 'แผนการเดินทางโดย AI',
+    interests: 'ความสนใจ',
+    selectInterests: 'เลือกสิ่งที่คุณชอบ',
+    duration: 'ระยะเวลา',
+    day: 'วัน',
+    days: 'วัน',
+    generate: 'สร้างแผน',
+    yourItinerary: 'แผนการเดินทาง {days} วัน ในสะหวันนะเขดของคุณ',
+    saveToTrips: 'บันทึกในทริปของฉัน',
+    saving: 'กำลังบันทึก...',
+    planAnother: 'วางแผนใหม่',
+    saveSuccess: 'บันทึกแผนการเดินทางสำเร็จ! คุณสามารถดูได้ในโปรไฟล์ของคุณ',
+  },
+
   // --- Common ---
   common: {
     loading: 'กำลังโหลด...',
@@ -291,6 +329,16 @@ export default {
     min: 'นาที',
     sending: 'กำลังส่ง...',
     characters: 'ตัวอักษร',
+    clear: 'ล้างข้อมูล',
+    monday: 'วันจันทร์',
+    tuesday: 'วันอังคาร',
+    wednesday: 'วันพุธ',
+    thursday: 'วันพฤหัสบดี',
+    friday: 'วันศุกร์',
+    saturday: 'วันเสาร์',
+    sunday: 'วันอาทิตย์',
+    viewOnMap: 'ดูบนแผนที่',
+    reviews: 'รีวิว',
   },
 
   // --- Footer ---

@@ -74,24 +74,12 @@
                         Filters</button>
                 </div>
 
-                <div v-else>
+                <div class="nature-grid">
                     <div class="nature-card" v-for="(place, index) in filteredNature" :key="place.id"
                         @click="goToDetail(place.id)">
 
                         <div class="card-img-wrapper">
                             <img :src="getCoverImage(place)" :alt="place.name" @error="handleImgError" />
-
-                            <div class="slider-arrows" v-if="getPlaceImagesArray(place).length > 1">
-                                <button class="arrow-btn left" @click.stop="prevImage(place.id, place)"><i
-                                        class="fas fa-chevron-left"></i></button>
-                                <button class="arrow-btn right" @click.stop="nextImage(place.id, place)"><i
-                                        class="fas fa-chevron-right"></i></button>
-                            </div>
-                            <div class="slider-dots" v-if="getPlaceImagesArray(place).length > 1">
-                                <span v-for="(_, idx) in getPlaceImagesArray(place)" :key="idx"
-                                    :class="['dot', { active: (currentImageIndices[place.id] || 0) === idx }]"></span>
-                            </div>
-
                             <button class="btn-heart" :class="{ active: isFavorite(place.id) }"
                                 @click.stop="toggleHeart(place.id)">
                                 <i class="fas fa-heart"></i>
@@ -99,33 +87,24 @@
                         </div>
 
                         <div class="card-info">
-                            <h3 class="place-name">{{ index + 1 }}. {{ place.name }}</h3>
+                            <span class="category-tag">{{ getCategoryName(place.category_id) }}</span>
+                            <h3 class="place-name">{{ place.name }}</h3>
 
                             <div class="rating-row">
                                 <span class="bubbles">
                                     <i v-for="s in 5" :key="s"
                                         :class="[(place.rating_avg || 0) >= s ? 'fas' : 'far', 'fa-circle']"></i>
                                 </span>
-                                <span class="review-count">{{ place.rating_avg || '0.0' }} Rating</span>
-                            </div>
-
-                            <div class="category-row">
-                                <span class="cat-label"><i class="fas fa-leaf"></i> {{
-                                    getCategoryName(place.category_id) }}</span>
-                                <span class="divider">•</span>
-                                <span>Savannakhet Province</span>
+                                <span class="review-count">{{ place.rating_avg || '0.0' }}</span>
                             </div>
 
                             <div class="description-snippet">
-                                <p>{{ place.description || `Explore the untouched beauty of this natural wonder in
-                                    Savannakhet.` }}</p>
+                                <p>{{ place.description || `Explore the untouched beauty of this natural wonder in Savannakhet.` }}</p>
                             </div>
 
                             <div class="card-footer">
-                                <!-- <button class="btn-contact" @click.stop="handleContact(place)">
-                                    <i class="fas fa-phone-alt"></i> Contact
-                                </button> -->
-                                <button class="btn-details">View Details</button>
+                                <span class="location-tag">✨ {{ t('landmarks.verified') }}</span>
+                                <span class="btn-details">{{ t('landmarks.openGuide') }} →</span>
                             </div>
                         </div>
                     </div>
@@ -149,6 +128,7 @@ import { placeRepository } from '@/repositories/placeRepository'
 import { categoryRepository } from '@/repositories/categoryRepository'
 import { favoriteRepository } from '@/repositories/favoriteRepository'
 import { useAuth } from '@/composables/useAuth'
+import { useI18n } from '@/composables/useI18n'
 import Navbar from '@/components/Navbar.vue'
 import MapOverlay from '@/components/MapOverlay.vue'
 import SectionDivider from '@/components/SectionDivider.vue'
@@ -156,6 +136,7 @@ import RecentlyViewed from '@/components/RecentlyViewed.vue'
 
 const router = useRouter()
 const { user } = useAuth()
+const { t } = useI18n()
 const places = ref([])
 const categories = ref([])
 const favoriteIds = ref([])
@@ -173,7 +154,7 @@ const toggleCategory = (cat) => {
 }
 
 const natureCategories = computed(() => {
-    return categories.value.filter(c => c.parent_type === 'nature')
+    return categories.value.filter(c => c.parent_type?.toLowerCase() === 'nature')
 })
 
 const getIconForNature = (name) => {
@@ -211,7 +192,7 @@ const filteredNature = computed(() => {
     let spots = places.value.filter(p => {
         const cat = categories.value.find(c => c.id == p.category_id)
         if (!cat) return false
-        return cat.parent_type === 'nature'
+        return cat.parent_type?.toLowerCase() === 'nature'
     })
 
     if (selectedCategories.value.length > 0) {
@@ -300,10 +281,10 @@ const handleContact = (place) => alert(`Contact for ${place.name}`)
 onMounted(fetchData)
 </script>
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700;800;900&display=swap');
 
 .nature-page {
-    background-color: #f7f9fa;
+    background-color: #faf9f6;
     min-height: 100vh;
     font-family: 'Inter', sans-serif;
     color: #1e293b;
@@ -486,33 +467,55 @@ onMounted(fetchData)
     background: white;
 }
 
+.nature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+}
+
 .nature-card {
-    display: flex;
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 16px;
+    position: relative;
+    background: #0f172a;
+    border-radius: 4px;
     overflow: hidden;
-    margin-bottom: 25px;
-    transition: 0.3s;
+    height: 500px;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
-    height: 260px;
+    border: none;
+    display: flex;
+    flex-direction: column;
 }
 
 .nature-card:hover {
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-    transform: translateY(-5px);
+    transform: translateY(-5px) scale(1.01);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
 .card-img-wrapper {
-    width: 320px;
-    position: relative;
-    flex-shrink: 0;
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    overflow: hidden;
+    z-index: 0;
+}
+
+.card-img-wrapper::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, 
+        rgba(0,0,0,0) 0%, 
+        rgba(0,0,0,0.2) 40%, 
+        rgba(0,0,0,0.8) 80%, 
+        rgba(0,0,0,0.95) 100%);
+    z-index: 1;
 }
 
 .card-img-wrapper img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 0.4s ease;
 }
 
 .slider-arrows {
@@ -608,19 +611,33 @@ onMounted(fetchData)
 }
 
 .card-info {
-    flex: 1;
-    padding: 25px;
+    position: relative;
+    z-index: 2;
+    padding: 30px 24px;
+    margin-top: auto;
+    color: white;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: flex-end;
+}
+
+.category-tag {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
 }
 
 .place-name {
-    font-size: 1.5rem;
+    font-size: 2.2rem;
     font-weight: 800;
-    color: #000;
-    margin: 0 0 8px;
-    transition: 0.2s;
+    font-family: 'Playfair Display', serif;
+    color: white;
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+    margin: 0 0 10px;
 }
 
 .nature-card:hover .place-name {
@@ -674,22 +691,40 @@ onMounted(fetchData)
 }
 
 .description-snippet {
-    font-size: 0.9rem;
-    color: #475569;
-    line-height: 1.6;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
     margin-bottom: 15px;
 }
 
+.description-snippet p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
 .card-footer {
-    margin-top: auto;
     display: flex;
-    justify-content: flex-end;
-    gap: 10px;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.location-tag {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.btn-details {
+    color: white;
+    font-weight: 800;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
 }
 
 .btn-contact {

@@ -69,47 +69,37 @@
                     <p>No restaurants found. Try clearing your filters or check back later.</p>
                 </div>
 
-                <div v-else class="restaurant-card" v-for="(place, index) in filteredRestaurants" :key="place.id"
-                    @click="goToDetail(place.id)">
+                <div class="restaurants-grid">
+                    <div v-for="(place, index) in filteredRestaurants" :key="place.id"
+                        class="restaurant-card" @click="goToDetail(place.id)">
 
-                    <div class="card-img-wrapper">
-                        <img :src="getCoverImage(place)" :alt="place.name" />
-                        
-                        <div class="slider-arrows" v-if="getPlaceImagesArray(place).length > 1">
-                            <button class="arrow-btn left" @click.stop="prevImage(place.id, place)"><i class="fas fa-chevron-left"></i></button>
-                            <button class="arrow-btn right" @click.stop="nextImage(place.id, place)"><i class="fas fa-chevron-right"></i></button>
-                        </div>
-                        <div class="slider-dots" v-if="getPlaceImagesArray(place).length > 1">
-                            <span v-for="(_, idx) in getPlaceImagesArray(place)" :key="idx" :class="['dot', { active: (currentImageIndices[place.id] || 0) === idx }]"></span>
+                        <div class="card-img-wrapper">
+                            <img :src="getCoverImage(place)" :alt="place.name" />
+                            <button class="btn-heart" :class="{ active: isFavorite(place.id) }"
+                                @click.stop="toggleHeart(place.id)">
+                                <i class="fas fa-heart"></i>
+                            </button>
                         </div>
 
-                        <button class="btn-heart" :class="{ active: isFavorite(place.id) }"
-                            @click.stop="toggleHeart(place.id)">
-                            <i class="fas fa-heart"></i>
-                        </button>
-                    </div>
+                        <div class="card-info">
+                            <span class="category-tag">{{ getCategoryName(place.category_id) }}</span>
+                            <h3 class="place-name">{{ place.name }}</h3>
+                            <div class="rating-row">
+                                <span class="bubbles">
+                                    <i v-for="s in 5" :key="s"
+                                        :class="[(place.rating_avg || 0) >= s ? 'fas' : 'far', 'fa-circle']"></i>
+                                </span>
+                                <span class="review-count">{{ place.rating_avg || '0.0' }}</span>
+                            </div>
 
-                    <div class="card-info">
-                        <h3 class="place-name">{{ index + 1 }}. {{ place.name }}</h3>
+                            <div class="review-snippet">
+                                <p>{{ place.description || "Experience the authentic flavors of Savannakhet." }}</p>
+                            </div>
 
-                        <div class="rating-row">
-                            <span class="bubbles">
-                                <i v-for="s in 5" :key="s"
-                                    :class="[(place.rating_avg || 0) >= s ? 'fas' : 'far', 'fa-circle']"></i>
-                            </span>
-                            <span class="review-count">{{ place.rating_avg || '0.0' }} Rating</span>
-                        </div>
-
-                        <div class="category-price-row">
-                            <span class="category-text">{{ getCategoryName(place.category_id) }}</span>
-                            <span class="dot-divider">•</span>
-                            <span class="price-range">$$ - $$$</span> <span class="dot-divider">•</span>
-                            <span class="open-status">Lao, Asian</span>
-                        </div>
-
-                        <div class="review-snippet">
-                            <i class="fas fa-quote-left"></i>
-                            <p>{{ place.description || "Great food and amazing atmosphere in Savannakhet!" }}</p>
+                            <div class="card-footer">
+                                <span class="location-tag">✨ {{ t('landmarks.verified') }}</span>
+                                <span class="btn-details">{{ t('landmarks.openGuide') }} →</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -138,6 +128,7 @@ import { placeRepository } from '@/repositories/placeRepository'
 import { categoryRepository } from '@/repositories/categoryRepository'
 import { favoriteRepository } from '@/repositories/favoriteRepository'
 import { useAuth } from '@/composables/useAuth'
+import { useI18n } from '@/composables/useI18n'
 import Navbar from '@/components/Navbar.vue'
 import MapOverlay from '@/components/MapOverlay.vue'
 import SectionDivider from '@/components/SectionDivider.vue'
@@ -146,6 +137,7 @@ import axios from 'axios'
 
 const router = useRouter()
 const { user } = useAuth()
+const { t } = useI18n()
 const places = ref([])
 const categories = ref([])
 const favoriteIds = ref([])
@@ -165,9 +157,13 @@ const fetchData = async () => {
         places.value = resPlaces.data
         categories.value = resCats.data
 
+        // Fetch favorites asynchronously to not block UI rendering
         if (user.value) {
-            const favRes = await favoriteRepository.getUserFavorites(user.value.id)
-            favoriteIds.value = favRes.data.map(f => f.place_id)
+            favoriteRepository.getUserFavorites(user.value.id)
+                .then(favRes => {
+                    favoriteIds.value = favRes.data.map(f => f.place_id)
+                })
+                .catch(err => console.error("Error fetching favorites:", err))
         }
     } catch (err) {
         console.error("Error fetching places:", err)
@@ -179,8 +175,9 @@ const fetchData = async () => {
 // 🍽️ กรองเฉพาะร้านอาหารและคาเฟ่
 const filteredRestaurants = computed(() => {
     let results = places.value.filter(p => {
-        const cat = categories.value.find(c => c.id === p.category_id)
-        return cat && ['restaurant', 'cafe', 'local_food'].includes(cat.parent_type)
+        const cat = categories.value.find(c => c.id == p.category_id)
+        const pType = cat?.parent_type?.toLowerCase() || ''
+        return ['restaurant', 'cafe', 'local_food'].includes(pType)
     })
 
     if (selectedCategories.value.length > 0) {
@@ -193,7 +190,10 @@ const filteredRestaurants = computed(() => {
 })
 
 const restaurantCategories = computed(() => {
-    return categories.value.filter(c => ['restaurant', 'cafe', 'local_food'].includes(c.parent_type))
+    return categories.value.filter(c => {
+        const pType = c.parent_type?.toLowerCase() || ''
+        return ['restaurant', 'cafe', 'local_food'].includes(pType)
+    })
 })
 
 const toggleCategory = (name) => {
@@ -291,10 +291,10 @@ onMounted(fetchData)
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700;800;900&display=swap');
 
 .restaurants-page {
-    background-color: #f7f9fa;
+    background-color: #faf9f6;
     min-height: 100vh;
     font-family: 'Inter', sans-serif;
     color: #1e293b;
@@ -465,34 +465,55 @@ onMounted(fetchData)
 }
 
 /* 🍽️ Restaurant Card */
+.restaurants-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+}
+
 .restaurant-card {
-    display: flex;
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
+    position: relative;
+    background: #0f172a;
+    border-radius: 4px;
     overflow: hidden;
-    margin-bottom: 20px;
-    transition: 0.2s;
+    height: 500px;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
-    height: 220px;
+    border: none;
+    display: flex;
+    flex-direction: column;
 }
 
 .restaurant-card:hover {
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-    transform: translateY(-3px);
+    transform: translateY(-5px) scale(1.01);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
-/* Image */
 .card-img-wrapper {
-    width: 260px;
-    position: relative;
-    flex-shrink: 0;
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    overflow: hidden;
+    z-index: 0;
+}
+
+.card-img-wrapper::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, 
+        rgba(0,0,0,0) 0%, 
+        rgba(0,0,0,0.2) 40%, 
+        rgba(0,0,0,0.8) 80%, 
+        rgba(0,0,0,0.95) 100%);
+    z-index: 1;
 }
 
 .card-img-wrapper img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 0.4s ease;
 }
 
 .slider-arrows { opacity: 0; transition: opacity 0.2s ease-in-out; }
@@ -534,19 +555,33 @@ onMounted(fetchData)
 
 /* Info */
 .card-info {
-    flex: 1;
-    padding: 20px;
+    position: relative;
+    z-index: 2;
+    padding: 30px 24px;
+    margin-top: auto;
+    color: white;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-end;
+}
+
+.category-tag {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
 }
 
 .place-name {
-    font-size: 1.3rem;
+    font-size: 2.2rem;
     font-weight: 800;
-    color: #000;
+    font-family: 'Playfair Display', serif;
+    color: white;
+    letter-spacing: -0.5px;
+    line-height: 1.1;
     margin: 0 0 10px;
-    transition: 0.2s;
 }
 
 .restaurant-card:hover .place-name {
@@ -592,31 +627,40 @@ onMounted(fetchData)
 }
 
 .review-snippet {
-    display: flex;
-    gap: 10px;
-    background: #f8fafc;
-    padding: 12px;
-    border-radius: 8px;
-    border-left: 3px solid #e2e8f0;
-    margin-top: auto;
-}
-
-.review-snippet i {
-    color: #94a3b8;
-    font-size: 0.9rem;
-    margin-top: 2px;
+    margin-bottom: 15px;
 }
 
 .review-snippet p {
     margin: 0;
     font-size: 0.85rem;
-    color: #334155;
+    color: rgba(255, 255, 255, 0.7);
     line-height: 1.5;
     display: -webkit-box;
-
+    -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    font-style: italic;
+}
+
+.card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.location-tag {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.btn-details {
+    color: white;
+    font-weight: 800;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
 }
 
 /* States */

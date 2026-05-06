@@ -5,6 +5,7 @@ from datetime import datetime
 class ItineraryRequest(BaseModel):
     days: int = Field(default=1, ge=1, le=5)
     user_id: Optional[int] = None
+    preferences: Optional[List[str]] = None
 
 # --- User ---
 class UserBase(BaseModel):
