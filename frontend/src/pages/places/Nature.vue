@@ -4,15 +4,8 @@
 
         <div class="nature-header">
             <div class="header-container">
-                <div class="header-content-flex">
-                    <div class="text-zone">
-                        <h1>Nature & Parks in Savannakhet</h1>
-                        <p class="subtitle">Discover serene landscapes, lush forests, and outdoor adventures.</p>
-                    </div>
-                    <div class="icon-zone">
-                        <i class="fas fa-tree"></i>
-                    </div>
-                </div>
+                <h1>Nature & Parks in Savannakhet</h1>
+                <p class="subtitle">Discover serene landscapes, lush forests, and outdoor adventures.</p>
 
                 <div class="quick-filters">
                     <button v-for="cat in natureCategories" :key="cat.id" class="filter-pill"
@@ -291,9 +284,9 @@ onMounted(fetchData)
 }
 
 .nature-header {
-    background: linear-gradient(135deg, #e8f5e9 0%, #ffffff 100%);
-    padding: 40px 20px;
-    border-bottom: 1px solid #c8e6c9;
+    background: white;
+    padding: 30px 20px;
+    border-bottom: 1px solid #e2e8f0;
 }
 
 .header-container {
@@ -301,32 +294,17 @@ onMounted(fetchData)
     margin: 0 auto;
 }
 
-.header-content-flex {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 25px;
-}
-
 .header-container h1 {
-    font-size: 2.5rem;
-    font-weight: 900;
+    font-size: 2.2rem;
+    font-weight: 800;
     margin: 0 0 5px;
-    color: #1b5e20;
-    letter-spacing: -1px;
+    color: #000;
 }
 
 .subtitle {
-    color: #388e3c;
-    font-size: 1.1rem;
-    margin: 0;
-    font-weight: 500;
-}
-
-.icon-zone {
-    font-size: 3.5rem;
-    color: #81c784;
-    opacity: 0.7;
+    color: #475569;
+    font-size: 1rem;
+    margin-bottom: 20px;
 }
 
 .quick-filters {
@@ -337,12 +315,12 @@ onMounted(fetchData)
 
 .filter-pill {
     background: white;
-    border: 1px solid #a5d6a7;
+    border: 1px solid #cbd5e1;
     padding: 10px 22px;
     border-radius: 50px;
     font-weight: 600;
     font-size: 0.9rem;
-    color: #1b5e20;
+    color: #1e293b;
     cursor: pointer;
     transition: 0.2s;
     display: flex;
@@ -350,11 +328,19 @@ onMounted(fetchData)
     gap: 8px;
 }
 
-.filter-pill:hover,
+.filter-pill:hover {
+    border-color: #000;
+    background: #f8fafc;
+}
+
 .filter-pill.active {
-    border-color: #2e7d32;
-    background: #e8f5e9;
-    transform: translateY(-2px);
+    background: #000;
+    color: #fff;
+    border-color: #000;
+}
+
+.filter-pill.active i {
+    color: #fff;
 }
 
 .filter-pill i {
@@ -426,7 +412,7 @@ onMounted(fetchData)
     width: 19px;
     height: 19px;
     cursor: pointer;
-    accent-color: #2e7d32;
+    accent-color: #000;
 }
 
 .filter-divider {
@@ -598,7 +584,7 @@ onMounted(fetchData)
     color: #94a3b8;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     transition: 0.2s;
-    z-index: 2;
+    z-index: 50;
 }
 
 .btn-heart.active {
@@ -641,7 +627,7 @@ onMounted(fetchData)
 }
 
 .nature-card:hover .place-name {
-    color: #2e7d32;
+    color: #00aa6c;
     text-decoration: underline;
 }
 
@@ -832,4 +818,7 @@ onMounted(fetchData)
         font-size: 2rem;
     }
 }
+/* -------------------------------------------------------------------------- */
+/*                                  DELETE CSS                                */
+/* -------------------------------------------------------------------------- */
 </style>

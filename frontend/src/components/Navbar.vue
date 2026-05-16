@@ -31,14 +31,14 @@
                         <transition name="fade-slide">
                             <div v-if="isDiscoverOpen" class="ta-dropdown-menu">
                                 <router-link to="/explore" class="ta-dropdown-item" @click="isDiscoverOpen = false">
-                                    <i class="fas fa-compass"></i> Explore All Places
+                                    <i class="fas fa-compass"></i> {{ getTranslation('nav.exploreAll', 'Explore All Places') }}
                                 </router-link>
                                 <router-link to="/history" class="ta-dropdown-item" @click="isDiscoverOpen = false">
-                                    <i class="fas fa-book-open"></i> Story of Savannakhet
+                                    <i class="fas fa-book-open"></i> {{ getTranslation('nav.story', 'Story of Savannakhet') }}
                                 </router-link>
                                 <div class="dropdown-divider"></div>
                                 <router-link to="/trip-planner" class="ta-dropdown-item" @click="isDiscoverOpen = false">
-                                    <i class="fas fa-magic" style="color: #f59e0b;"></i> Smart Trip Planner
+                                    <i class="fas fa-magic" style="color: #f59e0b;"></i> {{ getTranslation('nav.smartPlanner', 'Smart Trip Planner') }}
                                 </router-link>
                             </div>
                         </transition>
@@ -152,10 +152,7 @@
                                     <i class="fas fa-suitcase-rolling"></i> {{ getTranslation('nav.myTrips', 'My Trips')
                                     }}
                                 </router-link>
-                                <router-link to="/profile?tab=bookings" class="ta-dropdown-item"
-                                    @click="isProfileOpen = false">
-                                    <i class="far fa-calendar-alt"></i> {{ getTranslation('nav.bookings', 'Bookings') }}
-                                </router-link>
+
                                 <router-link to="/profile?tab=settings" class="ta-dropdown-item"
                                     @click="isProfileOpen = false">
                                     <i class="fas fa-cog"></i> {{ getTranslation('nav.settings', 'Settings') }}

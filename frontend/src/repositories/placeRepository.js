@@ -101,5 +101,23 @@ export const placeRepository = {
     // 🤖 GNN Recommendations — fetch personalized places from AI
     getGnnRecommendations(userId, topK = 8) {
         return api.get(`/api/recommendations/${userId}?top_k=${topK}`)
-    }
-}
+    },
+
+    // 📖 Place Sections (image + description blocks)
+    getSections(placeId) {
+        return api.get(`/places/${placeId}/sections`)
+    },
+    addSection(placeId, formData) {
+        return api.post(`/admin/places/${placeId}/sections`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        })
+    },
+    updateSection(placeId, sectionId, formData) {
+        return api.put(`/admin/places/${placeId}/sections/${sectionId}`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        })
+    },
+    deleteSection(placeId, sectionId) {
+        return api.delete(`/admin/places/${placeId}/sections/${sectionId}`)
+    },
+}

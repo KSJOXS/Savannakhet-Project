@@ -1,5 +1,7 @@
 <template>
     <div class="auth-page">
+        <LanguageSwitcherAuth />
+
         <div class="auth-card">
             <div class="auth-brand">
                 <span class="auth-brand-icon">🌴</span>
@@ -7,10 +9,10 @@
             </div>
 
             <button v-if="step === 1" @click="router.push('/')" class="btn-back">
-                <i class="fas fa-chevron-left"></i> Back to Home
+                <i class="fas fa-chevron-left"></i> {{ t('auth.back_home') }}
             </button>
             <button v-else @click="step = 1" class="btn-back">
-                <i class="fas fa-chevron-left"></i> Back to Account Info
+                <i class="fas fa-chevron-left"></i> {{ t('auth.back_account') }}
             </button>
 
             <div class="step-indicator">
@@ -20,65 +22,79 @@
 
             <div v-if="step === 1">
                 <div class="auth-header">
-                    <h2>Create Account</h2>
-                    <p>Join us and start exploring Savannakhet.</p>
+                    <h2>{{ t('auth.register_title') }}</h2>
+                    <p>{{ t('auth.register_subtitle') }}</p>
                 </div>
 
                 <form @submit.prevent="step = 2" class="auth-form">
                     <div class="input-group">
-                        <label>Username</label>
+                        <label>{{ t('auth.username') }}</label>
                         <div class="input-with-icon">
                             <i class="fas fa-user"></i>
-                            <input v-model="form.username" type="text" placeholder="Choose a username" required>
+                            <input v-model="form.username" type="text" :placeholder="t('auth.username_placeholder')" required>
                         </div>
                     </div>
 
                     <div class="input-group">
-                        <label>Email Address</label>
+                        <label>{{ t('auth.email') }}</label>
                         <div class="input-with-icon">
                             <i class="fas fa-envelope"></i>
-                            <input v-model="form.email" type="email" placeholder="example@gmail.com" required>
+                            <input v-model="form.email" type="email" :placeholder="t('auth.email_placeholder')" required>
                         </div>
                     </div>
 
                     <div class="input-group">
-                        <label>Password</label>
+                        <label>{{ t('auth.password') }}</label>
                         <div class="input-with-icon">
                             <i class="fas fa-lock"></i>
-                            <input v-model="form.password" type="password" placeholder="At least 6 characters" required>
+                            <input v-model="form.password" type="password" :placeholder="t('auth.password_hint')" required>
                         </div>
                     </div>
 
-                    <button type="submit" class="btn-submit">
-                        Next: Personalize Interests <i class="fas fa-arrow-right" style="margin-left: 8px;"></i>
+                    <div class="terms-group">
+                        <label class="checkbox-container">
+                            <input type="checkbox" v-model="form.acceptedTerms" required>
+                            <span class="checkmark"></span>
+                            <span class="terms-text">
+                                {{ t('auth.accept_terms_prefix') }}
+                                <a href="/terms" target="_blank" class="terms-link">{{ t('auth.terms_link') }}</a>
+                                {{ t('auth.accept_terms_mid') }}
+                                <a href="/privacy" target="_blank" class="terms-link">{{ t('auth.privacy_link') }}</a>
+                            </span>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn-submit" :disabled="!form.acceptedTerms">
+                        {{ t('auth.next_interests') }} <i class="fas fa-arrow-right" style="margin-left: 8px;"></i>
                     </button>
                 </form>
             </div>
 
             <div v-else>
                 <div class="auth-header">
-                    <h2>Your Interests</h2>
-                    <p>Tell us what you like to help AI recommend better.</p>
+                    <h2>{{ t('auth.interests_title') }}</h2>
+                    <p>{{ t('auth.interests_subtitle') }}</p>
                 </div>
 
                 <div class="interests-grid">
                     <div v-for="interest in availableInterests" :key="interest.id" class="interest-item"
                         :class="{ selected: form.preferences.includes(interest.id) }" @click="toggleInterest(interest.id)">
                         <i :class="interest.icon"></i>
-                        <span>{{ interest.name }}</span>
+                        <span>{{ t(interest.key) }}</span>
                     </div>
                 </div>
 
                 <p v-if="errorMsg" class="error-msg">⚠️ {{ errorMsg }}</p>
 
                 <button @click="handleRegister" :disabled="loading" class="btn-submit">
-                    {{ loading ? 'Creating account...' : 'Complete Registration' }}
+                    <span v-if="loading"><i class="fas fa-spinner fa-spin mr-2"></i> {{ t('auth.creating_account') }}</span>
+                    <span v-else>{{ t('auth.complete_reg') }}</span>
                 </button>
             </div>
 
             <div class="auth-footer">
-                <span>Already have an account?</span>
-                <router-link to="/login">Sign in here</router-link>
+                <span>{{ t('auth.already_have_account') }}</span>
+                <router-link to="/login">{{ t('auth.sign_in_here') }}</router-link>
             </div>
         </div>
     </div>
@@ -88,7 +104,10 @@
 import { ref } from 'vue'
 import { authRepository } from '@/repositories/authRepository'
 import { useRouter } from 'vue-router'
+import { useI18n } from '@/composables/useI18n'
+import LanguageSwitcherAuth from '@/components/LanguageSwitcherAuth.vue'
 
+const { t } = useI18n()
 const router = useRouter()
 const step = ref(1)
 const loading = ref(false)
@@ -98,16 +117,17 @@ const form = ref({
     username: '',
     email: '',
     password: '',
-    preferences: []
+    preferences: [],
+    acceptedTerms: false
 })
 
 const availableInterests = [
-    { id: 'nature', name: 'ธรรมชาติ & ภูเขา', icon: 'fas fa-mountain' },
-    { id: 'culture', name: 'วัด & ประวัติศาสตร์', icon: 'fas fa-vihara' },
-    { id: 'cafe', name: 'คาเฟ่ & ของหวาน', icon: 'fas fa-coffee' },
-    { id: 'local_food', name: 'อาหารท้องถิ่น', icon: 'fas fa-bowl-food' },
-    { id: 'landmark', name: 'จุดถ่ายรูปสวย', icon: 'fas fa-camera' },
-    { id: 'chill', name: 'เดินเล่นชิลๆ', icon: 'fas fa-walking' }
+    { id: 'nature', key: 'auth.interest_nature', icon: 'fas fa-mountain' },
+    { id: 'culture', key: 'auth.interest_culture', icon: 'fas fa-vihara' },
+    { id: 'cafe', key: 'auth.interest_cafe', icon: 'fas fa-coffee' },
+    { id: 'local_food', key: 'auth.interest_local_food', icon: 'fas fa-bowl-food' },
+    { id: 'landmark', key: 'auth.interest_landmark', icon: 'fas fa-camera' },
+    { id: 'chill', key: 'auth.interest_chill', icon: 'fas fa-walking' }
 ]
 
 const toggleInterest = (id) => {
@@ -126,7 +146,7 @@ const handleRegister = async () => {
         await authRepository.register(form.value)
         router.push('/login?registered=1')
     } catch (err) {
-        errorMsg.value = err.response?.data?.detail || 'Registration failed. Please try again.'
+        errorMsg.value = err.response?.data?.detail || t('common.error')
     } finally {
         loading.value = false
     }
@@ -135,4 +155,8 @@ const handleRegister = async () => {
 
 <style scoped>
 @import "@/assets/auth.css";
+
+.mr-2 {
+    margin-right: 8px;
+}
 </style>

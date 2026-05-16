@@ -41,40 +41,38 @@
                     </div>
                 </header>
 
-                <div class="stats-bar">
-                    <div class="stat-item">
-                        <label>CHECK-IN</label>
-                        <div class="stat-value">14:00 PM</div>
+                <div class="stats-bar" v-if="hotel.best_months || hotel.ideal_stay || hotel.daily_budget || hotel.location_name">
+                    <div class="stat-item" v-if="hotel.best_months">
+                        <label>CHECK-IN / BEST MONTHS</label>
+                        <div class="stat-value">{{ hotel.best_months }}</div>
                     </div>
-                    <div class="stat-item">
+                    <div class="stat-item" v-if="hotel.ideal_stay">
                         <label>IDEAL STAY</label>
-                        <div class="stat-value">1 – 2 Nights</div>
+                        <div class="stat-value">{{ hotel.ideal_stay }}</div>
                     </div>
-                    <div class="stat-item">
-                        <label>PRICE RANGE</label>
-                        <div class="stat-value">$$ – $$$</div>
+                    <div class="stat-item" v-if="hotel.daily_budget">
+                        <label>{{ t('place.daily_budget') }}</label>
+                        <div class="stat-value">
+                            {{ hotel.daily_budget }}
+                        </div>
                     </div>
-                    <div class="stat-item">
-                        <label>RATING</label>
-                        <div class="stat-value">⭐ {{ hotel.rating_avg || '4.5' }}</div>
+                    <div class="stat-item" v-if="hotel.location_name">
+                        <label>LOCATION</label>
+                        <div class="stat-value">{{ hotel.location_name }}</div>
                     </div>
                 </div>
 
-                <div class="tags-container">
-                    <div class="tag-column best-for">
-                        <label>AMENITIES</label>
+                <div class="tags-container" v-if="(hotel.best_for && hotel.best_for.length > 0) || (hotel.avoid_if && hotel.avoid_if.length > 0)">
+                    <div class="tag-column best-for" v-if="hotel.best_for && hotel.best_for.length > 0">
+                        <label>AMENITIES / BEST FOR</label>
                         <div class="tag-list">
-                            <span class="tag">Free WiFi</span>
-                            <span class="tag">Swimming Pool</span>
-                            <span class="tag">Fitness Center</span>
-                            <span class="tag">Restaurant</span>
+                            <span v-for="(tag, idx) in hotel.best_for" :key="'bf-'+idx" class="tag">{{ tag }}</span>
                         </div>
                     </div>
-                    <div class="tag-column avoid-if">
-                        <label>GOOD TO KNOW</label>
+                    <div class="tag-column avoid-if" v-if="hotel.avoid_if && hotel.avoid_if.length > 0">
+                        <label>GOOD TO KNOW / AVOID IF</label>
                         <div class="tag-list">
-                            <span class="tag">Pet Friendly</span>
-                            <span class="tag">24h Reception</span>
+                            <span v-for="(tag, idx) in hotel.avoid_if" :key="'ai-'+idx" class="tag">{{ tag }}</span>
                         </div>
                     </div>
                 </div>
@@ -126,7 +124,7 @@
                     <hr class="divider-line" />
 
                     <section class="reviews-section" id="reviews">
-                        <h2>Reviews ({{ comments.length }})</h2>
+                        <h2>Reviews ({{ comments?.length || 0 }})</h2>
                         
                         <div class="write-review-card" v-if="user">
                             <div class="u-avatar">{{ user.username.charAt(0) }}</div>
@@ -187,7 +185,7 @@
                 <div class="right-col">
                     <div class="booking-widget" id="deals">
                         <div class="price-header">
-                            <span class="label" style="font-size: 1.1rem; font-weight: 700;">{{ t('hotels.view_prices_dates') }}</span>
+                            <span class="label" style="font-size: 1.1rem; font-weight: 700;">{{ t('hotels.checkPrices') }}</span>
                         </div>
                         
                         <div class="date-picker-box">
@@ -203,12 +201,20 @@
 
                         <div class="partner-deal">
                             <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/Booking.com_Logo_2022.png" height="24" alt="Booking.com" />
-                            <a :href="`https://www.booking.com/searchresults.html?ss=${hotel?.name || 'Savannakhet'}`" target="_blank" class="btn-partner">View deal</a>
+                            <div class="partner-info">
+                                <span class="partner-name">Booking.com</span>
+                                <small class="partner-hint">{{ t('hotels.seePrices') }}</small>
+                            </div>
+                            <a :href="hotel.booking_url || `https://www.booking.com/searchresults.html?ss=${hotel?.name || 'Savannakhet'}`" target="_blank" class="btn-partner">{{ t('hotels.viewPartnerDeal') }} <i class="fas fa-external-link-alt"></i></a>
                         </div>
                         
                         <div class="partner-deal">
                             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Agoda_logo.svg/1200px-Agoda_logo.svg.png" height="24" alt="Agoda" />
-                            <a :href="`https://www.agoda.com/search?text=${hotel?.name || 'Savannakhet'}`" target="_blank" class="btn-partner">View deal</a>
+                            <div class="partner-info">
+                                <span class="partner-name">Agoda</span>
+                                <small class="partner-hint">{{ t('hotels.seePrices') }}</small>
+                            </div>
+                            <a :href="hotel.agoda_url || `https://www.agoda.com/search?text=${hotel?.name || 'Savannakhet'}`" target="_blank" class="btn-partner">{{ t('hotels.viewPartnerDeal') }} <i class="fas fa-external-link-alt"></i></a>
                         </div>
 
                         <p class="free-cancel"><i class="fas fa-check"></i> {{ t('hotels.free_cancel') }}</p>
@@ -225,7 +231,7 @@
             </div>
 
             <!-- Recommended Places -->
-            <div class="recommended-section" v-if="recommendedPlaces.length > 0">
+            <div class="recommended-section" v-if="recommendedPlaces && recommendedPlaces.length > 0">
                 <h2>{{ t('place.recommended') }}</h2>
                 <div class="recommended-grid">
                     <div v-for="rec in recommendedPlaces" :key="rec.id" class="rec-card" @click="goToRecDetail(rec.id)">
@@ -249,13 +255,13 @@
             <MapOverlay :is-open="showMapModal" :places="allPlaces" :categories="categories"
                 :initial-selected-id="hotel.id" title="Explore Hotels" @close="showMapModal = false" />
         </div>
+        </div>
+
+        <div v-else class="loading-screen">
+            <div class="spinner"></div>
+            <p>{{ t('common.loading') }}</p>
+        </div>
     </div>
-    
-    <div v-else class="loading-screen">
-        <div class="spinner"></div>
-        <p>{{ t('common.loading') }}</p>
-    </div>
-</div>
 </template>
 
 <script setup>

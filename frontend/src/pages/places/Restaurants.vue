@@ -177,7 +177,7 @@ const filteredRestaurants = computed(() => {
     let results = places.value.filter(p => {
         const cat = categories.value.find(c => c.id == p.category_id)
         const pType = cat?.parent_type?.toLowerCase() || ''
-        return ['restaurant', 'cafe', 'local_food'].includes(pType)
+        return ['restaurant', 'cafe', 'local_food', 'chill', 'nightlife'].includes(pType)
     })
 
     if (selectedCategories.value.length > 0) {
@@ -192,7 +192,7 @@ const filteredRestaurants = computed(() => {
 const restaurantCategories = computed(() => {
     return categories.value.filter(c => {
         const pType = c.parent_type?.toLowerCase() || ''
-        return ['restaurant', 'cafe', 'local_food'].includes(pType)
+        return ['restaurant', 'cafe', 'local_food', 'chill', 'nightlife'].includes(pType)
     })
 })
 
@@ -542,6 +542,7 @@ onMounted(fetchData)
     color: #94a3b8;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
     transition: 0.2s;
+    z-index: 50;
 }
 
 .btn-heart.active {
@@ -723,4 +724,5 @@ onMounted(fetchData)
         height: 220px;
     }
 }
+
 </style>

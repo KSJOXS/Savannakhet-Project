@@ -27,10 +27,10 @@
 
                     <div class="hero-content">
                         <div class="top-row">
-                            <button @click="router.back()" class="btn-back-minimal">
+                            <button @click="handleBack" class="btn-back-minimal">
                                 <i class="fas fa-chevron-left"></i>
                             </button>
-                            <div class="breadcrumb">HOME › DESTINATIONS › {{ getCategoryName(place.category_id) }}</div>
+                            <div class="breadcrumb">{{ t('nav.home') }} › {{ t('nav.destinations') }} › {{ getCategoryName(place.category_id) }}</div>
                         </div>
 
                         <div class="hero-main-info">
@@ -38,50 +38,57 @@
                             <p class="local-name">{{ place.name_local || place.name }}</p>
                             <p class="hero-description">{{ place.description }}</p>
                         </div>
+
+                        <button v-if="!user || user.role !== 'admin'" 
+                            class="floating-heart-main" 
+                            :class="{ active: isFavorite }" 
+                            @click="toggleHeart()">
+                            <i class="fas fa-heart"></i>
+                            <span>{{ isFavorite ? t('place.saved') : t('place.save') }}</span>
+                        </button>
                     </div>
                 </header>
 
-                <div class="stats-bar">
-                    <div class="stat-item">
-                        <label>BEST MONTHS</label>
-                        <div class="stat-value">Nov – Feb</div>
+                <div class="stats-bar" v-if="place.best_months || place.ideal_stay || place.daily_budget || place.location_name">
+                    <div class="stat-item" v-if="place.best_months && !place.best_months.includes('undefined')">
+                        <label>{{ t('place.best_months') }}</label>
+                        <div class="stat-value">{{ place.best_months === 'Year-round' ? t('place.year_round') : place.best_months }}</div>
                     </div>
-                    <div class="stat-item">
-                        <label>IDEAL STAY</label>
-                        <div class="stat-value">2 – 3 Days</div>
+                    <div class="stat-item" v-if="place.ideal_stay">
+                        <label>{{ t('place.ideal_stay') }}</label>
+                        <div class="stat-value">{{ place.ideal_stay }}</div>
                     </div>
-                    <div class="stat-item">
-                        <label>DAILY BUDGET</label>
-                        <div class="stat-value">₭ 150k – 500k</div>
+                    <div class="stat-item" v-if="place.daily_budget && place.daily_budget !== '₭ 0 - 0' && !place.daily_budget.includes('undefined')">
+                        <label>{{ t('place.daily_budget') }}</label>
+                        <div class="stat-value">
+                            {{ place.daily_budget }}
+                        </div>
                     </div>
-                    <div class="stat-item">
-                        <label>LOCATION</label>
-                        <div class="stat-value">Savannakhet</div>
+                    <div class="stat-item" v-if="place.location_name">
+                        <label>{{ t('place.airport_location') }}</label>
+                        <div class="stat-value">{{ place.location_name }}</div>
                     </div>
                 </div>
 
-                <div class="tags-container">
-                    <div class="tag-column best-for">
-                        <label>BEST FOR</label>
+
+                <div class="tags-container" v-if="(place.best_for && place.best_for.length > 0) || (place.avoid_if && place.avoid_if.length > 0)">
+                    <div class="tag-column best-for" v-if="place.best_for && place.best_for.length > 0">
+                        <label>{{ t('place.best_for') }}</label>
                         <div class="tag-list">
-                            <span class="tag">Local Heritage</span>
-                            <span class="tag">Photography</span>
-                            <span class="tag">Architecture</span>
-                            <span class="tag">Slow Travel</span>
+                            <span v-for="(tag, idx) in place.best_for" :key="'bf-'+idx" class="tag">{{ tag }}</span>
                         </div>
                     </div>
-                    <div class="tag-column avoid-if">
-                        <label>AVOID IF</label>
+                    <div class="tag-column avoid-if" v-if="place.avoid_if && place.avoid_if.length > 0">
+                        <label>{{ t('place.avoid_if') }}</label>
                         <div class="tag-list">
-                            <span class="tag">Rainy Season</span>
-                            <span class="tag">You dislike walking</span>
+                            <span v-for="(tag, idx) in place.avoid_if" :key="'ai-'+idx" class="tag">{{ tag }}</span>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="ta-container">
-                <div class="gallery-preview-strip" @click="openLightbox">
+                <div class="gallery-preview-strip" @click="openLightbox" v-if="galleryImages && galleryImages.length > 0">
                 <div v-for="(img, idx) in galleryImages.slice(0, 4)" :key="'strip-'+idx" class="strip-item">
                     <img :src="img" alt="Gallery preview" />
                 </div>
@@ -89,27 +96,27 @@
             </div>
 
 
-                <div class="deals-banner" v-if="isHotel" id="deals">
+                <div class="deals-banner" v-if="isHotel && (place.booking_url || place.agoda_url)" id="deals">
                 <div class="deals-banner-title">
                     <i class="fas fa-tags"></i>
                     <span>{{ t('place.checkPrices') }}</span>
                 </div>
                 <div class="deals-rows">
-                    <a :href="`https://www.booking.com/searchresults.html?ss=${encodeURIComponent(place.name)}`"
+                    <a v-if="place.booking_url" :href="place.booking_url"
                         target="_blank" class="deals-row-item">
                         <div class="deals-row-brand">
                             <span class="booking-text">Booking<span class="booking-dot">.</span>com</span>
                         </div>
                         <div class="deals-row-price">
-                            <span class="deals-price-main">See prices on site</span>
+                            <span class="deals-price-main">{{ t('hotels.seePrices') }}</span>
                         </div>
-                        <div class="deals-row-btn deals-btn-booking">ดูข้อเสนอ <i class="fas fa-external-link-alt"></i>
+                        <div class="deals-row-btn deals-btn-booking">{{ t('hotels.viewPartnerDeal') }} <i class="fas fa-external-link-alt"></i>
                         </div>
                     </a>
 
-                    <div class="deals-row-divider"></div>
+                    <div class="deals-row-divider" v-if="place.booking_url && place.agoda_url"></div>
 
-                    <a :href="`https://www.agoda.com/search?query=${encodeURIComponent(place.name)}`" target="_blank"
+                    <a v-if="place.agoda_url" :href="place.agoda_url" target="_blank"
                         class="deals-row-item">
                         <div class="deals-row-brand">
                             <span class="agoda-text">agoda</span>
@@ -122,15 +129,15 @@
                             </div>
                         </div>
                         <div class="deals-row-price">
-                            <span class="deals-price-main">See prices on site</span>
+                            <span class="deals-price-main">{{ t('hotels.seePrices') }}</span>
                         </div>
-                        <div class="deals-row-btn deals-btn-agoda">ดูข้อเสนอ <i class="fas fa-external-link-alt"></i>
+                        <div class="deals-row-btn deals-btn-agoda">{{ t('hotels.viewPartnerDeal') }} <i class="fas fa-external-link-alt"></i>
                         </div>
                     </a>
                 </div>
                 <p class="deals-disclaimer">
                     <i class="fas fa-info-circle"></i>
-                    ราคาเป็นราคาเฉลี่ยอ้างอิงเท่านั้น ราคาจริงจะแสดงบนเว็บไซต์พาร์ทเนอร์
+                    {{ t('hotels.price_disclaimer') || 'Prices are approximate. Actual prices on partner site.' }}
                 </p>
             </div>
 
@@ -161,10 +168,23 @@
                         <p class="description-text" style="font-size: 1.05rem; line-height: 1.8; color: #334155; white-space: pre-line; margin: 0;">{{ place.description || 'No description available for this place yet.' }}</p>
                     </section>
 
+                    <!-- ✨ Travel Guide Sections — Rich content blocks -->
+                    <section v-if="placeSections && placeSections.length > 0" class="guide-sections-block">
+                        <div v-for="(sec, idx) in placeSections" :key="sec.id" class="guide-section-item">
+                            <img
+                                v-if="sec.image_url"
+                                :src="getSectionImageUrl(sec.image_url)"
+                                :alt="`Section ${idx + 1}`"
+                                class="guide-section-img"
+                            />
+                            <p v-if="sec.description" class="guide-section-desc">{{ sec.description }}</p>
+                        </div>
+                    </section>
+
                     <hr class="section-divider" />
 
                     <section class="reviews-section" id="reviews">
-                        <h2>{{ t('place.travelerReviews') }} ({{ comments.length }})</h2>
+                        <h2>{{ t('place.travelerReviews') }} ({{ comments?.length || 0 }})</h2>
 
                         <div class="write-review-box" v-if="user && user.role !== 'admin'">
                             <div class="u-avatar-large"
@@ -218,7 +238,7 @@
                         </div>
 
                         <div class="review-list">
-                            <div v-if="comments.length === 0" class="no-reviews">
+                            <div v-if="!comments || comments.length === 0" class="no-reviews">
                                 <i class="far fa-comment-alt"></i>
                                 <p>{{ t('place.noReviewsYet') }}</p>
                             </div>
@@ -252,11 +272,11 @@
                                                 <button @click="startEdit(comment)"
                                                     style="display: block; width: 100%; text-align: left; padding: 10px 15px; background: none; border: none; cursor: pointer; font-size: 0.9rem; color: #1e293b; transition: background 0.2s;">
                                                     <i class="fas fa-pen"
-                                                        style="margin-right: 8px; color: #64748b;"></i> Edit
+                                                        style="margin-right: 8px; color: #64748b;"></i> {{ t('common.edit') }}
                                                 </button>
                                                 <button @click="deleteReview(comment.id)"
                                                     style="display: block; width: 100%; text-align: left; padding: 10px 15px; background: none; border: none; cursor: pointer; font-size: 0.9rem; color: #ef4444; transition: background 0.2s;">
-                                                    <i class="fas fa-trash" style="margin-right: 8px;"></i> Delete
+                                                    <i class="fas fa-trash" style="margin-right: 8px;"></i> {{ t('common.delete') }}
                                                 </button>
                                             </div>
                                         </div>
@@ -275,9 +295,9 @@
                                             style="width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; resize: vertical; min-height: 80px; font-family: inherit; font-size: 0.95rem; margin-bottom: 10px;"></textarea>
                                         <div style="display: flex; gap: 10px; justify-content: flex-end;">
                                             <button @click="cancelEdit"
-                                                style="padding: 8px 16px; background: white; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; color: #475569; font-weight: 600;">Cancel</button>
+                                                style="padding: 8px 16px; background: white; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; color: #475569; font-weight: 600;">{{ t('common.cancel') }}</button>
                                             <button @click="saveEdit(comment.id)"
-                                                style="padding: 8px 16px; background: #3b82f6; border: none; border-radius: 6px; cursor: pointer; color: white; font-weight: 600;">Save</button>
+                                                style="padding: 8px 16px; background: #3b82f6; border: none; border-radius: 6px; cursor: pointer; color: white; font-weight: 600;">{{ t('common.save') }}</button>
                                         </div>
                                     </div>
                                     <div v-else>
@@ -329,7 +349,7 @@
                     <div class="sidebar-card opening-hours-card">
                         <h3 style="font-size: 1rem; font-weight: 800; margin: 0 0 16px; color: #1e293b;">{{ t('place.openingHours') || 'Opening Hours' }}
                         </h3>
-                        <div class="opening-hours-list" v-if="openingHoursList.length">
+                        <div class="opening-hours-list" v-if="openingHoursList && openingHoursList.length">
                             <div v-for="day in openingHoursList" :key="day.key" class="opening-hours-row">
                                 <span>{{ day.label }}</span>
                                 <span :class="['opening-hours-value', { closed: day.closed }]">
@@ -353,7 +373,7 @@
                                 </div>
                                 <span class="score-label">{{ t('place.ratingLabels')[Math.round(place.rating_avg || 0) -
                                     1] || 'N/A' }}</span>
-                                <span class="score-count">({{ comments.length }})</span>
+                                <span class="score-count">({{ comments?.length || 0 }})</span>
                             </div>
                             <div class="score-bars">
                                 <div v-for="lvl in ratingBreakdown" :key="lvl.value" class="score-bar-row">
@@ -391,7 +411,7 @@
                 </div>
             </div>
 
-            <div class="nearby-section" v-if="nearbyRestaurants.length > 0 || nearbyAttractions.length > 0">
+            <div class="nearby-section" v-if="(nearbyRestaurants && nearbyRestaurants.length > 0) || (nearbyAttractions && nearbyAttractions.length > 0)">
                 <div class="nearby-grid">
                     <div class="nearby-col getting-there-col">
                         <h3>{{ t('place.gettingThere') }}</h3>
@@ -469,91 +489,120 @@
                 </div>
             </div>
 
-            <div class="recommended-section" v-if="aiRecommendedPlaces.length > 0">
-                <h2 style="color: #6366f1; font-weight: 800; display: flex; align-items: center; gap: 10px;">
-                    <i class="fas fa-magic"></i> {{ t('recommend.ai_recom') }}
-                </h2>
-                <p style="color: #64748b; margin-top: -10px; margin-bottom: 20px;">{{ t('recommend.ai_desc') }}</p>
-                <div class="recommended-grid">
-                    <div v-for="rec in aiRecommendedPlaces" :key="rec.place.id" class="rec-card"
-                        @click="goToRecDetail(rec.place.id)"
-                        style="border: 2px solid #e0e7ff; box-shadow: 0 10px 25px rgba(99,102,241,0.15); transform: translateY(-5px); transition: 0.3s; cursor: pointer;">
-                        <div class="rec-img-wrapper" style="position: relative;">
-                            <img :src="getRecCoverImage(rec.place)" :alt="rec.place.name" />
-                            <span
-                                style="position: absolute; top: 12px; left: 12px; background: #6366f1; color: white; padding: 5px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
-                                <i class="fas fa-sparkles"></i> AI Pick
-                            </span>
+            <!-- AI Recommendations (✨ AI Recommended) -->
+            <div class="recommended-section" v-if="aiRecommendedPlaces && aiRecommendedPlaces.length > 0">
+                <div class="section-header-modern">
+                    <div class="sh-left">
+                        <span class="sh-badge">{{ t('recommend.hero_badge') }}</span>
+                        <h2 class="sh-title">{{ t('recommend.ai_recom') }}</h2>
+                        <p class="sh-subtitle">{{ t('recommend.ai_desc') }}</p>
+                    </div>
+                </div>
+                
+                <div class="recommended-grid-modern">
+                    <div v-for="rec in aiRecommendedPlaces" :key="rec.place.id" class="modern-immersive-card"
+                        @click="goToRecDetail(rec.place.id)">
+                        <img :src="getRecCoverImage(rec.place)" :alt="rec.place.name" class="mic-image" />
+                        
+                        <div class="mic-heart" :class="{ active: favoriteIds.includes(rec.place.id) }" @click.stop="toggleHeart(rec.place.id)">
+                            <i :class="favoriteIds.includes(rec.place.id) ? 'fas fa-heart' : 'far fa-heart'"></i>
                         </div>
-                        <div class="rec-info" style="padding: 18px;">
-                            <h4 style="font-size: 1.15rem; color: #1e293b; font-weight: 800; margin-bottom: 12px;">{{
-                                rec.place.name }}</h4>
-                            <div
-                                style="background: #fefce8; color: #b45309; font-size: 0.85rem; padding: 10px 12px; border-radius: 8px; margin-bottom: 15px; font-weight: 600; border: 1px solid #fef08a;">
-                                <i class="fas fa-lightbulb" style="color: #f59e0b; margin-right: 5px;"></i> {{
-                                    rec.reason }}
+                        
+                        <div class="mic-overlay">
+                            <span class="mic-category">{{ rec.place.category?.name || t('place.category_label') }}</span>
+                            <h4 class="mic-title">{{ rec.place.name }}</h4>
+                            <div class="mic-rating">
+                                <i class="fas fa-star"></i>
+                                <span>{{ rec.place.rating_avg || '0.0' }}</span>
+                                <span style="opacity: 0.7; font-size: 0.75rem; margin-left: 4px;">({{ rec.place.reviews_count || 0 }})</span>
                             </div>
-                            <div class="rec-rating"
-                                style="display: flex; justify-content: space-between; align-items: center; color: #00aa6c; font-weight: 700;">
-                                <span class="bubbles">
-                                    <i v-for="s in 5" :key="s"
-                                        :class="[(rec.place.rating_avg || 0) >= s ? 'fas' : 'far', 'fa-circle']"
-                                        style="margin-right:2px;"></i>
-                                </span>
-                                <span>{{ t('place.scoreString') }} {{ rec.place.rating_avg || '0.0' }}</span>
+                            
+                            <div class="mic-footer">
+                                <div class="mic-verified">
+                                    <i class="fas fa-certificate"></i>
+                                    <span>{{ t('landmarks.verified') }}</span>
+                                </div>
+                                <div class="mic-action">
+                                    {{ t('landmarks.openGuide') }} <i class="fas fa-arrow-right"></i>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="recommended-section" v-if="similarPlaces.length > 0">
-                <h2 style="color: #0ea5e9; font-weight: 800; display: flex; align-items: center; gap: 10px;">
-                    <i class="fas fa-project-diagram"></i> ผู้ที่สนใจสถานที่นี้ มักจะชอบ...
-                </h2>
-                <div class="recommended-grid">
-                    <div v-for="rec in similarPlaces" :key="rec.place.id" class="rec-card"
-                        @click="goToRecDetail(rec.place.id)"
-                        style="border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; cursor: pointer; transition: 0.3s;">
-                        <div class="rec-img-wrapper">
-                            <img :src="getRecCoverImage(rec.place)" :alt="rec.place.name"
-                                style="width: 100%; height: 180px; object-fit: cover;" />
+            <!-- Similar Places Section -->
+            <div class="recommended-section" v-if="similarPlaces && similarPlaces.length > 0">
+                <div class="section-header-modern">
+                    <div class="sh-left">
+                        <h2 class="sh-title">{{ t('recommend.similar') }}</h2>
+                    </div>
+                </div>
+
+                <div class="recommended-grid-modern">
+                    <div v-for="rec in similarPlaces" :key="rec.place.id" class="modern-immersive-card"
+                        @click="goToRecDetail(rec.place.id)">
+                        <img :src="getRecCoverImage(rec.place)" :alt="rec.place.name" class="mic-image" />
+                        
+                        <div class="mic-heart" :class="{ active: favoriteIds.includes(rec.place.id) }" @click.stop="toggleHeart(rec.place.id)">
+                            <i :class="favoriteIds.includes(rec.place.id) ? 'fas fa-heart' : 'far fa-heart'"></i>
                         </div>
-                        <div class="rec-info" style="padding: 15px;">
-                            <h4 style="font-size: 1.1rem; color: #1e293b; font-weight: 700; margin-bottom: 8px;">{{
-                                rec.place.name }}</h4>
-                            <div style="color: #64748b; font-size: 0.85rem; margin-bottom: 12px;">
-                                <i class="fas fa-info-circle"></i> {{ rec.reason }}
-                            </div>
-                            <div class="rec-rating"
-                                style="display: flex; justify-content: space-between; align-items: center; color: #00aa6c; font-weight: 700;">
-                                <span class="bubbles">
-                                    <i v-for="s in 5" :key="s"
-                                        :class="[(rec.place.rating_avg || 0) >= s ? 'fas' : 'far', 'fa-circle']"
-                                        style="margin-right:2px;"></i>
-                                </span>
+                        
+                        <div class="mic-overlay">
+                            <span class="mic-category">{{ rec.place.category?.name || t('place.category_label') }}</span>
+                            <h4 class="mic-title">{{ rec.place.name }}</h4>
+                            <div class="mic-rating">
+                                <i class="fas fa-star"></i>
                                 <span>{{ rec.place.rating_avg || '0.0' }}</span>
                             </div>
+                            
+                            <div class="mic-footer">
+                                <div class="mic-verified">
+                                    <i class="fas fa-certificate"></i>
+                                    <span>{{ t('landmarks.verified') }}</span>
+                                </div>
+                                <div class="mic-action">
+                                    {{ t('landmarks.openGuide') }} <i class="fas fa-arrow-right"></i>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="recommended-section" v-else-if="recommendedPlaces.length > 0">
-                <h2>{{ t('place.recommended') }}</h2>
-                <div class="recommended-grid">
-                    <div v-for="rec in recommendedPlaces" :key="rec.id" class="rec-card" @click="goToRecDetail(rec.id)">
-                        <div class="rec-img-wrapper">
-                            <img :src="getRecCoverImage(rec)" :alt="rec.name" />
+            <!-- Fallback Recommendations -->
+            <div class="recommended-section" v-else-if="recommendedPlaces && recommendedPlaces.length > 0">
+                <div class="section-header-modern">
+                    <div class="sh-left">
+                        <h2 class="sh-title">{{ t('place.recommended') }}</h2>
+                    </div>
+                </div>
+
+                <div class="recommended-grid-modern">
+                    <div v-for="rec in recommendedPlaces" :key="rec.id" class="modern-immersive-card"
+                        @click="goToRecDetail(rec.id)">
+                        <img :src="getRecCoverImage(rec)" :alt="rec.name" class="mic-image" />
+                        
+                        <div class="mic-heart" :class="{ active: favoriteIds.includes(rec.id) }" @click.stop="toggleHeart(rec.id)">
+                            <i :class="favoriteIds.includes(rec.id) ? 'fas fa-heart' : 'far fa-heart'"></i>
                         </div>
-                        <div class="rec-info">
-                            <h4>{{ rec.name }}</h4>
-                            <div class="rec-rating">
-                                <span class="bubbles">
-                                    <i v-for="s in 5" :key="s"
-                                        :class="[(rec.rating_avg || 0) >= s ? 'fas' : 'far', 'fa-circle']"></i>
-                                </span>
+                        
+                        <div class="mic-overlay">
+                            <span class="mic-category">{{ rec.category?.name || t('place.category_label') }}</span>
+                            <h4 class="mic-title">{{ rec.name }}</h4>
+                            <div class="mic-rating">
+                                <i class="fas fa-star"></i>
                                 <span>{{ rec.rating_avg || '0.0' }}</span>
+                            </div>
+                            
+                            <div class="mic-footer">
+                                <div class="mic-verified">
+                                    <i class="fas fa-certificate"></i>
+                                    <span>{{ t('landmarks.verified') }}</span>
+                                </div>
+                                <div class="mic-action">
+                                    {{ t('landmarks.openGuide') }} <i class="fas fa-arrow-right"></i>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -569,6 +618,12 @@
 
         <div v-if="isLightboxOpen" class="lightbox-overlay" @click="closeLightbox" @wheel.prevent="handleScrollZoom">
             <button class="btn-close-lightbox" @click="closeLightbox"><i class="fas fa-times"></i></button>
+            <button v-if="!user || user.role !== 'admin'" 
+                class="lightbox-heart-btn" 
+                :class="{ active: isFavorite }" 
+                @click.stop="toggleHeart()">
+                <i class="fas fa-heart"></i>
+            </button>
             <button v-if="activeLightboxImages.length > 1" class="btn-nav prev" @click.stop="prevImage"><i
                     class="fas fa-chevron-left"></i></button>
             <img :src="activeLightboxImages[currentImageIndex]" class="lightbox-img"
@@ -578,14 +633,16 @@
         </div>
 
         <div class="like-popup" :class="{ 'show': showLikePopup }">
-            <div class="popup-header">
-                <div class="icon-circle"><i class="fas fa-heart" style="color: #ef4444;"></i></div>
-                <div>
-                    <h4 style="margin: 0; font-size: 1rem; font-weight: 700; color: #1e293b;">บันทึกสถานที่สำเร็จ!</h4>
-                    <p style="margin: 0; font-size: 0.85rem; color: #64748b;">คุณอาจจะติดใจสถานที่ระดับแนะนำเหล่านี้ด้วย
-                    </p>
+            <div class="popup-header" v-if="place">
+                <img :src="galleryImages[0]" class="popup-liked-img" />
+                <div class="popup-title-area">
+                    <h4 class="popup-place-name">{{ place.name }}</h4>
+                    <p class="popup-status-text"><i class="fas fa-check-circle"></i> {{ t('place.save_success') }}</p>
                 </div>
                 <button @click="showLikePopup = false" class="close-popup"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="popup-recommend-label" v-if="similarPlaces.length > 0">
+                {{ t('place.save_success_desc') }}
             </div>
             <div class="popup-body" v-if="similarPlaces.length > 0">
                 <div v-for="rec in similarPlaces.slice(0, 2)" :key="'pop-' + rec.place.id" class="popup-rec-item"
@@ -593,8 +650,7 @@
                     <img :src="getRecCoverImage(rec.place)" alt="" />
                     <div class="popup-rec-info">
                         <strong>{{ rec.place.name }}</strong>
-                        <span><i class="fas fa-star" style="color: #eab308;"></i> {{ rec.place.rating_avg || '0.0'
-                            }}</span>
+                        <span><i class="fas fa-star" style="color: #eab308;"></i> {{ rec.place.rating_avg || '0.0' }}</span>
                     </div>
                 </div>
             </div>
@@ -620,12 +676,22 @@ import axios from 'axios'
 
 const route = useRoute()
 const router = useRouter()
+
+const handleBack = () => {
+    // If there's no history (e.g. opened in new tab), go to home
+    if (window.history.state && window.history.state.back) {
+        router.back()
+    } else {
+        router.push('/')
+    }
+}
 const { t } = useI18n()
 const place = ref(null)
 const categories = ref([])
 const comments = ref([])
 const user = ref(JSON.parse(localStorage.getItem('user')))
 const isFavorite = ref(false)
+const favoriteIds = ref([])
 const reviewSuccess = ref(false)
 const addressText = ref(t('common.loading'))
 const showMapModal = ref(false)
@@ -633,6 +699,14 @@ const allPlaces = ref([])
 const aiRecommendedPlaces = ref([])
 const similarPlaces = ref([])
 const showLikePopup = ref(false)
+const placeSections = ref([])
+
+const recommendedPlaces = computed(() => {
+    if (!place.value || !allPlaces.value.length) return [];
+    return allPlaces.value
+        .filter(p => p.category_id === place.value.category_id && p.id !== place.value.id)
+        .slice(0, 4);
+});
 
 const newComment = ref('')
 const newRating = ref(5)
@@ -787,7 +861,7 @@ const openingHoursList = computed(() => {
     }
     if (!hours || typeof hours !== 'object') return []
 
-    return weekDays.map(day => {
+    return weekDays.value.map(day => {
         const values = hours[day.key] || {}
         const closed = values.closed === true || values.closed === 'true' || values.closed === 1 || values.closed === '1'
         return {
@@ -818,13 +892,6 @@ const ratingBreakdown = computed(() => {
         const count = comments.value.filter(c => Math.round(c.rating) === lvl.value).length;
         return { value: lvl.value, count, percent: Math.round((count / total) * 100) };
     });
-});
-
-const recommendedPlaces = computed(() => {
-    if (!place.value || !allPlaces.value.length) return [];
-    return allPlaces.value
-        .filter(p => p.category_id === place.value.category_id && p.id !== place.value.id)
-        .slice(0, 4);
 });
 
 // Haversine Distance Calculator
@@ -896,6 +963,12 @@ const getImageUrl = (url) => {
     if (!url) return '';
     if (url.startsWith('http') || url.startsWith('data:')) return url;
     return `http://localhost:8000/${url.startsWith('/') ? url.slice(1) : url}`;
+}
+
+const getSectionImageUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http') || url.startsWith('data:')) return url;
+    return `http://localhost:8000${url.startsWith('/') ? '' : '/'}${url}`;
 }
 
 const stickyNavRef = ref(null);
@@ -1005,9 +1078,16 @@ const initDetailMap = () => {
         let marker = window.L.marker([pLat, pLng], { icon: customIcon }).addTo(detailMap);
         mapMarkers.push(marker);
 
+        const goToDetail = (id) => {
+            const baseUrl = import.meta.env.BASE_URL || '/';
+            // Use hash for hash mode
+            window.open(`${baseUrl}#/places/${id}`, '_blank');
+        };
+
         const bubblesHtml = [1, 2, 3, 4, 5].map(s => `<i class="${(p.rating_avg || 0) >= s ? 'fas' : 'far'} fa-circle"></i>`).join('');
+        const baseUrl = import.meta.env.BASE_URL || '/';
         const popupContentHtml = `
-            <div class="leaflet-custom-card" onclick="window.open('/places/${p.id}', '_blank')" style="cursor:pointer; display:flex; flex-direction:column; background:white; font-family:'Inter', sans-serif;">
+            <div class="leaflet-custom-card" onclick="window.open('${baseUrl}#/places/${p.id}', '_blank')" style="cursor:pointer; display:flex; flex-direction:column; background:white; font-family:'Inter', sans-serif;">
                 <div style="height: 120px; width: 100%;">
                     <img src="${getRecCoverImage(p)}" style="width:100%; height:100%; object-fit:cover;" />
                 </div>
@@ -1159,7 +1239,8 @@ const fetchData = async () => {
         if (user.value && user.value.role !== 'admin') {
             favoriteRepository.getUserFavorites(user.value.id)
                 .then(favRes => {
-                    isFavorite.value = favRes.data.some(f => f.place_id === parseInt(id))
+                    favoriteIds.value = favRes.data.map(f => f.place_id)
+                    isFavorite.value = favoriteIds.value.includes(parseInt(id))
                 })
                 .catch(err => console.warn("Failed to fetch favorites", err))
 
@@ -1197,6 +1278,12 @@ const fetchData = async () => {
             const resComm = await placeRepository.getComments(id)
             comments.value = resComm.data
         } catch (e) { comments.value = [] }
+
+        // Fetch Travel Guide Sections
+        try {
+            const resSec = await placeRepository.getSections(id)
+            placeSections.value = resSec.data
+        } catch (e) { placeSections.value = [] }
 
         nextTick(() => {
             initDetailMap();
@@ -1259,28 +1346,36 @@ const isLiked = (comment) => {
     return user.value && comment.liked_by && comment.liked_by.includes(user.value.id)
 }
 
-const toggleHeart = async () => {
+const toggleHeart = async (id = null) => {
+    const targetId = id || route.params.id
     if (!user.value) return router.push('/login')
     try {
-        const res = await favoriteRepository.toggleFavorite(user.value.id, route.params.id)
-        isFavorite.value = res.data.status === 'added'
-
-        if (isFavorite.value) {
+        const res = await favoriteRepository.toggleFavorite(user.value.id, targetId)
+        const added = res.data.status === 'added'
+        
+        if (!id || parseInt(id) === parseInt(route.params.id)) {
+            isFavorite.value = added
+        }
+        
+        if (added) {
+            if (!favoriteIds.value.includes(parseInt(targetId))) {
+                favoriteIds.value.push(parseInt(targetId))
+            }
             try {
                 await gnnRepository.logInteraction({
                     user_id: user.value.id,
-                    place_id: parseInt(route.params.id),
+                    place_id: parseInt(targetId),
                     action_type: 'like'
                 });
 
                 // Show Popup after liking
-                if (similarPlaces.value.length > 0) {
-                    showLikePopup.value = true;
-                    setTimeout(() => {
-                        showLikePopup.value = false;
-                    }, 6000);
-                }
+                showLikePopup.value = true;
+                setTimeout(() => {
+                    showLikePopup.value = false;
+                }, 6000);
             } catch (err) { console.warn("AI Log failed", err); }
+        } else {
+            favoriteIds.value = favoriteIds.value.filter(fid => fid !== parseInt(targetId))
         }
     } catch (err) { console.error(err) }
 }
@@ -1310,16 +1405,126 @@ const placeSummary = computed(() => {
     min-height: 100vh;
     font-family: 'Inter', sans-serif;
     color: #1e293b;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+.floating-heart-main {
+    position: absolute;
+    bottom: 40px;
+    right: 40px;
+    z-index: 50;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 12px 28px;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    font-weight: 700;
+    font-size: 1.1rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+@media (max-width: 768px) {
+    .floating-heart-main {
+        bottom: 20px;
+        right: 20px; /* Ensure it stays visible */
+        padding: 10px 18px;
+        font-size: 0.9rem;
+    }
+    .floating-heart-main span {
+        display: none; /* Hide text on small screens if still tight */
+    }
+}
+
+@media (max-width: 400px) {
+    .floating-heart-main {
+        right: 15px;
+        bottom: 15px;
+    }
+}
+
+.floating-heart-main i {
+    font-size: 1.4rem;
+}
+
+.floating-heart-main:hover {
+    background: white;
+    color: #ef4444;
+    transform: translateY(-5px);
+}
+
+.floating-heart-main.active {
+    background: #ef4444;
+    color: white;
+    border-color: #ef4444;
+}
+
+.lightbox-heart-btn {
+    position: fixed;
+    top: 30px;
+    right: 100px;
+    z-index: 2001;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 1.5rem;
+}
+
+.lightbox-heart-btn:hover {
+    background: #ef4444;
+    transform: scale(1.1);
+}
+
+.lightbox-heart-btn.active {
+    background: #ef4444;
+    color: white;
+}
+
+.mic-heart {
+    cursor: pointer !important;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.9) !important;
+}
+
+.mic-heart:hover {
+    transform: scale(1.2);
+    background: white !important;
+}
+
+.mic-heart.active {
+    color: #ef4444 !important;
+    background: white !important;
 }
 
 /* Premium Hero Section */
 .premium-hero-wrapper {
     margin-bottom: 40px;
+    width: 100%;
+    margin-left: 0;
+    margin-right: 0;
 }
 
 .premium-hero {
     position: relative;
     height: 85vh;
+    width: 100%;
     background-size: cover;
     background-position: center;
     color: white;
@@ -1335,6 +1540,23 @@ const placeSummary = computed(() => {
     align-items: center;
     padding: 20px 40px;
     background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 100%);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+@media (max-width: 1100px) {
+    .nav-items {
+        display: none !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-nav {
+        padding: 15px 20px;
+    }
+    .btn-plan {
+        display: none;
+    }
 }
 
 .logo {
@@ -1408,6 +1630,14 @@ const placeSummary = computed(() => {
     display: flex;
     flex-direction: column;
     padding: 0 40px 60px;
+    box-sizing: border-box;
+    overflow: hidden; /* Prevent children from expanding width */
+}
+
+@media (max-width: 768px) {
+    .hero-content {
+        padding: 0 20px 40px;
+    }
 }
 
 .top-row {
@@ -1478,12 +1708,15 @@ const placeSummary = computed(() => {
 
 .serif-title {
     font-family: 'Playfair Display', serif;
-    font-size: 8rem;
+    font-size: clamp(3.5rem, 8vw, 6rem);
     font-weight: 900;
-    line-height: 0.85;
+    line-height: 0.95;
     margin: 0;
-    letter-spacing: -4px;
+    letter-spacing: -2px;
     text-transform: capitalize;
+    padding-left: 5px;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 
 .local-name {
@@ -1505,14 +1738,85 @@ const placeSummary = computed(() => {
 /* Stats Bar */
 .stats-bar {
     max-width: 1280px;
-    margin: 0 auto 0;
+    margin: 0 auto;
     background: white;
     position: relative;
     z-index: 5;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     border: 1px solid #f1f5f9;
     box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+    .stats-bar {
+        grid-template-columns: 1fr;
+        margin: 0;
+        border-left: none;
+        border-right: none;
+    }
+    
+    .stat-item {
+        border-right: none;
+        border-bottom: 1px solid #f1f5f9;
+        padding: 20px;
+    }
+}
+
+.booking-options-bar {
+    max-width: 1280px;
+    margin: 15px auto 0;
+    background: #f8fafc;
+    padding: 15px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+}
+
+.booking-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 700;
+    color: #475569;
+    font-size: 0.95rem;
+}
+
+.booking-label i {
+    color: #3b82f6;
+    font-size: 1.2rem;
+}
+
+.booking-links {
+    display: flex;
+    gap: 20px;
+}
+
+.btn-booking-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    padding: 8px 20px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+    height: 44px;
+}
+
+.btn-booking-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+    border-color: #3b82f6;
+}
+
+.btn-booking-link img {
+    height: 22px;
+    width: auto;
 }
 
 .stat-item {
@@ -1548,6 +1852,13 @@ const placeSummary = computed(() => {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 30px;
+}
+
+@media (max-width: 768px) {
+    .tags-container {
+        grid-template-columns: 1fr;
+        margin: 20px;
+    }
 }
 
 .tag-column {
@@ -1688,6 +1999,54 @@ const placeSummary = computed(() => {
 .opening-hours-list {
     display: grid;
     gap: 12px;
+}
+
+/* ══════════════════════════════════════
+   TRAVEL GUIDE SECTIONS (Public Display)
+══════════════════════════════════════ */
+.guide-sections-block {
+    margin-bottom: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.guide-section-item {
+    margin-bottom: 36px;
+    animation: fadeInUp 0.5s ease both;
+}
+
+.guide-section-item:last-child {
+    margin-bottom: 10px;
+}
+
+.guide-section-img {
+    width: 100%;
+    border-radius: 16px;
+    display: block;
+    object-fit: cover;
+    max-height: 480px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+.guide-section-img:hover {
+    transform: scale(1.008);
+    box-shadow: 0 16px 45px rgba(0,0,0,0.15);
+}
+
+.guide-section-desc {
+    font-size: 1.05rem;
+    line-height: 1.85;
+    color: #334155;
+    margin: 16px 0 0 0;
+    white-space: pre-line;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
 .opening-hours-row {
@@ -2019,15 +2378,46 @@ const placeSummary = computed(() => {
     position: relative;
 }
 
-.icon-circle {
-    width: 40px;
-    height: 40px;
-    background: #fee2e2;
-    border-radius: 50%;
+.popup-liked-img {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    object-fit: cover;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.popup-title-area {
+    flex: 1;
+    overflow: hidden;
+}
+
+.popup-place-name {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #1e293b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.popup-status-text {
+    margin: 2px 0 0;
+    font-size: 0.8rem;
+    color: #10b981;
+    font-weight: 700;
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-size: 1.2rem;
+    gap: 4px;
+}
+
+.popup-recommend-label {
+    font-size: 0.75rem;
+    color: #64748b;
+    font-weight: 600;
+    margin: 15px 0 10px;
+    padding-top: 15px;
+    border-top: 1px solid #f1f5f9;
 }
 
 .close-popup {
@@ -2902,52 +3292,6 @@ textarea:focus {
     object-fit: contain;
     display: block;
 }
-
-.bcc-price-col {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    padding-right: 8px;
-}
-
-.bcc-price-original {
-    font-size: 0.78rem;
-    color: #94a3b8;
-    text-decoration: line-through;
-    font-weight: 500;
-}
-
-.bcc-price {
-    font-size: 0.88rem;
-    font-weight: 700;
-    color: #64748b;
-}
-
-.bcc-price-sale {
-    font-size: 1.1rem;
-    font-weight: 800;
-    color: #0f172a;
-}
-
-.bcc-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 9px 14px;
-    border-radius: 8px;
-    font-size: 0.82rem;
-    font-weight: 700;
-    text-decoration: none;
-    transition: 0.2s;
-    white-space: nowrap;
-    flex-shrink: 0;
-}
-
-.bcc-btn i {
-    font-size: 0.7rem;
-}
-
 .bcc-btn-booking {
     background: #003580;
     color: white;
@@ -2992,109 +3336,188 @@ textarea:focus {
     flex-shrink: 0;
 }
 
-.popup-icon {
-    font-size: 0.7rem;
-    opacity: 0.8;
-}
-
-/* Recommended Places Section */
+/* Recommended Places Section Refined */
 .recommended-section {
-    margin-top: 40px;
-    padding-top: 30px;
-    border-top: 1px solid #e2e8f0;
+    margin-top: 60px;
+    padding-top: 40px;
+    border-top: 1px solid #f1f5f9;
 }
 
-.recommended-section h2 {
-    font-size: 1.5rem;
+.section-header-modern {
+    margin-bottom: 30px;
+}
+
+.sh-badge {
+    background: #e0e7ff;
+    color: #4338ca;
+    padding: 6px 12px;
+    border-radius: 100px;
+    font-size: 0.75rem;
     font-weight: 800;
-    margin-bottom: 20px;
-    color: #0f172a;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    display: inline-block;
 }
 
-.recommended-grid {
+.sh-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin: 0 0 8px;
+}
+
+.sh-subtitle {
+    font-size: 1rem;
+    color: #64748b;
+    margin: 0;
+}
+
+.recommended-grid-modern {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 25px;
 }
 
-.rec-card {
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
+/* Premium Immersive Card Style */
+.modern-immersive-card {
+    position: relative;
+    height: 420px;
+    border-radius: 0;
     overflow: hidden;
     cursor: pointer;
-    transition: 0.2s;
+    background-color: #1e293b;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.rec-card:hover {
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+.modern-immersive-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
 }
 
-.rec-img-wrapper {
-    height: 140px;
-    width: 100%;
-}
-
-.rec-img-wrapper img {
+.mic-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 0.8s ease;
 }
 
-.rec-info {
-    padding: 12px;
+.modern-immersive-card:hover .mic-image {
+    transform: scale(1.1);
 }
 
-.rec-info h4 {
-    margin: 0 0 8px;
-    font-size: 0.95rem;
+.mic-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 40px 16px 16px;
+    background: linear-gradient(to top, 
+        rgba(0,0,0,0.9) 0%, 
+        rgba(0,0,0,0.6) 50%, 
+        transparent 100%);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 2;
+}
+
+.mic-category {
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #38bdf8;
+}
+
+.mic-title {
+    font-size: 1.2rem;
     font-weight: 700;
-    color: #0f172a;
-    line-height: 1.3;
+    margin: 0;
+    line-height: 1.2;
+    color: white;
 }
 
-.rec-rating {
+.mic-rating {
     display: flex;
     align-items: center;
     gap: 5px;
-    font-size: 0.8rem;
-    color: #475569;
-    font-weight: 600;
+    font-size: 0.95rem;
+    font-weight: 700;
 }
 
-.rec-rating i {
-    color: #00aa6c;
+.mic-rating i {
+    color: #fbbf24;
 }
 
-/* Large Map Section */
-.large-map-section {
-    margin-top: 40px;
-    padding-top: 30px;
-    border-top: 1px solid #e2e8f0;
+.mic-desc {
+    font-size: 0.88rem;
+    opacity: 0.9;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.6;
+    margin: 5px 0;
 }
 
-.large-map-section h2 {
-    font-size: 1.5rem;
-    font-weight: 800;
-    margin: 0 0 10px;
-    color: #0f172a;
+.mic-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 5px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255,255,255,0.2);
 }
 
-.map-address {
-    font-size: 1rem;
-    color: #475569;
-    margin-bottom: 20px;
+.mic-verified {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #10b981;
 }
 
-.large-map-container {
-    width: 100%;
-    border-radius: 16px;
-    overflow: hidden;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+.mic-action {
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: 0.2s;
+}
+
+.modern-immersive-card:hover .mic-action {
+    gap: 10px;
+}
+
+.mic-heart {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 38px;
+    height: 38px;
+    background: rgba(255,255,255,0.9);
+    backdrop-filter: blur(4px);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ef4444;
+    font-size: 1.2rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: all 0.3s;
+    z-index: 50;
+}
+
+.mic-heart:hover {
+    transform: scale(1.1);
+    background: #ef4444;
+    color: white;
 }
 
 /* Nearby Section */
@@ -3146,16 +3569,6 @@ textarea:focus {
     color: #00aa6c;
 }
 
-/* Getting there column */
-.getting-there-col {
-    padding-right: 20px;
-}
-
-.getting-there-col h3 {
-    border-bottom: none;
-    margin-bottom: 20px;
-}
-
 .walk-score-box {
     background: #f8fafc;
     border: 1px solid #e2e8f0;
@@ -3175,41 +3588,10 @@ textarea:focus {
     margin-bottom: 4px;
 }
 
-.score-title i {
-    color: #64748b;
-    font-size: 0.8rem;
-}
-
-.score-desc {
-    font-size: 0.8rem;
-    color: #475569;
-}
-
 .score-number {
     font-size: 1.8rem;
     font-weight: 800;
     color: #00aa6c;
-}
-
-.airport-info p {
-    margin: 0 0 5px;
-    font-size: 0.95rem;
-}
-
-.airport-info i {
-    color: #64748b;
-    margin-right: 8px;
-}
-
-.distance-line {
-    font-size: 0.85rem;
-    color: #475569;
-    padding-left: 24px;
-}
-
-.side-icon {
-    font-size: 0.8rem !important;
-    margin-right: 4px !important;
 }
 
 /* List Items */
@@ -3222,14 +3604,6 @@ textarea:focus {
     padding: 15px 0;
     border-bottom: 1px solid #e2e8f0;
     cursor: pointer;
-}
-
-.nearby-item:last-child {
-    border-bottom: none;
-}
-
-.nearby-item:hover h4 {
-    text-decoration: underline;
 }
 
 .nearby-item h4 {
@@ -3246,19 +3620,9 @@ textarea:focus {
     font-size: 0.85rem;
 }
 
-.n-score {
-    font-weight: 700;
-}
-
 .n-rating .bubbles i {
     color: #00aa6c;
     font-size: 0.75rem;
-}
-
-.n-reviews {
-    color: #475569;
-    font-size: 0.8rem;
-    text-decoration: underline;
 }
 
 .n-meta {
@@ -3266,43 +3630,34 @@ textarea:focus {
     color: #475569;
 }
 
-.n-meta i {
-    color: #94a3b8;
-    margin-right: 4px;
-}
-
 @media (max-width: 992px) {
     .nearby-grid {
         grid-template-columns: 1fr;
         gap: 40px;
     }
+}
 
-    .getting-there-col {
-        padding-right: 0;
-        border-right: none;
+@media (max-width: 768px) {
+    .sh-title {
+        font-size: 1.5rem;
+    }
+    .modern-immersive-card {
+        height: 380px;
+    }
+    .recommended-grid-modern {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 15px;
     }
 }
 
-@media (max-width: 992px) {
-    .recommended-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 480px) {
-    .recommended-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* 🚨 CSS สำหรับ Lightbox (ดูรูปเต็มจอ) ที่ใส่เพิ่มให้แล้ว 🚨 */
+/* Lightbox Styling */
 .lightbox-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    background: rgba(0, 0, 0, 0.92);
+    background: rgba(0, 0, 0, 0.95);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -3310,37 +3665,35 @@ textarea:focus {
 }
 
 .lightbox-img {
-    max-width: 90vw;
+    max-width: 95vw;
     max-height: 90vh;
     object-fit: contain;
     transition: transform 0.2s ease-out;
     user-select: none;
-    border-radius: 8px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    border-radius: 4px;
 }
 
 .btn-close-lightbox {
     position: absolute;
     top: 25px;
-    right: 35px;
+    right: 25px;
     background: rgba(255, 255, 255, 0.1);
     border: none;
     color: white;
-    font-size: 1.8rem;
-    width: 50px;
-    height: 50px;
+    font-size: 1.5rem;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     cursor: pointer;
     z-index: 100000;
-    transition: all 0.2s;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: 0.2s;
 }
 
 .btn-close-lightbox:hover {
     background: #ef4444;
-    transform: scale(1.1);
 }
 
 .btn-nav {
@@ -3350,31 +3703,25 @@ textarea:focus {
     background: rgba(255, 255, 255, 0.1);
     border: none;
     color: white;
-    font-size: 2rem;
-    width: 60px;
-    height: 60px;
+    font-size: 1.5rem;
+    width: 54px;
+    height: 54px;
     border-radius: 50%;
     cursor: pointer;
     z-index: 100000;
-    transition: all 0.2s;
     display: flex;
     align-items: center;
     justify-content: center;
     backdrop-filter: blur(4px);
+    transition: 0.2s;
 }
 
 .btn-nav:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: translateY(-50%) scale(1.1);
+    background: rgba(255, 255, 255, 0.2);
 }
 
-.btn-nav.prev {
-    left: 30px;
-}
-
-.btn-nav.next {
-    right: 30px;
-}
+.btn-nav.prev { left: 20px; }
+.btn-nav.next { right: 20px; }
 
 .loading-screen {
     position: fixed;
@@ -3384,13 +3731,12 @@ textarea:focus {
     align-items: center; justify-content: center;
     background: white;
     z-index: 9999;
-    color: #1e293b;
 }
 
 .spinner {
     width: 40px; height: 40px;
     border: 4px solid #f1f5f9;
-    border-top: 4px solid #3b82f6;
+    border-top: 4px solid #6366f1;
     border-radius: 50%;
     animation: spin 1s linear infinite;
     margin-bottom: 15px;

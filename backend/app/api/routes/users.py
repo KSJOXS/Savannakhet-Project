@@ -127,10 +127,24 @@ async def update_user_profile(
     username: Optional[str] = Form(None),
     email: Optional[str] = Form(None),
     password: Optional[str] = Form(None),
+    preferences: Optional[str] = Form(None),
     profile_image: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db)
 ):
     db_user = db.query(models.User).filter(models.User.id == user_id).first()
+    
+    # 📝 DEBUG LOGGING
+    try:
+        with open("debug.log", "a", encoding="utf-8") as f:
+            import datetime
+            f.write(f"[{datetime.datetime.now()}] UPDATING USER ID: {user_id}\n")
+            f.write(f"  - Received Username: {username}\n")
+            f.write(f"  - Received Email: {email}\n")
+            f.write(f"  - Received Preferences: {preferences}\n")
+            f.write(f"  - DB User Found: {db_user.username if db_user else 'NOT FOUND'}\n")
+    except:
+        pass
+
     if not db_user:
         raise HTTPException(status_code=404, detail="User not found.")
 
@@ -154,6 +168,20 @@ async def update_user_profile(
 
     if password is not None and len(password) > 0:
         db_user.password_hash = auth.get_password_hash(password)
+
+    if preferences is not None:
+        try:
+            # Parse and update preferences
+            from sqlalchemy.orm.attributes import flag_modified
+            prefs_list = json.loads(preferences)
+            if not isinstance(prefs_list, list):
+                prefs_list = [str(prefs_list)]
+            
+            db_user.preferences = prefs_list
+            # Force SQLAlchemy to detect change in JSON column
+            flag_modified(db_user, "preferences")
+        except Exception as e:
+            print(f"Error parsing preferences: {e}")
 
     if profile_image and profile_image.filename:
         os.makedirs(UPLOAD_DIR_USERS, exist_ok=True)

@@ -1,11 +1,12 @@
 import os
+import json
 import torch
 import torch.nn.functional as F
 from torch_geometric.nn import SAGEConv, to_hetero
 from torch_geometric.utils import negative_sampling
 from sqlalchemy.sql import func
 from app.services.gnn_service import build_gnn_graph
-from app.models import InteractionLog, Place, Category
+from app.models import InteractionLog, Place, Category, User
 from sqlalchemy.orm import Session
 
 MODEL_PATH = "gnn_model.pt"
@@ -31,12 +32,18 @@ class SavannakhetRecommender(torch.nn.Module):
     def forward(self, x_dict, edge_index_dict):
         return self.gnn(x_dict, edge_index_dict)
 
-    def recommend_places(self, user_id, updated_x_dict, top_k=5):
+    def recommend_places(self, user_id, updated_x_dict, top_k=5, interacted_indices=None):
         user_features = updated_x_dict['user'][user_id]
         all_place_features = updated_x_dict['place']
         
-        # Calculate dot product as similarity score
-        scores = torch.matmul(all_place_features, user_features)
+        # Use Cosine Similarity for better score normalization
+        scores = F.cosine_similarity(all_place_features, user_features.unsqueeze(0))
+        
+        # Exclude already-interacted places by setting score to -infinity
+        if interacted_indices is not None:
+            for idx in interacted_indices:
+                scores[idx] = -float('inf')
+        
         actual_k = min(top_k, all_place_features.size(0))
         top_scores, top_place_indices = torch.topk(scores, k=actual_k)
         
@@ -137,10 +144,60 @@ def get_recommendations_for_user(db: Session, user_id_from_db: int, top_k=5):
     # Load trained model, if not exists, it will use random (untrained)
     is_trained = load_model(model)
     
+    # Find places the user already reviewed to exclude (liked places still show)
+    interacted_logs = db.query(InteractionLog).filter(
+        InteractionLog.user_id == user_id_from_db,
+        InteractionLog.action_type == 'review'
+    ).all()
+    interacted_place_ids = set(log.place_id for log in interacted_logs)
+    interacted_indices = [place_map[pid] for pid in interacted_place_ids if pid in place_map]
+    
     model.eval()
     with torch.no_grad():
         updated_features = model(data.x_dict, data.edge_index_dict)
-        recommended_indices, scores = model.recommend_places(mapped_user_id, updated_features, top_k)
+        
+        # --- Hybrid Score: GNN Collaborative + Content-Based ---
+        user_emb = updated_features['user'][mapped_user_id]
+        place_embs = updated_features['place']
+        
+        # 1) GNN Collaborative Score (cosine similarity)
+        gnn_scores = F.cosine_similarity(place_embs, user_emb.unsqueeze(0))
+        
+        # 2) Content-Based Score (user preferences × place category)
+        pref_cats = ['nature', 'culture', 'restaurant', 'hotel', 'shopping', 'nightlife', 'cafe', 'local_food', 'chill', 'landmark']
+        user_obj = db.query(User).filter(User.id == user_id_from_db).first()
+        try:
+            prefs = user_obj.preferences
+            if isinstance(prefs, str):
+                prefs = json.loads(prefs)
+            if not isinstance(prefs, list):
+                prefs = []
+        except:
+            prefs = []
+        
+        user_pref_vec = torch.tensor([1.0 if cat in prefs else 0.0 for cat in pref_cats], dtype=torch.float)
+        
+        # Place category vectors (first 10 dims of place features = category one-hot)
+        place_cat_vecs = data['place'].x[:, :len(pref_cats)]
+        
+        if user_pref_vec.sum() > 0:
+            content_scores = F.cosine_similarity(place_cat_vecs, user_pref_vec.unsqueeze(0))
+        else:
+            content_scores = torch.zeros(place_embs.size(0))
+        
+        # 3) Hybrid: 60% GNN + 40% Content-Based (preferences matter!)
+        alpha = 0.6
+        final_scores = alpha * gnn_scores + (1 - alpha) * content_scores
+        
+        # Exclude already-interacted places
+        for idx in interacted_indices:
+            final_scores[idx] = -float('inf')
+        
+        actual_k = min(top_k, place_embs.size(0))
+        top_scores, top_indices = torch.topk(final_scores, k=actual_k)
+        
+        recommended_indices = top_indices.tolist()
+        scores = top_scores.tolist()
         
     reverse_place_map = {v: k for k, v in place_map.items()}
     recommended_place_ids = [reverse_place_map[idx] for idx in recommended_indices]

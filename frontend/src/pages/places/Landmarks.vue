@@ -5,30 +5,8 @@
         <!-- Hero Header -->
         <div class="landmarks-header">
             <div class="header-container">
-                <div class="header-content-flex">
-                    <div class="text-zone">
-                        <div class="header-badge">
-                            <i class="fas fa-gopuram"></i>
-                            <span>{{ t('landmarks.badge') }}</span>
-                        </div>
-                        <h1>{{ t('landmarks.title') }}</h1>
-                        <p class="subtitle">{{ t('landmarks.subtitle') }}</p>
-                        <div class="header-stats">
-                            <div class="stat-item">
-                                <span class="stat-num">{{ filteredLandmarks.length }}</span>
-                                <span class="stat-label">{{ t('landmarks.sitesLabel') }}</span>
-                            </div>
-                            <div class="stat-divider"></div>
-                            <div class="stat-item">
-                                <span class="stat-num">{{ landmarkCategories.length }}</span>
-                                <span class="stat-label">{{ t('landmarks.categoriesLabel') }}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="icon-zone">
-                        <i class="fas fa-landmark"></i>
-                    </div>
-                </div>
+                <h1>{{ t('landmarks.title') }}</h1>
+                <p class="subtitle">{{ t('landmarks.subtitle') }}</p>
 
                 <div class="quick-filters">
                     <button
@@ -379,93 +357,28 @@ onMounted(fetchData)
     pointer-events: none;
 }
 
+.landmarks-header {
+    background: white;
+    padding: 30px 20px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
 .header-container {
     max-width: 1200px;
     margin: 0 auto;
 }
 
-.header-content-flex {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 28px;
-}
-
-.header-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: rgba(139, 92, 246, 0.1);
-    border: 1px solid rgba(139, 92, 246, 0.25);
-    color: #7c3aed;
-    padding: 5px 14px;
-    border-radius: 50px;
-    font-size: 0.82rem;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    margin-bottom: 12px;
-}
-
-.header-badge i {
-    font-size: 0.85rem;
-}
-
 .header-container h1 {
-    font-size: 2.6rem;
-    font-weight: 900;
-    margin: 0 0 8px;
-    color: #1e1b4b;
-    letter-spacing: -1.5px;
-    line-height: 1.1;
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin: 0 0 5px;
+    color: #000;
 }
 
 .subtitle {
-    color: #5b21b6;
-    font-size: 1.05rem;
-    margin: 0 0 20px;
-    font-weight: 500;
-    max-width: 480px;
-    line-height: 1.6;
-}
-
-.header-stats {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
-
-.stat-item {
-    text-align: center;
-}
-
-.stat-num {
-    display: block;
-    font-size: 1.6rem;
-    font-weight: 900;
-    color: #7c3aed;
-    line-height: 1;
-}
-
-.stat-label {
-    font-size: 0.78rem;
-    color: #7c3aed;
-    font-weight: 600;
-    opacity: 0.7;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.stat-divider {
-    width: 1px;
-    height: 30px;
-    background: rgba(139, 92, 246, 0.3);
-}
-
-.icon-zone {
-    font-size: 5rem;
-    color: #a78bfa;
-    opacity: 0.5;
-    line-height: 1;
+    color: #475569;
+    font-size: 1rem;
+    margin-bottom: 20px;
 }
 
 /* Quick Filters */
@@ -491,23 +404,24 @@ onMounted(fetchData)
     box-shadow: 0 1px 4px rgba(0,0,0,0.05);
 }
 
+.filter-pill i {
+    color: #64748b;
+    font-size: 1.1rem;
+}
+
 .filter-pill:hover {
-    border-color: #7c3aed;
-    background: #f5f3ff;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.15);
+    border-color: #000;
+    background: #f8fafc;
 }
 
 .filter-pill.active {
-    border-color: #7c3aed;
-    background: #7c3aed;
-    color: white;
-    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
-    transform: translateY(-2px);
+    background: #000;
+    color: #fff;
+    border-color: #000;
 }
 
-.filter-pill i {
-    font-size: 0.9rem;
+.filter-pill.active i {
+    color: #fff;
 }
 
 /* ===== MAIN LAYOUT ===== */
@@ -544,8 +458,8 @@ onMounted(fetchData)
     left: 50%;
     transform: translate(-50%, -50%);
     background: white;
-    border: 1.5px solid #7c3aed;
-    color: #7c3aed;
+    border: 1.5px solid #000;
+    color: #000;
     padding: 10px 18px;
     border-radius: 8px;
     font-weight: 700;
@@ -583,7 +497,7 @@ onMounted(fetchData)
     width: 18px;
     height: 18px;
     cursor: pointer;
-    accent-color: #7c3aed;
+    accent-color: #000;
 }
 
 .filter-divider {
@@ -757,7 +671,7 @@ onMounted(fetchData)
     color: #94a3b8;
     box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     transition: 0.2s;
-    z-index: 2;
+    z-index: 50;
 }
 .btn-heart.active { color: #ef4444; }
 .btn-heart:hover { transform: scale(1.1); background: white; }
@@ -794,7 +708,7 @@ onMounted(fetchData)
 }
 
 .landmark-card:hover .place-name {
-    color: #7c3aed;
+    color: #00aa6c;
     text-decoration: underline;
 }
 
@@ -806,7 +720,7 @@ onMounted(fetchData)
 }
 
 .bubbles i {
-    color: #7c3aed;
+    color: #00aa6c;
     font-size: 0.85rem;
     margin-right: 2px;
 }
@@ -829,8 +743,8 @@ onMounted(fetchData)
 
 .cat-label {
     font-weight: 700;
-    color: #7c3aed;
-    background: #f5f3ff;
+    color: #000;
+    background: #f1f5f9;
     padding: 4px 10px;
     border-radius: 5px;
     display: flex;
@@ -863,7 +777,7 @@ onMounted(fetchData)
 .btn-contact {
     background: white;
     color: #1e293b;
-    border: 1.5px solid #ddd6fe;
+    border: 1.5px solid #cbd5e1;
     padding: 10px 20px;
     border-radius: 25px;
     font-weight: 700;
@@ -876,13 +790,12 @@ onMounted(fetchData)
 }
 
 .btn-contact:hover {
-    border-color: #7c3aed;
-    color: #7c3aed;
-    background: #f5f3ff;
+    border-color: #000;
+    background: #f8fafc;
 }
 
 .btn-details {
-    background: #7c3aed;
+    background: #000;
     color: white;
     border: none;
     padding: 10px 24px;
@@ -972,4 +885,8 @@ onMounted(fetchData)
         display: none;
     }
 }
+
+/* -------------------------------------------------------------------------- */
+/*                                  DELETE CSS                                */
+/* -------------------------------------------------------------------------- */
 </style>

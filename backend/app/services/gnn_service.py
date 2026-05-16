@@ -16,8 +16,8 @@ def build_gnn_graph(db: Session):
     data = HeteroData()
     
     # 1. User Features (Multi-hot encoding based on preferences)
-    # Categories: nature, culture, restaurant, hotel, shopping, nightlife
-    pref_cats = ['nature', 'culture', 'restaurant', 'hotel', 'shopping', 'nightlife']
+    # Categories: nature, culture, restaurant, hotel, shopping, nightlife, cafe, local_food, chill, landmark
+    pref_cats = ['nature', 'culture', 'restaurant', 'hotel', 'shopping', 'nightlife', 'cafe', 'local_food', 'chill', 'landmark']
     user_features = []
     
     for user in users:
@@ -40,28 +40,42 @@ def build_gnn_graph(db: Session):
         
     data['user'].x = torch.tensor(user_features, dtype=torch.float)
 
-    # 2. Place Features (Category ID normalized + Rating)
+    # 2. Place Features (One-Hot Category + Rating)
+    pref_cats = ['nature', 'culture', 'restaurant', 'hotel', 'shopping', 'nightlife', 'cafe', 'local_food', 'chill', 'landmark']
     place_features = []
-    # Get max category ID for normalization
-    max_cat_id = db.query(func.max(Category.id)).scalar() or 1
     
     for place in places:
-        cat_feat = float(place.category_id) / max_cat_id
+        # Determine which index to set based on category parent_type
+        cat_feat = [0.0] * len(pref_cats)
+        if place.category and place.category.parent_type in pref_cats:
+            idx = pref_cats.index(place.category.parent_type)
+            cat_feat[idx] = 1.0
+            
         rat_feat = float(place.rating_avg) / 5.0
-        place_features.append([cat_feat, rat_feat])
+        place_features.append(cat_feat + [rat_feat])
+        
     data['place'].x = torch.tensor(place_features, dtype=torch.float)
 
-    # 3. Edges
-    edges = []
-    edge_weights = []
+    # 3. Edges - Aggregate duplicate (user, place) pairs into single edges
+    # This prevents users with many 'view' logs from dominating the graph
+    edge_agg = {}  # (u_idx, p_idx) -> total_weight
 
     for log in logs:
         if log.user_id in user_mapping and log.place_id in place_mapping:
             u_idx = user_mapping[log.user_id]
             p_idx = place_mapping[log.place_id]
             w = float(log.interaction_weight)
+            key = (u_idx, p_idx)
+            edge_agg[key] = edge_agg.get(key, 0.0) + w
+
+    # Normalize weights to reduce popularity bias from heavy users
+    if edge_agg:
+        max_w = max(edge_agg.values())
+        edges = []
+        edge_weights = []
+        for (u_idx, p_idx), w in edge_agg.items():
             edges.append([u_idx, p_idx])
-            edge_weights.append(w)
+            edge_weights.append(w / max_w)  # Normalize to [0, 1]
 
     if edges:
         edge_index = torch.tensor(edges, dtype=torch.long).t().contiguous()

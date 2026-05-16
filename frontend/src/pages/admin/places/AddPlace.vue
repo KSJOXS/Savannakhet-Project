@@ -36,6 +36,26 @@
                                 </div>
                             </div>
 
+                            <div class="input-row" v-if="isHotelCategory" style="margin-top: 15px; background: #f0f9ff; padding: 15px; border-radius: 12px; border: 1px solid #bae6fd;">
+                                <div style="grid-column: 1 / -1; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
+                                    <label class="switch" style="margin-bottom: 0;">
+                                        <input type="checkbox" v-model="showBookingLinks" :disabled="form.is_published">
+                                        <span class="slider round"></span>
+                                    </label>
+                                    <span style="font-weight: 700; color: #0369a1;">Enable Partner Booking Links (Agoda / Booking.com)</span>
+                                </div>
+                                <template v-if="showBookingLinks">
+                                    <div class="input-group" style="margin-bottom: 0;">
+                                        <label style="color: #0369a1; font-weight: 700;"><i class="fas fa-link"></i> Booking.com URL</label>
+                                        <input v-model="form.booking_url" placeholder="https://www.booking.com/hotel/...">
+                                    </div>
+                                    <div class="input-group" style="margin-bottom: 0;">
+                                        <label style="color: #0369a1; font-weight: 700;"><i class="fas fa-link"></i> Agoda URL</label>
+                                        <input v-model="form.agoda_url" placeholder="https://www.agoda.com/...">
+                                    </div>
+                                </template>
+                            </div>
+
                             <div class="input-group" style="margin-top: 10px;">
                                 <label style="color: #6366f1;"><i class="fas fa-paste"></i> Paste Google Maps Plus
                                     Code/Address</label>
@@ -54,6 +74,93 @@
                                 <label>Description <span class="text-danger">*</span></label>
                                 <textarea v-model="form.description" rows="4" placeholder="Place details..."
                                     required></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Premium Details Card -->
+                    <div class="card premium-details-card">
+                        <div class="card-header">
+                            <i class="fas fa-star"></i> <span>Premium Details (Stats & Tags)</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="input-row">
+                                <div class="input-group">
+                                    <label class="label-with-action">
+                                        <span>Best Months (Range)</span>
+                                        <label class="year-round-toggle">
+                                            <input type="checkbox" v-model="form.is_year_round"> 
+                                            <span>Year-round</span>
+                                        </label>
+                                    </label>
+                                    <div style="display: flex; gap: 10px; align-items: center;" v-if="!form.is_year_round">
+                                        <select v-model="form.best_months_start" style="flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1;">
+                                            <option v-for="m in months" :key="m" :value="m">{{ m }}</option>
+                                        </select>
+                                        <span style="color: #94a3b8; font-weight: 600;">to</span>
+                                        <select v-model="form.best_months_end" style="flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1;">
+                                            <option v-for="m in months" :key="m" :value="m">{{ m }}</option>
+                                        </select>
+                                    </div>
+                                    <div v-else style="padding: 10px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; color: #64748b; font-weight: 600; text-align: center;">
+                                        <i class="fas fa-calendar-check" style="margin-right: 8px;"></i> Year-round
+                                    </div>
+                                </div>
+                                <div class="input-group">
+                                    <label>Ideal Stay (e.g. 1 - 2 Days)</label>
+                                    <input v-model="form.ideal_stay" placeholder="2 Days">
+                                </div>
+                            </div>
+                            <div class="input-row">
+                                <div class="input-group">
+                                    <label class="label-with-action">
+                                        <span>Daily Budget (Range in ₭)</span>
+                                        <label class="year-round-toggle">
+                                            <input type="checkbox" v-model="form.is_free"> 
+                                            <span>Free</span>
+                                        </label>
+                                    </label>
+                                    <div v-if="!form.is_free" style="display: flex; gap: 10px; align-items: center;">
+                                        <input type="number" v-model="form.budget_min" placeholder="Min (e.g. 100000)">
+                                        <span>-</span>
+                                        <input type="number" v-model="form.budget_max" placeholder="Max (e.g. 500000)">
+                                    </div>
+                                    <div v-else style="padding: 10px; background: #ecfdf5; border: 1px dashed #10b981; border-radius: 8px; color: #047857; font-weight: 700; text-align: center;">
+                                        <i class="fas fa-gift" style="margin-right: 8px;"></i> Free Entry / No Cost
+                                    </div>
+                                </div>
+                                <div class="input-group">
+                                    <label>Location Display Name (e.g. Savannakhet)</label>
+                                    <input v-model="form.location_name" placeholder="Savannakhet">
+                                </div>
+                            </div>
+
+                            <div class="input-group">
+                                <label>Best For (Tags)</label>
+                                <div class="tag-input-container">
+                                    <div class="tag-pills">
+                                        <span v-for="(tag, idx) in form.best_for" :key="idx" class="tag-pill">
+                                            {{ tag }}
+                                            <i class="fas fa-times" @click="removeTag('best_for', idx)"></i>
+                                        </span>
+                                    </div>
+                                    <input @keydown.enter.prevent="addTag('best_for', $event)" 
+                                        placeholder="Type and press Enter to add tags...">
+                                </div>
+                            </div>
+
+                            <div class="input-group">
+                                <label>Avoid If (Tags)</label>
+                                <div class="tag-input-container">
+                                    <div class="tag-pills">
+                                        <span v-for="(tag, idx) in form.avoid_if" :key="idx" class="tag-pill alert">
+                                            {{ tag }}
+                                            <i class="fas fa-times" @click="removeTag('avoid_if', idx)"></i>
+                                        </span>
+                                    </div>
+                                    <input @keydown.enter.prevent="addTag('avoid_if', $event)" 
+                                        placeholder="Type and press Enter to add tags...">
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -196,7 +303,7 @@
 
 <script setup>
 /* global L */
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted, nextTick, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { placeRepository } from '@/repositories/placeRepository'
 import { categoryRepository } from '@/repositories/categoryRepository'
@@ -207,6 +314,7 @@ const map = ref(null)
 const marker = ref(null)
 const addressPaste = ref('')
 const isSaving = ref(false)
+const showBookingLinks = ref(false)
 
 // 💡 สร้าง 2 Array: 
 // 1. images ไว้เก็บ Base64 โชว์ให้แอดมินดูหน้าเว็บ
@@ -214,14 +322,48 @@ const isSaving = ref(false)
 const images = ref([])
 const rawFiles = ref([])
 
+const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
 const form = ref({
     name: '',
     category_id: '',
     description: '',
     location_lat: 16.5662, // พิกัดเริ่มต้นที่สะหวันนะเขต
     location_lng: 104.7525,
-    is_published: true
+    is_published: true,
+    best_months: '',
+    best_months_start: 'Nov',
+    best_months_end: 'Feb',
+    is_year_round: false,
+    ideal_stay: '',
+    daily_budget: '',
+    budget_min: 150000,
+    budget_max: 500000,
+    is_free: false,
+    location_name: '',
+    best_for: [],
+    avoid_if: [],
+    booking_url: '',
+    agoda_url: ''
 })
+
+const isHotelCategory = computed(() => {
+    if (!form.value.category_id || !categories.value.length) return false
+    const cat = categories.value.find(c => c.id === form.value.category_id)
+    return cat && (cat.parent_type?.toLowerCase() === 'hotel' || cat.name.toLowerCase().includes('hotel'))
+})
+
+const addTag = (field, event) => {
+    const val = event.target.value.trim()
+    if (val && !form.value[field].includes(val)) {
+        form.value[field].push(val)
+        event.target.value = ''
+    }
+}
+
+const removeTag = (field, index) => {
+    form.value[field].splice(index, 1)
+}
 const weekDays = [
     { key: 'mon', label: 'Monday' },
     { key: 'tue', label: 'Tuesday' },
@@ -395,6 +537,24 @@ const savePlace = async () => {
         formData.append('location_lng', form.value.location_lng)
         formData.append('opening_hours', JSON.stringify(openingHours.value))
 
+        // Premium Details
+        const bestMonthsStr = form.value.is_year_round ? 'Year-round' : `${form.value.best_months_start} - ${form.value.best_months_end}`
+        const formatBudget = (val) => {
+            if (!val) return '0'
+            if (val >= 1000) return (val / 1000) + 'k'
+            return val
+        }
+        const budgetStr = form.value.is_free ? 'Free' : `₭ ${formatBudget(form.value.budget_min)} - ${formatBudget(form.value.budget_max)}`
+
+        formData.append('best_months', bestMonthsStr)
+        formData.append('ideal_stay', form.value.ideal_stay || '')
+        formData.append('daily_budget', budgetStr)
+        formData.append('location_name', form.value.location_name || '')
+        formData.append('best_for', JSON.stringify(form.value.best_for || []))
+        formData.append('avoid_if', JSON.stringify(form.value.avoid_if || []))
+        formData.append('booking_url', form.value.booking_url || '')
+        formData.append('agoda_url', form.value.agoda_url || '')
+
         // ยัดไฟล์ทั้งหมดใส่ Key 'images' ให้ FastAPI แปลงเป็น List[UploadFile]
         rawFiles.value.forEach((file) => {
             formData.append('images', file)
@@ -498,6 +658,7 @@ onMounted(async () => {
     border: 1px solid #e2e8f0;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     margin-bottom: 25px;
+    overflow: hidden;
 }
 
 .card-header {
@@ -805,18 +966,18 @@ textarea:focus {
 }
 
 .time-input {
-    padding: 8px 10px;
-    border: 1.5px solid #e2e8f0;
+    padding: 6px 5px;
+    font-size: 0.8rem;
+    text-align: center;
+    border: 1px solid #e2e8f0;
+    width: 95px;
     border-radius: 8px;
     background: white;
     color: #0f172a;
     font-family: 'Kanit', sans-serif;
-    font-size: 0.85rem;
     font-weight: 700;
-    width: 95px;
     outline: none;
     transition: 0.2s;
-    text-align: center;
 }
 
 .time-input:focus {
@@ -1044,5 +1205,74 @@ input:checked+.slider {
 
 input:checked+.slider:before {
     transform: translateX(24px);
+}
+
+/* Tag Input Styles */
+.tag-input-container {
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 10px;
+    background: white;
+    min-height: 45px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    transition: 0.2s;
+}
+
+.tag-input-container:focus-within {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.tag-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tag-pill {
+    background: #eff6ff;
+    color: #1d4ed8;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid #dbeafe;
+}
+
+.tag-pill.alert {
+    background: #fff1f2;
+    color: #e11d48;
+    border-color: #ffe4e6;
+}
+
+.tag-pill i {
+    cursor: pointer;
+    font-size: 0.75rem;
+    opacity: 0.6;
+    transition: 0.2s;
+}
+
+.tag-pill i:hover {
+    opacity: 1;
+    transform: scale(1.2);
+}
+
+.tag-input-container input {
+    flex: 1;
+    min-width: 150px;
+    border: none !important;
+    padding: 4px !important;
+    font-size: 0.85rem !important;
+    background: transparent !important;
+}
+
+.tag-input-container input:focus {
+    outline: none !important;
 }
 </style>

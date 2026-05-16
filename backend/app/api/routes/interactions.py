@@ -52,3 +52,31 @@ def test_build_graph(db: Session = Depends(get_db)):
         }
     except Exception as e:
         return {"status": "error", "message": str(e)}
+
+@router.get("/user/{user_id}/frequent")
+def get_frequent_interactions(user_id: int, limit: int = 5, db: Session = Depends(get_db)):
+    """
+    ดึงข้อมูลสถานที่ที่ผู้ใช้คนนี้ เข้าดูบ่อยที่สุด (Frequently Viewed)
+    โดยคำนวณจาก InteractionLog
+    """
+    from sqlalchemy import func
+    from app.models import InteractionLog, Place
+    
+    results = db.query(
+        InteractionLog.place_id,
+        func.count(InteractionLog.id).label('view_count')
+    ).filter(InteractionLog.user_id == user_id)\
+     .group_by(InteractionLog.place_id)\
+     .order_by(func.count(InteractionLog.id).desc())\
+     .limit(limit).all()
+     
+    frequent_places = []
+    for r in results:
+        place = db.query(Place).filter(Place.id == r.place_id).first()
+        if place:
+            frequent_places.append({
+                "place": place,
+                "view_count": r.view_count
+            })
+            
+    return frequent_places

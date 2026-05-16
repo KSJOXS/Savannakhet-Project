@@ -6,6 +6,8 @@ class ItineraryRequest(BaseModel):
     days: int = Field(default=1, ge=1, le=5)
     user_id: Optional[int] = None
     preferences: Optional[List[str]] = None
+    month: Optional[int] = Field(default=None, ge=1, le=12)
+    budget: Optional[str] = None
 
 # --- User ---
 class UserBase(BaseModel):
@@ -47,6 +49,16 @@ class PlaceBase(BaseModel):
     opening_hours: Optional[dict] = None
     owner_id: Optional[int] = None
     status: str = "pending"
+    
+    # Premium Details
+    best_months: Optional[str] = None
+    ideal_stay: Optional[str] = None
+    daily_budget: Optional[str] = None
+    location_name: Optional[str] = None
+    best_for: Optional[List[str]] = None
+    avoid_if: Optional[List[str]] = None
+    booking_url: Optional[str] = None
+    agoda_url: Optional[str] = None
 
 class PlaceUpdate(PlaceBase):
     """ใช้สำหรับ PUT request ตอนแก้ไขข้อมูล"""
@@ -60,6 +72,14 @@ class PlaceResponse(PlaceBase):
     class Config: from_attributes = True
     location_lat: Optional[float] = None
     location_lng: Optional[float] = None
+
+class PlaceSectionResponse(BaseModel):
+    id: int
+    place_id: int
+    image_url: Optional[str] = None
+    description: Optional[str] = None
+    order_index: int = 0
+    class Config: from_attributes = True
 
 # --- Category & Review ---
 class CategoryCreate(BaseModel):
@@ -205,4 +225,12 @@ class ItineraryResponse(BaseModel):
     days: int
     created_at: datetime
     items: List[ItineraryItemResponse]
-    class Config: from_attributes = True
+    class Config: from_attributes = True
+
+class SwapPlaceRequest(BaseModel):
+    current_place_id: Optional[int] = None
+    time_slot: str
+    month: Optional[int] = None
+    preferences: Optional[List[str]] = None
+    budget: Optional[str] = None
+    used_place_ids: List[int] = []

@@ -80,8 +80,8 @@
                                 <i class="fas fa-magic"></i>
                             </div>
                             <div class="banner-text">
-                                <h3>AI Trip Planner</h3>
-                                <p>Plan a 2-3 day trip easily!</p>
+                                <h3>{{ t('explore.ai_planner_title') }}</h3>
+                                <p>{{ t('explore.ai_planner_subtitle') }}</p>
                             </div>
                             <i class="fas fa-arrow-right arrow-icon"></i>
                         </div>
@@ -164,7 +164,7 @@
                         @click="goToDetail(place.id)">
                         <div class="card-img-wrapper">
                             <img :src="getCoverImage(place)" :alt="place.name" />
-                            <div class="rank-badge">Top Rated</div>
+                            <div class="rank-badge">{{ t('recommend.top_rated_badge') }}</div>
                             <button v-if="!user || user.role !== 'admin'" class="btn-heart"
                                 :class="{ active: isFavorite(place.id) }" @click.stop="toggleHeart(place.id)">
                                 <i class="fas fa-heart"></i>
@@ -226,49 +226,45 @@
             </div>
         </section>
 
-        <section class="history-section">
-            <div class="container history-container">
-                <div class="history-images">
-                    <img src="https://images.unsplash.com/photo-1540611025311-01df3cef54b5?q=80&w=800"
-                        alt="Savannakhet City" class="history-main-img" />
-                    <div class="history-float-img">
-                        <img src="https://images.unsplash.com/photo-1590352528795-9b2f6f5df5fb?q=80&w=400"
+        <section class="heritage-section">
+            <div class="container heritage-container">
+                <div class="heritage-images">
+                    <img src="/images/heritage/main.png"
+                        alt="Savannakhet Heritage" class="heritage-main-img" />
+                    <div class="heritage-float-img">
+                        <img src="/images/heritage/culture.png"
                             alt="Lao Culture" />
                     </div>
                 </div>
-                <div class="history-content">
-                    <p class="section-eyebrow">Discover The Heritage</p>
-                    <h2>เรื่องราวของนครไกสอน พมวิหาน <br>(แขวงสะหวันนะเขต)</h2>
-                    <p>
-                        <strong>"สะหวันนะเขต"</strong> หรือที่ปัจจุบันรู้จักกันในชื่อ <strong>นครไกสอน พมวิหาน</strong>
-                        เป็นแขวงที่ใหญ่ที่สุดและมีประชากรมากที่สุดในประเทศลาว ตั้งอยู่ริมฝั่งแม่น้ำโขง
-                        ตรงข้ามกับจังหวัดมุกดาหารของประเทศไทย
+                <div class="heritage-content">
+                    <p class="section-eyebrow">{{ t('heritage.eyebrow') }}</p>
+                    <h2 class="heritage-title" v-html="t('heritage.title')"></h2>
+                    <p class="heritage-desc">
+                        {{ t('heritage.desc1') }}
                     </p>
-                    <p>
-                        เมืองแห่งนี้เต็มไปด้วยเสน่ห์ที่ผสมผสานระหว่างอารยธรรมดั้งเดิมและสถาปัตยกรรมยุคอาณานิคมฝรั่งเศส
-                        (French Colonial) ที่ยังคงหลงเหลืออยู่ตามตึกรามบ้านช่องใจกลางเมือง
-                        นอกจากนี้ยังมีแหล่งค้นพบฟอสซิลไดโนเสาร์แห่งแรกของลาวอีกด้วย
+                    <p class="heritage-desc">
+                        {{ t('heritage.desc2') }}
                     </p>
-                    <ul class="history-highlights">
+                    <ul class="heritage-highlights">
                         <li>
                             <div class="highlight-icon"><i class="fas fa-landmark"></i></div>
-                            <div>
-                                <strong>สถาปัตยกรรมโคโลเนียล</strong>
-                                <span>เดินชมตึกเก่าสุดคลาสสิกที่ใจกลางเมืองเก่า</span>
+                            <div class="highlight-text">
+                                <strong>{{ t('heritage.highlight1_title') }}</strong>
+                                <span>{{ t('heritage.highlight1_desc') }}</span>
                             </div>
                         </li>
                         <li>
                             <div class="highlight-icon"><i class="fas fa-vihara"></i></div>
-                            <div>
-                                <strong>พระธาตุอิงฮัง</strong>
-                                <span>ปูชนียสถานศักดิ์สิทธิ์ ศูนย์รวมจิตใจของชาวสะหวันนะเขต</span>
+                            <div class="highlight-text">
+                                <strong>{{ t('heritage.highlight2_title') }}</strong>
+                                <span>{{ t('heritage.highlight2_desc') }}</span>
                             </div>
                         </li>
                         <li>
                             <div class="highlight-icon"><i class="fas fa-bone"></i></div>
-                            <div>
-                                <strong>พิพิธภัณฑ์ไดโนเสาร์</strong>
-                                <span>ชมฟอสซิลไดโนเสาร์อายุนับล้านปีที่ถูกค้นพบในแขวงนี้</span>
+                            <div class="highlight-text">
+                                <strong>{{ t('heritage.highlight3_title') }}</strong>
+                                <span>{{ t('heritage.highlight3_desc') }}</span>
                             </div>
                         </li>
                     </ul>
@@ -302,6 +298,7 @@ const searchQuery = ref('')
 const selectedCategory = ref(null)
 const favoriteIds = ref([])
 const recommendedPlaces = ref([])
+const recentInteractionCategoryIds = ref([])
 
 // 🏞️ ข้อมูลสำหรับ Hero Slider (ดึงจาก Settings)
 const heroImages = ref([])
@@ -367,7 +364,12 @@ const fetchData = async () => {
     try {
         const [resPlaces, resCats] = await Promise.all([placeRepository.getAll(), categoryRepository.getAll()])
         places.value = resPlaces.data
-        categories.value = resCats.data
+        
+        // Remove duplicate categories by name
+        categories.value = resCats.data.filter((cat, index, self) =>
+            index === self.findIndex((c) => c.name === cat.name)
+        );
+        
         featuredPlaces.value = resPlaces.data.slice(0, 3)
 
         if (user.value && user.value.role !== 'admin') {
@@ -384,13 +386,30 @@ const fetchData = async () => {
             try {
                 // 🤖 Call GNN Recommendation Engine
                 const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+                
+                // Fetch Recent Interactions to get "Current Interest Categories"
+                const interactionRes = await axios.get(`${backendUrl}/api/interactions/user/${user.value.id}/frequent?limit=10`);
+                if (interactionRes.data && interactionRes.data.length > 0) {
+                    recentInteractionCategoryIds.value = [
+                        ...new Set(interactionRes.data.map(item => item.place.category_id))
+                    ];
+                }
+
                 const aiRes = await axios.get(`${backendUrl}/api/recommendations/${user.value.id}?top_k=12`);
                 if (aiRes.data.status === 'success' && aiRes.data.recommended_places?.length > 0) {
-                    // Response format: { recommended_places: [{place: {...}, reason: "...", score: 0.9}] }
                     recommendedPlaces.value = aiRes.data.recommended_places.filter(item => item.place != null);
+                } else {
+                    // 🔄 Fallback: ดึง "สถานที่ดูบ่อย" แบบธรรมดาถ้า AI ยังไม่พร้อม
+                    if (interactionRes.data && interactionRes.data.length > 0) {
+                        recommendedPlaces.value = interactionRes.data.map(item => ({
+                            place: item.place,
+                            reason: t('recommend.viewed_often') || 'สถานที่ที่คุณดูบ่อยช่วงนี้',
+                            score: 0.95
+                        }));
+                    }
                 }
             } catch (aiErr) {
-                console.warn("GNN not ready yet — will show top-rated instead", aiErr);
+                console.warn("AI Recommendations not ready — using recently viewed instead", aiErr);
             }
         }
     } catch (err) { console.error("API Error:", err) } finally { loading.value = false }
@@ -464,15 +483,29 @@ const filteredPlaces = computed(() => {
         return matchesSearch && matchesCat
     })
 
-    // Sort: Preferred categories first, then by rating
+    const recommendedIds = recommendedPlaces.value.map(item => item.place.id)
+
+    // Sort: AI/Frequently Viewed first, then Interaction-based, then Preferred categories, then by rating
     return [...results].sort((a, b) => {
+        // 1. AI Recommendation Priority (Strongest)
+        const aIsRecommended = recommendedIds.includes(a.id)
+        const bIsRecommended = recommendedIds.includes(b.id)
+        if (aIsRecommended && !bIsRecommended) return -1
+        if (!aIsRecommended && bIsRecommended) return 1
+
+        // 2. Recent Interaction Category Match (Warm Start - based on actual views/likes)
+        const aIsRecent = recentInteractionCategoryIds.value.includes(a.category_id)
+        const bIsRecent = recentInteractionCategoryIds.value.includes(b.category_id)
+        if (aIsRecent && !bIsRecent) return -1
+        if (!aIsRecent && bIsRecent) return 1
+
+        // 3. Signup Preference Category Match (Cold Start)
         const aIsPreferred = userPreferredCategoryIds.value.includes(a.category_id)
         const bIsPreferred = userPreferredCategoryIds.value.includes(b.category_id)
-
         if (aIsPreferred && !bIsPreferred) return -1
         if (!aIsPreferred && bIsPreferred) return 1
 
-        // Otherwise sort by rating
+        // 4. Rating Priority (Fallback)
         return (parseFloat(b.rating_avg) || 0) - (parseFloat(a.rating_avg) || 0)
     })
 })
@@ -500,7 +533,11 @@ const toggleHeart = async (placeId) => {
 }
 const isFavorite = (id) => favoriteIds.value.includes(id)
 
-onMounted(() => { fetchData() })
+onMounted(async () => { 
+    window.scrollTo(0, 0)
+    await fetchData() 
+    window.scrollTo(0, 0)
+})
 onUnmounted(() => { if (heroInterval) clearInterval(heroInterval) })
 </script>
 
@@ -543,6 +580,31 @@ onUnmounted(() => { if (heroInterval) clearInterval(heroInterval) })
     transition: opacity 1s ease;
     position: absolute;
     inset: 0;
+}
+
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4));
+    z-index: 1;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 10;
+    padding: 0 20px;
+}
+
+.hero-content h1 {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 800;
+    margin-bottom: 10px;
+    letter-spacing: -1px;
+}
+
+.hero-content p {
+    font-size: clamp(1rem, 2vw, 1.3rem);
+    opacity: 0.9;
 }
 
 .slide-fade-enter-from,
@@ -927,7 +989,7 @@ onUnmounted(() => { if (heroInterval) clearInterval(heroInterval) })
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     color: #94a3b8;
     transition: 0.2s;
-    z-index: 10;
+    z-index: 50;
 }
 
 .btn-heart.active {
@@ -1089,8 +1151,9 @@ onUnmounted(() => { if (heroInterval) clearInterval(heroInterval) })
 .filter-card {
     background: white;
     padding: 25px;
-    border-radius: 16px;
-    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    border: none;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.06);
     color: #1e293b;
 }
 
@@ -1119,22 +1182,27 @@ onUnmounted(() => { if (heroInterval) clearInterval(heroInterval) })
 
 .input-with-icon i {
     position: absolute;
-    left: 12px;
-    color: #94a3b8;
+    left: 16px;
+    color: #64748b;
+    font-size: 1.1rem;
+    transition: color 0.3s ease;
 }
 
 .input-with-icon input {
     width: 100%;
-    padding: 10px 10px 10px 35px;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    background: #f8fafc;
+    padding: 12px 16px 12px 42px;
+    border: 2px solid transparent;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    background: #f1f5f9;
     outline: none;
+    transition: all 0.3s ease;
 }
 
 .input-with-icon input:focus {
     border-color: #3498db;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.1);
 }
 
 .category-list {
@@ -1144,43 +1212,49 @@ onUnmounted(() => { if (heroInterval) clearInterval(heroInterval) })
 }
 
 .cat-pill {
-    padding: 6px 14px;
-    border-radius: 20px;
-    border: 1px solid #cbd5e1;
-    background: white;
+    padding: 8px 16px;
+    border-radius: 50px;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
     color: #475569;
     font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
-    transition: 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .cat-pill:hover {
-    border-color: #000;
-    color: #000;
+    border-color: #cbd5e1;
+    background: #e2e8f0;
+    color: #0f172a;
+    transform: translateY(-1px);
 }
 
 .cat-pill.active {
-    background: #000;
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
     color: white;
-    border-color: #000;
+    border-color: transparent;
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+    transform: translateY(-1px);
 }
 
 .btn-clear {
     width: 100%;
     padding: 12px;
-    margin-top: 20px;
-    background: none;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
+    margin-top: 25px;
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 12px;
     font-weight: 700;
-    color: #1e293b;
+    color: #64748b;
     cursor: pointer;
-    transition: 0.2s;
+    transition: all 0.3s ease;
 }
 
 .btn-clear:hover {
     background: #f1f5f9;
+    border-color: #94a3b8;
+    color: #334155;
 }
 
 .results-bar {
@@ -1200,130 +1274,174 @@ onUnmounted(() => { if (heroInterval) clearInterval(heroInterval) })
 }
 
 /* ─── 🚨 History Section CSS 🚨 ─── */
-.history-section {
+/* ─── 🚨 Heritage Section (Beautified) 🚨 ─── */
+.heritage-section {
     background-color: #ffffff;
-    padding: 80px 20px;
-    border-top: 1px solid #e2e8f0;
+    padding: 100px 20px;
+    border-top: 1px solid #f1f5f9;
+    position: relative;
+    overflow: hidden;
 }
 
-.history-container {
+.heritage-container {
     max-width: 1200px;
     margin: 0 auto;
     display: grid;
-    grid-template-columns: 1fr 1.1fr;
-    gap: 60px;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
     align-items: center;
 }
 
-.history-images {
+.heritage-images {
     position: relative;
     width: 100%;
 }
 
-.history-main-img {
-    width: 90%;
-    height: 500px;
+.heritage-main-img {
+    width: 95%;
+    height: 550px;
     object-fit: cover;
-    border-radius: 20px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border-radius: 24px;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.12);
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.history-float-img {
+.heritage-images:hover .heritage-main-img {
+    transform: scale(1.02);
+}
+
+.heritage-float-img {
     position: absolute;
-    bottom: -30px;
-    right: 0;
-    width: 50%;
-    height: 250px;
-    border-radius: 16px;
+    bottom: -40px;
+    right: -20px;
+    width: 55%;
+    height: 280px;
+    border-radius: 20px;
     overflow: hidden;
-    border: 8px solid white;
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+    border: 10px solid white;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.history-float-img img {
+.heritage-images:hover .heritage-float-img {
+    transform: translateY(-10px) rotate(2deg);
+}
+
+.heritage-float-img img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
-.history-content {
-    padding-right: 20px;
+.heritage-content {
+    padding-left: 20px;
 }
 
-.history-content h2 {
-    font-size: 2.2rem;
+.heritage-title {
+    font-size: 2.8rem;
     font-weight: 800;
-    color: #1e293b;
-    line-height: 1.3;
-    margin-bottom: 20px;
+    color: #0f172a;
+    line-height: 1.2;
+    margin-bottom: 24px;
+    font-family: 'Playfair Display', serif; /* Elegant title font */
 }
 
-.history-content p {
-    font-size: 1.05rem;
+.heritage-desc {
+    font-size: 1.1rem;
     color: #475569;
-    line-height: 1.7;
-    margin-bottom: 16px;
+    line-height: 1.8;
+    margin-bottom: 20px;
+    font-weight: 400;
 }
 
-.history-highlights {
+.heritage-highlights {
     list-style: none;
     padding: 0;
-    margin-top: 30px;
+    margin-top: 40px;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 25px;
 }
 
-.history-highlights li {
+.heritage-highlights li {
     display: flex;
-    align-items: flex-start;
-    gap: 16px;
+    align-items: center;
+    gap: 20px;
+    padding: 15px;
+    border-radius: 16px;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.heritage-highlights li:hover {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+    transform: translateX(10px);
 }
 
 .highlight-icon {
-    width: 45px;
-    height: 45px;
-    background: #f0f9ff;
-    color: #3498db;
-    border-radius: 12px;
+    width: 54px;
+    height: 54px;
+    background: #f1f5f9;
+    color: #00aa6c; /* Consistent brand color */
+    border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.2rem;
+    font-size: 1.4rem;
     flex-shrink: 0;
+    transition: all 0.3s ease;
 }
 
-.history-highlights li strong {
+.heritage-highlights li:hover .highlight-icon {
+    background: #00aa6c;
+    color: white;
+    transform: scale(1.1) rotate(-5deg);
+}
+
+.highlight-text strong {
     display: block;
-    color: #1e293b;
-    font-size: 1.05rem;
+    color: #0f172a;
+    font-size: 1.1rem;
+    font-weight: 700;
     margin-bottom: 4px;
 }
 
-.history-highlights li span {
+.highlight-text span {
     color: #64748b;
-    font-size: 0.9rem;
-    line-height: 1.4;
+    font-size: 0.95rem;
+    line-height: 1.5;
 }
 
 @media (max-width: 992px) {
-    .history-container {
+    .heritage-container {
         grid-template-columns: 1fr;
-        gap: 50px;
+        gap: 60px;
+        text-align: center;
     }
 
-    .history-main-img {
+    .heritage-main-img {
         width: 100%;
-        height: 400px;
+        height: 450px;
     }
 
-    .history-float-img {
+    .heritage-float-img {
         width: 60%;
-        right: 20px;
+        right: 10px;
+        bottom: -30px;
     }
 
-    .history-content {
-        padding-right: 0;
+    .heritage-content {
+        padding-left: 0;
+    }
+
+    .heritage-title {
+        font-size: 2.2rem;
+    }
+    
+    .heritage-highlights li {
+        justify-content: center;
+        text-align: left;
     }
 }
 
@@ -1470,4 +1588,5 @@ onUnmounted(() => { if (heroInterval) clearInterval(heroInterval) })
         margin-bottom: 20px;
     }
 }
+
 </style>

@@ -90,7 +90,8 @@ const closeMap = () => {
 };
 
 const goToDetail = (id) => {
-    window.open(`/places/${id}`, '_blank');
+    const baseUrl = import.meta.env.BASE_URL || '/';
+    window.open(`${baseUrl}#/places/${id}`, '_blank');
 };
 
 const getCoverImage = (place) => {
@@ -178,8 +179,9 @@ const renderMarkers = () => {
         const bubblesHtml = [1,2,3,4,5].map(s => `<i class="${(place.rating_avg || 0) >= s ? 'fas' : 'far'} fa-circle"></i>`).join('');
         const descText = place.description ? place.description.substring(0, 80) + '...' : 'View details for more information.';
         
+        const baseUrl = import.meta.env.BASE_URL || '/';
         const popupContentHtml = `
-            <div class="leaflet-custom-card" onclick="window.open('#/places/${place.id}', '_blank')">
+            <div class="leaflet-custom-card" onclick="window.open('${baseUrl}#/places/${place.id}', '_blank')">
                 <div class="card-img-wrapper">
                     <img src="${getCoverImage(place)}" alt="${place.name}" />
                     <button class="btn-heart-popup" onclick="event.stopPropagation()"><i class="far fa-heart"></i></button>

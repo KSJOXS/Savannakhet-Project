@@ -158,7 +158,7 @@ onMounted(fetchData)
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700;800;900&display=swap');
 
 .recently-viewed-section {
-    max-width: 1400px;
+    max-width: 1800px;
     margin: 80px auto;
     padding: 0 40px;
     font-family: 'Inter', sans-serif;
@@ -224,12 +224,12 @@ onMounted(fetchData)
 }
 
 .recent-card {
-    flex: 0 0 320px;
+    flex: 0 0 360px;
     position: relative;
     background: #0f172a;
     border-radius: 4px;
     overflow: hidden;
-    height: 400px;
+    height: 450px;
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
     border: none;
@@ -301,21 +301,6 @@ onMounted(fetchData)
     background: white;
 }
 
-.category-badge {
-    position: absolute;
-    bottom: 15px;
-    left: 15px;
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(8px);
-    color: #1e293b;
-    padding: 5px 12px;
-    border-radius: 8px;
-    font-size: 0.75rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
 
 .card-content {
     position: relative;
@@ -335,10 +320,13 @@ onMounted(fetchData)
     font-weight: 800;
     font-family: 'Playfair Display', serif;
     color: white;
-    white-space: nowrap;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
     line-height: 1.2;
+    white-space: normal;
 }
 
 .rating-bar {

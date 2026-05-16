@@ -6,7 +6,15 @@ from app import schemas
 import shutil
 import os
 import json
+import logging
 from typing import List, Optional
+
+# Setup logging
+logging.basicConfig(
+    filename='debug.log',
+    level=logging.ERROR,
+    format='%(asctime)s %(levelname)s: %(message)s'
+)
 
 router = APIRouter(tags=["Places Management"])
 UPLOAD_DIR = "static/places"
@@ -98,6 +106,15 @@ async def submit_place(
     location_lng: Optional[float] = Form(None),
     user_id: int = Form(...),
     opening_hours: Optional[str] = Form(None),
+    best_months: Optional[str] = Form(None),
+    ideal_stay: Optional[str] = Form(None),
+    daily_budget: Optional[str] = Form(None),
+    location_name: Optional[str] = Form(None),
+    best_for: Optional[str] = Form(None), # JSON string
+    avoid_if: Optional[str] = Form(None), # JSON string
+    booking_url: Optional[str] = Form(None),
+    agoda_url: Optional[str] = Form(None),
+    is_published: int = Form(1),
     images: Optional[List[UploadFile]] = File(None),
     db: Session = Depends(get_db)
 ):
@@ -128,10 +145,18 @@ async def submit_place(
         location_lat=location_lat,
         location_lng=location_lng,
         image_url=image_url_data,
-        is_published=False,
+        is_published=bool(is_published),
         status="pending",
         owner_id=user_id,
         opening_hours=parsed_hours,
+        best_months=best_months,
+        ideal_stay=ideal_stay,
+        daily_budget=daily_budget,
+        location_name=location_name,
+        best_for=json.loads(best_for) if best_for else [],
+        avoid_if=json.loads(avoid_if) if avoid_if else [],
+        booking_url=booking_url,
+        agoda_url=agoda_url,
         rating_avg=0.0
     )
     db.add(new_place)
@@ -149,6 +174,14 @@ async def create_place(
     location_lng: Optional[float] = Form(None),
     is_published: int = Form(1),
     opening_hours: Optional[str] = Form(None),  # JSON string
+    best_months: Optional[str] = Form(None),
+    ideal_stay: Optional[str] = Form(None),
+    daily_budget: Optional[str] = Form(None),
+    location_name: Optional[str] = Form(None),
+    best_for: Optional[str] = Form(None), # JSON string
+    avoid_if: Optional[str] = Form(None), # JSON string
+    booking_url: Optional[str] = Form(None),
+    agoda_url: Optional[str] = Form(None),
     images: Optional[List[UploadFile]] = File(None),
     db: Session = Depends(get_db)
 ):
@@ -182,6 +215,14 @@ async def create_place(
         is_published=bool(is_published),
         status="approved",
         opening_hours=parsed_hours,
+        best_months=best_months,
+        ideal_stay=ideal_stay,
+        daily_budget=daily_budget,
+        location_name=location_name,
+        best_for=json.loads(best_for) if best_for else [],
+        avoid_if=json.loads(avoid_if) if avoid_if else [],
+        booking_url=booking_url,
+        agoda_url=agoda_url,
         rating_avg=0.0
     )
     db.add(new_place)
@@ -200,40 +241,73 @@ async def update_place(
     location_lng: Optional[float] = Form(None),
     is_published: int = Form(1),
     opening_hours: Optional[str] = Form(None),  # JSON string
+    best_months: Optional[str] = Form(None),
+    ideal_stay: Optional[str] = Form(None),
+    daily_budget: Optional[str] = Form(None),
+    location_name: Optional[str] = Form(None),
+    best_for: Optional[str] = Form(None), # JSON string
+    avoid_if: Optional[str] = Form(None), # JSON string
+    booking_url: Optional[str] = Form(None),
+    agoda_url: Optional[str] = Form(None),
     images: Optional[List[UploadFile]] = File(None),
     db: Session = Depends(get_db)
 ):
-    db_place = db.query(models.Place).filter(models.Place.id == place_id).first()
-    if not db_place:
-        raise HTTPException(status_code=404, detail="Place not found.")
+    try:
+        db_place = db.query(models.Place).filter(models.Place.id == place_id).first()
+        if not db_place:
+            raise HTTPException(status_code=404, detail="Place not found.")
 
-    db_place.name = name
-    db_place.category_id = category_id
-    db_place.description = description
-    db_place.location_lat = location_lat
-    db_place.location_lng = location_lng
-    db_place.is_published = bool(is_published)
+        db_place.name = name
+        db_place.category_id = category_id
+        db_place.description = description
+        db_place.location_lat = location_lat
+        db_place.location_lng = location_lng
+        db_place.is_published = bool(is_published)
 
-    if opening_hours is not None:
-        try:
-            db_place.opening_hours = json.loads(opening_hours)
-        except Exception:
-            pass
+        if opening_hours is not None:
+            try:
+                db_place.opening_hours = json.loads(opening_hours)
+            except Exception:
+                pass
+                
+        # Update Premium Details
+        db_place.best_months = best_months
+        db_place.ideal_stay = ideal_stay
+        db_place.daily_budget = daily_budget
+        db_place.location_name = location_name
+        if best_for is not None:
+            try:
+                db_place.best_for = json.loads(best_for)
+            except Exception:
+                pass
+        if avoid_if is not None:
+            try:
+                db_place.avoid_if = json.loads(avoid_if)
+            except Exception:
+                pass
 
-    if images and images[0].filename:
-        os.makedirs(UPLOAD_DIR, exist_ok=True)
-        image_urls = []
-        for file in images:
-            if file.filename:
-                file_path = f"{UPLOAD_DIR}/{file.filename}"
-                with open(file_path, "wb") as buffer:
-                    shutil.copyfileobj(file.file, buffer)
-                image_urls.append(f"/{file_path}")
-        
-        db_place.image_url = json.dumps(image_urls)
+        if booking_url is not None:
+            db_place.booking_url = booking_url
+        if agoda_url is not None:
+            db_place.agoda_url = agoda_url
 
-    db.commit()
-    return {"message": "Place updated successfully."}
+        if images and images[0].filename:
+            os.makedirs(UPLOAD_DIR, exist_ok=True)
+            image_urls = []
+            for file in images:
+                if file.filename:
+                    file_path = f"{UPLOAD_DIR}/{file.filename}"
+                    with open(file_path, "wb") as buffer:
+                        shutil.copyfileobj(file.file, buffer)
+                    image_urls.append(f"/{file_path}")
+            
+            db_place.image_url = json.dumps(image_urls)
+
+        db.commit()
+        return {"message": "Place updated successfully."}
+    except Exception as e:
+        logging.error(f"Error updating place {place_id}: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
 
 # --- Admin: Delete place ---
 @router.delete("/admin/places/{place_id}")

@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Text, ForeignKey, Numeric, JSON, DateTime, Boolean
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
-from sqlalchemy.dialects.mysql import LONGTEXT  # เพิ่มตัวนี้เพื่อรองรับ Base64 ยาวๆ
+from sqlalchemy.dialects.mysql import LONGTEXT  
 from app.database import Base
 
 class Category(Base):
@@ -36,6 +36,19 @@ class Place(Base):
     status = Column(String(20), default="pending")  # 'pending', 'approved', 'rejected'
     
     rating_avg = Column(Numeric(3, 2), default=0)
+    
+    # Booking Links
+    booking_url = Column(Text, nullable=True)
+    agoda_url = Column(Text, nullable=True)
+    
+    # Premium Details
+    best_months = Column(String(100), nullable=True)
+    ideal_stay = Column(String(100), nullable=True)
+    daily_budget = Column(String(100), nullable=True)
+    location_name = Column(String(100), nullable=True)
+    best_for = Column(JSON, nullable=True)  # List of strings
+    avoid_if = Column(JSON, nullable=True)  # List of strings
+    
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # ความสัมพันธ์
@@ -43,6 +56,7 @@ class Place(Base):
     interactions = relationship("Interaction", back_populates="place")
     favorites = relationship("Favorite", back_populates="place", cascade="all, delete")
     owner = relationship("User", back_populates="owned_places")
+    sections = relationship("PlaceSection", back_populates="place", cascade="all, delete-orphan", order_by="PlaceSection.order_index")
 
 class User(Base):
     __tablename__ = "users"
@@ -136,6 +150,20 @@ class InteractionLog(Base):
     # เชื่อมกลับ
     user = relationship("User", backref="interaction_logs")
     place = relationship("Place", backref="interaction_logs")
+
+class PlaceSection(Base):
+    """Stores rich content sections for a place (image + description), like a travel article."""
+    __tablename__ = "place_sections"
+
+    id = Column(Integer, primary_key=True, index=True)
+    place_id = Column(Integer, ForeignKey("places.id", ondelete="CASCADE"), nullable=False)
+    image_url = Column(String(500), nullable=True)   # path to uploaded image
+    description = Column(Text, nullable=True)         # rich text / paragraph
+    order_index = Column(Integer, default=0)          # display order
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    place = relationship("Place", back_populates="sections")
+
 
 class PasswordReset(Base):
     __tablename__ = "password_resets"

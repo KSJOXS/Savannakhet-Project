@@ -17,21 +17,21 @@
                     
                     <div class="booking-divider"></div>
                     
-                    <div class="booking-input dates">
-                        <i class="far fa-calendar-alt"></i>
-                        <div class="input-content">
-                            <label>{{ t('hotels.checkInCheckOut') }}</label>
-                            <input type="text" :placeholder="t('hotels.addDates')" />
-                        </div>
-                    </div>
-                    
                     <div class="booking-divider"></div>
                     
-                    <div class="booking-input guests">
-                        <i class="far fa-user"></i>
+                    <div class="booking-input budget" @click.stop="showBudgetDropdown = !showBudgetDropdown">
+                        <i class="fas fa-wallet"></i>
                         <div class="input-content">
-                            <label>{{ t('hotels.guests') }}</label>
-                            <input type="text" :value="t('hotels.adultsRoom')" readonly />
+                            <label>{{ t('hotels.budget') }}</label>
+                            <div class="input-value">{{ selectedBudgetText }}</div>
+                        </div>
+
+                        <div class="dropdown-menu budget-dropdown" v-if="showBudgetDropdown" @click.stop>
+                            <div class="dropdown-item" v-for="b in budgets" :key="b.id" 
+                                :class="{ active: selectedBudget === b.id }"
+                                @click="selectedBudget = b.id; showBudgetDropdown = false">
+                                {{ b.label }}
+                            </div>
                         </div>
                     </div>
                     
@@ -130,7 +130,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { placeRepository } from '@/repositories/placeRepository'
 import { categoryRepository } from '@/repositories/categoryRepository'
@@ -151,6 +151,20 @@ const favoriteIds = ref([])
 const loading = ref(true)
 const selectedCategories = ref([])
 const showMapModal = ref(false)
+
+const selectedBudget = ref('any')
+const showBudgetDropdown = ref(false)
+
+const budgets = computed(() => [
+    { id: 'any', label: t('hotels.budgetAny') },
+    { id: 'economy', label: t('hotels.budgetEconomy') },
+    { id: 'midRange', label: t('hotels.budgetMidRange') },
+    { id: 'luxury', label: t('hotels.budgetLuxury') }
+])
+
+const selectedBudgetText = computed(() => {
+    return budgets.value.find(b => b.id === selectedBudget.value)?.label || t('hotels.budgetAny')
+})
 
 const fetchData = async () => {
     loading.value = true
@@ -183,6 +197,15 @@ const filteredHotels = computed(() => {
         return cat && cat.parent_type?.toLowerCase() === 'hotel'
     })
 
+    // Budget Filter
+    if (selectedBudget.value !== 'any') {
+        results = results.filter(p => {
+            if (!p.daily_budget) return false
+            const budgetLevel = getBudgetLevel(p.daily_budget)
+            return budgetLevel === selectedBudget.value
+        })
+    }
+
     if (selectedCategories.value.length > 0) {
         results = results.filter(p => {
             const cat = categories.value.find(c => c.id === p.category_id)
@@ -191,6 +214,24 @@ const filteredHotels = computed(() => {
     }
     return results
 })
+
+const getBudgetLevel = (budgetString) => {
+    if (!budgetString) return 'any'
+    if (budgetString.toLowerCase().includes('free')) return 'economy'
+    
+    const numbers = budgetString.match(/\d+(,\d+)*(\.\d+)?/g)
+    if (!numbers) return 'any'
+    
+    let price = parseFloat(numbers[0].replace(/,/g, ''))
+    
+    // Currency conversion if needed
+    if (budgetString.includes('฿')) price = price * 600
+    if (budgetString.includes('$')) price = price * 20000
+
+    if (price < 200000) return 'economy'
+    if (price <= 600000) return 'midRange'
+    return 'luxury'
+}
 
 const hotelCategories = computed(() => {
     return categories.value.filter(c => c.parent_type === 'hotel')
@@ -256,7 +297,18 @@ const toggleHeart = async (id) => {
 
 const goToDetail = (id) => router.push(`/places/${id}`)
 
-onMounted(fetchData)
+const closeDropdowns = () => {
+    showBudgetDropdown.value = false
+}
+
+onMounted(() => {
+    fetchData()
+    document.addEventListener('click', closeDropdowns)
+})
+
+onUnmounted(() => {
+    document.removeEventListener('click', closeDropdowns)
+})
 </script>
 
 <style scoped>
@@ -332,6 +384,50 @@ onMounted(fetchData)
     margin-left: 10px;
 }
 .btn-update-search:hover { background: #334155; }
+
+/* Budget Selector Styles */
+.booking-input.budget {
+    position: relative;
+}
+
+.input-value {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #000;
+}
+
+.budget-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    width: 220px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    z-index: 100;
+    padding: 8px;
+}
+
+.dropdown-item {
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #475569;
+    transition: 0.2s;
+    cursor: pointer;
+}
+
+.dropdown-item:hover {
+    background: #f1f5f9;
+    color: #000;
+}
+
+.dropdown-item.active {
+    background: #000;
+    color: white;
+}
 
 /* --- Main Layout --- */
 .main-layout {
@@ -437,7 +533,7 @@ onMounted(fetchData)
 .dot { width: 6px; height: 6px; background: rgba(255, 255, 255, 0.6); border-radius: 50%; transition: 0.2s; }
 .dot.active { background: white; transform: scale(1.3); }
 
-.btn-heart { position: absolute; top: 15px; right: 15px; background: white; border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.2); font-size: 1.1rem; color: #94a3b8; transition: 0.2s; z-index: 10;}
+.btn-heart { position: absolute; top: 15px; right: 15px; background: white; border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.2); font-size: 1.1rem; color: #94a3b8; transition: 0.2s; z-index: 50;}
 .btn-heart.active { color: #ef4444; }
 .btn-heart:hover { transform: scale(1.1); }
 .img-counter { position: absolute; bottom: 15px; left: 15px; background: rgba(0,0,0,0.6); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; gap: 6px;}
@@ -551,4 +647,5 @@ onMounted(fetchData)
     color: #64748b;
     font-size: 1rem;
 }
+
 </style>

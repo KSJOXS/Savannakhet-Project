@@ -117,7 +117,7 @@ const routes = [
         component: Profile
     },
     {
-        path: '/submit-place',
+        path: '/submit-place/:id?',
         name: 'SubmitPlace',
         component: SubmitPlace
     },
@@ -246,7 +246,11 @@ const router = createRouter({
      * วิธีนี้จะเติม /#/ ใน URL เพื่อให้ GitHub Pages ทำงานร่วมกับ Vue Router ได้โดยไม่จอขาว
      */
     history: createWebHashHistory(import.meta.env.BASE_URL),
-    routes
+    routes,
+    scrollBehavior(to, from, savedPosition) {
+        // Always scroll to top on navigation
+        return { top: 0 }
+    }
 })
 
 // 🔐 Navigation Guard: ตรวจสอบสิทธิ์การเข้าถึง

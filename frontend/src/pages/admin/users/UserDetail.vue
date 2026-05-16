@@ -87,7 +87,15 @@
                             <div class="list-details">
                                 <div class="list-header">
                                     <h4 @click="openExternal(place.id)">{{ place.name }} <i class="fas fa-external-link-alt small-icon"></i></h4>
-                                    <span class="place-status-badge" :class="place.status">{{ place.status }}</span>
+                                    <div class="status-actions">
+                                        <span class="place-status-badge" :class="place.status">{{ place.status }}</span>
+                                        <button v-if="place.status !== 'rejected'" class="btn-action-delete" @click="handleUpdatePlaceStatus(place.id, 'rejected')" title="Delete Place">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                        <button v-else class="btn-action-restore" @click="handleUpdatePlaceStatus(place.id, 'approved')" title="Restore Place">
+                                            <i class="fas fa-undo"></i> Restore
+                                        </button>
+                                    </div>
                                 </div>
                                 <p class="list-desc">{{ truncate(place.description, 100) }}</p>
                             </div>
@@ -133,6 +141,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { userRepository } from '@/repositories/userRepository'
+import { placeRepository } from '@/repositories/placeRepository'
 
 const route = useRoute()
 const router = useRouter()
@@ -143,6 +152,24 @@ const userProfile = ref(null)
 const userPlaces = ref([])
 const userReviews = ref([])
 const activeTab = ref('places')
+const updatingStatus = ref(false)
+
+const handleUpdatePlaceStatus = async (placeId, newStatus) => {
+    if (newStatus === 'rejected' && !confirm('Are you sure you want to delete this place?')) return
+    
+    updatingStatus.value = true
+    try {
+        await placeRepository.updateStatus(placeId, newStatus)
+        // Update local state
+        const place = userPlaces.value.find(p => p.id === placeId)
+        if (place) place.status = newStatus
+    } catch (err) {
+        console.error("Failed to update place status:", err)
+        alert("Failed to update status")
+    } finally {
+        updatingStatus.value = false
+    }
+}
 
 const fetchData = async () => {
     loading.value = true
@@ -195,7 +222,8 @@ const formatDate = (dateString) => {
 }
 
 const openExternal = (placeId) => {
-    window.open(`/places/${placeId}`, '_blank')
+    const routeData = router.resolve({ path: `/places/${placeId}` });
+    window.open(routeData.href, '_blank')
 }
 
 onMounted(() => {
@@ -356,6 +384,47 @@ onMounted(() => {
 .place-status-badge.approved { background: #d1fae5; color: #059669; }
 .place-status-badge.pending { background: #fef3c7; color: #d97706; }
 .place-status-badge.rejected { background: #fee2e2; color: #ef4444; }
+
+.status-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-action-delete {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 4px;
+    transition: 0.2s;
+}
+
+.btn-action-delete:hover {
+    color: #ef4444;
+    background: #fee2e2;
+}
+
+.btn-action-restore {
+    background: #d1fae5;
+    color: #059669;
+    border: 1px solid #059669;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-action-restore:hover {
+    background: #059669;
+    color: white;
+}
 
 .list-desc { margin: 0 0 15px 0; color: #64748b; font-size: 0.95rem; line-height: 1.5; }
 
