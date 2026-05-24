@@ -368,18 +368,18 @@
 
                             <p class="upload-hint">
                                 <i class="fas fa-info-circle"></i>
-                                First image = Cover photo. Max 10 images.
+                                {{ t('submit.uploadHint') }}
                             </p>
                         </div>
                     </div>
 
                     <div class="card opening-hours-card">
                         <div class="card-header">
-                            <i class="fas fa-clock"></i> <span>Opening Hours</span>
+                            <i class="fas fa-clock"></i> <span>{{ t('submit.openingHours') }}</span>
                             <div class="oh-actions">
-                                <button type="button" @click="setAllClosed(false)" class="btn-oh-action">Open</button>
-                                <button type="button" @click="setAllClosed(true)" class="btn-oh-action">Close</button>
-                                <button type="button" @click="copyMondayToAll" class="btn-oh-action highlight">Copy Mon</button>
+                                <button type="button" @click="setAllClosed(false)" class="btn-oh-action">{{ t('submit.open') }}</button>
+                                <button type="button" @click="setAllClosed(true)" class="btn-oh-action">{{ t('submit.close') }}</button>
+                                <button type="button" @click="copyMondayToAll" class="btn-oh-action highlight">{{ t('submit.copyMon') }}</button>
                             </div>
                         </div>
                         <div class="card-body">
@@ -642,7 +642,7 @@ const searchFromAddress = () => {
             map.value.setView(center, 17)
             updateMarkerPosition(center.lat, center.lng)
         } else {
-            alert('Location not found. Try copying exact coordinates.')
+            alert(t('submit.errLocationNotFound', 'Location not found. Try copying exact coordinates.'))
         }
     })
 }
@@ -661,7 +661,7 @@ const onFileChange = (e) => {
         if (images.value.length >= 10) return
         
         if (file.size > 5 * 1024 * 1024) {
-            alert(`File ${file.name} is too large (Max 5MB).`)
+            alert(t('submit.errFileTooLarge', `File ${file.name} is too large (Max 5MB).`).replace('{name}', file.name))
             return
         }
 
@@ -691,12 +691,12 @@ const setCover = (index) => {
 
 const submitPlace = async () => {
     if (!form.value.name || !form.value.category_id || !form.value.description) {
-        alert("Please fill in Name, Category, and Description.")
+        alert(t('submit.errFillRequired', 'Please fill in Name, Category, and Description.'))
         return
     }
     
     if(!user.value || !user.value.id) {
-        alert("You must be logged in to submit a place.")
+        alert(t('submit.errMustBeLoggedIn', 'You must be logged in to submit a place.'))
         router.push('/login')
         return
     }
@@ -737,16 +737,16 @@ const submitPlace = async () => {
 
         if (isEditMode.value) {
             await placeRepository.update(route.params.id, formData)
-            alert('✅ Place updated successfully!')
+            alert(t('submit.successUpdate', '✅ Place updated successfully!'))
         } else {
             await placeRepository.submit(formData)
-            alert('🎉 Place submitted successfully! Waiting for admin approval.')
+            alert(t('submit.successSubmit', '🎉 Place submitted successfully! Waiting for admin approval.'))
         }
         
         router.push('/profile?tab=places')
     } catch (error) {
         console.error("Submit Error:", error)
-        alert('❌ Failed to submit place.')
+        alert(t('submit.errSubmit', '❌ Failed to submit place.'))
     } finally {
         isSaving.value = false
     }
@@ -762,10 +762,10 @@ const requestPermission = async () => {
         const updatedUser = { ...user.value, post_permission_status: 'pending' }
         login(updatedUser, localStorage.getItem('access_token'))
         
-        alert('Permission request sent successfully!')
+        alert(t('submit.successPermission', 'Permission request sent successfully!'))
     } catch (error) {
         console.error(error)
-        alert('Failed to request permission.')
+        alert(t('submit.errPermission', 'Failed to request permission.'))
     } finally {
         isRequesting.value = false
     }
@@ -781,13 +781,24 @@ onMounted(async () => {
     try {
         const profileRes = await userRepository.getProfile(user.value.id)
         const profileData = profileRes.data
-        permissionStatus.value = profileData.post_permission_status || 'none'
+        
+        // Admins should always have approved status
+        if (profileData.role === 'admin') {
+            permissionStatus.value = 'approved'
+        } else {
+            permissionStatus.value = profileData.post_permission_status || 'none'
+        }
         
         // Update local context
         login(profileData, localStorage.getItem('access_token'))
     } catch(e) {
         console.error("Could not fetch user profile", e)
-        permissionStatus.value = 'none'
+        // Check if user object already has admin role as fallback
+        if (user.value && user.value.role === 'admin') {
+            permissionStatus.value = 'approved'
+        } else {
+            permissionStatus.value = 'none'
+        }
     }
 
     if (permissionStatus.value === 'approved' || isEditMode.value) {
@@ -2042,5 +2053,125 @@ input:checked + .slider:before, input:checked + .oh-slider:before {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+/* Permission State Cards */
+.permission-state-card {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 60px 20px;
+    animation: fadeInDown 0.5s ease-out;
+}
+
+.permission-card {
+    max-width: 500px;
+    width: 100%;
+    text-align: center;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 24px;
+    box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    position: relative;
+    overflow: hidden;
+}
+
+.permission-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+}
+
+.permission-card .card-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px 20px;
+}
+
+.permission-icon {
+    font-size: 3.5rem;
+    color: #3b82f6;
+    margin-bottom: 20px;
+    background: #eff6ff;
+    width: 100px;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.15);
+}
+
+.permission-icon.pending {
+    color: #f59e0b;
+    background: #fffbeb;
+    box-shadow: 0 8px 20px rgba(245, 158, 11, 0.15);
+}
+
+.permission-card h2 {
+    font-size: 1.6rem;
+    color: #1e293b;
+    margin-bottom: 12px;
+    font-weight: 700;
+}
+
+.permission-card p {
+    color: #64748b;
+    font-size: 1.05rem;
+    line-height: 1.6;
+    margin-bottom: 30px;
+}
+
+.btn-request {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    border: none;
+    padding: 14px 30px;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+    width: 100%;
+    font-family: 'Kanit', sans-serif;
+}
+
+.btn-request:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
+}
+
+.btn-request:disabled {
+    background: #94a3b8;
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-cancel {
+    background: white;
+    color: #64748b;
+    border: 2px solid #e2e8f0;
+    padding: 12px 30px;
+    border-radius: 12px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    font-family: 'Kanit', sans-serif;
+}
+
+.btn-cancel:hover {
+    background: #f8fafc;
+    color: #0f172a;
+    border-color: #cbd5e1;
 }
 </style>

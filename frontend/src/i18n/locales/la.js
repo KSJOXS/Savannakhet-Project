@@ -38,6 +38,7 @@ export default {
     userGuide: 'ຄູ່ມືຜູ້ໃຊ້',
     contactSupport: 'ຕິດຕໍ່ຝ່າຍການສະໜັບສະໜູນ',
     reportIssue: 'ລາຍງານບັນຫາ',
+    support: 'ສະໜັບສະໜູນ',
   },
 
   // --- Contact Page ---
@@ -626,6 +627,15 @@ export default {
     idealStayPlaceholder: 'ເຊັ່ນ 1 - 2 ວັນ',
     locationPlaceholder: 'ເຊັ່ນ ສະຫວັນນະເຂດ',
     goBack: 'ກັບຄືນ',
+    errLocationNotFound: 'ບໍ່ພົບສະຖານທີ່ ລອງສຳເນົາພິກັດທີ່ແນ່ນອນ',
+    errFileTooLarge: 'ໄຟລ໌ {name} ໃຫຍ່ເກີນໄປ (ສູງສຸດ 5MB)',
+    errFillRequired: 'ກະລຸນາຕື່ມຊື່, ໝວດໝູ່, ແລະລາຍລະອຽດ',
+    errMustBeLoggedIn: 'ທ່ານຕ້ອງເຂົ້າສູ່ລະບົບກ່ອນເພື່ອເພີ່ມສະຖານທີ່',
+    successUpdate: '✅ ອັບເດດສະຖານທີ່ສຳເລັດ!',
+    successSubmit: '🎉 ສົ່ງສະຖານທີ່ສຳເລັດ! ລໍຖ້າການອະນຸມັດຈາກຜູ້ດູແລລະບົບ',
+    errSubmit: '❌ ການສົ່ງສະຖານທີ່ລົ້ມເຫລວ',
+    successPermission: 'ສົ່ງຄຳຂໍສິດສຳເລັດແລ້ວ!',
+    errPermission: 'ບໍ່ສາມາດສົ່ງຄຳຂໍສິດໄດ້',
   },
   heritage: {
     eyebrow: 'Discover The Heritage',

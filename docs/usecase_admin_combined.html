@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Sơ đồ phân rã chức năng Admin - Savannakhet Smart Travel</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #f0f0f0; display: flex; flex-direction: column; align-items: center; padding: 20px; font-family: 'Segoe UI', Arial, sans-serif; }
+        h2 { margin-bottom: 12px; color: #222; }
+        .btn-dl { padding: 10px 30px; font-size: 14px; background: #222; color: #fff; border: none; border-radius: 6px; cursor: pointer; margin-bottom: 12px; }
+        .btn-dl:hover { background: #555; }
+        canvas { background: #fff; border: 1px solid #bbb; box-shadow: 0 2px 14px rgba(0,0,0,0.08); }
+        .caption { margin-top: 10px; font-style: italic; color: #555; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <h2>Sơ đồ phân rã chức năng Admin</h2>
+    <button class="btn-dl" onclick="downloadPNG()">⬇ Tải xuống PNG</button>
+    <canvas id="canvas" width="1050" height="920"></canvas>
+    <div class="caption">Hình 2.7 Sơ đồ phân rã chức năng Quản trị viên (Admin)</div>
+
+    <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const F = '"Segoe UI", Arial, sans-serif';
+
+    function oval(cx,cy,rx,ry,label,fs){
+        fs=fs||12;
+        ctx.beginPath();ctx.ellipse(cx,cy,rx,ry,0,0,Math.PI*2);
+        ctx.strokeStyle='#000';ctx.lineWidth=1.6;ctx.stroke();ctx.fillStyle='#fff';ctx.fill();
+        ctx.fillStyle='#000';ctx.font=`${fs}px ${F}`;ctx.textAlign='center';ctx.textBaseline='middle';
+        const lines=label.split('\n'),lh=fs+2,sy=cy-((lines.length-1)*lh)/2;
+        lines.forEach((l,i)=>ctx.fillText(l,cx,sy+i*lh));
+    }
+
+    function actor(x,y,name){
+        ctx.strokeStyle='#000';ctx.lineWidth=1.6;
+        ctx.beginPath();ctx.arc(x,y-24,10,0,Math.PI*2);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(x,y-14);ctx.lineTo(x,y+12);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(x-14,y-2);ctx.lineTo(x+14,y-2);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(x,y+12);ctx.lineTo(x-12,y+30);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(x,y+12);ctx.lineTo(x+12,y+30);ctx.stroke();
+        ctx.fillStyle='#000';ctx.font=`bold 13px ${F}`;ctx.textAlign='center';
+        ctx.fillText(name,x,y+48);
+    }
+
+    function solid(x1,y1,x2,y2){
+        ctx.beginPath();ctx.strokeStyle='#000';ctx.lineWidth=1.3;ctx.setLineDash([]);
+        ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+    }
+
+    function dashed(x1,y1,x2,y2,label){
+        ctx.beginPath();ctx.strokeStyle='#000';ctx.lineWidth=1.2;ctx.setLineDash([6,3]);
+        ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();ctx.setLineDash([]);
+        const a=Math.atan2(y2-y1,x2-x1),h=9;
+        ctx.beginPath();ctx.moveTo(x2,y2);ctx.lineTo(x2-h*Math.cos(a-.4),y2-h*Math.sin(a-.4));
+        ctx.moveTo(x2,y2);ctx.lineTo(x2-h*Math.cos(a+.4),y2-h*Math.sin(a+.4));
+        ctx.strokeStyle='#000';ctx.lineWidth=1.2;ctx.stroke();
+        if(label){
+            const mx=(x1+x2)/2,my=(y1+y2)/2;
+            ctx.font=`10px ${F}`;const tw=ctx.measureText(label).width;
+            ctx.fillStyle='#fff';ctx.fillRect(mx-tw/2-3,my-8,tw+6,16);
+            ctx.fillStyle='#000';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(label,mx,my);
+        }
+    }
+
+    function edge(cx,cy,rx,ry,tx,ty){
+        const a=Math.atan2(ty-cy,tx-cx);
+        return {x:cx+rx*Math.cos(a),y:cy+ry*Math.sin(a)};
+    }
+
+    function connect_solid(ax,ay,cx,cy,rx,ry){
+        const e=edge(cx,cy,rx,ry,ax,ay);solid(ax,ay,e.x,e.y);
+    }
+
+    function connect_include(c1x,c1y,r1x,r1y,c2x,c2y,r2x,r2y){
+        const e1=edge(c1x,c1y,r1x,r1y,c2x,c2y),e2=edge(c2x,c2y,r2x,r2y,c1x,c1y);
+        dashed(e1.x,e1.y,e2.x,e2.y,'<<include>>');
+    }
+
+    function connect_extends(extx,exty,erx,ery,cx,cy,rx,ry){
+        const e1=edge(extx,exty,erx,ery,cx,cy),e2=edge(cx,cy,rx,ry,extx,exty);
+        dashed(e1.x,e1.y,e2.x,e2.y,'<<Extends>>');
+    }
+
+    const R=95,Rh=26,S=85,Sh=23;
+
+    function draw(){
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.fillStyle='#fff';
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+
+        // ===== ACTOR =====
+        const ax=65, ay=450;
+        actor(ax, ay, 'Admin');
+
+        // ===== LOGIN (shared) =====
+        const login={x:780, y:80};
+        oval(login.x, login.y, R, Rh, 'Đăng nhập');
+
+        // ===================================================
+        //  USE CASE 1: Quản lý địa điểm (top section)
+        // ===================================================
+        const uc1={x:330, y:160};
+        oval(uc1.x, uc1.y, R, Rh, 'Quản lý địa điểm');
+        connect_solid(ax+14, ay-10, uc1.x-R+10, uc1.y+Rh-5);
+        connect_include(uc1.x,uc1.y,R,Rh, login.x,login.y,R,Rh);
+
+        // Extends
+        const e1a={x:680, y:155};
+        const e1b={x:680, y:220};
+        const e1c={x:680, y:285};
+        const e1d={x:910, y:155};
+        const e1e={x:910, y:220};
+        oval(e1a.x,e1a.y,S,Sh,'Thêm địa điểm mới',11);
+        oval(e1b.x,e1b.y,S,Sh,'Sửa thông tin\nđịa điểm',11);
+        oval(e1c.x,e1c.y,S,Sh,'Xóa địa điểm',11);
+        oval(e1d.x,e1d.y,S,Sh,'Phê duyệt\nđịa điểm mới',11);
+        oval(e1e.x,e1e.y,S,Sh,'Quản lý danh mục',11);
+
+        [e1a,e1b,e1c,e1d,e1e].forEach(e=>connect_extends(e.x,e.y,S,Sh, uc1.x,uc1.y,R,Rh));
+
+        // ===================================================
+        //  USE CASE 2: Quản lý người dùng (middle section)
+        // ===================================================
+        const uc2={x:330, y:470};
+        oval(uc2.x, uc2.y, R, Rh, 'Quản lý người dùng');
+        connect_solid(ax+14, ay, uc2.x-R+10, uc2.y);
+        connect_include(uc2.x,uc2.y,R,Rh, login.x,login.y,R,Rh);
+
+        const e2a={x:680, y:390};
+        const e2b={x:680, y:450};
+        const e2c={x:680, y:510};
+        const e2d={x:680, y:570};
+        const e2e={x:910, y:450};
+        oval(e2a.x,e2a.y,S,Sh,'Xem thông tin\nngười dùng',11);
+        oval(e2b.x,e2b.y,S,Sh,'Khóa tài khoản\n(Suspend)',11);
+        oval(e2c.x,e2c.y,S,Sh,'Mở khóa tài khoản\n(Restore)',11);
+        oval(e2d.x,e2d.y,S,Sh,'Phê duyệt quyền\nđăng bài',11);
+        oval(e2e.x,e2e.y,S,Sh,'Xóa đánh giá\nngười dùng',11);
+
+        [e2a,e2b,e2c,e2d,e2e].forEach(e=>connect_extends(e.x,e.y,S,Sh, uc2.x,uc2.y,R,Rh));
+
+        // ===================================================
+        //  USE CASE 3: Dashboard & AI (bottom section)
+        // ===================================================
+        const uc3={x:330, y:770};
+        oval(uc3.x, uc3.y, R, Rh, 'Dashboard &\nAI Control Room');
+        connect_solid(ax+14, ay+10, uc3.x-R+10, uc3.y-Rh+5);
+        connect_include(uc3.x,uc3.y,R,Rh, login.x,login.y,R,Rh);
+
+        const e3a={x:680, y:680};
+        const e3b={x:680, y:740};
+        const e3c={x:680, y:800};
+        const e3d={x:680, y:860};
+        const e3e={x:910, y:740};
+        oval(e3a.x,e3a.y,S,Sh,'Xem tổng quan\nthống kê hệ thống',11);
+        oval(e3b.x,e3b.y,S,Sh,'Xem biểu đồ\ndanh mục',11);
+        oval(e3c.x,e3c.y,S,Sh,'Xem Top 5\nđịa điểm',11);
+        oval(e3d.x,e3d.y,S,Sh,'Huấn luyện AI\n(Train GNN)',11);
+        oval(e3e.x,e3e.y,S,Sh,'Xem biểu đồ\nLoss & Accuracy',11);
+
+        [e3a,e3b,e3c,e3d,e3e].forEach(e=>connect_extends(e.x,e.y,S,Sh, uc3.x,uc3.y,R,Rh));
+
+        // ===== Divider lines (nhẹ) =====
+        ctx.setLineDash([4,6]);
+        ctx.strokeStyle='#bbb';
+        ctx.lineWidth=0.7;
+
+        ctx.beginPath();ctx.moveTo(180,330);ctx.lineTo(1040,330);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(180,630);ctx.lineTo(1040,630);ctx.stroke();
+        ctx.setLineDash([]);
+    }
+
+    draw();
+
+    function downloadPNG(){
+        const link = document.createElement('a');
+        link.download = 'phanra_admin_all.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    }
+    </script>
+</body>
+</html>

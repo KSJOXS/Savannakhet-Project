@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Use Case Diagram - Tìm kiếm địa điểm</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+        h2 { margin-bottom: 10px; color: #333; }
+        .btn-bar { margin-bottom: 15px; }
+        .btn-bar button {
+            padding: 10px 28px;
+            font-size: 15px;
+            background: #222;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 0 5px;
+        }
+        .btn-bar button:hover { background: #555; }
+        canvas {
+            background: #fff;
+            border: 1px solid #ccc;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+    </style>
+</head>
+<body>
+    <h2>Use Case Diagram: Phân rã "Người dùng tìm kiếm địa điểm"</h2>
+    <div class="btn-bar">
+        <button onclick="downloadPNG()">⬇ Tải xuống PNG</button>
+    </div>
+    <canvas id="canvas" width="1100" height="780"></canvas>
+
+    <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    // ===== Drawing Helpers =====
+    function drawOval(cx, cy, rx, ry, label, fontSize) {
+        fontSize = fontSize || 13;
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 1.8;
+        ctx.stroke();
+        ctx.fillStyle = '#fff';
+        ctx.fill();
+
+        // Draw text (multi-line support)
+        ctx.fillStyle = '#000';
+        ctx.font = `${fontSize}px "Segoe UI", Arial, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        const lines = label.split('\n');
+        const lineH = fontSize + 3;
+        const startY = cy - ((lines.length - 1) * lineH) / 2;
+        lines.forEach((line, i) => {
+            ctx.fillText(line, cx, startY + i * lineH);
+        });
+    }
+
+    function drawActor(x, y, name) {
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 1.8;
+        // Head
+        ctx.beginPath();
+        ctx.arc(x, y - 28, 12, 0, Math.PI * 2);
+        ctx.stroke();
+        // Body
+        ctx.beginPath();
+        ctx.moveTo(x, y - 16);
+        ctx.lineTo(x, y + 16);
+        ctx.stroke();
+        // Arms
+        ctx.beginPath();
+        ctx.moveTo(x - 16, y - 4);
+        ctx.lineTo(x + 16, y - 4);
+        ctx.stroke();
+        // Left leg
+        ctx.beginPath();
+        ctx.moveTo(x, y + 16);
+        ctx.lineTo(x - 14, y + 38);
+        ctx.stroke();
+        // Right leg
+        ctx.beginPath();
+        ctx.moveTo(x, y + 16);
+        ctx.lineTo(x + 14, y + 38);
+        ctx.stroke();
+        // Label
+        ctx.fillStyle = '#000';
+        ctx.font = '14px "Segoe UI", Arial, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(name, x, y + 56);
+    }
+
+    function drawSolidLine(x1, y1, x2, y2) {
+        ctx.beginPath();
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([]);
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+    }
+
+    function drawDashedArrow(x1, y1, x2, y2, label) {
+        ctx.beginPath();
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 1.3;
+        ctx.setLineDash([7, 4]);
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Arrowhead
+        const angle = Math.atan2(y2 - y1, x2 - x1);
+        const headLen = 10;
+        ctx.beginPath();
+        ctx.moveTo(x2, y2);
+        ctx.lineTo(x2 - headLen * Math.cos(angle - 0.4), y2 - headLen * Math.sin(angle - 0.4));
+        ctx.moveTo(x2, y2);
+        ctx.lineTo(x2 - headLen * Math.cos(angle + 0.4), y2 - headLen * Math.sin(angle + 0.4));
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 1.3;
+        ctx.stroke();
+
+        // Label on the line
+        if (label) {
+            const mx = (x1 + x2) / 2;
+            const my = (y1 + y2) / 2;
+            ctx.fillStyle = '#fff';
+            const tw = ctx.measureText(label).width;
+            ctx.fillRect(mx - tw / 2 - 3, my - 8, tw + 6, 16);
+            ctx.fillStyle = '#000';
+            ctx.font = '11px "Segoe UI", Arial, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(label, mx, my);
+        }
+    }
+
+    function drawBoundary(x, y, w, h, title) {
+        ctx.beginPath();
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([]);
+        ctx.rect(x, y, w, h);
+        ctx.stroke();
+
+        ctx.fillStyle = '#000';
+        ctx.font = 'bold 15px "Segoe UI", Arial, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(title, x + w / 2, y + 22);
+    }
+
+    // ===== Get edge point of ellipse towards a target =====
+    function ovalEdge(cx, cy, rx, ry, tx, ty) {
+        const angle = Math.atan2(ty - cy, tx - cx);
+        return {
+            x: cx + rx * Math.cos(angle),
+            y: cy + ry * Math.sin(angle)
+        };
+    }
+
+    // ===== DRAW THE DIAGRAM =====
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // --- Boundary box ---
+        drawBoundary(160, 20, 920, 740, 'Savannakhet Smart Travel System');
+
+        // --- Actor ---
+        const actorX = 80, actorY = 360;
+        drawActor(actorX, actorY, 'Người dùng');
+
+        // --- Oval sizes ---
+        const RX = 95, RY = 28;
+        const SRX = 88, SRY = 25;
+
+        // ============ MAIN USE CASE ============
+        const mainX = 370, mainY = 360;
+        drawOval(mainX, mainY, RX + 5, RY + 2, 'Tìm kiếm địa điểm', 14);
+
+        // Actor → Main (solid line)
+        const edgeMain = ovalEdge(mainX, mainY, RX + 5, RY + 2, actorX, actorY);
+        drawSolidLine(actorX + 16, actorY, edgeMain.x, edgeMain.y);
+
+        // ============ <<include>> USE CASES ============
+
+        // 1. Đăng nhập (top-left)
+        const loginX = 370, loginY = 110;
+        drawOval(loginX, loginY, SRX, SRY, 'Đăng nhập');
+        let e1 = ovalEdge(mainX, mainY, RX + 5, RY + 2, loginX, loginY);
+        let e1t = ovalEdge(loginX, loginY, SRX, SRY, mainX, mainY);
+        drawDashedArrow(e1.x, e1.y, e1t.x, e1t.y, '<<include>>');
+
+        // 2. Lọc theo danh mục (right-top)
+        const filterX = 650, filterY = 210;
+        drawOval(filterX, filterY, SRX, SRY, 'Lọc theo danh mục');
+        let e2 = ovalEdge(mainX, mainY, RX + 5, RY + 2, filterX, filterY);
+        let e2t = ovalEdge(filterX, filterY, SRX, SRY, mainX, mainY);
+        drawDashedArrow(e2.x, e2.y, e2t.x, e2t.y, '<<include>>');
+
+        // 3. Xem chi tiết địa điểm (right-center)
+        const detailX = 650, detailY = 360;
+        drawOval(detailX, detailY, RX, RY + 2, 'Xem chi tiết địa điểm', 13);
+        let e3 = ovalEdge(mainX, mainY, RX + 5, RY + 2, detailX, detailY);
+        let e3t = ovalEdge(detailX, detailY, RX, RY + 2, mainX, mainY);
+        drawDashedArrow(e3.x, e3.y, e3t.x, e3t.y, '<<include>>');
+
+        // ============ <<extends>> FROM "Xem chi tiết" ============
+
+        // 4. Xem bản đồ GPS
+        const gpsX = 920, gpsY = 210;
+        drawOval(gpsX, gpsY, SRX, SRY, 'Xem bản đồ GPS');
+        let e4 = ovalEdge(gpsX, gpsY, SRX, SRY, detailX, detailY);
+        let e4t = ovalEdge(detailX, detailY, RX, RY + 2, gpsX, gpsY);
+        drawDashedArrow(e4.x, e4.y, e4t.x, e4t.y, '<<extends>>');
+
+        // 5. Xem đánh giá (Review)
+        const reviewX = 920, reviewY = 310;
+        drawOval(reviewX, reviewY, SRX, SRY, 'Xem đánh giá');
+        let e5 = ovalEdge(reviewX, reviewY, SRX, SRY, detailX, detailY);
+        let e5t = ovalEdge(detailX, detailY, RX, RY + 2, reviewX, reviewY);
+        drawDashedArrow(e5.x, e5.y, e5t.x, e5t.y, '<<extends>>');
+
+        // 6. Thêm vào yêu thích
+        const favX = 920, favY = 410;
+        drawOval(favX, favY, SRX, SRY, 'Thêm vào yêu thích');
+        let e6 = ovalEdge(favX, favY, SRX, SRY, detailX, detailY);
+        let e6t = ovalEdge(detailX, detailY, RX, RY + 2, favX, favY);
+        drawDashedArrow(e6.x, e6.y, e6t.x, e6t.y, '<<extends>>');
+
+        // 7. Xem địa điểm tương tự (AI)
+        const simX = 920, simY = 510;
+        drawOval(simX, simY, SRX, SRY, 'Xem địa điểm\ntương tự (AI)');
+        let e7 = ovalEdge(simX, simY, SRX, SRY, detailX, detailY);
+        let e7t = ovalEdge(detailX, detailY, RX, RY + 2, simX, simY);
+        drawDashedArrow(e7.x, e7.y, e7t.x, e7t.y, '<<extends>>');
+
+        // ============ <<extends>> FROM "Tìm kiếm" ============
+
+        // 8. Xem địa điểm Trending
+        const trendX = 370, trendY = 560;
+        drawOval(trendX, trendY, SRX, SRY, 'Xem địa điểm Trending');
+        let e8 = ovalEdge(trendX, trendY, SRX, SRY, mainX, mainY);
+        let e8t = ovalEdge(mainX, mainY, RX + 5, RY + 2, trendX, trendY);
+        drawDashedArrow(e8.x, e8.y, e8t.x, e8t.y, '<<extends>>');
+
+        // 9. Nhận gợi ý AI (For You)
+        const aiX = 370, aiY = 680;
+        drawOval(aiX, aiY, SRX, SRY, 'Nhận gợi ý AI\n(For You)');
+        let e9 = ovalEdge(aiX, aiY, SRX, SRY, mainX, mainY);
+        let e9t = ovalEdge(mainX, mainY, RX + 5, RY + 2, aiX, aiY);
+        drawDashedArrow(e9.x, e9.y, e9t.x, e9t.y, '<<extends>>');
+    }
+
+    draw();
+
+    function downloadPNG() {
+        const link = document.createElement('a');
+        link.download = 'usecase_tim_kiem_dia_diem.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    }
+    </script>
+</body>
+</html>

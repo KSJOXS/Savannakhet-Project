@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Sơ đồ phân rã chức năng - Savannakhet Smart Travel</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #f0f0f0; display: flex; flex-direction: column; align-items: center; padding: 20px; font-family: 'Segoe UI', Arial, sans-serif; }
+        h2 { margin-bottom: 12px; color: #222; }
+        .tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; justify-content: center; }
+        .tabs button { padding: 9px 18px; font-size: 13px; background: #fff; color: #333; border: 2px solid #ccc; border-radius: 6px; cursor: pointer; transition: all .2s; }
+        .tabs button:hover { background: #e0e0e0; }
+        .tabs button.active { background: #222; color: #fff; border-color: #222; }
+        .btn-dl { padding: 10px 30px; font-size: 14px; background: #222; color: #fff; border: none; border-radius: 6px; cursor: pointer; margin-bottom: 12px; }
+        .btn-dl:hover { background: #555; }
+        canvas { background: #fff; border: 1px solid #bbb; box-shadow: 0 2px 14px rgba(0,0,0,0.08); }
+        .caption { margin-top: 8px; font-style: italic; color: #555; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <h2>Sơ đồ phân rã chức năng — Savannakhet Smart Travel</h2>
+    <div class="tabs" id="tabBar"></div>
+    <button class="btn-dl" onclick="downloadPNG()">⬇ Tải xuống PNG</button>
+    <canvas id="canvas" width="950" height="620"></canvas>
+    <div class="caption" id="caption"></div>
+
+    <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const F = '"Segoe UI", Arial, sans-serif';
+
+    // ======== Drawing Helpers ========
+    function oval(cx,cy,rx,ry,label,fs){
+        fs=fs||12;
+        ctx.beginPath();ctx.ellipse(cx,cy,rx,ry,0,0,Math.PI*2);
+        ctx.strokeStyle='#000';ctx.lineWidth=1.6;ctx.stroke();ctx.fillStyle='#fff';ctx.fill();
+        ctx.fillStyle='#000';ctx.font=`${fs}px ${F}`;ctx.textAlign='center';ctx.textBaseline='middle';
+        const lines=label.split('\n'),lh=fs+2,sy=cy-((lines.length-1)*lh)/2;
+        lines.forEach((l,i)=>ctx.fillText(l,cx,sy+i*lh));
+    }
+    function actor(x,y,name){
+        ctx.strokeStyle='#000';ctx.lineWidth=1.6;
+        ctx.beginPath();ctx.arc(x,y-24,10,0,Math.PI*2);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(x,y-14);ctx.lineTo(x,y+12);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(x-14,y-2);ctx.lineTo(x+14,y-2);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(x,y+12);ctx.lineTo(x-12,y+30);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(x,y+12);ctx.lineTo(x+12,y+30);ctx.stroke();
+        ctx.fillStyle='#000';ctx.font=`bold 13px ${F}`;ctx.textAlign='center';
+        name.split('\n').forEach((l,i)=>ctx.fillText(l,x,y+48+i*15));
+    }
+    function solid(x1,y1,x2,y2){
+        ctx.beginPath();ctx.strokeStyle='#000';ctx.lineWidth=1.3;ctx.setLineDash([]);
+        ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+    }
+    function dashed(x1,y1,x2,y2,label){
+        ctx.beginPath();ctx.strokeStyle='#000';ctx.lineWidth=1.2;ctx.setLineDash([6,3]);
+        ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();ctx.setLineDash([]);
+        const a=Math.atan2(y2-y1,x2-x1),h=9;
+        ctx.beginPath();ctx.moveTo(x2,y2);ctx.lineTo(x2-h*Math.cos(a-.4),y2-h*Math.sin(a-.4));
+        ctx.moveTo(x2,y2);ctx.lineTo(x2-h*Math.cos(a+.4),y2-h*Math.sin(a+.4));
+        ctx.strokeStyle='#000';ctx.lineWidth=1.2;ctx.stroke();
+        if(label){
+            const mx=(x1+x2)/2,my=(y1+y2)/2;
+            ctx.font=`10px ${F}`;const tw=ctx.measureText(label).width;
+            ctx.fillStyle='#fff';ctx.fillRect(mx-tw/2-2,my-7,tw+4,14);
+            ctx.fillStyle='#000';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(label,mx,my);
+        }
+    }
+    function edge(cx,cy,rx,ry,tx,ty){
+        const a=Math.atan2(ty-cy,tx-cx);
+        return {x:cx+rx*Math.cos(a),y:cy+ry*Math.sin(a)};
+    }
+    function connect_solid(ax,ay,cx,cy,rx,ry){
+        const e=edge(cx,cy,rx,ry,ax,ay);solid(ax,ay,e.x,e.y);
+    }
+    function connect_include(c1x,c1y,r1x,r1y,c2x,c2y,r2x,r2y){
+        const e1=edge(c1x,c1y,r1x,r1y,c2x,c2y),e2=edge(c2x,c2y,r2x,r2y,c1x,c1y);
+        dashed(e1.x,e1.y,e2.x,e2.y,'<<include>>');
+    }
+    function connect_extends(extx,exty,erx,ery,cx,cy,rx,ry){
+        const e1=edge(extx,exty,erx,ery,cx,cy),e2=edge(cx,cy,rx,ry,extx,exty);
+        dashed(e1.x,e1.y,e2.x,e2.y,'<<Extends>>');
+    }
+    function clear(){ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);}
+
+    const R=90,Rh=24,S=80,Sh=22;
+
+    // ================================================================
+    //  DIAGRAM 1: Đăng ký & Đăng nhập
+    // ================================================================
+    function draw1(){
+        canvas.width=900;canvas.height=530;clear();
+        actor(60,250,'Người dùng');
+
+        // Main
+        const reg={x:310,y:130},login={x:310,y:310},forgot={x:310,y:460};
+        oval(reg.x,reg.y,R,Rh,'Đăng ký tài khoản');
+        oval(login.x,login.y,R,Rh,'Đăng nhập');
+        oval(forgot.x,forgot.y,R,Rh,'Quên mật khẩu');
+
+        connect_solid(74,230,reg.x,reg.y,R,Rh);
+        connect_solid(74,250,login.x,login.y,R,Rh);
+        connect_solid(74,270,forgot.x,forgot.y,R,Rh);
+
+        // Extends from Đăng ký
+        const e1={x:620,y:80},e2={x:620,y:160};
+        oval(e1.x,e1.y,S,Sh,'Nhập thông tin\ncá nhân',11);
+        oval(e2.x,e2.y,S,Sh,'Chọn sở thích\ndu lịch (10 loại)',11);
+        connect_extends(e1.x,e1.y,S,Sh,reg.x,reg.y,R,Rh);
+        connect_extends(e2.x,e2.y,S,Sh,reg.x,reg.y,R,Rh);
+
+        // Extends from Đăng nhập
+        const e3={x:620,y:270},e4={x:620,y:340};
+        oval(e3.x,e3.y,S,Sh,'Xác thực JWT Token',11);
+        oval(e4.x,e4.y,S,Sh,'Mã hóa bcrypt',11);
+        connect_extends(e3.x,e3.y,S,Sh,login.x,login.y,R,Rh);
+        connect_extends(e4.x,e4.y,S,Sh,login.x,login.y,R,Rh);
+
+        // Extends from Quên mật khẩu
+        const e5={x:620,y:420},e6={x:620,y:490};
+        oval(e5.x,e5.y,S,Sh,'Gửi OTP qua Email',11);
+        oval(e6.x,e6.y,S,Sh,'Đặt mật khẩu mới',11);
+        connect_extends(e5.x,e5.y,S,Sh,forgot.x,forgot.y,R,Rh);
+        connect_extends(e6.x,e6.y,S,Sh,forgot.x,forgot.y,R,Rh);
+
+        // include forgot→login
+        connect_include(forgot.x,forgot.y,R,Rh,login.x,login.y,R,Rh);
+    }
+
+    // ================================================================
+    //  DIAGRAM 2: Tìm kiếm địa điểm
+    // ================================================================
+    function draw2(){
+        canvas.width=950;canvas.height=580;clear();
+        actor(55,280,'Người dùng');
+
+        const view={x:280,y:160},search={x:280,y:400},login={x:590,y:80},detail={x:530,y:280};
+        oval(view.x,view.y,R,Rh,'Xem địa điểm');
+        oval(search.x,search.y,R,Rh,'Tìm kiếm địa điểm');
+        oval(login.x,login.y,R,Rh,'Đăng nhập');
+        oval(detail.x,detail.y,R,Rh,'Xem chi tiết địa điểm');
+
+        connect_solid(69,260,view.x,view.y,R,Rh);
+        connect_solid(69,290,search.x,search.y,R,Rh);
+
+        connect_include(view.x,view.y,R,Rh,login.x,login.y,R,Rh);
+        connect_include(view.x,view.y,R,Rh,detail.x,detail.y,R,Rh);
+        connect_extends(search.x,search.y,R,Rh,view.x,view.y,R,Rh);
+
+        // Extends from detail
+        const g1={x:790,y:160},g2={x:790,y:240},g3={x:790,y:320},g4={x:790,y:400};
+        oval(g1.x,g1.y,S,Sh,'Xem bản đồ GPS',11);
+        oval(g2.x,g2.y,S,Sh,'Xem đánh giá',11);
+        oval(g3.x,g3.y,S,Sh,'Thêm vào yêu thích',11);
+        oval(g4.x,g4.y,S,Sh,'Xem địa điểm\ntương tự (AI)',11);
+        [g1,g2,g3,g4].forEach(g=>connect_extends(g.x,g.y,S,Sh,detail.x,detail.y,R,Rh));
+
+        // Extends from search
+        const s1={x:280,y:530};
+        oval(s1.x,s1.y,S,Sh,'Nhận gợi ý AI',11);
+        connect_extends(s1.x,s1.y,S,Sh,search.x,search.y,R,Rh);
+
+        const s2={x:530,y:470};
+        oval(s2.x,s2.y,S,Sh,'Lọc theo danh mục',11);
+        connect_extends(s2.x,s2.y,S,Sh,search.x,search.y,R,Rh);
+    }
+
+    // ================================================================
+    //  DIAGRAM 3: Lập lịch trình du lịch
+    // ================================================================
+    function draw3(){
+        canvas.width=900;canvas.height=560;clear();
+        actor(55,260,'Người dùng');
+
+        const trip={x:310,y:200},login={x:600,y:80},view={x:310,y:400};
+        oval(trip.x,trip.y,R,Rh,'Lập lịch trình\ndu lịch');
+        oval(login.x,login.y,R,Rh,'Đăng nhập');
+        oval(view.x,view.y,R,Rh,'Xem lịch trình\nđã lưu');
+
+        connect_solid(69,240,trip.x,trip.y,R,Rh);
+        connect_solid(69,280,view.x,view.y,R,Rh);
+        connect_include(trip.x,trip.y,R,Rh,login.x,login.y,R,Rh);
+
+        // Extends from Lập lịch trình
+        const e1={x:620,y:160},e2={x:620,y:230},e3={x:620,y:300};
+        oval(e1.x,e1.y,S,Sh,'Chọn mùa du lịch',11);
+        oval(e2.x,e2.y,S,Sh,'Chọn ngân sách',11);
+        oval(e3.x,e3.y,S,Sh,'Chọn số ngày',11);
+        [e1,e2,e3].forEach(e=>connect_extends(e.x,e.y,S,Sh,trip.x,trip.y,R,Rh));
+
+        // Extends from Xem lịch trình
+        const v1={x:620,y:380},v2={x:620,y:440},v3={x:620,y:500};
+        oval(v1.x,v1.y,S,Sh,'Hoán đổi địa điểm\n(Swap)',11);
+        oval(v2.x,v2.y,S,Sh,'Lưu lịch trình',11);
+        oval(v3.x,v3.y,S,Sh,'Xóa lịch trình',11);
+        [v1,v2,v3].forEach(v=>connect_extends(v.x,v.y,S,Sh,view.x,view.y,R,Rh));
+
+        connect_include(view.x,view.y,R,Rh,login.x,login.y,R,Rh);
+    }
+
+    // ================================================================
+    //  DIAGRAM 4: Đăng bài & Đánh giá (Community)
+    // ================================================================
+    function draw4(){
+        canvas.width=900;canvas.height=580;clear();
+        actor(55,270,'Người dùng');
+
+        const post={x:310,y:170},feed={x:310,y:400},login={x:610,y:80};
+        oval(post.x,post.y,R,Rh,'Đăng bài đánh giá');
+        oval(feed.x,feed.y,R,Rh,'Xem cộng đồng\n(Community Feed)');
+        oval(login.x,login.y,R,Rh,'Đăng nhập');
+
+        connect_solid(69,250,post.x,post.y,R,Rh);
+        connect_solid(69,290,feed.x,feed.y,R,Rh);
+        connect_include(post.x,post.y,R,Rh,login.x,login.y,R,Rh);
+        connect_include(feed.x,feed.y,R,Rh,login.x,login.y,R,Rh);
+
+        // Extends from Đăng bài
+        const p1={x:620,y:140},p2={x:620,y:200},p3={x:620,y:260};
+        oval(p1.x,p1.y,S,Sh,'Đăng ảnh',11);
+        oval(p2.x,p2.y,S,Sh,'Cho điểm (1-5 sao)',11);
+        oval(p3.x,p3.y,S,Sh,'Sửa/Xóa đánh giá',11);
+        [p1,p2,p3].forEach(p=>connect_extends(p.x,p.y,S,Sh,post.x,post.y,R,Rh));
+
+        // Extends from Feed
+        const f1={x:620,y:360},f2={x:620,y:420},f3={x:620,y:480},f4={x:620,y:540};
+        oval(f1.x,f1.y,S,Sh,'Thích bài viết (Like)',11);
+        oval(f2.x,f2.y,S,Sh,'Bình luận bài viết',11);
+        oval(f3.x,f3.y,S,Sh,'Xóa bình luận',11);
+        oval(f4.x,f4.y,S,Sh,'Xem bài đánh giá\ncủa tôi',11);
+        [f1,f2,f3,f4].forEach(f=>connect_extends(f.x,f.y,S,Sh,feed.x,feed.y,R,Rh));
+    }
+
+    // ================================================================
+    //  DIAGRAM 5: Quản lý thông tin cá nhân
+    // ================================================================
+    function draw5(){
+        canvas.width=900;canvas.height=500;clear();
+        actor(55,220,'Người dùng');
+
+        const profile={x:310,y:220},login={x:600,y:70};
+        oval(profile.x,profile.y,R,Rh,'Quản lý thông tin\ncá nhân');
+        oval(login.x,login.y,R,Rh,'Đăng nhập');
+
+        connect_solid(69,220,profile.x,profile.y,R,Rh);
+        connect_include(profile.x,profile.y,R,Rh,login.x,login.y,R,Rh);
+
+        const e1={x:630,y:140},e2={x:630,y:210},e3={x:630,y:280},e4={x:630,y:350},e5={x:630,y:420};
+        oval(e1.x,e1.y,S,Sh,'Cập nhật\nUsername / Email',11);
+        oval(e2.x,e2.y,S,Sh,'Đổi ảnh đại diện',11);
+        oval(e3.x,e3.y,S,Sh,'Đổi mật khẩu',11);
+        oval(e4.x,e4.y,S,Sh,'Cập nhật sở thích\ndu lịch',11);
+        oval(e5.x,e5.y,S,Sh,'Xem địa điểm\nđã đóng góp',11);
+        [e1,e2,e3,e4,e5].forEach(e=>connect_extends(e.x,e.y,S,Sh,profile.x,profile.y,R,Rh));
+    }
+
+    // ================================================================
+    //  DIAGRAM 6: Admin - Quản lý địa điểm
+    // ================================================================
+    function draw6(){
+        canvas.width=900;canvas.height=520;clear();
+        actor(55,230,'Admin');
+
+        const mng={x:310,y:230},login={x:600,y:70};
+        oval(mng.x,mng.y,R,Rh,'Quản lý địa điểm');
+        oval(login.x,login.y,R,Rh,'Đăng nhập');
+
+        connect_solid(69,230,mng.x,mng.y,R,Rh);
+        connect_include(mng.x,mng.y,R,Rh,login.x,login.y,R,Rh);
+
+        const e1={x:630,y:130},e2={x:630,y:200},e3={x:630,y:270},e4={x:630,y:340},e5={x:630,y:410};
+        oval(e1.x,e1.y,S,Sh,'Thêm địa điểm mới',11);
+        oval(e2.x,e2.y,S,Sh,'Sửa thông tin\nđịa điểm',11);
+        oval(e3.x,e3.y,S,Sh,'Xóa địa điểm',11);
+        oval(e4.x,e4.y,S,Sh,'Phê duyệt\nđịa điểm mới',11);
+        oval(e5.x,e5.y,S,Sh,'Quản lý danh mục',11);
+        [e1,e2,e3,e4,e5].forEach(e=>connect_extends(e.x,e.y,S,Sh,mng.x,mng.y,R,Rh));
+    }
+
+    // ================================================================
+    //  DIAGRAM 7: Admin - Quản lý người dùng
+    // ================================================================
+    function draw7(){
+        canvas.width=900;canvas.height=480;clear();
+        actor(55,220,'Admin');
+
+        const mng={x:310,y:220},login={x:600,y:70};
+        oval(mng.x,mng.y,R,Rh,'Quản lý người dùng');
+        oval(login.x,login.y,R,Rh,'Đăng nhập');
+
+        connect_solid(69,220,mng.x,mng.y,R,Rh);
+        connect_include(mng.x,mng.y,R,Rh,login.x,login.y,R,Rh);
+
+        const e1={x:630,y:140},e2={x:630,y:210},e3={x:630,y:280},e4={x:630,y:350},e5={x:630,y:420};
+        oval(e1.x,e1.y,S,Sh,'Xem thông tin\nngười dùng',11);
+        oval(e2.x,e2.y,S,Sh,'Khóa tài khoản\n(Suspend)',11);
+        oval(e3.x,e3.y,S,Sh,'Mở khóa tài khoản\n(Restore)',11);
+        oval(e4.x,e4.y,S,Sh,'Phê duyệt quyền\nđăng bài',11);
+        oval(e5.x,e5.y,S,Sh,'Xóa đánh giá\nngười dùng',11);
+        [e1,e2,e3,e4,e5].forEach(e=>connect_extends(e.x,e.y,S,Sh,mng.x,mng.y,R,Rh));
+    }
+
+    // ================================================================
+    //  DIAGRAM 8: Admin - Dashboard & AI
+    // ================================================================
+    function draw8(){
+        canvas.width=900;canvas.height=500;clear();
+        actor(55,220,'Admin');
+
+        const dash={x:310,y:220},login={x:600,y:70};
+        oval(dash.x,dash.y,R,Rh,'Dashboard &\nAI Control Room');
+        oval(login.x,login.y,R,Rh,'Đăng nhập');
+
+        connect_solid(69,220,dash.x,dash.y,R,Rh);
+        connect_include(dash.x,dash.y,R,Rh,login.x,login.y,R,Rh);
+
+        const e1={x:630,y:130},e2={x:630,y:200},e3={x:630,y:270},e4={x:630,y:340},e5={x:630,y:410};
+        oval(e1.x,e1.y,S,Sh,'Xem tổng quan\nthống kê hệ thống',11);
+        oval(e2.x,e2.y,S,Sh,'Xem biểu đồ\ndanh mục',11);
+        oval(e3.x,e3.y,S,Sh,'Xem Top 5\nđịa điểm',11);
+        oval(e4.x,e4.y,S,Sh,'Huấn luyện AI\n(Train GNN)',11);
+        oval(e5.x,e5.y,S,Sh,'Xem biểu đồ\nLoss & Accuracy',11);
+        [e1,e2,e3,e4,e5].forEach(e=>connect_extends(e.x,e.y,S,Sh,dash.x,dash.y,R,Rh));
+    }
+
+    // ================================================================
+    //  TAB SYSTEM
+    // ================================================================
+    const diagrams = [
+        { name: '1. Đăng ký & Đăng nhập', fn: draw1, caption: 'Hình 2.2 Sơ đồ phân rã chức năng Đăng ký và Đăng nhập', file: 'phanra_dangky_dangnhap' },
+        { name: '2. Tìm kiếm địa điểm', fn: draw2, caption: 'Hình 2.3 Sơ đồ phân rã chức năng Tìm kiếm địa điểm', file: 'phanra_timkiem_diadiem' },
+        { name: '3. Lập lịch trình', fn: draw3, caption: 'Hình 2.4 Sơ đồ phân rã chức năng Lập lịch trình du lịch', file: 'phanra_lap_lichtrinh' },
+        { name: '4. Đánh giá & Community', fn: draw4, caption: 'Hình 2.5 Sơ đồ phân rã chức năng Đăng bài và Đánh giá', file: 'phanra_danhgia_community' },
+        { name: '5. Quản lý cá nhân', fn: draw5, caption: 'Hình 2.6 Sơ đồ phân rã chức năng Quản lý thông tin cá nhân', file: 'phanra_quanly_canhan' },
+        { name: '6. Admin: Quản lý địa điểm', fn: draw6, caption: 'Hình 2.7 Sơ đồ phân rã chức năng Quản lý địa điểm (Admin)', file: 'phanra_admin_diadiem' },
+        { name: '7. Admin: Quản lý người dùng', fn: draw7, caption: 'Hình 2.8 Sơ đồ phân rã chức năng Quản lý người dùng (Admin)', file: 'phanra_admin_nguoidung' },
+        { name: '8. Admin: Dashboard & AI', fn: draw8, caption: 'Hình 2.9 Sơ đồ phân rã chức năng Dashboard và AI Control Room', file: 'phanra_admin_dashboard_ai' },
+    ];
+
+    let currentIdx = 0;
+
+    function buildTabs(){
+        const bar = document.getElementById('tabBar');
+        bar.innerHTML = '';
+        diagrams.forEach((d, i) => {
+            const btn = document.createElement('button');
+            btn.textContent = d.name;
+            btn.className = i === currentIdx ? 'active' : '';
+            btn.onclick = () => { currentIdx = i; buildTabs(); d.fn(); document.getElementById('caption').textContent = d.caption; };
+            bar.appendChild(btn);
+        });
+    }
+
+    function downloadPNG(){
+        const link = document.createElement('a');
+        link.download = diagrams[currentIdx].file + '.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    }
+
+    buildTabs();
+    diagrams[0].fn();
+    document.getElementById('caption').textContent = diagrams[0].caption;
+    </script>
+</body>
+</html>

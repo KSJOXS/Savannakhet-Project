@@ -42,6 +42,7 @@ export default {
     userGuide: 'คู่มือผู้ใช้',
     contactSupport: 'ติดต่อฝ่ายสนับสนุน',
     reportIssue: 'รายงานปัญหา',
+    support: 'สนับสนุน',
   },
 
   // --- Contact Page ---
@@ -651,6 +652,15 @@ export default {
     idealStayPlaceholder: 'เช่น 1 - 2 วัน',
     locationPlaceholder: 'เช่น สะหวันนะเขต',
     goBack: 'กลับ',
+    errLocationNotFound: 'ไม่พบตำแหน่งที่ตั้ง ลองคัดลอกพิกัดที่แน่นอน',
+    errFileTooLarge: 'ไฟล์ {name} มีขนาดใหญ่เกินไป (สูงสุด 5MB)',
+    errFillRequired: 'กรุณากรอกชื่อ หมวดหมู่ และคำอธิบาย',
+    errMustBeLoggedIn: 'คุณต้องเข้าสู่ระบบก่อนเพื่อเพิ่มสถานที่',
+    successUpdate: '✅ อัปเดตสถานที่สำเร็จ!',
+    successSubmit: '🎉 ส่งสถานที่สำเร็จ! รอการอนุมัติจากผู้ดูแลระบบ',
+    errSubmit: '❌ การส่งสถานที่ล้มเหลว',
+    successPermission: 'ส่งคำขอสิทธิ์สำเร็จ!',
+    errPermission: 'ไม่สามารถส่งคำขอสิทธิ์ได้',
   },
   heritage: {
     eyebrow: 'Discover The Heritage',

@@ -169,7 +169,7 @@
             </div>
         </div>
 
-        <div class="ta-bottom-row">
+        <div class="ta-bottom-row" v-if="!isProfileRoute">
             <div class="nav-container">
                 <div class="sub-nav-list">
                     <router-link v-if="!isLoggedIn" to="/" class="sub-nav-item" :class="{ active: route.path === '/' }">
@@ -230,6 +230,8 @@ const isProfileOpen = ref(false)
 
 const isLoggedIn = ref(isAuthenticated())
 const username = ref(user.value ? user.value.username : '')
+
+const isProfileRoute = computed(() => route.path.includes('/profile'))
 
 const safeSupportedLocales = computed(() => {
     if (supportedLocales && supportedLocales.length > 0) {

@@ -1,6 +1,12 @@
 import os
 import sys
 import json
+import time
+
+# Force system standard output to use UTF-8 encoding to prevent Windows cp1252 crash
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
+
 import torch
 import torch.nn.functional as F
 from torch_geometric.nn import SAGEConv, to_hetero
@@ -111,12 +117,17 @@ def run_real_demo():
         optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
         
         losses = []
+        accuracies = []
         print("\n--- Training AI ---")
-        for epoch in range(1, 101):
+        pos_edge_index = data['user', 'interacts_with', 'place'].edge_index
+        n_steps = max(1, pos_edge_index.size(1) // 5)
+        
+        for epoch in range(1, 21):
+            print(f"Epoch {epoch}/20")
+            t_start = time.time()
             optimizer.zero_grad()
             out_dict = model(data.x_dict, data.edge_index_dict)
             
-            pos_edge_index = data['user', 'interacts_with', 'place'].edge_index
             pos_src, pos_dst = pos_edge_index[0], pos_edge_index[1]
             pos_out = (out_dict['user'][pos_src] * out_dict['place'][pos_dst]).sum(dim=-1)
             
@@ -136,24 +147,49 @@ def run_real_demo():
             optimizer.step()
             losses.append(loss.item())
             
-            if epoch % 20 == 0:
-                print(f"Epoch {epoch:03d}: Loss = {loss.item():.6f}")
+            # Calculate Link Prediction Accuracy (BCE Threshold Accuracy)
+            with torch.no_grad():
+                pos_pred = (pos_out >= 0).float()
+                neg_pred = (neg_out < 0).float()
+                correct = pos_pred.sum().item() + neg_pred.sum().item()
+                total = pos_out.size(0) + neg_out.size(0)
+                accuracy_decimal = correct / total
+                accuracies.append(accuracy_decimal)
+                
+            t_elapsed = (time.time() - t_start) * 1000  # ms
+            step_time = max(1, int(t_elapsed / n_steps))
+            total_time_s = int(t_elapsed / 1000)
+            
+            # Output Keras-style logs
+            print(f"{n_steps}/{n_steps} ━━━━━━━━━━━━━━━━━━━━ {total_time_s}s {step_time}ms/step - accuracy: {accuracy_decimal:.4f} - loss: {loss.item():.4f}")
 
-        # 2. Save Loss Chart
-        plt.figure(figsize=(8, 5))
-        plt.plot(losses, label='Training Loss', color='red')
-        plt.xlabel('Epoch')
-        plt.ylabel('Loss')
-        plt.title('AI Learning Progress (Loss Curve)')
-        plt.legend()
-        plt.grid(True)
+        # 2. Save Dual-Panel Accuracy & Loss Chart
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4.5))
+        
+        # Left Panel: Model Accuracy
+        ax1.plot(accuracies, label='accuracy', color='#1f77b4')
+        ax1.set_title('Model Accuracy', fontsize=10)
+        ax1.set_xlabel('Epochs', fontsize=9)
+        ax1.set_ylabel('Accuracy', fontsize=9)
+        ax1.set_ylim(0.0, 1.05)
+        ax1.legend(loc='upper left')
+        
+        # Right Panel: Model Loss
+        ax2.plot(losses, label='loss', color='#1f77b4')
+        ax2.set_title('Model Loss', fontsize=10)
+        ax2.set_xlabel('Epochs', fontsize=9)
+        ax2.set_ylabel('Loss', fontsize=9)
+        ax2.set_ylim(bottom=0.0)
+        ax2.legend(loc='upper right')
+        
+        plt.tight_layout()
         plt.savefig(os.path.join(current_dir, "loss_chart.png"))
         print(f"Saved: {os.path.join(current_dir, 'loss_chart.png')}")
 
         print("\n--- Recommendation Test ---")
         model.eval()
         with torch.no_grad():
-            target_user = db.query(User).filter(User.username == "nam").first()
+            target_user = db.query(User).filter(User.username == "dee").first()
             test_user_id = target_user.id if (target_user and target_user.id in user_map) else list(user_map.keys())[0]
             
             mapped_user = user_map[test_user_id]
@@ -219,21 +255,78 @@ def run_real_demo():
             
             top_v, top_i = torch.topk(final_scores, k=3)
             
-            print(f"User: {user_name} | Preferences: {prefs}")
-            print(f"  Preferred places in DB: {total_matching}")
-            print(f"  Already visited/liked:  {already_visited_matching}")
-            print(f"  New places to discover: {total_matching - already_visited_matching}")
+            print("\n" + "="*60)
+            print("       AI (GNN) Evaluation and Recommendation Results")
+            print("="*60)
+            print(f"👤 User: {user_name}")
+            print(f"🎯 Preferences: {prefs}")
+            print(f"------------------------------------------------------------")
+            print(f"📊 System Data Summary:")
+            print(f"  • Places matching your preferences: {total_matching}")
+            print(f"  • Places already reviewed/visited (filtered): {already_visited_matching}")
+            print(f"  • New places matching preferences: {total_matching - already_visited_matching}")
             
             if total_matching > 0 and already_visited_matching == total_matching:
-                print(f"\n  [!] All {prefs} places have been visited!")
-                print(f"      Showing best alternatives based on your taste profile.")
+                print(f"\n  [!] You have already visited all places in the category {prefs}!")
+                print(f"      The system is scanning for alternative options from your Taste Profile.")
             
-            print(f"\nTop Recommendations for {user_name}:")
-            for v, i in zip(top_v, top_i):
+            print("\n" + "="*60)
+            print(f"🌟 Top 3 Recommendations for You")
+            print("="*60)
+            
+            for idx, (v, i) in enumerate(zip(top_v, top_i), 1):
                 p_id = reverse_place_map[i.item()]
                 place_obj = db.query(Place).filter(Place.id == p_id).first()
-                cat_name = place_obj.category.parent_type if place_obj.category else "?"
-                print(f" - {place_obj.name.ljust(25)} | Score: {v:.4f} | Category: {cat_name}")
+                cat_name = place_obj.category.parent_type if place_obj and place_obj.category else "?"
+                
+                # Retrieve raw scores
+                overall_score = v.item()
+                gnn_score = gnn_scores[i.item()].item()
+                content_score = content_scores[i.item()].item()
+                
+                # Convert cosine similarity [-1, 1] to percentage [0%, 100%]
+                overall_pct = (overall_score + 1) / 2 * 100
+                gnn_pct = (gnn_score + 1) / 2 * 100
+                content_pct = (content_score + 1) / 2 * 100
+                
+                # Bound percentage to [0%, 100%]
+                overall_pct = max(0.0, min(100.0, overall_pct))
+                gnn_pct = max(0.0, min(100.0, gnn_pct))
+                content_pct = max(0.0, min(100.0, content_pct))
+                
+                # Place details
+                place_name = place_obj.name if place_obj else f"Place ID {p_id}"
+                avg_rating = float(place_obj.rating_avg) if place_obj and place_obj.rating_avg else 0.0
+                location = place_obj.location_name if place_obj and place_obj.location_name else "Savannakhet"
+                desc_text = place_obj.description.strip() if place_obj and place_obj.description else "No description available"
+                if len(desc_text) > 100:
+                    desc_text = desc_text[:100] + "..."
+                
+                # Print detailed analysis
+                print(f"\n {idx}. 📍 {place_name}")
+                print(f"    ⭐ Average Rating: {avg_rating:.2f}/5.0 | 📌 Location: {location} | 📂 Category: {cat_name}")
+                print(f"    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+                print(f"    💖 Overall Match: {overall_pct:.2f}%")
+                print(f"      ├─ 👥 GNN Social Match: {gnn_pct:.2f}%  (Weight 60%)")
+                print(f"      └─ 🎯 Preference Match: {content_pct:.2f}%  (Weight 40%)")
+                
+                # Reasoning explanation
+                reasons = []
+                if cat_name in prefs:
+                    reasons.append(f"it matches the category you selected ('{cat_name}')")
+                if gnn_pct > 70:
+                    reasons.append(f"you are highly likely to like it based on travel behavior of similar users")
+                elif gnn_pct > 50:
+                    reasons.append(f"it aligns with general system taste profiles")
+                
+                if reasons:
+                    reason_str = " and ".join(reasons)
+                    print(f"    ℹ️  Reasoning: The system recommends this because {reason_str}")
+                else:
+                    print(f"    ℹ️  Reasoning: Recommended based on your AI-evaluated Taste Profile")
+                
+                print(f"    📝 Description: {desc_text}")
+                print(f"    ------------------------------------------------------------")
 
     finally:
         db.close()

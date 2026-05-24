@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 
@@ -34,7 +34,19 @@ class UserResponse(UserBase):
     deleted_at: Optional[datetime] = None
     profile_image: Optional[str] = None  
     preferences: Optional[List[str]] = None
-    post_permission_status: str = "none"
+    post_permission_status: Optional[str] = "none"
+    
+    @field_validator('preferences', mode='before')
+    @classmethod
+    def parse_preferences(cls, v):
+        import json
+        if isinstance(v, str):
+            try:
+                return json.loads(v)
+            except:
+                return [v]
+        return v
+        
     class Config: from_attributes = True
 
 # --- Place ---

@@ -42,6 +42,7 @@ export default {
     userGuide: 'User Guide',
     contactSupport: 'Contact Support',
     reportIssue: 'Report an Issue',
+    support: 'Support',
   },
 
   // --- Contact Page ---
@@ -646,6 +647,15 @@ export default {
     idealStayPlaceholder: 'e.g. 1 - 2 Days',
     locationPlaceholder: 'e.g. Savannakhet',
     goBack: 'Go Back',
+    errLocationNotFound: 'Location not found. Try copying exact coordinates.',
+    errFileTooLarge: 'File {name} is too large (Max 5MB).',
+    errFillRequired: 'Please fill in Name, Category, and Description.',
+    errMustBeLoggedIn: 'You must be logged in to submit a place.',
+    successUpdate: '✅ Place updated successfully!',
+    successSubmit: '🎉 Place submitted successfully! Waiting for admin approval.',
+    errSubmit: '❌ Failed to submit place.',
+    successPermission: 'Permission request sent successfully!',
+    errPermission: 'Failed to request permission.',
   },
   heritage: {
     eyebrow: 'Discover The Heritage',

@@ -197,3 +197,18 @@ sqlalchemy.exc.DataError: (pymysql.err.DataError) (1406, "Data too long for colu
   - Received Email: nam@gmail.com
   - Received Preferences: ["local_food"]
   - DB User Found: ืnam
+[2026-05-21 15:02:04.268096] UPDATING USER ID: 19
+  - Received Username: dee
+  - Received Email: dee@gmail.com
+  - Received Preferences: ["cafe"]
+  - DB User Found: dee
+[2026-05-21 15:02:08.263613] UPDATING USER ID: 19
+  - Received Username: dee
+  - Received Email: dee@gmail.com
+  - Received Preferences: ["culture"]
+  - DB User Found: dee
+[2026-05-21 15:02:41.206415] UPDATING USER ID: 19
+  - Received Username: dee
+  - Received Email: dee@gmail.com
+  - Received Preferences: ["nature"]
+  - DB User Found: dee

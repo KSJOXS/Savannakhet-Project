@@ -1,8 +1,6 @@
 <template>
     <div class="profile-page">
         <Navbar />
-        
-        <div class="page-header-bg"></div>
 
         <div class="profile-container">
             <!-- Sidebar: User Info & Navigation -->
@@ -62,6 +60,9 @@
                     </nav>
 
                     <div class="sidebar-footer">
+                        <button class="btn-back-home" @click="router.push('/')">
+                            <i class="fas fa-arrow-left"></i> {{ t('nav.home', 'Back to Home') }}
+                        </button>
                         <button class="btn-logout-alt" @click="handleLogout">
                             <i class="fas fa-sign-out-alt"></i> {{ t('auth.sign_out') }}
                         </button>
@@ -694,30 +695,13 @@ onUnmounted(() => {
     padding-bottom: 50px;
 }
 
-.page-header-bg {
-    height: 400px;
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #3b82f6 100%);
-    position: relative;
-    overflow: hidden;
-    width: 100%;
-}
-
-.page-header-bg::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at 30% 20%, rgba(59, 130, 246, 0.2) 0%, transparent 50%),
-                radial-gradient(circle at 70% 80%, rgba(37, 99, 235, 0.15) 0%, transparent 50%);
-    filter: blur(40px);
-}
-
 .profile-container {
-    max-width: 1100px;
-    margin: -80px auto 0;
-    padding: 0 20px;
+    max-width: 100%;
+    margin: 0;
+    padding: 0 30px 0 0;
     display: grid;
     grid-template-columns: 320px 1fr;
-    gap: 30px;
+    gap: 40px;
     align-items: start;
 }
 
@@ -729,10 +713,12 @@ onUnmounted(() => {
 
 .user-info-card {
     background: white;
-    border-radius: 24px;
+    border-radius: 0 24px 24px 0;
     padding: 30px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.05);
     border: 1px solid rgba(0,0,0,0.05);
+    border-left: none;
+    min-height: calc(100vh - 200px);
 }
 
 .avatar-section {
@@ -862,6 +848,30 @@ onUnmounted(() => {
     margin-top: 30px;
     padding-top: 20px;
     border-top: 1px solid #f1f5f9;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.btn-back-home {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px;
+    background: #f1f5f9;
+    color: #334155;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-back-home:hover {
+    background: #e2e8f0;
+    color: #0f172a;
 }
 
 .btn-logout-alt {
@@ -887,15 +897,12 @@ onUnmounted(() => {
 /* Main Content Styles */
 .profile-main-content {
     min-height: 600px;
+    max-width: 1200px;
 }
 
 .content-card {
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(20px);
-    border-radius: 32px;
-    padding: 40px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.04);
-    border: 1px solid rgba(255, 255, 255, 0.7);
+    background: transparent;
+    padding: 40px 0 40px 40px;
 }
 
 .content-header {

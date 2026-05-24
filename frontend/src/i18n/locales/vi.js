@@ -37,6 +37,7 @@ export default {
     userGuide: 'Hướng dẫn sử dụng',
     contactSupport: 'Liên hệ hỗ trợ',
     reportIssue: 'Báo cáo sự cố',
+    support: 'Hỗ trợ',
   },
 
   // --- Contact Page ---
@@ -621,6 +622,15 @@ export default {
     idealStayPlaceholder: 'ví dụ: 1 - 2 ngày',
     locationPlaceholder: 'ví dụ: Savannakhet',
     goBack: 'Quay lại',
+    errLocationNotFound: 'Không tìm thấy vị trí. Vui lòng thử sao chép tọa độ chính xác.',
+    errFileTooLarge: 'Tệp {name} quá lớn (Tối đa 5MB).',
+    errFillRequired: 'Vui lòng điền Tên, Danh mục và Mô tả.',
+    errMustBeLoggedIn: 'Bạn phải đăng nhập để gửi địa điểm.',
+    successUpdate: '✅ Cập nhật địa điểm thành công!',
+    successSubmit: '🎉 Đã gửi địa điểm thành công! Đang chờ quản trị viên phê duyệt.',
+    errSubmit: '❌ Gửi địa điểm thất bại.',
+    successPermission: 'Gửi yêu cầu cấp quyền thành công!',
+    errPermission: 'Không thể gửi yêu cầu cấp quyền.',
   },
   heritage: {
     eyebrow: 'Khám phá di sản',
