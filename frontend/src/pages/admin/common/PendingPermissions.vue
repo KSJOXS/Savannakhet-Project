@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <div class="pending-permissions-container">
         <div class="header-section">
             <div class="title-group">
@@ -100,7 +100,7 @@ const updateStatus = async (id, status) => {
 const getImageUrl = (path) => {
     if (!path) return '';
     if (path.startsWith('http')) return path;
-    return `http://localhost:8000${path}`;
+    return `http://127.0.0.1:8000${path}`;
 }
 
 onMounted(() => {

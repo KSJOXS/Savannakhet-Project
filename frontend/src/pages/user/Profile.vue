@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <div class="profile-page">
         <Navbar />
 
@@ -60,9 +60,6 @@
                     </nav>
 
                     <div class="sidebar-footer">
-                        <button class="btn-back-home" @click="router.push('/')">
-                            <i class="fas fa-arrow-left"></i> {{ t('nav.home', 'Back to Home') }}
-                        </button>
                         <button class="btn-logout-alt" @click="handleLogout">
                             <i class="fas fa-sign-out-alt"></i> {{ t('auth.sign_out') }}
                         </button>
@@ -80,8 +77,12 @@
                 <div v-else class="content-card">
                     <!-- Header inside card -->
                     <div class="content-header">
-                        <h2>{{ tabTitle }}</h2>
-                        <p>{{ tabSubtitle }}</p>
+                        <div class="header-title-group">
+                            <button class="btn-back-small" @click="router.back()" :title="t('common.back', 'Back')">
+                                <i class="fas fa-arrow-left"></i>
+                            </button>
+                            <h2>{{ tabTitle }}</h2>
+                        </div>
                     </div>
 
                     <!-- TAB: Settings -->
@@ -140,7 +141,7 @@
                                 </transition>
 
                                 <div v-if="isEditing" class="btn-group-profile">
-                                    <button type="button" class="btn-cancel-action" @click="cancelEdit">{{ t('auth.cancel') }}</button>
+                                    <button type="button" class="btn-cancel-action" @click="cancelEdit">{{ t('common.cancel') }}</button>
                                     <button type="submit" class="btn-save-action" :disabled="saving">
                                         <i class="fas fa-save"></i> {{ saving ? t('auth.saving') : t('auth.save_changes') }}
                                     </button>
@@ -479,9 +480,9 @@ const currentProfileImage = computed(() => {
     if (form.value.profile_image) {
         const url = form.value.profile_image
         if (url.startsWith('http') || url.startsWith('data:')) return url
-        return `http://localhost:8000/${url.startsWith('/') ? url.slice(1) : url}`
+        return `http://127.0.0.1:8000/${url.startsWith('/') ? url.slice(1) : url}`
     }
-    return `https://ui-avatars.com/api/?name=${form.value.username || 'User'}&background=3b82f6&color=fff&size=150`
+    return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ccc"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>`
 })
 
 const triggerImageUpload = () => fileInput.value.click()
@@ -642,7 +643,7 @@ const getPlaceImage = (imageString) => {
 
     if (!url) return '/placeholder-image.jpg'
     if (url.startsWith('http') || url.startsWith('data:')) return url
-    return `http://localhost:8000${url.startsWith('/') ? '' : '/'}${url}`
+    return `http://127.0.0.1:8000${url.startsWith('/') ? '' : '/'}${url}`
 }
 
 const truncate = (text, length) => {
@@ -660,7 +661,7 @@ const formatDate = (dateString) => {
 const getImageUrl = (url) => {
     if (!url) return ''
     if (url.startsWith('http') || url.startsWith('data:')) return url
-    return `http://localhost:8000/${url.startsWith('/') ? url.slice(1) : url}`
+    return `http://127.0.0.1:8000/${url.startsWith('/') ? url.slice(1) : url}`
 }
 
 watch(() => route.query.tab, (newTab) => {
@@ -692,7 +693,6 @@ onUnmounted(() => {
 .profile-page {
     background-color: #f8fafc;
     min-height: 100vh;
-    padding-bottom: 50px;
 }
 
 .profile-container {
@@ -702,13 +702,12 @@ onUnmounted(() => {
     display: grid;
     grid-template-columns: 320px 1fr;
     gap: 40px;
-    align-items: start;
+    align-items: stretch;
 }
 
 /* Sidebar Styles */
 .profile-sidebar {
-    position: sticky;
-    top: 100px;
+    height: 100%;
 }
 
 .user-info-card {
@@ -718,7 +717,14 @@ onUnmounted(() => {
     box-shadow: 0 10px 30px rgba(0,0,0,0.05);
     border: 1px solid rgba(0,0,0,0.05);
     border-left: none;
-    min-height: calc(100vh - 200px);
+    height: 100%;
+    min-height: calc(100vh - 100px);
+    display: flex;
+    flex-direction: column;
+}
+
+.top-back-btn {
+    display: none;
 }
 
 .avatar-section {
@@ -732,9 +738,9 @@ onUnmounted(() => {
     height: 140px;
     margin: 0 auto 20px;
     border-radius: 50%;
-    padding: 6px;
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    box-shadow: 0 15px 35px rgba(37, 99, 235, 0.2);
+    padding: 4px;
+    background: white;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
@@ -845,7 +851,7 @@ onUnmounted(() => {
 }
 
 .sidebar-footer {
-    margin-top: 30px;
+    margin-top: auto;
     padding-top: 20px;
     border-top: 1px solid #f1f5f9;
     display: flex;
@@ -911,15 +917,35 @@ onUnmounted(() => {
     padding-bottom: 20px;
 }
 
+.header-title-group {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.btn-back-small {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: #f1f5f9;
+    color: #475569;
+    border: none;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-back-small:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
 .content-header h2 {
     font-size: 1.8rem;
     font-weight: 800;
     color: #1e293b;
-    margin: 0 0 5px;
-}
-
-.content-header p {
-    color: #64748b;
     margin: 0;
 }
 
@@ -1078,8 +1104,7 @@ onUnmounted(() => {
 }
 
 .btn-save-action {
-    flex: 1;
-    padding: 12px;
+    padding: 12px 25px;
     background: #10b981;
     color: white;
     border: none;

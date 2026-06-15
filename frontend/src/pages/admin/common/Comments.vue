@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <div class="admin-page">
         <div class="page-header">
             <h2><i class="fas fa-comments"></i> Review Management</h2>
@@ -141,7 +141,7 @@ const getThumbnail = (imageUrl) => {
         try { url = JSON.parse(url)[0]; } catch (e) { url = url.replace(/[\[\]"]/g, ''); }
     }
     if (url.startsWith('data:') || url.startsWith('http')) return url;
-    return `http://localhost:8000/${url.startsWith('/') ? url.slice(1) : url}`;
+    return `http://127.0.0.1:8000/${url.startsWith('/') ? url.slice(1) : url}`;
 }
 
 onMounted(fetchComments)

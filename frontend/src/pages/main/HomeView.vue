@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <div class="home-page">
         <Navbar />
 
@@ -242,7 +242,7 @@ const getCoverImage = (place) => {
         return targetUrl;
     }
 
-    return `http://localhost:8000${targetUrl.startsWith('/') ? '' : '/'}${targetUrl}`;
+    return `http://127.0.0.1:8000${targetUrl.startsWith('/') ? '' : '/'}${targetUrl}`;
 }
 
 const fetchData = async () => {

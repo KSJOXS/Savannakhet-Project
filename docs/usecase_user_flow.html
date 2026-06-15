@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<title>Sơ đồ nguyên lý hoạt động — Savannakhet Smart Travel</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0f172a;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    color: #e2e8f0;
+    min-height: 100vh;
+    padding: 30px 20px;
+  }
+  h1 {
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #93c5fd;
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+  }
+  .subtitle {
+    text-align: center;
+    font-size: 0.9rem;
+    color: #64748b;
+    margin-bottom: 30px;
+  }
+  .diagram-wrapper {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 16px;
+    padding: 30px 20px;
+    max-width: 1100px;
+    margin: 0 auto;
+    overflow-x: auto;
+  }
+  .mermaid {
+    display: flex;
+    justify-content: center;
+  }
+  .legend {
+    max-width: 1100px;
+    margin: 24px auto 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    justify-content: center;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.82rem;
+    color: #94a3b8;
+  }
+  .legend-dot {
+    width: 14px; height: 14px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+
+<h1>🗺️ Sơ đồ nguyên lý hoạt động — Tổng quan người dùng</h1>
+<p class="subtitle">Savannakhet Smart Travel · User Activity Flow Diagram</p>
+
+<div class="diagram-wrapper">
+<div class="mermaid">
+flowchart TD
+    START([" 👤 Người dùng truy cập Website "]):::startEnd
+
+    START --> GUEST_OR_LOGIN{" Đã đăng nhập? "}:::decision
+
+    %% ─── GUEST PATH ───────────────────────────────────────
+    GUEST_OR_LOGIN -- "❌ Chưa (Guest)" --> HOMEPAGE[" 🏠 Trang chủ\n(HomeView) "]:::page
+    HOMEPAGE --> BROWSE_GUEST[" 🔍 Duyệt địa điểm\n(Explore / Category) "]:::page
+    BROWSE_GUEST --> PLACEDETAIL_GUEST[" 📍 Xem chi tiết địa điểm\n(PlaceDetail) "]:::page
+    PLACEDETAIL_GUEST --> WANT_MORE{" Muốn lưu / đánh giá? "}:::decision
+    WANT_MORE -- "Có" --> LOGIN_REGISTER[" 🔐 Đăng nhập / Đăng ký\n(Login / Register) "]:::auth
+    WANT_MORE -- "Không" --> BROWSE_GUEST
+
+    LOGIN_REGISTER --> FORGOT{" Quên mật khẩu? "}:::decision
+    FORGOT -- "Có" --> FORGOT_PW[" 📧 Quên mật khẩu\n→ Reset Password "]:::auth
+    FORGOT_PW --> LOGIN_REGISTER
+    FORGOT -- "Không" --> LOGGED_IN
+
+    %% ─── LOGGED IN PATH ────────────────────────────────────
+    GUEST_OR_LOGIN -- "✅ Đã đăng nhập" --> LOGGED_IN{" Vai trò? "}:::decision
+
+    %% ─── NORMAL USER ───────────────────────────────────────
+    LOGGED_IN -- "👤 User" --> EXPLORE[" 🔍 Khám phá địa điểm\n(Explore / AI Recommend) "]:::page
+
+    EXPLORE --> FILTER_SEARCH[" 🔎 Lọc & Tìm kiếm\n(Danh mục / Từ khóa) "]:::action
+    FILTER_SEARCH --> PLACEDETAIL[" 📍 Xem chi tiết địa điểm\n(PlaceDetail) "]:::page
+
+    PLACEDETAIL --> USER_ACTIONS{" Hành động tại trang? "}:::decision
+    USER_ACTIONS -- "❤️ Thích / Lưu" --> FAVORITE[" ❤️ Thêm vào Yêu thích\n→ Ghi InteractionLog +2.0 "]:::action
+    USER_ACTIONS -- "✍️ Đánh giá" --> WRITE_REVIEW[" ✍️ Viết đánh giá\n(WriteReview)\n→ Ghi InteractionLog +3.0 "]:::action
+    USER_ACTIONS -- "👁️ Chỉ xem" --> VIEW_LOG[" 👁️ Ghi lịch sử xem\n→ InteractionLog +1.0 "]:::action
+    USER_ACTIONS -- "🗺️ Xem bản đồ" --> MAP_OVERLAY[" 🗺️ MapOverlay\n(Leaflet Map) "]:::action
+    USER_ACTIONS -- "🌐 Dịch nội dung" --> TRANSLATE[" 🌐 Dịch nội dung\n(4 ngôn ngữ) "]:::action
+
+    FAVORITE --> AI_ENGINE
+    WRITE_REVIEW --> AI_ENGINE
+    VIEW_LOG --> AI_ENGINE
+
+    AI_ENGINE[" 🤖 AI Engine cập nhật\n(GNN + Content-Based Hybrid) "]:::ai
+    AI_ENGINE --> EXPLORE
+
+    EXPLORE --> TRIP_PLANNER[" 🗓️ Trip Planner AI\n(Lập kế hoạch thông minh) "]:::page
+    TRIP_PLANNER --> SAVE_TRIP[" 💾 Lưu hành trình "]:::action
+
+    EXPLORE --> COMMUNITY[" 👥 Trang Community\n(Feed bài viết cộng đồng) "]:::page
+    COMMUNITY --> LIKE_COMMENT[" 👍 Like / Comment "]:::action
+
+    EXPLORE --> SUBMIT_PLACE[" ➕ Gửi địa điểm mới\n(SubmitPlace) "]:::page
+    SUBMIT_PLACE --> PENDING[" ⏳ Chờ Admin duyệt "]:::action
+
+    EXPLORE --> MY_PROFILE[" 👤 Trang Profile "]:::page
+    MY_PROFILE --> PROFILE_TABS{" Tab? "}:::decision
+    PROFILE_TABS -- "Settings" --> EDIT_PROFILE[" ✏️ Chỉnh sửa thông tin\n+ Upload ảnh đại diện "]:::action
+    PROFILE_TABS -- "Reviews" --> MY_REVIEWS[" 📋 Lịch sử đánh giá "]:::action
+    PROFILE_TABS -- "My Places" --> MY_PLACES[" 📌 Địa điểm đã gửi "]:::action
+    PROFILE_TABS -- "Saved Trips" --> MY_TRIPS[" 🗺️ Hành trình đã lưu "]:::action
+
+    %% ─── ADMIN PATH ────────────────────────────────────────
+    LOGGED_IN -- "🛡️ Admin" --> ADMIN_DASH[" 🛡️ Admin Dashboard "]:::admin
+    ADMIN_DASH --> ADMIN_ACTIONS{" Chức năng Admin "}:::decision
+    ADMIN_ACTIONS -- "Quản lý địa điểm" --> ADMIN_PLACES[" 📍 CRUD Địa điểm\n+ Duyệt địa điểm người dùng gửi "]:::admin
+    ADMIN_ACTIONS -- "Quản lý người dùng" --> ADMIN_USERS[" 👥 Quản lý tài khoản "]:::admin
+    ADMIN_ACTIONS -- "Kiểm duyệt" --> ADMIN_COMMENTS[" 💬 Kiểm duyệt đánh giá "]:::admin
+    ADMIN_ACTIONS -- "Cài đặt hệ thống" --> ADMIN_SETTINGS[" ⚙️ Cài đặt\n(Hero ảnh, Banner) "]:::admin
+    ADMIN_ACTIONS -- "Xem thống kê" --> ADMIN_STATS[" 📊 Dashboard thống kê "]:::admin
+
+    ADMIN_PLACES --> PENDING_APPROVE[" ✅ Duyệt / Từ chối\n(pending → approved) "]:::admin
+
+    %% ─── LOGOUT ─────────────────────────────────────────────
+    MY_PROFILE --> LOGOUT[" 🚪 Đăng xuất "]:::auth
+    ADMIN_DASH --> LOGOUT
+    LOGOUT --> START
+
+    %% ─── STYLE ──────────────────────────────────────────────
+    classDef startEnd fill:#1e40af,stroke:#3b82f6,color:#fff,rx:20,font-weight:700
+    classDef decision fill:#4c1d95,stroke:#7c3aed,color:#e0d9ff,font-weight:600
+    classDef page fill:#0f4c2a,stroke:#10b981,color:#d1fae5,font-weight:600
+    classDef action fill:#1e293b,stroke:#475569,color:#cbd5e1
+    classDef auth fill:#7c2d12,stroke:#f97316,color:#fed7aa,font-weight:600
+    classDef ai fill:#312e81,stroke:#6366f1,color:#e0e7ff,font-weight:700
+    classDef admin fill:#4a1942,stroke:#c026d3,color:#fae8ff,font-weight:600
+</div>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#1e40af;border:1.5px solid #3b82f6"></div> Điểm bắt đầu/kết thúc</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#4c1d95;border:1.5px solid #7c3aed"></div> Điểm quyết định</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#0f4c2a;border:1.5px solid #10b981"></div> Trang giao diện (Page)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#1e293b;border:1.5px solid #475569"></div> Hành động người dùng</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#7c2d12;border:1.5px solid #f97316"></div> Xác thực (Auth)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#312e81;border:1.5px solid #6366f1"></div> AI Engine (GNN)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#4a1942;border:1.5px solid #c026d3"></div> Admin</div>
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'dark',
+    flowchart: { curve: 'basis', padding: 20, nodeSpacing: 40, rankSpacing: 55 },
+    themeVariables: {
+      background: '#1e293b',
+      primaryColor: '#1e3a5f',
+      primaryTextColor: '#e2e8f0',
+      primaryBorderColor: '#334155',
+      lineColor: '#475569',
+      secondaryColor: '#0f4c2a',
+      tertiaryColor: '#312e81',
+      fontFamily: 'Segoe UI, Arial, sans-serif',
+      fontSize: '13px'
+    }
+  })
+</script>
+</body>
+</html>

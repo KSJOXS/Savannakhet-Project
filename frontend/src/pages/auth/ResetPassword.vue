@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="auth-page">
     <div class="auth-card">
       <div class="auth-header">
@@ -95,7 +95,7 @@ const handleResetPassword = async () => {
   error.value = ''
   
   try {
-    const res = await axios.post('http://localhost:8000/reset-password', {
+    const res = await axios.post('http://127.0.0.1:8000/reset-password', {
       token: token.value,
       new_password: password.value
     })

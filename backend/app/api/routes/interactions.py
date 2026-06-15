@@ -1,15 +1,28 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, BackgroundTasks
 from sqlalchemy.orm import Session
-from app.database import get_db
+from app.database import get_db, SessionLocal
 
 # ดึงฟังก์ชันที่เราเพิ่งเขียนมาใช้
 from app.services.gnn_service import build_gnn_graph
+from app.services.recommendation import train_gnn_link_prediction
 from app import models, schemas
+import logging
 
 router = APIRouter()
 
+def run_gnn_training_background():
+    db = SessionLocal()
+    try:
+        logging.info("Starting background GNN training...")
+        train_gnn_link_prediction(db)
+        logging.info("Background GNN training completed successfully.")
+    except Exception as e:
+        logging.error(f"Error during background GNN training: {e}")
+    finally:
+        db.close()
+
 @router.post("/log")
-def log_interaction(payload: schemas.InteractionLogCreate, db: Session = Depends(get_db)):
+def log_interaction(payload: schemas.InteractionLogCreate, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     """
     เก็บ Log การใช้งาน (view, like, review) และคำนวณเป็น weight
     """
@@ -31,6 +44,11 @@ def log_interaction(payload: schemas.InteractionLogCreate, db: Session = Depends
     )
     db.add(new_log)
     db.commit()
+    
+    # Trigger Auto-Train in background if it's a significant action
+    if payload.action_type in ['like', 'review']:
+        background_tasks.add_task(run_gnn_training_background)
+
     return {"status": "success", "message": "Interaction logged successfully", "weight_assigned": weight}
 
 @router.get("/test-graph-data")

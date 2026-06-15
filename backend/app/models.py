@@ -128,6 +128,8 @@ class ContactMessage(Base):
     message = Column(Text, nullable=False)
     is_read = Column(Boolean, default=False)
     is_replied = Column(Boolean, default=False)
+    reply_text = Column(Text, nullable=True)   # เก็บข้อความที่ admin ตอบกลับ
+    replied_at = Column(DateTime(timezone=True), nullable=True)  # เวลาที่ตอบ
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 class SiteSetting(Base):

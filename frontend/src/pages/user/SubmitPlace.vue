@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <div class="submit-page-container">
         <div class="header-section">
             <div class="header-content">
@@ -873,7 +873,7 @@ const loadPlaceData = async () => {
         if (p.image_url) {
             try {
                 const imgUrls = JSON.parse(p.image_url)
-                images.value = imgUrls.map(url => `http://localhost:8000${url}`)
+                images.value = imgUrls.map(url => `http://127.0.0.1:8000${url}`)
             } catch(e) {
                 console.warn("Could not parse image_url", e)
             }
@@ -907,7 +907,7 @@ const fetchSections = async () => {
 const getSectionImageUrl = (url) => {
     if (!url) return ''
     if (url.startsWith('http') || url.startsWith('data:')) return url
-    return `http://localhost:8000${url.startsWith('/') ? '' : '/'}${url}`
+    return `http://127.0.0.1:8000${url.startsWith('/') ? '' : '/'}${url}`
 }
 
 const toggleExpandSection = (id) => {

@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <div class="admin-dashboard">
         <header class="dashboard-header">
             <h2><i class="fas fa-chart-line"></i> Dashboard Overview</h2>
@@ -94,7 +94,7 @@ const dashboardData = ref({
 const fetchStats = async () => {
     loading.value = true
     try {
-        const response = await axios.get('http://localhost:8000/admin/stats')
+        const response = await axios.get('http://127.0.0.1:8000/admin/stats')
         console.log("API Result:", response.data) // เช็คใน Console (F12)
         dashboardData.value = response.data
     } catch (error) {

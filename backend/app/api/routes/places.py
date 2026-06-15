@@ -249,6 +249,7 @@ async def update_place(
     avoid_if: Optional[str] = Form(None), # JSON string
     booking_url: Optional[str] = Form(None),
     agoda_url: Optional[str] = Form(None),
+    existing_image_urls: Optional[str] = Form(None),  # JSON array of old URLs to keep
     images: Optional[List[UploadFile]] = File(None),
     db: Session = Depends(get_db)
 ):
@@ -291,17 +292,43 @@ async def update_place(
         if agoda_url is not None:
             db_place.agoda_url = agoda_url
 
+        # อัปเดตรูปภาพ:
+        # 1. โหลด existing_image_urls ที่ frontend บอกว่ายังต้องการเก็บไว้
+        kept_urls = []
+        if existing_image_urls:
+            try:
+                kept_urls = json.loads(existing_image_urls)
+                if not isinstance(kept_urls, list):
+                    kept_urls = []
+            except Exception:
+                kept_urls = []
+
+        # 2. อัปโหลดรูปใหม่
+        new_image_urls = []
         if images and images[0].filename:
             os.makedirs(UPLOAD_DIR, exist_ok=True)
-            image_urls = []
             for file in images:
                 if file.filename:
                     file_path = f"{UPLOAD_DIR}/{file.filename}"
                     with open(file_path, "wb") as buffer:
                         shutil.copyfileobj(file.file, buffer)
-                    image_urls.append(f"/{file_path}")
-            
-            db_place.image_url = json.dumps(image_urls)
+                    new_image_urls.append(f"/{file_path}")
+
+        # 3. รวม kept_urls + new_image_urls และ cap ที่ 10
+        # แปลง http://localhost:8000/path → /path เพื่อเก็บเป็น relative path ใน DB
+        normalized_kept = []
+        for url in kept_urls:
+            if url.startswith('http://localhost:8000'):
+                url = url[len('http://localhost:8000'):]
+            elif url.startswith('http://') or url.startswith('https://'):
+                url = url  # เก็บ external URL ไว้เหมือนเดิม
+            normalized_kept.append(url)
+
+        final_urls = (normalized_kept + new_image_urls)[:10]
+
+        # 4. อัปเดต DB เฉพาะเมื่อมีการเปลี่ยนแปลง (มีรูปใหม่ หรือมีการลบรูปเก่า)
+        if new_image_urls or existing_image_urls is not None:
+            db_place.image_url = json.dumps(final_urls)
 
         db.commit()
         return {"message": "Place updated successfully."}

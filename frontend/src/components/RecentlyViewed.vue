@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <div class="recently-viewed-section" v-if="recentPlaces.length > 0">
         <div class="section-header">
             <h2 class="section-title">
@@ -110,7 +110,7 @@ const getCoverImage = (place) => {
     
     if (url.startsWith('http')) return url
     
-    const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+    const backendUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'
     return `${backendUrl}${url.startsWith('/') ? '' : '/'}${url}`
 }
 
@@ -133,7 +133,7 @@ const toggleHeart = async (id) => {
         const res = await favoriteRepository.toggleFavorite(user.value.id, id)
         if (res.data.status === 'added') {
             favoriteIds.value.push(id)
-            const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+            const backendUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'
             await axios.post(`${backendUrl}/api/interactions/`, {
                 place_id: id, rating: 5, comment: "Liked", interaction_type: 'like'
             }).catch(()=>{});

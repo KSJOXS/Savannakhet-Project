@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <div class="admin-page">
         <div class="page-header">
             <h2>Place Management</h2>
@@ -138,7 +138,7 @@ const getThumbnail = (imageUrl) => {
     if (url === PLACEHOLDER || url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
         return url;
     }
-    return `http://localhost:8000${url.startsWith('/') ? '' : '/'}${url}`;
+    return `http://127.0.0.1:8000${url.startsWith('/') ? '' : '/'}${url}`;
 }
 
 const fetchData = async () => {

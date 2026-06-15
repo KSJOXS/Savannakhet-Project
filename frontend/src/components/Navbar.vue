@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <header class="ta-header">
         <div class="ta-top-row">
             <div class="nav-container">
@@ -56,10 +56,6 @@
                                     @click="isContributeOpen = false">
                                     <i class="fas fa-pen-nib"></i> {{ getTranslation('nav.writeReview', 'Write Review')
                                     }}
-                                </router-link>
-                                <router-link to="/submit-place" class="ta-dropdown-item"
-                                    @click="isContributeOpen = false">
-                                    <i class="fas fa-camera"></i> {{ getTranslation('nav.postPhoto', 'Post Photo') }}
                                 </router-link>
                                 <div class="dropdown-divider"></div>
                                 <router-link to="/submit-place" class="ta-dropdown-item"
@@ -270,7 +266,7 @@ const switchLang = (code) => {
 const getImageUrl = (url) => {
     if (!url) return '';
     if (url.startsWith('http') || url.startsWith('data:')) return url;
-    return `http://localhost:8000/${url.startsWith('/') ? url.slice(1) : url}`;
+    return `http://127.0.0.1:8000/${url.startsWith('/') ? url.slice(1) : url}`;
 }
 
 const checkAuth = () => {

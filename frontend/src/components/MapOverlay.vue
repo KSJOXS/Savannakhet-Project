@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="map-overlay-backdrop" v-if="isOpen">
     <div class="map-overlay-modal">
       <!-- Map Container must be the background -->
@@ -48,7 +48,7 @@ let hasViewBeenSet = false;
 
 const filterOptions = [
     { id: 'hotel', label: 'Hotels', icon: 'fas fa-bed' },
-    { id: 'restaurant', label: 'Restaurants', icon: 'fas fa-utensils' },
+    { id: 'restaurant', label: 'Restaurants & Coffee', icon: 'fas fa-utensils' },
     { id: 'nature', label: 'Nature & Parks', icon: 'fas fa-tree' },
     { id: 'landmark', label: 'Landmarks', icon: 'fas fa-monument' },
     { id: 'culture', label: 'Culture', icon: 'fas fa-vihara' }
@@ -76,14 +76,32 @@ const displayedPlaces = computed(() => {
     }
 
     if (!props.categories || props.categories.length === 0) return places;
-    if (activeFilters.value.size === 0) return []; 
-    
+    if (activeFilters.value.size === 0) return [];
+
+    // Map filter IDs to actual parent_types in database
+    // 'restaurant' button should match: local_food, cafe, chill (Bars)
+    const filterTypeMap = {
+        'restaurant': ['restaurant', 'local_food', 'cafe', 'chill'],
+        'hotel':      ['hotel'],
+        'nature':     ['nature'],
+        'landmark':   ['landmark', null],
+        'culture':    ['culture'],
+    };
+
+    // Collect all accepted parent_types based on active filters
+    const acceptedTypes = new Set();
+    activeFilters.value.forEach(filterId => {
+        const types = filterTypeMap[filterId] || [filterId];
+        types.forEach(t => acceptedTypes.add(t));
+    });
+
     return places.filter(p => {
         const cat = props.categories.find(c => c.id === p.category_id);
         if (!cat) return false;
-        return activeFilters.value.has(cat.parent_type) || (cat.parent_type === null && activeFilters.value.has('landmark')); // fallback to landmark
+        return acceptedTypes.has(cat.parent_type);
     });
 });
+
 
 const closeMap = () => {
     emit('close');
@@ -113,7 +131,7 @@ const getCoverImage = (place) => {
     
     if (!url) return 'https://via.placeholder.com/400x300?text=No+Image';
     if (url.startsWith('data:')) return url;
-    return url.startsWith('http') ? url : `http://localhost:8000/${url.replace(/^\//, '')}`;
+    return url.startsWith('http') ? url : `http://127.0.0.1:8000/${url.replace(/^\//, '')}`;
 }
 
 const initMap = () => {

@@ -15,6 +15,7 @@ export default {
     signOut: 'ออกจากระบบ',
     logout: 'ออกจากระบบ',
     myHistory: 'ประวัติของฉัน',
+    myReviews: 'ประวัติการรีวิว',
     socialHistory: 'โซเชียลฟีดของฉัน',
     profile: 'โปรไฟล์',
     accountInfo: 'ข้อมูลบัญชีผู้ใช้',
@@ -133,6 +134,9 @@ export default {
     saved: 'บันทึกแล้ว',
     free: 'ฟรี',
     freeEntry: 'เข้าชมฟรี',
+    seeTranslation: 'แปลภาษา',
+    showOriginal: 'ต้นฉบับ',
+    translateGuide: 'แปลภาษา',
   },
 
   recommend: {
@@ -168,6 +172,8 @@ export default {
     create_account: 'สร้างบัญชีฟรีเพื่อบันทึกรายการโปรดและรับคำแนะนำส่วนตัว',
     get_started: "เริ่มเลย — ฟรี",
     top_rated_badge: 'ยอดนิยม',
+    show_more: 'ดูเพิ่มเติม',
+    show_less: 'ย่อเก็บ',
   },
 
   // --- Hotels Page ---
@@ -698,7 +704,59 @@ export default {
     card_teresa_desc: 'มรดกทางสถาปัตยกรรมยุคโคโลเนียลที่โดดเด่นที่สุดใจกลางย่านเมืองเก่า',
     card_oldtown_title: 'เขตเมืองเก่า (Old Town)',
     card_oldtown_desc: 'เดินชมอาคารเก่าแก่สไตล์ฝรั่งเศส และลิ้มลองอาหารพื้นเมืองรอบจัตุรัสทาแล็ง',
-    cta_title: 'พร้อมที่จะค้นพบสะหวันนะเขตในแบบของคุณแล้วหรือยัง?',
-    cta_btn: 'เริ่มต้นการสำรวจ'
+    cta_title: 'พร้อมที่จะสำรวจสะหวันนะเขตในแบบของคุณหรือยัง?',
+    cta_btn: 'เริ่มออกเดินทาง'
+  },
+  about: {
+    devRole: 'DEVELOPER',
+    devName: 'Jo Xaysongkham',
+    quote: '"Technology to elevate local tourism."',
+    p1: 'สวัสดีครับ! ผมเป็นคนออกแบบและพัฒนาระบบ Savannakhet Smart Travel แพลตฟอร์มนี้เกิดจากความตั้งใจที่อยากเอาเทคโนโลยีใหม่ ๆ มาช่วยให้การท่องเที่ยวในแขวงสะหวันนะเขตสนุกและสะดวกยิ่งขึ้นครับ',
+    p2: 'จุดเริ่มต้นของโปรเจกต์นี้ มาจากการที่ผมเห็นปัญหาว่าบางทีเราก็หาสถานที่ท่องเที่ยวที่ถูกใจไม่ค่อยเจอ ผมเลยตัดสินใจเอา AI โดยเฉพาะโมเดล Graph Neural Network (GNN) มาช่วยเรียนรู้พฤติกรรมและความชอบของแต่ละคน เพื่อให้ระบบสามารถแนะนำสถานที่ได้ตรงใจผู้ใช้มากที่สุดครับ',
+    p3: 'ในส่วนของการพัฒนา ผมดูแลทั้งฝั่ง Frontend โดยใช้ Vue.js 3 เพื่อให้ได้หน้าจอที่สวยงาม ใช้งานง่าย และฝั่ง Backend ผมใช้ FastAPI ร่วมกับ MySQL เพื่อจัดการฐานข้อมูลและประมวลผลโมเดล AI ให้ทำงานได้อย่างรวดเร็วและมีประสิทธิภาพครับ',
+    p4: 'ผมหวังว่าระบบนี้จะช่วยให้นักท่องเที่ยวทุกคนได้รับประสบการณ์ที่ยอดเยี่ยม และเป็นส่วนเล็ก ๆ ในการช่วยขับเคลื่อนเศรษฐกิจและการท่องเที่ยวของสะหวันนะเขตให้เติบโตอย่างยั่งยืนครับ',
+    watermark: 'Developer'
+  },
+  features: {
+    title: 'Project Objectives & Core Features',
+    desc: 'โปรเจกต์นี้ได้รับการพัฒนาเพื่อสนับสนุนและยกระดับการท่องเที่ยวในแขวงสะหวันนะเขต ด้วยการรวมปัญญาประดิษฐ์ (AI) เราทำการวิเคราะห์ความชอบของผู้ใช้เพื่อแนะนำจุดหมายปลายทางที่เหมาะสมและเป็นส่วนตัวที่สุดสำหรับนักเดินทางแต่ละคน',
+    f1Title: 'GNN Integration',
+    f1Desc: 'พัฒนาแพลตฟอร์มการท่องเที่ยวอัจฉริยะสำหรับสะหวันนะเขต โดยผสาน Graph Neural Network (GNN) เพื่อนำเสนอคำแนะนำการท่องเที่ยวแบบเฉพาะบุคคลอย่างสูงตามความชอบของผู้ใช้',
+    f2Title: 'User-Friendly UI',
+    f2Desc: 'ออกแบบและพัฒนาอินเทอร์เฟซผู้ใช้ที่ใช้งานง่าย ช่วยให้ผู้ใช้สำรวจจุดหมายปลายทาง อ่านรีวิว และรับแผนการเดินทางที่ปรับแต่งได้อย่างราบรื่น',
+    f3Title: 'Graph Relationship Learning',
+    f3Desc: 'สร้างและฝึกฝนโมเดล GNN เพื่อจัดทำแผนที่และวิเคราะห์ความสัมพันธ์ของกราฟที่ซับซ้อนระหว่างผู้ใช้ สถานที่ และความสนใจ ซึ่งช่วยเพิ่มความแม่นยำในการแนะนำได้อย่างมาก',
+    f4Title: 'Admin Management System',
+    f4Desc: 'สร้าง Admin Dashboard ที่ครอบคลุมสำหรับการจัดการสถานที่ท่องเที่ยว ตรวจสอบรีวิวของผู้ใช้ และตรวจสอบสถิติระบบโดยรวม',
+    f5Title: 'Security & Scalability',
+    f5Desc: 'มั่นใจในสถาปัตยกรรมระบบที่แข็งแกร่งโดยมุ่งเน้นที่ความพร้อมใช้งานสูง ความปลอดภัยของข้อมูลที่ยอดเยี่ยม และความสามารถในการปรับขนาดในอนาคต'
+  },
+  timeline: {
+    title: 'Project Development Timeline',
+    subtitle: 'ไทม์ไลน์การพัฒนาโปรเจกต์ตั้งแต่เริ่มต้นจนสำเร็จ (กุมภาพันธ์ - มิถุนายน 2026)',
+    watermark: 'Timeline',
+    periods: {
+      feb: 'Feb 2026',
+      mar: 'Mar 2026',
+      apr: 'Apr 2026',
+      may: 'May 2026',
+      jun: 'Jun 2026'
+    },
+    items: [
+      { periodId: 'feb', week: 'Week 1', label: 'Research', title: 'Research & System Architecture', desc: 'ศึกษาเทคโนโลยี GNN, FastAPI, Vue.js, MySQL รวบรวมข้อมูลสถานที่ท่องเที่ยวสะหวันนะเขต และกำหนดสถาปัตยกรรมระบบ' },
+      { periodId: 'feb', week: 'Week 2-3', label: 'Database', title: 'Database Design & Graph Modeling', desc: 'ออกแบบฐานข้อมูล MySQL และสร้างโครงสร้างกราฟความสัมพันธ์ ผู้ใช้-สถานที่-ความชอบ เพื่อเตรียมสำหรับโมเดล GNN' },
+      { periodId: 'mar', week: 'Week 4', label: 'Backend', title: 'FastAPI Backend Core', desc: 'พัฒนาระบบ Backend ด้วย FastAPI รวมถึงระบบยืนยันตัวตน (JWT) และ API จัดการข้อมูลสถานที่ ผู้ใช้งาน และความชอบ' },
+      { periodId: 'mar', week: 'Week 4-6', label: 'AI Model', title: 'GNN Model Training', desc: 'สร้างและฝึกสอน (Train) โมเดล AI ด้วย PyTorch Geometric โดยใช้ชุดข้อมูลความสัมพันธ์ของผู้ใช้และสถานที่ในสะหวันนะเขต' },
+      { periodId: 'apr', week: 'Week 6-7', label: 'Integration', title: 'AI Integration & Endpoints', desc: 'นำโมเดล GNN เข้าผสานกับ FastAPI เพื่อสร้าง API Endpoint สำหรับดึงข้อมูลแนะนำสถานที่แบบเฉพาะบุคคล (Personalized)' },
+      { periodId: 'may', week: 'Week 8-9', label: 'Frontend', title: 'Vue.js UI Development', desc: 'พัฒนาหน้าจอผู้ใช้งานด้วย Vue.js 3 (หน้าแรก, ค้นหา, แนะนำสถานที่ด้วย GNN, รีวิว, โปรไฟล์) และเชื่อมต่อ API' },
+      { periodId: 'jun', week: 'Week 10', label: 'Dashboard', title: 'Admin Dashboard', desc: 'สร้างระบบสำหรับผู้ดูแล เพื่อจัดการสถานที่ ผู้ใช้ สถิติ และตรวจสอบประสิทธิภาพของ GNN Model (Precision, Recall, NDCG)' },
+      { periodId: 'jun', week: 'Week 11', label: 'Testing', title: 'Testing & Final Report', desc: 'ทดสอบระบบทั้งหมด (End-to-End Testing) ปรับปรุงความเร็วของ API และความแม่นยำของโมเดล พร้อมเขียนรายงานโปรเจกต์จบ' }
+    ]
+  },
+  faq: {
+    title: 'คำถามที่พบบ่อย',
+    subtitle: 'ค้นหาคำตอบสำหรับคำถามทั่วไปเกี่ยวกับ Savannakhet Smart Travel',
+    stillNeedHelp: 'ยังต้องการความช่วยเหลือ?',
+    contactUs: 'หากคุณไม่พบคำตอบสำหรับคำถามของคุณ โปรดติดต่อเรา'
   }
 }

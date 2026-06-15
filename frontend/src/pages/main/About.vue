@@ -11,63 +11,56 @@
 
         <div class="main-layout">
             <div class="intro-section">
-                <h2>Project Objectives & Core Features</h2>
+                <h2>{{ t('features.title') }}</h2>
                 <p class="intro-text">
-                    This project was developed to support and elevate tourism in Savannakhet Province.
-                    By integrating Artificial Intelligence (AI), we analyze user preferences to recommend
-                    the most suitable and personalized destinations for every traveler.
+                    {{ t('features.desc') }}
                 </p>
             </div>
 
             <div class="features-grid">
                 <div class="feature-card">
                     <div class="icon-box"><i class="fas fa-brain"></i></div>
-                    <h3>GNN Integration</h3>
-                    <p>Developed a smart tourism platform for Savannakhet, integrating a Graph Neural Network (GNN) to
-                        deliver highly personalized travel recommendations based on user preferences.</p>
+                    <h3>{{ t('features.f1Title') }}</h3>
+                    <p>{{ t('features.f1Desc') }}</p>
                 </div>
 
                 <div class="feature-card">
                     <div class="icon-box"><i class="fas fa-mobile-alt"></i></div>
-                    <h3>User-Friendly UI</h3>
-                    <p>Designed and implemented an intuitive user interface, enabling users to seamlessly explore
-                        destinations, read reviews, and receive tailored travel itineraries.</p>
+                    <h3>{{ t('features.f2Title') }}</h3>
+                    <p>{{ t('features.f2Desc') }}</p>
                 </div>
 
                 <div class="feature-card">
                     <div class="icon-box"><i class="fas fa-project-diagram"></i></div>
-                    <h3>Graph Relationship Learning</h3>
-                    <p>Engineered and trained a GNN model to map and analyze complex graph relationships between users,
-                        locations, and interests, significantly improving recommendation accuracy.</p>
+                    <h3>{{ t('features.f3Title') }}</h3>
+                    <p>{{ t('features.f3Desc') }}</p>
                 </div>
 
                 <div class="feature-card">
                     <div class="icon-box"><i class="fas fa-cogs"></i></div>
-                    <h3>Admin Management System</h3>
-                    <p>Built a comprehensive Admin Dashboard for managing tourist attractions, moderating user reviews,
-                        and monitoring overall system statistics.</p>
+                    <h3>{{ t('features.f4Title') }}</h3>
+                    <p>{{ t('features.f4Desc') }}</p>
                 </div>
 
                 <div class="feature-card">
                     <div class="icon-box"><i class="fas fa-shield-alt"></i></div>
-                    <h3>Security & Scalability</h3>
-                    <p>Ensured a robust system architecture with a strong focus on high availability, excellent data
-                        security, and future scalability.</p>
+                    <h3>{{ t('features.f5Title') }}</h3>
+                    <p>{{ t('features.f5Desc') }}</p>
                 </div>
             </div>
 
             <div class="history-section-title">
-                <h2>Project Development Timeline</h2>
-                <p>ไทม์ไลน์การพัฒนาโปรเจกต์ตั้งแต่เริ่มต้นจนสำเร็จ (กุมภาพันธ์ - มิถุนายน 2026)</p>
+                <h2>{{ t('timeline.title') }}</h2>
+                <p>{{ t('timeline.subtitle') }}</p>
             </div>
 
             <div class="history-card">
                 <div class="history-sidebar">
-                    <div v-for="period in periods" :key="period" 
+                    <div v-for="key in periodKeys" :key="key" 
                          class="sidebar-year" 
-                         :class="{ active: activePeriod === period }"
-                         @click="activePeriod = period">
-                        {{ period }}
+                         :class="{ active: activePeriodId === key }"
+                         @click="activePeriodId = key">
+                        {{ t('timeline.periods.' + key) }}
                     </div>
                 </div>
                 
@@ -92,7 +85,7 @@
                         </div>
                     </transition-group>
                     
-                    <div class="history-watermark">Timeline</div>
+                    <div class="history-watermark">{{ t('timeline.watermark') }}</div>
                 </div>
             </div>
             </div>
@@ -101,29 +94,25 @@
             <div class="developer-container">
                 
                 <div class="dev-left">
-                    <p class="dev-role">DEVELOPER</p>
-                    <h2 class="dev-name">Jo Xaysongkham</h2>
+                    <p class="dev-role">{{ t('about.devRole') }}</p>
+                    <h2 class="dev-name">{{ t('about.devName') }}</h2>
                     
                     <div class="dev-img-wrapper">
-                        <img src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?q=80&w=300" alt="Developer Profile" />
+                        <img src="/my_portfolio.jpg" alt="Developer Profile" />
                     </div>
                 </div>
 
                 <div class="dev-right">
-                    <p><strong>"Technology to elevate local tourism."</strong></p>
-                    
-                    <p>สวัสดีครับ ผมเป็นผู้พัฒนาและออกแบบระบบ Savannakhet Smart Travel แพลตฟอร์มนี้ถูกสร้างขึ้นด้วยความตั้งใจที่จะนำเทคโนโลยีสมัยใหม่มาช่วยยกระดับการท่องเที่ยวในแขวงสะหวันนะเขต</p>
-                    
-                    <p>จุดเริ่มต้นของโปรเจกต์นี้มาจากความต้องการที่จะแก้ปัญหาการค้นหาสถานที่ท่องเที่ยวที่ตรงใจผู้ใช้งาน ผมจึงตัดสินใจนำเทคโนโลยี Artificial Intelligence โดยเฉพาะโมเดล Graph Neural Network (GNN) เข้ามาประยุกต์ใช้ เพื่อเรียนรู้พฤติกรรมและความชอบของผู้ใช้งานแต่ละคนแบบ Personalization</p>
-                    
-                    <p>ในด้านของการพัฒนา ผมรับผิดชอบทั้งส่วนของ Frontend ที่พัฒนาด้วย Vue.js 3 เพื่อให้ได้หน้าจอที่ใช้งานง่าย สวยงาม และ Responsive รวมถึงส่วนของ Backend ที่ใช้ FastAPI และ MySQL ในการจัดการระบบฐานข้อมูลและการประมวลผลโมเดล AI</p>
-
-                    <p>ผมเชื่อว่าระบบนี้จะไม่เพียงแต่ช่วยให้นักท่องเที่ยวได้รับประสบการณ์ที่ดีขึ้น แต่ยังเป็นส่วนหนึ่งในการขับเคลื่อนเศรษฐกิจและการท่องเที่ยวของแขวงสะหวันนะเขตให้เติบโตอย่างยั่งยืนในยุคดิจิทัลครับ.</p>
+                    <div>
+                        <p><strong>{{ t('about.quote') }}</strong></p>
+                        <p>{{ t('about.p1') }}</p>
+                        <p>{{ t('about.p2') }}</p>
+                        <p>{{ t('about.p3') }}</p>
+                        <p>{{ t('about.p4') }}</p>
+                    </div>
                 </div>
 
-                <div class="dev-watermark">Developer</div>
-
-                <div class="deco-circle"></div>
+                <div class="dev-watermark">{{ t('about.watermark') }}</div>
             </div>
         </section>
         </div>
@@ -132,37 +121,20 @@
 <script setup>
 import { ref, computed } from 'vue'
 import Navbar from '@/components/Navbar.vue'
+import { useI18n } from '@/composables/useI18n'
 
-// ข้อมูลเดือนสำหรับเมนูด้านซ้าย (Feb - Jun 2026)
-const periods = ['Feb 2026', 'Mar 2026', 'Apr 2026', 'May 2026', 'Jun 2026']
+const { t } = useI18n()
 
-// ตั้งค่าเริ่มต้นให้แสดงเดือนกุมภาพันธ์
-const activePeriod = ref('Feb 2026')
+const periodKeys = ['feb', 'mar', 'apr', 'may', 'jun']
 
-// ข้อมูล Timeline แปลงตามกระบวนการทำงาน 11 สัปดาห์
-const timelineData = [
-    // --- February 2026 ---
-    { period: 'Feb 2026', week: 'Week 1', label: 'Research', title: 'Research & System Architecture', desc: 'ศึกษาเทคโนโลยี GNN, FastAPI, Vue.js, MySQL รวบรวมข้อมูลสถานที่ท่องเที่ยวสะหวันนะเขต และกำหนดสถาปัตยกรรมระบบ' },
-    { period: 'Feb 2026', week: 'Week 2-3', label: 'Database', title: 'Database Design & Graph Modeling', desc: 'ออกแบบฐานข้อมูล MySQL และสร้างโครงสร้างกราฟความสัมพันธ์ ผู้ใช้-สถานที่-ความชอบ เพื่อเตรียมสำหรับโมเดล GNN' },
-    
-    // --- March 2026 ---
-    { period: 'Mar 2026', week: 'Week 4', label: 'Backend', title: 'FastAPI Backend Core', desc: 'พัฒนาระบบ Backend ด้วย FastAPI รวมถึงระบบยืนยันตัวตน (JWT) และ API จัดการข้อมูลสถานที่ ผู้ใช้งาน และความชอบ' },
-    { period: 'Mar 2026', week: 'Week 4-6', label: 'AI Model', title: 'GNN Model Training', desc: 'สร้างและฝึกสอน (Train) โมเดล AI ด้วย PyTorch Geometric โดยใช้ชุดข้อมูลความสัมพันธ์ของผู้ใช้และสถานที่ในสะหวันนะเขต' },
-    
-    // --- April 2026 ---
-    { period: 'Apr 2026', week: 'Week 6-7', label: 'Integration', title: 'AI Integration & Endpoints', desc: 'นำโมเดล GNN เข้าผสานกับ FastAPI เพื่อสร้าง API Endpoint สำหรับดึงข้อมูลแนะนำสถานที่แบบเฉพาะบุคคล (Personalized)' },
-    
-    // --- May 2026 ---
-    { period: 'May 2026', week: 'Week 8-9', label: 'Frontend', title: 'Vue.js UI Development', desc: 'พัฒนาหน้าจอผู้ใช้งานด้วย Vue.js 3 (หน้าแรก, ค้นหา, แนะนำสถานที่ด้วย GNN, รีวิว, โปรไฟล์) และเชื่อมต่อ API' },
-    
-    // --- June 2026 ---
-    { period: 'Jun 2026', week: 'Week 10', label: 'Dashboard', title: 'Admin Dashboard', desc: 'สร้างระบบสำหรับผู้ดูแล เพื่อจัดการสถานที่ ผู้ใช้ สถิติ และตรวจสอบประสิทธิภาพของ GNN Model (Precision, Recall, NDCG)' },
-    { period: 'Jun 2026', week: 'Week 11', label: 'Testing', title: 'Testing & Final Report', desc: 'ทดสอบระบบทั้งหมด (End-to-End Testing) ปรับปรุงความเร็วของ API และความแม่นยำของโมเดล พร้อมเขียนรายงานโปรเจกต์จบ' },
-]
+const activePeriodId = ref('feb')
 
-// ฟิลเตอร์ข้อมูลให้แสดงเฉพาะเดือนที่เลือก
 const filteredTimeline = computed(() => {
-    return timelineData.filter(item => item.period === activePeriod.value)
+    const items = t('timeline.items')
+    if (Array.isArray(items)) {
+        return items.filter(item => item.periodId === activePeriodId.value)
+    }
+    return []
 })
 </script>
 
@@ -580,4 +552,5 @@ const filteredTimeline = computed(() => {
     .dev-watermark { display: none; }
     .dev-img-wrapper { width: 150px; height: 150px; border-radius: 50%; }
 }
+
 </style>

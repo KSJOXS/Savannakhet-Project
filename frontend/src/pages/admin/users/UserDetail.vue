@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <div class="admin-page">
         <div class="header-content">
             <div class="title-section">
@@ -194,7 +194,7 @@ const fetchData = async () => {
 const getImageUrl = (path) => {
     if (!path) return '';
     if (path.startsWith('http')) return path;
-    return `http://localhost:8000${path.startsWith('/') ? path : '/' + path}`;
+    return `http://127.0.0.1:8000${path.startsWith('/') ? path : '/' + path}`;
 }
 
 const getPlaceImage = (imageString) => {
@@ -202,10 +202,10 @@ const getPlaceImage = (imageString) => {
         if (!imageString || imageString === '[]') return '/placeholder-image.jpg'
         const images = JSON.parse(imageString)
         if (images.length > 0) {
-            return `http://localhost:8000${images[0]}`
+            return `http://127.0.0.1:8000${images[0]}`
         }
     } catch (e) {
-        if (imageString && !imageString.includes('[')) return `http://localhost:8000${imageString}`
+        if (imageString && !imageString.includes('[')) return `http://127.0.0.1:8000${imageString}`
     }
     return '/placeholder-image.jpg'
 }

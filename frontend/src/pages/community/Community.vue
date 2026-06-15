@@ -1,12 +1,38 @@
-<template>
+﻿<template>
   <div class="community-page">
     <Navbar />
 
-    <div class="community-container">
-      <div class="feed-header">
-        <h1>{{ t('nav.communityFeed') || 'Community Feed' }}</h1>
-        <p>{{ t('recommend.hero_subtitle') }}</p>
-      </div>
+    <div class="community-layout">
+      <!-- Left Sidebar (Facebook Style) -->
+      <aside class="fb-left-sidebar" v-if="user">
+        <router-link to="/profile" class="fb-sidebar-item">
+          <img :src="getUserAvatar(user.profile_image)" alt="avatar" class="sidebar-avatar" />
+          <span class="sidebar-text">{{ user.username }}</span>
+        </router-link>
+        
+        <router-link to="/profile?tab=trips" class="fb-sidebar-item">
+          <div class="sidebar-icon-wrap" style="background: #e6f7f0; color: #00aa6c;">
+            <i class="fas fa-bookmark"></i>
+          </div>
+          <span class="sidebar-text">{{ t('nav.myTrips', 'Saved Places') }}</span>
+        </router-link>
+        
+        <router-link to="/profile?tab=reviews" class="fb-sidebar-item">
+          <div class="sidebar-icon-wrap" style="background: #e0f2fe; color: #0284c7;">
+            <i class="fas fa-history"></i>
+          </div>
+          <span class="sidebar-text">{{ t('nav.myReviews', 'My Reviews') }}</span>
+        </router-link>
+        
+        <router-link to="/explore" class="fb-sidebar-item">
+          <div class="sidebar-icon-wrap" style="background: #fdf4ff; color: #c026d3;">
+            <i class="fas fa-compass"></i>
+          </div>
+          <span class="sidebar-text">{{ t('nav.exploreAll', 'Explore Places') }}</span>
+        </router-link>
+      </aside>
+
+      <div class="community-container">
 
       <div v-if="user" class="write-post-card">
         <div class="write-post-header">
@@ -121,6 +147,7 @@
           </div>
         </div>
       </div>
+    </div>
     </div>
 
     <!-- Lightbox -->
@@ -271,12 +298,12 @@ const fetchFeed = async () => {
 const getImageUrl = (url) => {
   if (!url) return '';
   if (url.startsWith('http') || url.startsWith('data:')) return url;
-  return `http://localhost:8000/${url.startsWith('/') ? url.slice(1) : url}`;
+  return `http://127.0.0.1:8000/${url.startsWith('/') ? url.slice(1) : url}`;
 }
 
 const getUserAvatar = (url) => {
   if (url) return getImageUrl(url);
-  return 'https://ui-avatars.com/api/?background=random&color=fff&name=User';
+  return 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ccc"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>';
 }
 
 const formatDate = (date) => {
@@ -439,10 +466,71 @@ onMounted(fetchFeed)
   font-family: 'Inter', sans-serif;
 }
 
-.community-container {
-  max-width: 700px;
-  margin: 40px auto;
+.community-layout {
+  display: flex;
+  max-width: 1200px;
+  margin: 20px auto;
+  gap: 20px;
   padding: 0 15px;
+}
+
+.fb-left-sidebar {
+  width: 280px;
+  position: sticky;
+  top: 100px;
+  height: max-content;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+@media (max-width: 900px) {
+  .fb-left-sidebar {
+    display: none;
+  }
+}
+
+.fb-sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 10px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: #050505;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.fb-sidebar-item:hover {
+  background: #e4e6eb;
+}
+
+.sidebar-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.sidebar-icon-wrap {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+.sidebar-text {
+  font-size: 0.95rem;
+}
+
+.community-container {
+  flex: 1;
+  max-width: 780px;
+  width: 100%;
 }
 
 .feed-header {

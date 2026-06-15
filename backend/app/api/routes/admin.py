@@ -9,10 +9,33 @@ router = APIRouter(tags=["Admin Dashboard"])
 
 # --- 0. Places Approval Management ---
 
-@router.get("/admin/places/pending", response_model=List[schemas.PlaceResponse])
+@router.get("/admin/places/pending")
 def get_pending_places(db: Session = Depends(get_db)):
     from sqlalchemy.orm import selectinload
-    return db.query(models.Place).options(selectinload(models.Place.category)).filter(models.Place.status == "pending").all()
+    places = db.query(models.Place).options(
+        selectinload(models.Place.category),
+        selectinload(models.Place.owner)
+    ).filter(models.Place.status == "pending").all()
+    
+    result = []
+    for p in places:
+        result.append({
+            "id": p.id,
+            "name": p.name,
+            "description": p.description,
+            "category_id": p.category_id,
+            "category": {"id": p.category.id, "name": p.category.name, "parent_type": p.category.parent_type} if p.category else None,
+            "image_url": p.image_url,
+            "location_lat": float(p.location_lat) if p.location_lat else None,
+            "location_lng": float(p.location_lng) if p.location_lng else None,
+            "is_published": p.is_published,
+            "status": p.status,
+            "owner_id": p.owner_id,
+            "owner_username": p.owner.username if p.owner else None,
+            "rating_avg": float(p.rating_avg) if p.rating_avg else 0.0,
+            "review_count": 0,
+        })
+    return result
 
 from fastapi import Form
 @router.put("/admin/places/{place_id}/status")

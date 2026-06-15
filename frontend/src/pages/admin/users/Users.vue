@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <div class="admin-page">
 
         <!-- Header -->
@@ -251,7 +251,7 @@ const isRestorable = (user) => {
 const getImageUrl = (path) => {
     if (!path) return ''
     if (path.startsWith('http')) return path
-    return `http://localhost:8000${path.startsWith('/') ? path : '/' + path}`
+    return `http://127.0.0.1:8000${path.startsWith('/') ? path : '/' + path}`
 }
 
 onMounted(fetchUsers)

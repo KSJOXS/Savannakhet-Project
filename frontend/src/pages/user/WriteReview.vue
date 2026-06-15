@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <div class="write-review-page">
         <Navbar />
 
@@ -6,6 +6,9 @@
             <div class="ta-review-box">
 
                 <div class="ta-rm-left">
+                    <button class="ta-btn-back" @click="router.back()">
+                        <i class="fas fa-arrow-left"></i> {{ t('common.back', 'Back') }}
+                    </button>
                     <h1 class="ta-rm-title">{{ t('review.tellUsTitle') || 'Tell us, how was your visit?' }}</h1>
 
                     <div class="ta-place-selector">
@@ -192,7 +195,7 @@ const getPlaceImage = (p) => {
         } catch (e) { url = p.image_url; }
     }
     if (!url) return 'https://via.placeholder.com/150?text=No+Image';
-    return url.startsWith('http') ? url : `http://localhost:8000/${url.replace(/^\//, '')}`;
+    return url.startsWith('http') ? url : `http://127.0.0.1:8000/${url.replace(/^\//, '')}`;
 }
 
 const searchPlaces = async () => {
@@ -337,6 +340,25 @@ const submitPost = async () => {
     line-height: 1.1;
     margin-bottom: 30px;
     letter-spacing: -1px;
+}
+
+.ta-btn-back {
+    background: transparent;
+    border: none;
+    color: #64748b;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    padding: 0;
+    transition: color 0.2s;
+}
+
+.ta-btn-back:hover {
+    color: #0f172a;
 }
 
 .ta-place-selector label {

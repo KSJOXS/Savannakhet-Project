@@ -74,7 +74,7 @@ const handleLogin = async () => {
         if (res.data.user.role === 'admin') {
             router.push('/admin/places')
         } else {
-            router.push('/explore')
+            router.push('/history')
         }
     } catch (err) {
         error.value = err.response?.data?.detail || t('common.error')

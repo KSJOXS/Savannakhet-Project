@@ -2,6 +2,7 @@
     <div class="hotels-page">
         <Navbar />
 
+        <!-- 1. Booking Header Bar (Old Style - no hero) -->
         <div class="hotel-search-header">
             <div class="search-container">
                 <h1>{{ t('hotels.title') }}</h1>
@@ -14,8 +15,6 @@
                             <input type="text" :value="t('hotels.savannakhetLaos')" readonly />
                         </div>
                     </div>
-                    
-                    <div class="booking-divider"></div>
                     
                     <div class="booking-divider"></div>
                     
@@ -61,10 +60,12 @@
                     <h2>{{ filteredHotels.length }} properties in Savannakhet</h2>
                     <div class="sort-by">
                         <span>Sort by:</span>
-                        <select>
-                            <option>Traveler Ranked</option>
-                            <option>Price (Low to High)</option>
-                            <option>Distance</option>
+                        <!-- เพิ่มการเรียงราคา -->
+                        <select v-model="sortBy">
+                            <option value="default">Traveler Ranked</option>
+                            <option value="price_low">Price (Low to High)</option>
+                            <option value="price_high">Price (High to Low)</option>
+                            <option value="rating">Rating</option>
                         </select>
                     </div>
                 </div>
@@ -79,11 +80,12 @@
                     <p>No hotels found matching your search.</p>
                 </div>
 
+                <!-- Immersive Cards Grid -->
                 <div class="hotels-grid">
-                    <div class="hotel-card" v-for="(hotel, index) in filteredHotels" :key="hotel.id" @click="goToDetail(hotel.id)">
+                    <div class="hotel-card" v-for="(hotel, index) in sortedHotels" :key="hotel.id" @click="goToDetail(hotel.id)">
                         
                         <div class="card-img-wrapper">
-                            <img :src="getCoverImage(hotel)" :alt="hotel.name" />
+                            <img :src="getCoverImage(hotel)" :alt="hotel.name" @error="handleImgError" />
                             <button class="btn-heart" :class="{ active: isFavorite(hotel.id) }" @click.stop="toggleHeart(hotel.id)">
                                 <i class="fas fa-heart"></i>
                             </button>
@@ -103,6 +105,11 @@
                             <p class="description">
                                 {{ hotel.description || 'Experience comfort and luxury in the heart of Savannakhet.' }}
                             </p>
+
+                            <!-- แสดงราคาให้เห็นชัดเจน -->
+                            <div class="price-display" v-if="hotel.daily_budget">
+                                <i class="fas fa-coins"></i> {{ hotel.daily_budget }} / night
+                            </div>
 
                             <div class="card-footer">
                                 <span class="location-tag">✨ {{ t('landmarks.verified') }}</span>
@@ -154,16 +161,17 @@ const showMapModal = ref(false)
 
 const selectedBudget = ref('any')
 const showBudgetDropdown = ref(false)
+const sortBy = ref('default')
 
 const budgets = computed(() => [
-    { id: 'any', label: t('hotels.budgetAny') },
-    { id: 'economy', label: t('hotels.budgetEconomy') },
-    { id: 'midRange', label: t('hotels.budgetMidRange') },
-    { id: 'luxury', label: t('hotels.budgetLuxury') }
+    { id: 'any', label: t('hotels.budgetAny') || 'Any' },
+    { id: 'economy', label: t('hotels.budgetEconomy') || 'Economy (< ₭200k)' },
+    { id: 'midRange', label: t('hotels.budgetMidRange') || 'Mid-Range (₭200k-600k)' },
+    { id: 'luxury', label: t('hotels.budgetLuxury') || 'Luxury (> ₭600k)' }
 ])
 
 const selectedBudgetText = computed(() => {
-    return budgets.value.find(b => b.id === selectedBudget.value)?.label || t('hotels.budgetAny')
+    return budgets.value.find(b => b.id === selectedBudget.value)?.label || t('hotels.budgetAny') || 'Any'
 })
 
 const fetchData = async () => {
@@ -176,7 +184,6 @@ const fetchData = async () => {
         places.value = resPlaces.data
         categories.value = resCats.data
 
-        // Fetch favorites asynchronously to not block UI rendering
         if (user.value) {
             favoriteRepository.getUserFavorites(user.value.id)
                 .then(favRes => {
@@ -191,18 +198,44 @@ const fetchData = async () => {
     }
 }
 
+const getBudgetLevel = (budgetString) => {
+    if (!budgetString) return 'any'
+    if (budgetString.toLowerCase().includes('free')) return 'economy'
+    
+    const numbers = budgetString.match(/\d+(,\d+)*(\.\d+)?/g)
+    if (!numbers) return 'any'
+    
+    let price = parseFloat(numbers[0].replace(/,/g, ''))
+    
+    if (budgetString.includes('฿')) price = price * 600
+    if (budgetString.includes('$')) price = price * 20000
+
+    if (price < 200000) return 'economy'
+    if (price <= 600000) return 'midRange'
+    return 'luxury'
+}
+
+// Function สำหรับสกัดราคาเพื่อใช้ sort
+const getMinPrice = (budgetString) => {
+    if (!budgetString) return 0
+    const numbers = budgetString.match(/\d+(,\d+)*(\.\d+)?/g)
+    if (!numbers) return 0
+    let price = parseFloat(numbers[0].replace(/,/g, ''))
+    if (budgetString.includes('฿')) price *= 600
+    if (budgetString.includes('$')) price *= 20000
+    return price
+}
+
 const filteredHotels = computed(() => {
     let results = places.value.filter(p => {
         const cat = categories.value.find(c => c.id == p.category_id)
         return cat && cat.parent_type?.toLowerCase() === 'hotel'
     })
 
-    // Budget Filter
     if (selectedBudget.value !== 'any') {
         results = results.filter(p => {
             if (!p.daily_budget) return false
-            const budgetLevel = getBudgetLevel(p.daily_budget)
-            return budgetLevel === selectedBudget.value
+            return getBudgetLevel(p.daily_budget) === selectedBudget.value
         })
     }
 
@@ -215,23 +248,19 @@ const filteredHotels = computed(() => {
     return results
 })
 
-const getBudgetLevel = (budgetString) => {
-    if (!budgetString) return 'any'
-    if (budgetString.toLowerCase().includes('free')) return 'economy'
-    
-    const numbers = budgetString.match(/\d+(,\d+)*(\.\d+)?/g)
-    if (!numbers) return 'any'
-    
-    let price = parseFloat(numbers[0].replace(/,/g, ''))
-    
-    // Currency conversion if needed
-    if (budgetString.includes('฿')) price = price * 600
-    if (budgetString.includes('$')) price = price * 20000
-
-    if (price < 200000) return 'economy'
-    if (price <= 600000) return 'midRange'
-    return 'luxury'
-}
+const sortedHotels = computed(() => {
+    const list = [...filteredHotels.value]
+    if (sortBy.value === 'price_low') {
+        return list.sort((a, b) => getMinPrice(a.daily_budget) - getMinPrice(b.daily_budget))
+    }
+    if (sortBy.value === 'price_high') {
+        return list.sort((a, b) => getMinPrice(b.daily_budget) - getMinPrice(a.daily_budget))
+    }
+    if (sortBy.value === 'rating') {
+        return list.sort((a, b) => (b.rating_avg || 0) - (a.rating_avg || 0))
+    }
+    return list
+})
 
 const hotelCategories = computed(() => {
     return categories.value.filter(c => c.parent_type === 'hotel')
@@ -239,11 +268,11 @@ const hotelCategories = computed(() => {
 
 const getCategoryName = (id) => categories.value.find(c => c.id === id)?.name || 'Accommodation'
 
-// --- Image Carousel Logic ---
+// Image Handling
 const currentImageIndices = ref({}) 
 
 const getPlaceImagesArray = (place) => {
-    const noImageUrl = 'https://via.placeholder.com/400x300?text=No+Image';
+    const noImageUrl = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22400%22%20height%3D%22300%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20fill%3D%22%23e2e8f0%22%2F%3E%3Ctext%20x%3D%2250%25%22%20y%3D%2250%25%22%20fill%3D%22%2364748b%22%20font-family%3D%22sans-serif%22%20font-size%3D%2220%22%20text-anchor%3D%22middle%22%20dy%3D%22.3em%22%3ENo%20Image%3C%2Ftext%3E%3C%2Fsvg%3E';
     let urls = [];
     
     if (place.images && Array.isArray(place.images) && place.images.length > 0) {
@@ -261,7 +290,7 @@ const getPlaceImagesArray = (place) => {
     return urls.map(url => {
         if (!url) return noImageUrl;
         if (url.startsWith('https://') || url.startsWith('http://') || url.startsWith('data:')) return url;
-        return `http://localhost:8000${url.startsWith('/') ? '' : '/'}${url}`;
+        return `http://127.0.0.1:8000${url.startsWith('/') ? '' : '/'}${url}`;
     });
 }
 
@@ -271,18 +300,8 @@ const getCoverImage = (place) => {
     return images[index] || images[0];
 }
 
-const nextImage = (placeId, place) => {
-    const images = getPlaceImagesArray(place);
-    if (images.length <= 1) return;
-    const currentIdx = currentImageIndices.value[placeId] || 0;
-    currentImageIndices.value[placeId] = (currentIdx + 1) % images.length;
-}
-
-const prevImage = (placeId, place) => {
-    const images = getPlaceImagesArray(place);
-    if (images.length <= 1) return;
-    const currentIdx = currentImageIndices.value[placeId] || 0;
-    currentImageIndices.value[placeId] = currentIdx === 0 ? images.length - 1 : currentIdx - 1;
+const handleImgError = (e) => {
+    e.target.src = 'https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=600'
 }
 
 const isFavorite = (id) => favoriteIds.value.includes(id)
@@ -321,7 +340,7 @@ onUnmounted(() => {
     color: #1e293b;
 }
 
-/* --- 1. Booking Header Bar --- */
+/* --- 1. Booking Header Bar (Old Style) --- */
 .hotel-search-header {
     background: white;
     padding: 30px 20px;
@@ -386,15 +405,8 @@ onUnmounted(() => {
 .btn-update-search:hover { background: #334155; }
 
 /* Budget Selector Styles */
-.booking-input.budget {
-    position: relative;
-}
-
-.input-value {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #000;
-}
+.booking-input.budget { position: relative; }
+.input-value { font-size: 1rem; font-weight: 600; color: #000; }
 
 .budget-dropdown {
     position: absolute;
@@ -418,16 +430,8 @@ onUnmounted(() => {
     transition: 0.2s;
     cursor: pointer;
 }
-
-.dropdown-item:hover {
-    background: #f1f5f9;
-    color: #000;
-}
-
-.dropdown-item.active {
-    background: #000;
-    color: white;
-}
+.dropdown-item:hover { background: #f1f5f9; color: #000; }
+.dropdown-item.active { background: #000; color: white; }
 
 /* --- Main Layout --- */
 .main-layout {
@@ -462,37 +466,35 @@ onUnmounted(() => {
 .filter-group h3 { font-size: 1rem; font-weight: 800; margin: 0 0 15px; color: #000; }
 .filter-checkbox { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; cursor: pointer; font-size: 0.95rem; color: #475569;}
 .filter-checkbox input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: #000;}
-.stars { color: #f59e0b; font-size: 0.85rem; letter-spacing: 2px;}
-.filter-divider { height: 1px; background: #cbd5e1; margin: 25px 0; }
 
 /* --- 3. Hotel List Area --- */
 .list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .list-header h2 { font-size: 1.4rem; font-weight: 700; margin: 0; color: #000; }
+
 .sort-by { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; font-weight: 600;}
 .sort-by select { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-weight: 600; outline: none; cursor: pointer;}
 
-/* 🏨 Hotel Card (Horizontal List View) */
+/* 🏨 Hotel Card (Immersive Style like Landmarks/Activities) */
 .hotels-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 30px;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 24px;
 }
 
 .hotel-card {
     position: relative;
     background: #0f172a;
-    border-radius: 4px;
+    border-radius: 6px;
     overflow: hidden;
-    height: 500px;
-    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    height: 480px;
+    transition: all 0.45s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
-    border: none;
     display: flex;
     flex-direction: column;
 }
 
 .hotel-card:hover {
-    transform: translateY(-5px) scale(1.01);
+    transform: translateY(-6px) scale(1.01);
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
@@ -508,10 +510,10 @@ onUnmounted(() => {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(to bottom, 
-        rgba(0,0,0,0) 0%, 
-        rgba(0,0,0,0.2) 40%, 
-        rgba(0,0,0,0.8) 80%, 
+    background: linear-gradient(to bottom,
+        rgba(0,0,0,0) 0%,
+        rgba(0,0,0,0.15) 35%,
+        rgba(0,0,0,0.75) 75%,
         rgba(0,0,0,0.95) 100%);
     z-index: 1;
 }
@@ -520,101 +522,122 @@ onUnmounted(() => {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.4s ease;
+    transition: transform 0.45s ease;
 }
 
-.slider-arrows { opacity: 0; transition: opacity 0.2s ease-in-out; }
-.hotel-img-wrapper:hover .slider-arrows { opacity: 1; }
-.arrow-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255, 255, 255, 0.85); border: none; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #1e293b; box-shadow: 0 2px 6px rgba(0,0,0,0.2); z-index: 5; transition: 0.2s; }
-.arrow-btn:hover { background: white; transform: translateY(-50%) scale(1.1); }
-.arrow-btn.left { left: 8px; } .arrow-btn.right { right: 8px; }
+.hotel-card:hover .card-img-wrapper img { transform: scale(1.06); }
 
-.slider-dots { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); display: flex; gap: 4px; z-index: 5; }
-.dot { width: 6px; height: 6px; background: rgba(255, 255, 255, 0.6); border-radius: 50%; transition: 0.2s; }
-.dot.active { background: white; transform: scale(1.3); }
-
-.btn-heart { position: absolute; top: 15px; right: 15px; background: white; border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.2); font-size: 1.1rem; color: #94a3b8; transition: 0.2s; z-index: 50;}
+/* Heart */
+.btn-heart {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: rgba(255,255,255,0.92);
+    border: none;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #94a3b8;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    transition: 0.2s;
+    z-index: 50;
+}
 .btn-heart.active { color: #ef4444; }
-.btn-heart:hover { transform: scale(1.1); }
-.img-counter { position: absolute; bottom: 15px; left: 15px; background: rgba(0,0,0,0.6); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; gap: 6px;}
+.btn-heart:hover { transform: scale(1.1); background: white; }
 
-/* Middle: Details */
+/* Card Info */
 .card-info {
     position: relative;
     z-index: 2;
-    padding: 30px 24px;
+    padding: 24px 20px;
     margin-top: auto;
     color: white;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
 }
 
 .category-tag {
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 0.65rem;
+    color: rgba(255,255,255,0.8);
+    font-size: 0.63rem;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 2px;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
 }
 
 .place-name {
-    font-size: 2.2rem;
+    font-size: 1.6rem;
     font-weight: 800;
     font-family: 'Playfair Display', serif;
     color: white;
-    letter-spacing: -0.5px;
-    line-height: 1.1;
-    margin: 0 0 10px;
+    line-height: 1.15;
+    margin: 0 0 8px;
 }
 
+.hotel-card:hover .place-name { color: #93c5fd; }
+
+.rating-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.bubbles i { color: #00aa6c; font-size: 0.8rem; margin-right: 2px; }
+.review-count { font-size: 0.85rem; color: rgba(255,255,255,0.7); font-weight: 600; }
+
 .description {
-    margin: 0 0 15px;
-    font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.7);
-    line-height: 1.5;
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.65);
+    line-height: 1.55;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.price-display {
+    color: #10b981;
+    font-weight: 700;
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .card-footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-top: 15px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 12px;
+    border-top: 1px solid rgba(255,255,255,0.1);
 }
 
 .location-tag {
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 0.7rem;
+    color: rgba(255,255,255,0.5);
+    font-size: 0.68rem;
     font-weight: 600;
     text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .btn-details {
     color: white;
     font-weight: 800;
     font-size: 0.75rem;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
+    transition: 0.2s;
 }
-
-.other-deals { width: 100%; border-top: 1px solid #e2e8f0; padding-top: 15px;}
-.mini-deal { display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: #475569; margin-bottom: 6px;}
-.mini-deal strong { color: #000; font-size: 0.9rem;}
-
-/* --- Responsive Design --- */
-@media (max-width: 1024px) {
-    .main-layout { grid-template-columns: 1fr; }
-    .filter-sidebar { display: none; } /* ซ่อน Sidebar ในมือถือ (ในเว็บจริงจะทำเป็นปุ่ม Filter เด้งขึ้นมา) */
-}
+.hotel-card:hover .btn-details { color: #00aa6c; }
 
 /* States */
-.loading-box,
-.empty-box {
+.loading-box, .empty-box {
     text-align: center;
     padding: 60px;
     background: white;
@@ -637,15 +660,11 @@ onUnmounted(() => {
     100% { transform: rotate(360deg); }
 }
 
-.empty-box i {
-    font-size: 2.5rem;
-    color: #cbd5e1;
-    margin-bottom: 15px;
-}
+.empty-box i { font-size: 2.5rem; color: #cbd5e1; margin-bottom: 15px; }
+.empty-box p { color: #64748b; font-size: 1rem; }
 
-.empty-box p {
-    color: #64748b;
-    font-size: 1rem;
+@media (max-width: 1024px) {
+    .main-layout { grid-template-columns: 1fr; }
+    .filter-sidebar { display: none; }
 }
-
 </style>

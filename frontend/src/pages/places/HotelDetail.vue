@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <div class="ta-hotel-detail">
         <!-- Removed standard Navbar for immersive experience -->
 
@@ -398,7 +398,7 @@ const galleryImages = computed(() => {
         }
         if (typeof url !== 'string') return 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1920&q=80';
         if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) return url;
-        return `http://localhost:8000${url.startsWith('/') ? '' : '/'}${url}`;
+        return `http://127.0.0.1:8000${url.startsWith('/') ? '' : '/'}${url}`;
     }
 
     let urls = []
@@ -452,7 +452,7 @@ const toggleHeart = async () => {
         const res = await favoriteRepository.toggleFavorite(user.value.id, hotel.value.id)
         isFavorite.value = res.data.status === 'added'
         if (isFavorite.value) {
-            await axios.post('http://localhost:8000/api/interactions/', {
+            await axios.post('http://127.0.0.1:8000/api/interactions/', {
                 place_id: hotel.value.id, rating: 5, interaction_type: 'like'
             })
         }
@@ -465,7 +465,7 @@ const submitComment = async () => {
         await placeRepository.addComment(hotel.value.id, {
             user_id: user.value.id, rating: newRating.value, comment_text: newComment.value
         })
-        await axios.post('http://localhost:8000/api/interactions/', {
+        await axios.post('http://127.0.0.1:8000/api/interactions/', {
             place_id: hotel.value.id, rating: newRating.value, comment: newComment.value, interaction_type: 'review'
         })
         newComment.value = ''; fetchData();
@@ -490,7 +490,7 @@ const getRecCoverImage = (place) => {
         } catch (e) { url = place.image_url }
     }
     if (!url) return 'https://via.placeholder.com/300x200?text=No+Image'
-    return url.startsWith('http') ? url : `http://localhost:8000/${url.replace(/^\//,'')}`
+    return url.startsWith('http') ? url : `http://127.0.0.1:8000/${url.replace(/^\//,'')}`
 }
 
 const goToRecDetail = (id) => {

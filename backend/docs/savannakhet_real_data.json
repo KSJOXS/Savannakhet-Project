@@ -1,0 +1,6585 @@
+{
+  "categories": [
+    "nature",
+    "culture",
+    "restaurant",
+    "hotel",
+    "shopping",
+    "nightlife",
+    "cafe",
+    "local_food",
+    "chill",
+    "landmark"
+  ],
+  "users": [
+    {
+      "id": 1,
+      "username": "jame",
+      "preferences": []
+    },
+    {
+      "id": 3,
+      "username": "test",
+      "preferences": []
+    },
+    {
+      "id": 4,
+      "username": "jo",
+      "preferences": [
+        "nature"
+      ]
+    },
+    {
+      "id": 5,
+      "username": "admin",
+      "preferences": []
+    },
+    {
+      "id": 6,
+      "username": "admintestadmin",
+      "preferences": []
+    },
+    {
+      "id": 7,
+      "username": "jj",
+      "preferences": []
+    },
+    {
+      "id": 8,
+      "username": "bee",
+      "preferences": [
+        "cafe"
+      ]
+    },
+    {
+      "id": 9,
+      "username": "namfon",
+      "preferences": [
+        "culture"
+      ]
+    },
+    {
+      "id": 10,
+      "username": "boss",
+      "preferences": [
+        "cafe"
+      ]
+    },
+    {
+      "id": 11,
+      "username": "big",
+      "preferences": [
+        "nature"
+      ]
+    },
+    {
+      "id": 12,
+      "username": "j",
+      "preferences": [
+        "culture"
+      ]
+    },
+    {
+      "id": 13,
+      "username": "gg",
+      "preferences": [
+        "nature"
+      ]
+    },
+    {
+      "id": 14,
+      "username": "jtester123",
+      "preferences": [
+        "nature",
+        "cafe"
+      ]
+    },
+    {
+      "id": 15,
+      "username": "tester9991",
+      "preferences": [
+        "culture"
+      ]
+    },
+    {
+      "id": 16,
+      "username": "nam",
+      "preferences": [
+        "local_food"
+      ]
+    },
+    {
+      "id": 17,
+      "username": "how",
+      "preferences": [
+        "nature"
+      ]
+    },
+    {
+      "id": 18,
+      "username": "test_ai",
+      "preferences": [
+        "nature"
+      ]
+    },
+    {
+      "id": 19,
+      "username": "dee",
+      "preferences": [
+        "nature",
+        "cafe"
+      ]
+    },
+    {
+      "id": 20,
+      "username": "to",
+      "preferences": [
+        "nature"
+      ]
+    },
+    {
+      "id": 21,
+      "username": "ling",
+      "preferences": [
+        "nature"
+      ]
+    },
+    {
+      "id": 22,
+      "username": "phoy",
+      "preferences": [
+        "culture"
+      ]
+    },
+    {
+      "id": 23,
+      "username": "tuc",
+      "preferences": [
+        "landmark"
+      ]
+    },
+    {
+      "id": 24,
+      "username": "taiy",
+      "preferences": [
+        "landmark"
+      ]
+    },
+    {
+      "id": 25,
+      "username": "boum",
+      "preferences": [
+        "chill"
+      ]
+    },
+    {
+      "id": 26,
+      "username": "ty",
+      "preferences": [
+        "chill"
+      ]
+    },
+    {
+      "id": 27,
+      "username": "loy",
+      "preferences": [
+        "local_food"
+      ]
+    },
+    {
+      "id": 28,
+      "username": "beer",
+      "preferences": [
+        "chill",
+        "landmark"
+      ]
+    },
+    {
+      "id": 29,
+      "username": "lut",
+      "preferences": [
+        "local_food"
+      ]
+    },
+    {
+      "id": 30,
+      "username": "lol",
+      "preferences": [
+        "culture",
+        "nature",
+        "food"
+      ]
+    },
+    {
+      "id": 31,
+      "username": "user_evlud_1",
+      "preferences": [
+        "culture",
+        "nature",
+        "food"
+      ]
+    },
+    {
+      "id": 32,
+      "username": "user_jexub_2",
+      "preferences": [
+        "culture",
+        "nature",
+        "food"
+      ]
+    },
+    {
+      "id": 33,
+      "username": "user_qyztx_3",
+      "preferences": [
+        "culture",
+        "nature",
+        "food"
+      ]
+    },
+    {
+      "id": 34,
+      "username": "user_jyizo_4",
+      "preferences": [
+        "culture",
+        "nature",
+        "food"
+      ]
+    },
+    {
+      "id": 35,
+      "username": "user_nqxag_5",
+      "preferences": [
+        "culture",
+        "nature",
+        "food"
+      ]
+    },
+    {
+      "id": 36,
+      "username": "user_ngrzz_6",
+      "preferences": [
+        "culture",
+        "nature",
+        "food"
+      ]
+    },
+    {
+      "id": 37,
+      "username": "user_samqs_7",
+      "preferences": [
+        "culture",
+        "nature",
+        "food"
+      ]
+    },
+    {
+      "id": 38,
+      "username": "user_oevrx_8",
+      "preferences": [
+        "culture",
+        "nature",
+        "food"
+      ]
+    },
+    {
+      "id": 39,
+      "username": "user_pijwb_9",
+      "preferences": [
+        "culture",
+        "nature",
+        "food"
+      ]
+    },
+    {
+      "id": 40,
+      "username": "user_ycmgx_10",
+      "preferences": [
+        "culture",
+        "nature",
+        "food"
+      ]
+    },
+    {
+      "id": 41,
+      "username": "user_pbrag_11",
+      "preferences": [
+        "culture",
+        "nature",
+        "food"
+      ]
+    },
+    {
+      "id": 42,
+      "username": "user_dppht_12",
+      "preferences": [
+        "culture",
+        "nature",
+        "food"
+      ]
+    },
+    {
+      "id": 43,
+      "username": "user_boouj_13",
+      "preferences": [
+        "culture",
+        "nature",
+        "food"
+      ]
+    },
+    {
+      "id": 44,
+      "username": "user_kxary_14",
+      "preferences": [
+        "culture",
+        "nature",
+        "food"
+      ]
+    },
+    {
+      "id": 45,
+      "username": "user_fsmnc_15",
+      "preferences": [
+        "culture",
+        "nature",
+        "food"
+      ]
+    },
+    {
+      "id": 46,
+      "username": "user_ssmlt_16",
+      "preferences": [
+        "culture",
+        "nature",
+        "food"
+      ]
+    },
+    {
+      "id": 47,
+      "username": "user_wwhdu_17",
+      "preferences": [
+        "culture",
+        "nature",
+        "food"
+      ]
+    },
+    {
+      "id": 48,
+      "username": "user_jfska_18",
+      "preferences": [
+        "culture",
+        "nature",
+        "food"
+      ]
+    },
+    {
+      "id": 49,
+      "username": "user_ebwif_19",
+      "preferences": [
+        "culture",
+        "nature",
+        "food"
+      ]
+    },
+    {
+      "id": 50,
+      "username": "user_vsyov_20",
+      "preferences": [
+        "culture",
+        "nature",
+        "food"
+      ]
+    },
+    {
+      "id": 51,
+      "username": "user_scrfa_21",
+      "preferences": [
+        "culture",
+        "nature",
+        "food"
+      ]
+    },
+    {
+      "id": 52,
+      "username": "user_kjtsi_22",
+      "preferences": [
+        "culture",
+        "nature",
+        "food"
+      ]
+    },
+    {
+      "id": 53,
+      "username": "user_vlsae_23",
+      "preferences": [
+        "culture",
+        "nature",
+        "food"
+      ]
+    },
+    {
+      "id": 54,
+      "username": "user_wweuy_24",
+      "preferences": [
+        "culture",
+        "nature",
+        "food"
+      ]
+    },
+    {
+      "id": 55,
+      "username": "user_hvsae_25",
+      "preferences": [
+        "culture",
+        "nature",
+        "food"
+      ]
+    },
+    {
+      "id": 56,
+      "username": "user_helzi_26",
+      "preferences": [
+        "culture",
+        "nature",
+        "food"
+      ]
+    },
+    {
+      "id": 57,
+      "username": "user_iwusy_27",
+      "preferences": [
+        "culture",
+        "nature",
+        "food"
+      ]
+    },
+    {
+      "id": 58,
+      "username": "user_bdmky_28",
+      "preferences": [
+        "culture",
+        "nature",
+        "food"
+      ]
+    },
+    {
+      "id": 59,
+      "username": "user_fevjn_29",
+      "preferences": [
+        "culture",
+        "nature",
+        "food"
+      ]
+    }
+  ],
+  "places": [
+    {
+      "id": 1,
+      "name": "That Ing Hangs",
+      "category": "culture",
+      "rating": 5.0,
+      "location_name": "That Ing Hangs"
+    },
+    {
+      "id": 2,
+      "name": "Wat Xayaphoum",
+      "category": "landmark",
+      "rating": 4.0,
+      "location_name": "Savannakhet"
+    },
+    {
+      "id": 3,
+      "name": "Dong Tao",
+      "category": "nature",
+      "rating": 4.0,
+      "location_name": "Savannakhet"
+    },
+    {
+      "id": 4,
+      "name": "nang lin bar",
+      "category": "chill",
+      "rating": 0.0,
+      "location_name": "nang lin bar"
+    },
+    {
+      "id": 6,
+      "name": "Pilgrim's Kitchen & Inn",
+      "category": "local_food",
+      "rating": 0.0,
+      "location_name": "Savannakhet"
+    },
+    {
+      "id": 7,
+      "name": "Bueng Va",
+      "category": "nature",
+      "rating": 0.0,
+      "location_name": "That Ing Hang"
+    },
+    {
+      "id": 8,
+      "name": "Savan Holiday",
+      "category": "nature",
+      "rating": 0.0,
+      "location_name": "Savannakhet"
+    },
+    {
+      "id": 9,
+      "name": "Phu pha ",
+      "category": "nature",
+      "rating": 0.0,
+      "location_name": "thakhek"
+    },
+    {
+      "id": 10,
+      "name": "thung nang an",
+      "category": "nature",
+      "rating": 0.0,
+      "location_name": "thakhek"
+    },
+    {
+      "id": 11,
+      "name": "Daosavanh Resort & Spa",
+      "category": "hotel",
+      "rating": 0.0,
+      "location_name": "Savannakhet"
+    },
+    {
+      "id": 12,
+      "name": "hotel Pilgrim's Kitchen & Inn ",
+      "category": "hotel",
+      "rating": 0.0,
+      "location_name": "Pilgrim's Kitchen"
+    },
+    {
+      "id": 13,
+      "name": "Savan Resort",
+      "category": "hotel",
+      "rating": 0.0,
+      "location_name": "Savan Resort"
+    },
+    {
+      "id": 14,
+      "name": "Wat Sainyaphum",
+      "category": "landmark",
+      "rating": 0.0,
+      "location_name": "Savannakhet"
+    },
+    {
+      "id": 15,
+      "name": "Savannakhet Provincial Museum",
+      "category": "landmark",
+      "rating": 0.0,
+      "location_name": "Savannakhet"
+    },
+    {
+      "id": 16,
+      "name": "Dinosaur Museum",
+      "category": "landmark",
+      "rating": 0.0,
+      "location_name": "Savannakhet "
+    },
+    {
+      "id": 17,
+      "name": "St. Teresa's Catholic Church",
+      "category": "landmark",
+      "rating": 0.0,
+      "location_name": "Savannakhet"
+    },
+    {
+      "id": 18,
+      "name": "French Colonial Quarter",
+      "category": "landmark",
+      "rating": 0.0,
+      "location_name": "Savannakhet"
+    },
+    {
+      "id": 19,
+      "name": "Savannakhet War Memorial",
+      "category": "landmark",
+      "rating": 0.0,
+      "location_name": "Savannakhet"
+    },
+    {
+      "id": 20,
+      "name": "Talat Yen (Night Market)",
+      "category": "landmark",
+      "rating": 0.0,
+      "location_name": "Savannakhet"
+    },
+    {
+      "id": 22,
+      "name": "Cao Dai Temple",
+      "category": "landmark",
+      "rating": 0.0,
+      "location_name": "Savannakhet"
+    },
+    {
+      "id": 23,
+      "name": "Mimi’s Charming Guesthouse",
+      "category": "hotel",
+      "rating": 0.0,
+      "location_name": "Savannakhet"
+    },
+    {
+      "id": 24,
+      "name": "LONG PIZZA Phonesavanh",
+      "category": "cafe",
+      "rating": 0.0,
+      "location_name": "Savannakhet"
+    },
+    {
+      "id": 25,
+      "name": "Hungheuang Hotel",
+      "category": "hotel",
+      "rating": 0.0,
+      "location_name": "Savannakhet"
+    },
+    {
+      "id": 26,
+      "name": "B2",
+      "category": "hotel",
+      "rating": 0.0,
+      "location_name": "Savannakhet"
+    },
+    {
+      "id": 27,
+      "name": "laos chaluen",
+      "category": "local_food",
+      "rating": 0.0,
+      "location_name": "Savannakhet"
+    },
+    {
+      "id": 28,
+      "name": "Black coffee",
+      "category": "cafe",
+      "rating": 0.0,
+      "location_name": "Savannakhet"
+    },
+    {
+      "id": 29,
+      "name": "Dao hung 1",
+      "category": "local_food",
+      "rating": 0.0,
+      "location_name": "Savannakhet"
+    },
+    {
+      "id": 30,
+      "name": "Amazone 1",
+      "category": "cafe",
+      "rating": 5.0,
+      "location_name": "Savannakhet"
+    },
+    {
+      "id": 31,
+      "name": "ຕາດເຍືອງ",
+      "category": "nature",
+      "rating": 5.0,
+      "location_name": "thakhek"
+    },
+    {
+      "id": 32,
+      "name": "Savan-VEDC Monument",
+      "category": "landmark",
+      "rating": 0.0,
+      "location_name": "Savannakhet"
+    },
+    {
+      "id": 33,
+      "name": "wat dai",
+      "category": "culture",
+      "rating": 0.0,
+      "location_name": "wat dai"
+    },
+    {
+      "id": 34,
+      "name": "Vela cafe",
+      "category": "cafe",
+      "rating": 5.0,
+      "location_name": "Vela coffee"
+    },
+    {
+      "id": 35,
+      "name": "Bear Black Coffee",
+      "category": "cafe",
+      "rating": 0.0,
+      "location_name": "Savannakhet"
+    },
+    {
+      "id": 36,
+      "name": "Daosavanh Resort & Spa",
+      "category": "hotel",
+      "rating": 0.0,
+      "location_name": "River Road, Savannakhet"
+    },
+    {
+      "id": 37,
+      "name": "Leena Guesthouse",
+      "category": "hotel",
+      "rating": 0.0,
+      "location_name": "City Center, Savannakhet"
+    },
+    {
+      "id": 38,
+      "name": "Phonevilay Hotel",
+      "category": "hotel",
+      "rating": 0.0,
+      "location_name": "Market Area, Savannakhet"
+    },
+    {
+      "id": 39,
+      "name": "Savannakhet Eco Lodge",
+      "category": "hotel",
+      "rating": 0.0,
+      "location_name": "Outskirts, Savannakhet"
+    },
+    {
+      "id": 40,
+      "name": "Mekong Hotel Savannakhet",
+      "category": "hotel",
+      "rating": 0.0,
+      "location_name": "Mekong Riverside, Savannakhet"
+    },
+    {
+      "id": 41,
+      "name": "Inthira Savannakhet Hotel",
+      "category": "hotel",
+      "rating": 0.0,
+      "location_name": "Old Town Quarter, Savannakhet"
+    },
+    {
+      "id": 42,
+      "name": "Hoongthip Hotel",
+      "category": "hotel",
+      "rating": 0.0,
+      "location_name": "Central District, Savannakhet"
+    },
+    {
+      "id": 43,
+      "name": "Southida Guesthouse",
+      "category": "hotel",
+      "rating": 0.0,
+      "location_name": "Near Bus Station, Savannakhet"
+    },
+    {
+      "id": 44,
+      "name": "Savan Vegas Hotel & Casino",
+      "category": "hotel",
+      "rating": 0.0,
+      "location_name": "Savan-SENO Special Economic Zone"
+    },
+    {
+      "id": 45,
+      "name": "Vansana Savannakhet Hotel",
+      "category": "hotel",
+      "rating": 0.0,
+      "location_name": "Airport Road, Savannakhet"
+    },
+    {
+      "id": 46,
+      "name": "Khammouane Riverside Resort",
+      "category": "hotel",
+      "rating": 0.0,
+      "location_name": "Riverside Area, Savannakhet"
+    },
+    {
+      "id": 47,
+      "name": "Phonesavanh Hotel",
+      "category": "hotel",
+      "rating": 0.0,
+      "location_name": "Downtown Savannakhet"
+    },
+    {
+      "id": 48,
+      "name": "Lao Orchid Hotel",
+      "category": "hotel",
+      "rating": 0.0,
+      "location_name": "Commercial District, Savannakhet"
+    },
+    {
+      "id": 49,
+      "name": "Champa Garden Hotel",
+      "category": "hotel",
+      "rating": 0.0,
+      "location_name": "Residential Area, Savannakhet"
+    },
+    {
+      "id": 50,
+      "name": "Phouthip Hotel",
+      "category": "hotel",
+      "rating": 0.0,
+      "location_name": "Business District, Savannakhet"
+    },
+    {
+      "id": 51,
+      "name": "Savan Na Khet Heritage Hotel",
+      "category": "hotel",
+      "rating": 0.0,
+      "location_name": "Heritage Quarter, Savannakhet"
+    },
+    {
+      "id": 52,
+      "name": "Riverside Villas Savannakhet",
+      "category": "hotel",
+      "rating": 0.0,
+      "location_name": "Mekong Riverside, Savannakhet"
+    },
+    {
+      "id": 53,
+      "name": "Pakse-Savannakhet Transit Hotel",
+      "category": "hotel",
+      "rating": 0.0,
+      "location_name": "Bus Terminal Area, Savannakhet"
+    },
+    {
+      "id": 54,
+      "name": "Savanhxai Boutique Hotel",
+      "category": "hotel",
+      "rating": 0.0,
+      "location_name": "Central Savannakhet"
+    },
+    {
+      "id": 55,
+      "name": "Golden Palace Hotel Savannakhet",
+      "category": "hotel",
+      "rating": 0.0,
+      "location_name": "Southern District, Savannakhet"
+    },
+    {
+      "id": 56,
+      "name": "Lin's Cafe",
+      "category": "cafe",
+      "rating": 0.0,
+      "location_name": "Ban Xayaphoum, Kaisone Phomvihane, Savannakhet"
+    },
+    {
+      "id": 57,
+      "name": "Savan Cafe",
+      "category": "cafe",
+      "rating": 5.0,
+      "location_name": "Old Town, Savannakhet"
+    },
+    {
+      "id": 58,
+      "name": "Dao Savanh Restaurant",
+      "category": "local_food",
+      "rating": 0.0,
+      "location_name": "Riverside, Savannakhet"
+    },
+    {
+      "id": 59,
+      "name": "Mekong River Night Market",
+      "category": "local_food",
+      "rating": 0.0,
+      "location_name": "Mekong Riverfront, Savannakhet"
+    },
+    {
+      "id": 60,
+      "name": "White House Restaurant",
+      "category": "local_food",
+      "rating": 0.0,
+      "location_name": "Route 9, Savannakhet"
+    },
+    {
+      "id": 61,
+      "name": "Long Pizza Laos",
+      "category": "local_food",
+      "rating": 0.0,
+      "location_name": "Talat Yen Plaza, Savannakhet"
+    },
+    {
+      "id": 62,
+      "name": "Phosy Market Food Stalls",
+      "category": "local_food",
+      "rating": 0.0,
+      "location_name": "Phosy Market, Savannakhet"
+    },
+    {
+      "id": 63,
+      "name": "Macchiato Coffee Savannakhet",
+      "category": "cafe",
+      "rating": 5.0,
+      "location_name": "Old Quarter, Savannakhet"
+    },
+    {
+      "id": 64,
+      "name": "Sunset Bar Mekong",
+      "category": "chill",
+      "rating": 0.0,
+      "location_name": "Riverside, Savannakhet"
+    },
+    {
+      "id": 65,
+      "name": "Sala Thai Restaurant",
+      "category": "local_food",
+      "rating": 0.0,
+      "location_name": "Center, Savannakhet"
+    },
+    {
+      "id": 66,
+      "name": "Bung Va Lake",
+      "category": "nature",
+      "rating": 0.0,
+      "location_name": "Outskirts of Savannakhet"
+    },
+    {
+      "id": 67,
+      "name": "Dong Natad National Protected Area",
+      "category": "nature",
+      "rating": 5.0,
+      "location_name": "Nong Deun Village, Savannakhet"
+    },
+    {
+      "id": 68,
+      "name": "Tad Salaen Waterfall",
+      "category": "nature",
+      "rating": 0.0,
+      "location_name": "Phine District, Savannakhet"
+    },
+    {
+      "id": 69,
+      "name": "Phou Xang Heae National Protected Area",
+      "category": "nature",
+      "rating": 0.0,
+      "location_name": "Vilabouly District, Savannakhet"
+    },
+    {
+      "id": 70,
+      "name": "Mekong River Bank Gardens",
+      "category": "nature",
+      "rating": 0.0,
+      "location_name": "Riverside Road, Savannakhet"
+    },
+    {
+      "id": 71,
+      "name": "Nong Lom Lake",
+      "category": "nature",
+      "rating": 5.0,
+      "location_name": "Champhone District, Savannakhet"
+    },
+    {
+      "id": 72,
+      "name": "Tad Phouy Waterfall",
+      "category": "nature",
+      "rating": 0.0,
+      "location_name": "Thapangthong District, Savannakhet"
+    },
+    {
+      "id": 73,
+      "name": "Houay Ki Ecological Park",
+      "category": "nature",
+      "rating": 0.0,
+      "location_name": "Kaisone Phomvihane, Savannakhet"
+    }
+  ],
+  "interactions": [
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 4,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 18,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 2,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 4,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 14,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 14,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 14,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 14,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 14,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 12,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 23,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 20,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 2,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 2,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 2,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 2,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "review",
+      "weight": 3.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 2,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 14,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 12,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 23,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": null,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 27,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 27,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 4,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 2,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 2,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 2,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 24,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 2,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 2,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 14,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 2,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 2,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 15,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 16,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 15,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 14,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 18,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 17,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 18,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 20,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 2,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 15,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 27,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 4,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 4,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 12,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 12,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 17,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 24,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 20,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 20,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 6,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 22,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 9,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 9,
+      "place_id": 22,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 2,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 29,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 29,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 22,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 14,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 20,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 17,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 2,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 2,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 20,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 20,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 20,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 20,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 20,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 20,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 27,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 27,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 18,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 26,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 2,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 20,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 24,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 22,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 2,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 2,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 2,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 2,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 9,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 28,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 27,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 29,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 30,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 18,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 16,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 27,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 27,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 27,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 27,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 27,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 24,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 27,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 20,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 28,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 14,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 18,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 20,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 20,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 20,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 20,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 20,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 26,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 25,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 4,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 14,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 14,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 4,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 27,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 16,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 27,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 24,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 27,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 24,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 24,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 24,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 20,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 13,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 13,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 23,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 18,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 2,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 25,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 25,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 12,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 16,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 27,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 18,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 16,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 16,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 16,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 16,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 16,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 16,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 16,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 16,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 16,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 29,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 16,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 4,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 16,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 16,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 16,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 31,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 22,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 18,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 16,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 16,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 25,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 31,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 2,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 13,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 16,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 22,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 18,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 15,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 16,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 15,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 15,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 15,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 15,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 15,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 15,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 15,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 15,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 15,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 15,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 15,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 15,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 15,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 15,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 15,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 20,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 29,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 12,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 25,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 26,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 23,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 19,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 18,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 12,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 12,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 12,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 12,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 12,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 12,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 12,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 13,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 13,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 13,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 12,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 33,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 33,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 33,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 12,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 12,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 26,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 33,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 33,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 12,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 4,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 12,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 13,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 16,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 4,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 14,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 27,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 18,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 4,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 33,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 18,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 10,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 27,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 14,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 14,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 14,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 14,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 14,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 14,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 14,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 14,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 14,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 14,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 15,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 17,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 15,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 14,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 14,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 14,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 18,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 14,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 14,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 14,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 14,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 14,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 14,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 14,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 14,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 14,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 14,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 14,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 27,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 18,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 30,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 14,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 30,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 4,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 27,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 27,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 19,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 20,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 16,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 16,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 16,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 16,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 30,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 30,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 30,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 30,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 3,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 30,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 30,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 24,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 24,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 6,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 28,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 28,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 16,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 16,
+      "place_id": 7,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 16,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 16,
+      "place_id": 3,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 16,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 16,
+      "place_id": 3,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 17,
+      "place_id": 24,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 17,
+      "place_id": 24,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 17,
+      "place_id": 20,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 17,
+      "place_id": 20,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 17,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 17,
+      "place_id": 3,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 17,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 17,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 17,
+      "place_id": 10,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 17,
+      "place_id": 10,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 17,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 17,
+      "place_id": 8,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 17,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 17,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 17,
+      "place_id": 28,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 17,
+      "place_id": 28,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 17,
+      "place_id": 24,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 17,
+      "place_id": 20,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 17,
+      "place_id": 10,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 17,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 17,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 18,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 18,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 18,
+      "place_id": 9,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 18,
+      "place_id": 3,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 24,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 24,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 24,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 24,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 28,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 28,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 24,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 28,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 30,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 30,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 30,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 34,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 35,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 24,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 24,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 12,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 14,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 1,
+      "action": "review",
+      "weight": 5.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 13,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 13,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 24,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 14,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 9,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 12,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 14,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 14,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 14,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 9,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 10,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 9,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 8,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 9,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 9,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 9,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 9,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 10,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 31,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 34,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 11,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 12,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 26,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 25,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 19,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 10,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 8,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 8,
+      "place_id": 34,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 8,
+      "place_id": 24,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 8,
+      "place_id": 16,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 8,
+      "place_id": 35,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 8,
+      "place_id": 34,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 8,
+      "place_id": 34,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 8,
+      "place_id": 34,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 8,
+      "place_id": 34,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 8,
+      "place_id": 34,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 8,
+      "place_id": 29,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 8,
+      "place_id": 10,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 2,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 10,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 2,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 46,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 40,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 13,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 40,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 52,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 45,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 56,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 4,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 58,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 56,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 63,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 66,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 66,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 11,
+      "place_id": 12,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 8,
+      "place_id": 16,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 8,
+      "place_id": 70,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 8,
+      "place_id": 57,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 8,
+      "place_id": 51,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 8,
+      "place_id": 57,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 8,
+      "place_id": 57,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 8,
+      "place_id": 56,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 8,
+      "place_id": 44,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 8,
+      "place_id": 59,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 8,
+      "place_id": 35,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 8,
+      "place_id": 57,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 8,
+      "place_id": 57,
+      "action": "review",
+      "weight": 5.0
+    },
+    {
+      "user_id": 8,
+      "place_id": 57,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 8,
+      "place_id": 34,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 8,
+      "place_id": 34,
+      "action": "review",
+      "weight": 5.0
+    },
+    {
+      "user_id": 8,
+      "place_id": 34,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 8,
+      "place_id": 59,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 8,
+      "place_id": 30,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 8,
+      "place_id": 30,
+      "action": "review",
+      "weight": 5.0
+    },
+    {
+      "user_id": 8,
+      "place_id": 30,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 13,
+      "place_id": 67,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 13,
+      "place_id": 67,
+      "action": "review",
+      "weight": 5.0
+    },
+    {
+      "user_id": 13,
+      "place_id": 67,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 13,
+      "place_id": 71,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 13,
+      "place_id": 71,
+      "action": "review",
+      "weight": 5.0
+    },
+    {
+      "user_id": 13,
+      "place_id": 71,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 13,
+      "place_id": 31,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 13,
+      "place_id": 31,
+      "action": "review",
+      "weight": 5.0
+    },
+    {
+      "user_id": 13,
+      "place_id": 31,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 9,
+      "place_id": 30,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 9,
+      "place_id": 30,
+      "action": "review",
+      "weight": 5.0
+    },
+    {
+      "user_id": 9,
+      "place_id": 30,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 9,
+      "place_id": 57,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 9,
+      "place_id": 57,
+      "action": "review",
+      "weight": 5.0
+    },
+    {
+      "user_id": 9,
+      "place_id": 57,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 9,
+      "place_id": 63,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 9,
+      "place_id": 63,
+      "action": "review",
+      "weight": 5.0
+    },
+    {
+      "user_id": 9,
+      "place_id": 63,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 4,
+      "place_id": 2,
+      "action": "review",
+      "weight": 3.0
+    },
+    {
+      "user_id": 7,
+      "place_id": 2,
+      "action": "review",
+      "weight": 3.0
+    },
+    {
+      "user_id": 4,
+      "place_id": null,
+      "action": "review",
+      "weight": 3.0
+    },
+    {
+      "user_id": 19,
+      "place_id": null,
+      "action": "review",
+      "weight": 3.0
+    }
+  ],
+  "stats": {
+    "num_users": 58,
+    "num_places": 71,
+    "num_interactions": 934
+  }
+}

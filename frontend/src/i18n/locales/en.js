@@ -17,6 +17,7 @@ export default {
     accountInfo: 'Account info',
     logout: 'Logout',
     myHistory: 'My History',
+    myReviews: 'My Reviews',
     socialHistory: 'Social History',
     search: 'Search...',
     contact: 'Contact Us',
@@ -166,6 +167,8 @@ export default {
     create_account: 'Create a free account to save favorites and get personalized recommendations.',
     get_started: "Get Started — It's Free",
     top_rated_badge: 'Top Rated',
+    show_more: 'Show more',
+    show_less: 'Show less',
   },
 
   // --- Hotels Page ---
@@ -588,7 +591,10 @@ export default {
     bestMonths: 'Best Months (Range)',
     yearRound: 'Year-round',
     free: 'Free',
-    freeEntry: 'Free Entry / No Cost',
+    freeEntry: 'Free Entry',
+    seeTranslation: 'See Translation',
+    showOriginal: 'Original',
+    translateGuide: 'See Translation',
     to: 'to',
     idealStay: 'Ideal Stay (e.g. 1 - 2 Days)',
     dailyBudget: 'Daily Budget (Range in ₭)',
@@ -695,5 +701,57 @@ export default {
     card_oldtown_desc: 'Walk through classic French buildings and taste local food around Talat Yen.',
     cta_title: 'Ready to discover Savannakhet in your own way?',
     cta_btn: 'Start Exploring'
+  },
+  about: {
+    devRole: 'DEVELOPER',
+    devName: 'Jo Xaysongkham',
+    quote: '"Technology to elevate local tourism."',
+    p1: 'Hello! I am the designer and developer of the Savannakhet Smart Travel system. This platform was born from the intention to bring new technologies to make tourism in Savannakhet province more fun and convenient.',
+    p2: 'The starting point of this project came from seeing the problem that sometimes it\'s hard to find tourist attractions that suit our preferences. So I decided to apply AI, specifically the Graph Neural Network (GNN) model, to learn the behaviors and preferences of each individual, allowing the system to recommend personalized places that best match the users.',
+    p3: 'Regarding the development, I handled the Frontend using Vue.js 3 to create a beautiful and user-friendly interface. For the Backend, I used FastAPI with MySQL to manage the database and process the AI model for fast and efficient performance.',
+    p4: 'I hope this system will help all tourists have an excellent experience and play a small part in driving the economy and tourism of Savannakhet towards sustainable growth.',
+    watermark: 'Developer'
+  },
+  features: {
+    title: 'Project Objectives & Core Features',
+    desc: 'This project was developed to support and elevate tourism in Savannakhet Province. By integrating Artificial Intelligence (AI), we analyze user preferences to recommend the most suitable and personalized destinations for every traveler.',
+    f1Title: 'GNN Integration',
+    f1Desc: 'Developed a smart tourism platform for Savannakhet, integrating a Graph Neural Network (GNN) to deliver highly personalized travel recommendations based on user preferences.',
+    f2Title: 'User-Friendly UI',
+    f2Desc: 'Designed and implemented an intuitive user interface, enabling users to seamlessly explore destinations, read reviews, and receive tailored travel itineraries.',
+    f3Title: 'Graph Relationship Learning',
+    f3Desc: 'Engineered and trained a GNN model to map and analyze complex graph relationships between users, locations, and interests, significantly improving recommendation accuracy.',
+    f4Title: 'Admin Management System',
+    f4Desc: 'Built a comprehensive Admin Dashboard for managing tourist attractions, moderating user reviews, and monitoring overall system statistics.',
+    f5Title: 'Security & Scalability',
+    f5Desc: 'Ensured a robust system architecture with a strong focus on high availability, excellent data security, and future scalability.'
+  },
+  timeline: {
+    title: 'Project Development Timeline',
+    subtitle: 'Timeline of the project development from start to finish (February - June 2026)',
+    watermark: 'Timeline',
+    periods: {
+      feb: 'Feb 2026',
+      mar: 'Mar 2026',
+      apr: 'Apr 2026',
+      may: 'May 2026',
+      jun: 'Jun 2026'
+    },
+    items: [
+      { periodId: 'feb', week: 'Week 1', label: 'Research', title: 'Research & System Architecture', desc: 'Studied GNN, FastAPI, Vue.js, MySQL technologies, collected Savannakhet tourist attraction data, and defined the system architecture.' },
+      { periodId: 'feb', week: 'Week 2-3', label: 'Database', title: 'Database Design & Graph Modeling', desc: 'Designed the MySQL database and created a User-Place-Preference graph structure in preparation for the GNN model.' },
+      { periodId: 'mar', week: 'Week 4', label: 'Backend', title: 'FastAPI Backend Core', desc: 'Developed the Backend system with FastAPI, including the authentication system (JWT) and APIs for managing places, users, and preferences.' },
+      { periodId: 'mar', week: 'Week 4-6', label: 'AI Model', title: 'GNN Model Training', desc: 'Built and trained the AI model using PyTorch Geometric with datasets of user and place relationships in Savannakhet.' },
+      { periodId: 'apr', week: 'Week 6-7', label: 'Integration', title: 'AI Integration & Endpoints', desc: 'Integrated the GNN model with FastAPI to create API Endpoints for fetching personalized place recommendations.' },
+      { periodId: 'may', week: 'Week 8-9', label: 'Frontend', title: 'Vue.js UI Development', desc: 'Developed the user interface with Vue.js 3 (Home, Search, GNN Recommendations, Reviews, Profile) and connected the APIs.' },
+      { periodId: 'jun', week: 'Week 10', label: 'Dashboard', title: 'Admin Dashboard', desc: 'Created an Admin system to manage places, users, statistics, and monitor GNN Model performance (Precision, Recall, NDCG).' },
+      { periodId: 'jun', week: 'Week 11', label: 'Testing', title: 'Testing & Final Report', desc: 'End-to-End Testing of the entire system, improved API speed and model accuracy, and wrote the final project report.' }
+    ]
+  },
+  faq: {
+    title: 'Frequently Asked Questions',
+    subtitle: 'Find answers to common questions about Savannakhet Smart Travel',
+    stillNeedHelp: 'Still need help?',
+    contactUs: 'If you cannot find the answer to your question, please contact us.'
   }
 }

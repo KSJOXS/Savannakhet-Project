@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <div class="explore-page">
         <Navbar />
 
@@ -99,10 +99,13 @@
                                 <div class="category-list">
                                     <button :class="['cat-pill', { active: !selectedCategory }]"
                                         @click="filterByCategory(null)">{{ t('recommend.all') }}</button>
-                                    <button v-for="cat in categories" :key="cat.id"
+                                    <button v-for="cat in displayedCategories" :key="cat.id"
                                         :class="['cat-pill', { active: selectedCategory === cat.id }]"
                                         @click="filterByCategory(cat.id)">
                                         {{ cat.name }}
+                                    </button>
+                                    <button v-if="categories.length > 8" @click="showAllCategories = !showAllCategories" class="cat-pill show-more-btn">
+                                        {{ showAllCategories ? '▲ ' + (t('recommend.show_less') || 'Thu gọn / Show less') : '▼ ' + (t('recommend.show_more') || 'Xem thêm / Show more') }}
                                     </button>
                                 </div>
                             </div>
@@ -299,6 +302,11 @@ const selectedCategory = ref(null)
 const favoriteIds = ref([])
 const recommendedPlaces = ref([])
 const recentInteractionCategoryIds = ref([])
+const showAllCategories = ref(false)
+
+const displayedCategories = computed(() => {
+    return showAllCategories.value ? categories.value : categories.value.slice(0, 8)
+})
 
 // 🏞️ ข้อมูลสำหรับ Hero Slider (ดึงจาก Settings)
 const heroImages = ref([])
@@ -352,7 +360,7 @@ const getCoverImage = (place) => {
     }
 
     if (targetUrl.startsWith('http://') || targetUrl.startsWith('https://') || targetUrl.startsWith('data:')) return targetUrl;
-    return `http://localhost:8000${targetUrl.startsWith('/') ? '' : '/'}${targetUrl}`;
+    return `http://127.0.0.1:8000${targetUrl.startsWith('/') ? '' : '/'}${targetUrl}`;
 }
 
 const topRatedPlaces = computed(() => {
@@ -385,7 +393,7 @@ const fetchData = async () => {
 
             try {
                 // 🤖 Call GNN Recommendation Engine
-                const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+                const backendUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
                 
                 // Fetch Recent Interactions to get "Current Interest Categories"
                 const interactionRes = await axios.get(`${backendUrl}/api/interactions/user/${user.value.id}/frequent?limit=10`);
@@ -422,7 +430,7 @@ const fetchData = async () => {
             if (Array.isArray(parsed) && parsed.length > 0) {
                 heroImages.value = parsed.map(url => {
                     if (url.startsWith('http') || url.startsWith('data:')) return url;
-                    return `http://localhost:8000/${url.startsWith('/') ? url.slice(1) : url}`;
+                    return `http://127.0.0.1:8000/${url.startsWith('/') ? url.slice(1) : url}`;
                 });
                 startSlideshow();
             }
@@ -1095,9 +1103,10 @@ onUnmounted(() => { if (heroInterval) clearInterval(heroInterval) })
 
 /* --- Main Layout --- */
 .main-container {
-    max-width: 1400px;
+    max-width: 1700px;
+    width: 96%;
     margin: 0 auto;
-    padding: 40px 20px;
+    padding: 40px 15px;
     position: relative;
     z-index: 10;
 }
@@ -1140,20 +1149,32 @@ onUnmounted(() => { if (heroInterval) clearInterval(heroInterval) })
     grid-template-columns: 300px 1fr;
     gap: 30px;
     margin-top: 20px;
+    align-items: start;
 }
 
 .sidebar {
     position: sticky;
     top: 90px;
     height: fit-content;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+    padding-right: 8px; /* space for scrollbar */
+}
+
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+.sidebar::-webkit-scrollbar-thumb {
+    background: #e2e8f0;
+    border-radius: 10px;
 }
 
 .filter-card {
     background: white;
-    padding: 25px;
+    padding: 28px 24px;
     border-radius: 20px;
-    border: none;
-    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.06);
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
     color: #1e293b;
 }
 
@@ -1207,35 +1228,59 @@ onUnmounted(() => { if (heroInterval) clearInterval(heroInterval) })
 
 .category-list {
     display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+    flex-direction: column;
+    gap: 6px;
 }
 
 .cat-pill {
-    padding: 8px 16px;
-    border-radius: 50px;
-    border: 1px solid #e2e8f0;
-    background: #f8fafc;
+    width: 100%;
+    text-align: left;
+    padding: 12px 18px;
+    border-radius: 12px;
+    border: 1px solid transparent;
+    background: transparent;
     color: #475569;
-    font-size: 0.85rem;
+    font-size: 0.95rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .cat-pill:hover {
-    border-color: #cbd5e1;
-    background: #e2e8f0;
+    background: #f1f5f9;
     color: #0f172a;
-    transform: translateY(-1px);
+    transform: translateX(4px);
 }
 
 .cat-pill.active {
-    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-    color: white;
-    border-color: transparent;
-    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
-    transform: translateY(-1px);
+    background: #eff6ff;
+    color: #2563eb;
+    border: 1px solid #bfdbfe;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.05);
+    transform: translateX(4px);
+}
+
+.cat-pill.active::after {
+    content: '✓';
+    font-weight: bold;
+    color: #2563eb;
+    font-size: 1.1rem;
+}
+
+.show-more-btn {
+    justify-content: center;
+    color: #3b82f6;
+    font-weight: 700;
+    background: transparent;
+    border: 1px dashed #bfdbfe;
+}
+.show-more-btn:hover {
+    background: #eff6ff;
+    color: #2563eb;
+    transform: none;
 }
 
 .btn-clear {

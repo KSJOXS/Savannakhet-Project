@@ -1,0 +1,236 @@
+@startuml Place Search & AI Recommendation Flow
+!theme plain
+skinparam backgroundColor #0f172a
+skinparam defaultFontColor #e2e8f0
+skinparam defaultFontSize 12
+skinparam defaultFontName Arial
+
+skinparam rectangle {
+  BackgroundColor #1e293b
+  BorderColor #334155
+  FontColor #e2e8f0
+  RoundCorner 12
+}
+
+skinparam actor {
+  BackgroundColor #1e40af
+  BorderColor #3b82f6
+  FontColor #e2e8f0
+}
+
+skinparam database {
+  BackgroundColor #065f46
+  BorderColor #10b981
+  FontColor #e2e8f0
+}
+
+skinparam note {
+  BackgroundColor #312e81
+  BorderColor #6d28d9
+  FontColor #e2e8f0
+}
+
+skinparam arrow {
+  Color #64748b
+  FontColor #94a3b8
+  FontSize 10
+}
+
+title
+  <b><color:#93c5fd>ສໍາດຊອກຫາສະຖານທີ່ — Sơ đồ nguyên lý hoạt động tìm địa điểm</color></b>
+  <color:#94a3b8>Savannakhet Tourism · Place Discovery & AI Recommendation Flow</color>
+end title
+
+'============================================================
+' ACTORS & COMPONENTS
+'============================================================
+
+actor       "👤 User\n(Browser)"            as USER
+rectangle   "RecommendList.vue\n(Frontend)"  as FRONT   #1e3a5f
+rectangle   "fetchData()\nPromise.all()"     as FETCH   #1e3a5f
+rectangle   "FastAPI Backend\n(main.py)"     as API     #1c4532
+database    "PostgreSQL DB\n(SQLAlchemy)"    as DB      #1c4532
+rectangle   "useAuth()\ncomposable"          as AUTH    #3b1f6e
+
+'============================================================
+' SWIMLANE: ① USER STARTS
+'============================================================
+
+rectangle "① ผู้ใช้เริ่มใช้งาน / User Starts" as LANE1 #162032 {
+
+  USER -right-> FRONT : เปิดหน้า\nRecommendList
+  FRONT -right-> FETCH : onMounted()\nwindow.scrollTo(0,0)
+  FETCH -right-> API   : GET /api/places\nGET /api/categories
+  API -right-> DB      : SELECT * FROM places\nSELECT * FROM categories
+  DB --left-> FETCH    : places[], categories[]
+  FETCH -right-> FRONT : places.value = resPlaces.data\nfeaturedPlaces (slice 0-3)
+}
+
+'============================================================
+' SWIMLANE: ② AUTH CHECK
+'============================================================
+
+rectangle "② ກວດສອບ Login" as LANE2 #162032 {
+
+  rectangle "Check\nuser.value?" as AUTHCHECK #7c3aed
+
+  FRONT -down-> AUTHCHECK : useAuth()\nuser.value
+
+  rectangle "✅ YES: Logged In" as YES_BRANCH #164e32 {
+    rectangle "favoriteRepository\n.getUserFavorites()" as GETFAV #1e3a5f
+    rectangle "fetchInterest\nBasedRecommendations()" as INTEREST #1e3a5f
+    rectangle "GNN AI Engine\n/api/recommendations/{id}\n?top_k=12" as GNNAPI #3b1f6e
+    rectangle "Frequent Interactions\n/api/interactions/user\n/{id}/frequent?limit=10" as FREQ #1e3a5f
+  }
+
+  rectangle "❌ NO: Guest" as NO_BRANCH #3b1a1a {
+    rectangle "Featured Section\n(featuredPlaces[0..2])\n+ Top Rated (rating ↓)" as FEATURED #1e3a5f
+  }
+
+  AUTHCHECK -right-> GETFAV : user != null &&\nrole != 'admin'
+  GETFAV -right-> INTEREST  : favoriteIds.value = []
+  INTEREST -right-> FREQ    : axios.get()
+  FREQ -right-> GNNAPI       : recentInteraction\nCategoryIds[]
+
+  AUTHCHECK -down-> FEATURED : !user
+}
+
+'============================================================
+' SWIMLANE: ③ INTERACTION LOGGING
+'============================================================
+
+rectangle "③ ການບັນທຶກ Interaction (interactions.py)" as LANE3 #162032 {
+
+  rectangle "User Actions" as ACTIONS #1e3a5f {
+    rectangle "👁️ view" as ACT_VIEW   #1e293b
+    rectangle "❤️ like"  as ACT_LIKE  #1e293b
+    rectangle "⭐ review" as ACT_REV  #1e293b
+  }
+
+  note right of ACTIONS
+    <b>Weight Table</b>
+    view   → +1.0
+    like   → +5.0
+    review 5★ → +5.0
+    review 4★ → +3.0
+    review 3★ → +1.0
+    review 2★ → -2.0
+    review 1★ → -5.0
+  end note
+
+  rectangle "POST /api/interactions/log\nInteractionLog model" as ILOG #3b1f6e
+  rectangle "interaction_logs\ntable (DB)"               as ILOGDB #1c4532
+
+  ACT_VIEW  -right-> ILOG : weight=1.0\naction_type='view'
+  ACT_LIKE  -right-> ILOG : weight=5.0\naction_type='like'
+  ACT_REV   -right-> ILOG : weight by score\naction_type='review'
+  ILOG -right-> ILOGDB : db.add() / db.commit()
+
+  rectangle "logInteraction()\n[placeRepository]" as LOGCALL #1e3a5f
+  FRONT -down-> LOGCALL : toggleHeart(placeId)\n→ like interaction
+  LOGCALL -right-> ILOG
+}
+
+'============================================================
+' SWIMLANE: ④ GNN GRAPH BUILD
+'============================================================
+
+rectangle "④ ສ້າງ Heterogeneous Graph (gnn_service.py)" as LANE4 #162032 {
+
+  rectangle "User Features\n[Multi-hot encode]\n10 pref categories\ndim=10" as UFEAT #3b1f6e
+
+  rectangle "HeteroData()\nPyTorch Geometric\nBidirectional Edges" as HETERO #1e3a5f
+
+  rectangle "Place Features\n[One-hot category +\nrating/5.0]\ndim=11" as PFEAT #1c4532
+
+  rectangle "SAGEConv × 2\nhidden_channels=64\nto_hetero()" as SAGE #7c3aed
+
+  rectangle "gnn_model.pt\n(saved weights)\nload_model() / save_model()" as MODELPT #1e3a5f
+
+  DB -right-> UFEAT  : users, preferences
+  DB -right-> PFEAT  : places, categories\nrating_avg
+
+  UFEAT -right-> HETERO : user→interacts_with→place\nNormalized edge weights [0,1]
+  PFEAT -right-> HETERO
+
+  HETERO -right-> SAGE : forward(x_dict,\nedge_index_dict)
+  SAGE   -right-> MODELPT : train_gnn_link_prediction()\nepochs=100\nBCE Loss + Negative Sampling
+}
+
+'============================================================
+' SWIMLANE: ⑤ HYBRID SCORING
+'============================================================
+
+rectangle "⑤ Hybrid Scoring (recommendation.py)" as LANE5 #162032 {
+
+  rectangle "GNN Collaborative Score\ncosine_similarity(\nuser_emb, place_embs)\n× α=0.6" as GNNSCORE #3b1f6e
+
+  rectangle "Content-Based Score\nuser_pref_vec\n× place_cat_vec\n× (1-α)=0.4" as CBSCORE #1c4532
+
+  rectangle "final_scores[]\n= 0.6·GNN + 0.4·Content\n\nExclude reviewed places\n(score = -∞)" as FINAL #162e4e
+
+  rectangle "topk(k=12)\nrecommended_indices[]" as TOPK #3b1f6e
+
+  rectangle "Explainability\nget_explainability()\n'เพราะคุณเคยชอบ [name]'" as EXPLAIN #1e3a5f
+
+  rectangle "API Response\n{recommended_places[],\nscore, reason, place{}}" as RESP #1c4532
+
+  MODELPT -down-> GNNSCORE : model.eval()\ntorch.no_grad()
+  DB       -down-> CBSCORE  : user.preferences\nplace.category.parent_type
+
+  GNNSCORE -right-> FINAL : +
+  CBSCORE  -right-> FINAL : +
+  FINAL    -right-> TOPK
+  TOPK     -right-> EXPLAIN
+  EXPLAIN  -right-> RESP
+}
+
+'============================================================
+' SWIMLANE: ⑥ SORT PRIORITY (Frontend)
+'============================================================
+
+rectangle "⑥ filteredPlaces Sort Priority (RecommendList.vue)" as LANE6 #162032 {
+
+  rectangle "computed: filteredPlaces" as COMPUTED #3b1f6e {
+    rectangle "① AI GNN Recommended\nrecommendedIds.includes(place.id)\n→ Highest priority" as S1 #1e3a5f
+    rectangle "② Recent Interaction Category\nrecentInteractionCategoryIds[]\n(Warm Start)" as S2 #1e3a5f
+    rectangle "③ Signup Preferences\nuserPreferredCategoryIds[]\n(Cold Start)" as S3 #1e3a5f
+    rectangle "④ Rating Fallback\nsort by rating_avg DESC\n(Default)" as S4 #1e3a5f
+  }
+
+  S1 -down-> S2 : if not AI rec
+  S2 -down-> S3 : if not recent
+  S3 -down-> S4 : if not preferred
+
+  rectangle "Search Filter\nv-model: searchQuery\n+ selectedCategory\n(filterByCategory)" as FILTER #1e3a5f
+
+  rectangle "❤️ favoriteRecommendations[]\nfetchInterestBasedRec()\nsame category as liked\ntop 12 by rating" as FAVREC #3b1a1a
+
+  RESP    -down-> COMPUTED : recommendedPlaces.value
+  COMPUTED -right-> FILTER  : name.toLowerCase()\n.includes(searchQuery)
+}
+
+'============================================================
+' SWIMLANE: ⑦ DISPLAY OUTPUT
+'============================================================
+
+rectangle "⑦ ສະແດງຜົນ / Display (UI)" as LANE7 #162032 {
+
+  rectangle "🌟 Featured Section\n3 places (Guest only)\nfeaturedPlaces.value" as OUT1 #1e3a5f
+  rectangle "🗺️ All Places Grid\nfilteredPlaces[]\nAI-sorted + filter" as OUT2 #1e3a5f
+  rectangle "🏆 Top Rated Carousel\ntopRatedPlaces\nrating_avg DESC · top 8" as OUT3 #1e3a5f
+  rectangle "❤️ Based on Favorites\nfavoriteRecommendations[]\nWarm Start Section" as OUT4 #3b1a1a
+  rectangle "📍 PlaceDetail.vue\nrouter.push('/places/:id')\nlogInteraction('view', +1.0)" as OUT5 #1c4532
+
+  FILTER -right-> OUT1 : v-if="!user"
+  FILTER -right-> OUT2 : v-for filteredPlaces
+  FILTER -right-> OUT3 : v-if topRatedPlaces.length
+  FAVREC -right-> OUT4 : v-if favoriteRec.length
+
+  OUT1 -right-> OUT5 : @click goToDetail()
+  OUT2 -right-> OUT5 : @click goToDetail()
+  OUT3 -right-> OUT5 : @click goToDetail()
+  OUT4 -right-> OUT5 : @click goToDetail()
+}
+
+@enduml

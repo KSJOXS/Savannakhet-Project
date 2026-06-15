@@ -30,11 +30,11 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="place in pendingPlaces" :key="place.id">
+                        <tr v-for="place in pendingPlaces" :key="place.id" @click="selectedPlace = place" class="clickable-row">
                             <td>
                                 <div class="place-info">
                                     <div class="place-img-wrapper">
-                                        <img :src="getCoverImage(place.image_url)" alt="cover" class="place-thumbnail">
+                                        <img :src="getCoverImage(place.image_url)" alt="cover" class="place-thumbnail" @error="handleImageError">
                                     </div>
                                     <div class="place-details">
                                         <strong>{{ place.name }}</strong>
@@ -48,18 +48,18 @@
                                 </span>
                             </td>
                             <td>
-                                <span class="user-badge"><i class="fas fa-user"></i> User #{{ place.owner_id }}</span>
+                                <span class="user-badge"><i class="fas fa-user"></i> {{ place.owner_username || 'Unknown' }}</span>
                             </td>
                             <td>
-                                <a :href="`https://maps.google.com/?q=${place.location_lat},${place.location_lng}`" target="_blank" class="map-link">
+                                <a :href="`https://maps.google.com/?q=${place.location_lat},${place.location_lng}`" target="_blank" class="map-link" @click.stop>
                                     <i class="fas fa-map-marker-alt"></i> View Map
                                 </a>
                             </td>
                             <td class="actions-col">
-                                <button class="btn-approve" @click="updateStatus(place.id, 'approved')" :disabled="processingId === place.id">
+                                <button class="btn-approve" @click.stop="updateStatus(place.id, 'approved')" :disabled="processingId === place.id">
                                     <i class="fas fa-check"></i> Approve
                                 </button>
-                                <button class="btn-reject" @click="updateStatus(place.id, 'rejected')" :disabled="processingId === place.id">
+                                <button class="btn-reject" @click.stop="updateStatus(place.id, 'rejected')" :disabled="processingId === place.id">
                                     <i class="fas fa-times"></i> Reject
                                 </button>
                             </td>
@@ -68,16 +68,41 @@
                 </table>
             </div>
         </div>
+
+        <!-- Modal -->
+        <div v-if="selectedPlace" class="modal-overlay" @click.self="selectedPlace = null">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>{{ selectedPlace.name }}</h2>
+                    <button class="close-btn" @click="selectedPlace = null"><i class="fas fa-times"></i></button>
+                </div>
+                <div class="modal-body">
+                    <img :src="getCoverImage(selectedPlace.image_url)" alt="cover" class="modal-img" @error="handleImageError">
+                    <div class="modal-details">
+                        <p><strong>Category:</strong> {{ selectedPlace.category ? selectedPlace.category.name : 'Unknown' }}</p>
+                        <p><strong>Description:</strong> {{ selectedPlace.description }}</p>
+                        <p v-if="selectedPlace.location_lat"><strong>Location:</strong> <a :href="`https://maps.google.com/?q=${selectedPlace.location_lat},${selectedPlace.location_lng}`" target="_blank">View on Google Maps</a></p>
+                        <p><strong>Submitted by:</strong> <span class="submitter-name">{{ selectedPlace.owner_username || 'Unknown' }}</span></p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-approve" @click="updateStatus(selectedPlace.id, 'approved'); selectedPlace = null">Approve</button>
+                    <button class="btn-reject" @click="updateStatus(selectedPlace.id, 'rejected'); selectedPlace = null">Reject</button>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import { placeRepository } from '@/repositories/placeRepository'
+import placeholderImg from '/placeholder-image.jpg'
 
 const pendingPlaces = ref([])
 const loading = ref(true)
 const processingId = ref(null)
+const selectedPlace = ref(null)
 
 const loadPendingPlaces = async () => {
     loading.value = true
@@ -112,14 +137,27 @@ const updateStatus = async (id, status) => {
 const getCoverImage = (imageString) => {
     try {
         if (!imageString || imageString === '[]') return '/placeholder-image.jpg'
-        const images = JSON.parse(imageString)
+        
+        let images = [];
+        if (imageString.startsWith('[')) {
+            images = JSON.parse(imageString)
+        } else {
+            return imageString.startsWith('http') ? imageString : `http://127.0.0.1:8000${imageString}`;
+        }
+        
         if (images.length > 0) {
-            return `http://localhost:8000${images[0]}`
+            let img = images[0];
+            return img.startsWith('http') ? img : `http://127.0.0.1:8000${img}`
         }
     } catch (e) {
         console.error(e)
     }
-    return '/placeholder-image.jpg'
+    return null
+}
+
+const handleImageError = (e) => {
+    e.target.onerror = null  // prevent infinite loop
+    e.target.src = placeholderImg
 }
 
 const truncate = (text, length) => {
@@ -310,5 +348,90 @@ onMounted(() => {
 button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+.clickable-row {
+    cursor: pointer;
+}
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.4rem;
+    color: #0f172a;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: #64748b;
+    cursor: pointer;
+}
+.close-btn:hover {
+    color: #ef4444;
+}
+
+.modal-body {
+    padding: 25px;
+}
+
+.modal-img {
+    width: 100%;
+    max-height: 300px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.modal-details p {
+    margin: 0 0 10px 0;
+    line-height: 1.5;
+    color: #334155;
+}
+
+.modal-footer {
+    padding: 20px 25px;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+}
+
+.submitter-name {
+    font-weight: 600;
+    color: #4f46e5;
+    background: #e0e7ff;
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 0.9rem;
 }
 </style>

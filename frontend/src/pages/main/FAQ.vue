@@ -1,9 +1,16 @@
 <template>
-  <div class="faq-container">
-    <div class="faq-header">
-      <h1>{{ t('faq.title') }}</h1>
-      <p class="faq-subtitle">{{ t('faq.subtitle') }}</p>
-    </div>
+  <div class="faq-page-wrapper">
+    <Navbar />
+    
+    <div class="faq-container">
+      <button class="back-btn" @click="router.back()">
+        <i class="fas fa-arrow-left"></i> {{ t('nav.home') || 'Back' }}
+      </button>
+
+      <div class="faq-header">
+        <h1>{{ t('faq.title') }}</h1>
+        <p class="faq-subtitle">{{ t('faq.subtitle') }}</p>
+      </div>
 
     <div class="faq-content">
       <div class="faq-item" v-for="(item, index) in faqItems" :key="index">
@@ -24,13 +31,17 @@
       <p>{{ t('faq.contactUs') }}</p>
       <router-link to="/contact" class="btn-ta-solid">{{ t('nav.contactSupport') }}</router-link>
     </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useI18n } from '@/composables/useI18n'
+import Navbar from '@/components/Navbar.vue'
 
+const router = useRouter()
 const { t, locale } = useI18n()
 const openedFaq = ref({})
 
@@ -181,11 +192,34 @@ const toggleFaq = (index) => {
 </script>
 
 <style scoped>
+.faq-page-wrapper {
+  background-color: #f7f9fa;
+  min-height: 100vh;
+}
+
 .faq-container {
   max-width: 900px;
   margin: 0 auto;
   padding: 40px 20px;
   min-height: calc(100vh - 300px);
+}
+
+.back-btn {
+  background: transparent;
+  border: none;
+  color: #3498db;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: color 0.2s;
+}
+
+.back-btn:hover {
+  color: #2980b9;
 }
 
 .faq-header {

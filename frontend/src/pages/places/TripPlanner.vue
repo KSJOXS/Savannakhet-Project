@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <div class="trip-planner-page">
         <!-- Back Button -->
         <button class="btn-back-floating" @click="goBack">
@@ -741,7 +741,7 @@ const getCoverImage = (imgData) => {
     if (!url || typeof url !== 'string' || url === 'null' || url === 'undefined') return noImageUrl;
     if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) return url;
     
-    const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    const backendUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
     return `${backendUrl}${url.startsWith('/') ? '' : '/'}${url}`;
 }
 

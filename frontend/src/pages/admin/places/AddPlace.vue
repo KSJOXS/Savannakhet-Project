@@ -136,7 +136,14 @@
                             </div>
 
                             <div class="input-group">
-                                <label>Best For (Tags)</label>
+                                <label>Best For / Best Season (Tags)</label>
+                                <div class="preset-tags-container">
+                                    <span v-for="tag in predefinedBestFor" :key="tag" 
+                                          class="preset-tag" :class="{'active': form.best_for.includes(tag)}"
+                                          @click="toggleTag('best_for', tag)">
+                                        <i :class="form.best_for.includes(tag) ? 'fas fa-check' : 'fas fa-plus'"></i> {{ tag }}
+                                    </span>
+                                </div>
                                 <div class="tag-input-container">
                                     <div class="tag-pills">
                                         <span v-for="(tag, idx) in form.best_for" :key="idx" class="tag-pill">
@@ -151,6 +158,13 @@
 
                             <div class="input-group">
                                 <label>Avoid If (Tags)</label>
+                                <div class="preset-tags-container">
+                                    <span v-for="tag in predefinedAvoidIf" :key="tag" 
+                                          class="preset-tag alert" :class="{'active': form.avoid_if.includes(tag)}"
+                                          @click="toggleTag('avoid_if', tag)">
+                                        <i :class="form.avoid_if.includes(tag) ? 'fas fa-times-circle' : 'fas fa-plus'"></i> {{ tag }}
+                                    </span>
+                                </div>
                                 <div class="tag-input-container">
                                     <div class="tag-pills">
                                         <span v-for="(tag, idx) in form.avoid_if" :key="idx" class="tag-pill alert">
@@ -324,6 +338,14 @@ const rawFiles = ref([])
 
 const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
+const predefinedBestFor = [
+    'Hot Season', 'Rainy Season', 'Cool Season', 'All Seasons',
+    'Photography', 'Nature', 'Spirituality', 'Relaxation', 'Family', 'Couples', 'Adventure', 'Food'
+]
+const predefinedAvoidIf = [
+    'Rainy Season', 'Hot Season', 'Crowds', 'Inappropriate Attire', 'Mobility Issues', 'Noisy'
+]
+
 const form = ref({
     name: '',
     category_id: '',
@@ -364,6 +386,16 @@ const addTag = (field, event) => {
 const removeTag = (field, index) => {
     form.value[field].splice(index, 1)
 }
+
+const toggleTag = (field, tag) => {
+    const idx = form.value[field].indexOf(tag)
+    if (idx === -1) {
+        form.value[field].push(tag)
+    } else {
+        form.value[field].splice(idx, 1)
+    }
+}
+
 const weekDays = [
     { key: 'mon', label: 'Monday' },
     { key: 'tue', label: 'Tuesday' },
@@ -709,6 +741,31 @@ label {
     margin-bottom: 5px;
     color: #475569;
 }
+
+.preset-tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.preset-tag {
+    font-size: 0.8rem;
+    background: #f1f5f9;
+    color: #64748b;
+    border: 1px solid #cbd5e1;
+    padding: 4px 10px;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: 0.2s;
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+.preset-tag:hover { background: #e2e8f0; }
+.preset-tag.active { background: #dcfce7; color: #15803d; border-color: #22c55e; }
+.preset-tag.alert.active { background: #fee2e2; color: #b91c1c; border-color: #ef4444; }
 
 input,
 select,

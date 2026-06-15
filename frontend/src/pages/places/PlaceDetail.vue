@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <div class="ta-detail-page">
         <!-- Removed standard Navbar for immersive experience -->
 
@@ -159,17 +159,46 @@
             <div class="content-split">
                 <div class="main-column">
                     <section class="about-section" id="about" style="background: white; padding: 30px; border-radius: 20px; box-shadow: 0 4px 25px rgba(0,0,0,0.04); border: 1px solid #f1f5f9; margin-bottom: 30px;">
-                        <h2 style="font-size: 1.6rem; font-weight: 800; margin-top: 0; margin-bottom: 15px; color: #0f172a; display: flex; align-items: center; gap: 12px;">
-                            <div style="background: #eff6ff; padding: 8px; border-radius: 10px; color: #3b82f6; display: flex; align-items: center; justify-content: center;">
-                                <i class="fas fa-info-circle" style="font-size: 1.2rem;"></i>
+                        <h2 style="font-size: 1.6rem; font-weight: 800; margin-top: 0; margin-bottom: 15px; color: #0f172a; display: flex; align-items: center; justify-content: space-between;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div style="background: #eff6ff; padding: 8px; border-radius: 10px; color: #3b82f6; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-info-circle" style="font-size: 1.2rem;"></i>
+                                </div>
+                                {{ t('place.aboutThisPlace') }}
                             </div>
-                            {{ t('place.aboutThisPlace') }}
+                            
+                            <div style="display:flex; gap:10px;">
+                                <button v-if="!isTranslatingAbout && !translatedAboutText && place.description" @click="translateAbout()" class="btn-premium-translate">
+                                    <i class="fas fa-language" style="font-size: 1.1rem; color: #4f46e5;"></i> 
+                                    <span>{{ t('place.seeTranslation') !== 'place.seeTranslation' ? t('place.seeTranslation') : 'See Translation' }}</span>
+                                </button>
+                                <span v-if="isTranslatingAbout" class="btn-premium-translate" style="cursor:default;">
+                                    <i class="fas fa-circle-notch fa-spin" style="color: #4f46e5;"></i> Translating...
+                                </span>
+                                <button v-if="translatedAboutText" @click="translatedAboutText = null" class="btn-premium-translate active">
+                                    <i class="fas fa-undo"></i> {{ t('place.showOriginal') !== 'place.showOriginal' ? t('place.showOriginal') : 'Original' }}
+                                </button>
+                            </div>
                         </h2>
-                        <p class="description-text" style="font-size: 1.05rem; line-height: 1.8; color: #334155; white-space: pre-line; margin: 0;">{{ place.description || 'No description available for this place yet.' }}</p>
+                        
+                        <p class="description-text" @contextmenu.prevent="openTranslateMenu($event, 'about')" style="font-size: 1.05rem; line-height: 1.8; color: #334155; white-space: pre-line; margin: 0; cursor: context-menu;">{{ translatedAboutText || place.description || 'No description available for this place yet.' }}</p>
                     </section>
 
                     <!-- ✨ Travel Guide Sections — Rich content blocks -->
                     <section v-if="placeSections && placeSections.length > 0" class="guide-sections-block">
+                        <div style="display:flex; justify-content:flex-end; margin-bottom: 15px; gap: 10px;">
+                            <button v-if="!isTranslatingSections && !translatedSectionsActive" @click="translateSections()" class="btn-premium-translate">
+                                <i class="fas fa-language" style="font-size: 1.1rem; color: #4f46e5;"></i> 
+                                <span>{{ t('place.seeTranslation') !== 'place.seeTranslation' ? t('place.seeTranslation') : 'See Translation' }}</span>
+                            </button>
+                            <span v-if="isTranslatingSections" class="btn-premium-translate" style="cursor:default;">
+                                <i class="fas fa-circle-notch fa-spin" style="color: #4f46e5;"></i> Translating...
+                            </span>
+                            <button v-if="translatedSectionsActive" @click="translatedSectionsActive = false" class="btn-premium-translate active">
+                                <i class="fas fa-undo"></i> {{ t('place.showOriginal') !== 'place.showOriginal' ? t('place.showOriginal') : 'Original' }}
+                            </button>
+                        </div>
+
                         <div v-for="(sec, idx) in placeSections" :key="sec.id" class="guide-section-item">
                             <img
                                 v-if="sec.image_url"
@@ -177,7 +206,7 @@
                                 :alt="`Section ${idx + 1}`"
                                 class="guide-section-img"
                             />
-                            <p v-if="sec.description" class="guide-section-desc">{{ sec.description }}</p>
+                            <p v-if="sec.description" @contextmenu.prevent="openTranslateMenu($event, 'guide')" style="cursor: context-menu;" class="guide-section-desc">{{ (translatedSectionsActive && sec.translatedDesc) ? sec.translatedDesc : sec.description }}</p>
                         </div>
                     </section>
 
@@ -189,12 +218,8 @@
                         <div class="write-review-box" v-if="user && user.role !== 'admin'">
                             <div class="u-avatar-large"
                                 style="padding: 0; overflow: hidden; border: none; background: none;">
-                                <img v-if="user.profile_image" :src="getImageUrl(user.profile_image)" alt="avatar"
+                                <img :src="getUserAvatar(user.profile_image)" alt="avatar"
                                     style="width:100%; height:100%; object-fit:cover;" />
-                                <div v-else
-                                    style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#ff6b6b; color:white; border-radius:50%; font-size:1.2rem; font-weight:bold;">
-                                    {{ user.username ? user.username.charAt(0).toUpperCase() : 'U' }}
-                                </div>
                             </div>
                             <div class="review-input-area">
                                 <p class="prompt-text">{{ t('place.whatDoYouThink') }}</p>
@@ -247,13 +272,9 @@
                                 <div class="reviewer-info">
                                     <div class="r-avatar"
                                         style="padding: 0; overflow: hidden; border: none; background: none;">
-                                        <img v-if="comment.profile_image" :src="getImageUrl(comment.profile_image)"
+                                        <img :src="getUserAvatar(comment.profile_image)"
                                             alt="avatar"
                                             style="width:100%; height:100%; object-fit:cover; border-radius:50%;" />
-                                        <div v-else
-                                            style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#e2e8f0; color:#475569; font-weight:700; border-radius:50%;">
-                                            {{ comment.username?.charAt(0).toUpperCase() }}
-                                        </div>
                                     </div>
                                     <div class="r-details"
                                         style="flex-grow: 1; display: flex; justify-content: space-between; align-items: center;">
@@ -340,7 +361,7 @@
                             <span style="display: flex; align-items: center; justify-content: space-between;">
                                 <span style="display: flex; align-items: center; gap: 8px;"><i class="fas fa-star" style="color: #eab308; width: 16px; text-align: center;"></i> <strong>{{ t('place.rating_label') }}</strong></span>
                                 <span style="font-weight: 700; color: #00aa6c; display: flex; align-items: center; gap: 4px;">
-                                    {{ place.rating_avg ? parseFloat(place.rating_avg).toFixed(1) : 'N/A' }}
+                                    {{ place.rating_avg ? parseFloat(place.rating_avg).toFixed(1) : '0.0' }}
                                 </span>
                             </span>
                         </div>
@@ -371,8 +392,7 @@
                                     <i v-for="s in 5" :key="'sb-' + s"
                                         :class="[(place.rating_avg || 0) >= s ? 'fas' : 'far', 'fa-circle']"></i>
                                 </div>
-                                <span class="score-label">{{ t('place.ratingLabels')[Math.round(place.rating_avg || 0) -
-                                    1] || 'N/A' }}</span>
+                                <span class="score-label">{{ t('place.ratingLabels')[Math.round(place.rating_avg || 0) - 1] || '0.0' }}</span>
                                 <span class="score-count">({{ comments?.length || 0 }})</span>
                             </div>
                             <div class="score-bars">
@@ -658,6 +678,15 @@
 
         <MapOverlay v-if="place" :is-open="showMapModal" :places="allPlaces" :categories="categories"
             :initial-selected-id="place.id" title="Explore Places" @close="showMapModal = false" />
+        
+        <!-- Language Context Menu -->
+        <div v-if="contextMenu.visible" class="custom-context-menu" :style="{ top: contextMenu.y + 'px', left: contextMenu.x + 'px' }">
+            <div class="context-menu-title"><i class="fas fa-language"></i> Translate to</div>
+            <div class="context-menu-item" @click="translateSectionTo('th')">🇹🇭 Thai</div>
+            <div class="context-menu-item" @click="translateSectionTo('vi')">🇻🇳 Vietnamese</div>
+            <div class="context-menu-item" @click="translateSectionTo('lo')">🇱🇦 Lao</div>
+            <div class="context-menu-item" @click="translateSectionTo('en')">🇬🇧 English</div>
+        </div>
     </div> <!-- End ta-detail-page -->
 </template>
 
@@ -707,6 +736,89 @@ const recommendedPlaces = computed(() => {
         .filter(p => p.category_id === place.value.category_id && p.id !== place.value.id)
         .slice(0, 4);
 });
+
+// Translation State and Methods
+const targetTranslateLang = ref('vi');
+const isTranslatingAbout = ref(false);
+const translatedAboutText = ref(null);
+
+const contextMenu = ref({
+    visible: false,
+    x: 0,
+    y: 0,
+    targetSection: null // 'about' or 'guide'
+});
+
+const openTranslateMenu = (e, section) => {
+    e.preventDefault();
+    if (contextMenu.value.visible) {
+        contextMenu.value.visible = false;
+        return;
+    }
+    contextMenu.value.visible = true;
+    contextMenu.value.x = e.clientX;
+    contextMenu.value.y = e.clientY;
+    contextMenu.value.targetSection = section;
+};
+
+const closeContextMenu = () => {
+    if (contextMenu.value.visible) {
+        contextMenu.value.visible = false;
+    }
+};
+
+const translateSectionTo = (lang) => {
+    targetTranslateLang.value = lang;
+    if (contextMenu.value.targetSection === 'about') {
+        translateAbout();
+    } else if (contextMenu.value.targetSection === 'guide') {
+        translateSections();
+    }
+    contextMenu.value.visible = false;
+};
+
+watch(targetTranslateLang, () => {
+    translatedAboutText.value = null;
+    translatedSectionsActive.value = false;
+});
+
+const translateAbout = async () => {
+    if (!place.value || !place.value.description) return;
+    isTranslatingAbout.value = true;
+    try {
+        const lang = targetTranslateLang.value;
+        const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${lang}&dt=t&q=${encodeURIComponent(place.value.description)}`);
+        const data = await res.json();
+        translatedAboutText.value = data[0].map(item => item[0]).join('');
+    } catch (err) {
+        console.error('Translation failed', err);
+    } finally {
+        isTranslatingAbout.value = false;
+    }
+}
+
+const isTranslatingSections = ref(false);
+const translatedSectionsActive = ref(false);
+
+const translateSections = async () => {
+    if (!placeSections.value || placeSections.value.length === 0) return;
+    isTranslatingSections.value = true;
+    try {
+        const lang = targetTranslateLang.value;
+        for (const sec of placeSections.value) {
+            if (sec.description) {
+                const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${lang}&dt=t&q=${encodeURIComponent(sec.description)}`);
+                const data = await res.json();
+                sec.translatedDesc = data[0].map(item => item[0]).join('');
+            }
+        }
+        translatedSectionsActive.value = true;
+    } catch (err) {
+        console.error('Translation failed', err);
+    } finally {
+        isTranslatingSections.value = false;
+    }
+}
 
 const newComment = ref('')
 const newRating = ref(5)
@@ -798,6 +910,14 @@ const currentImageIndex = ref(0)
 const isLightboxOpen = ref(false)
 const zoomLevel = ref(1)
 
+const getUserAvatar = (url) => {
+  if (url) {
+      if (url.startsWith('http') || url.startsWith('data:')) return url;
+      return `http://127.0.0.1:8000/${url.startsWith('/') ? url.slice(1) : url}`;
+  }
+  return 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ccc"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>';
+}
+
 const galleryImages = computed(() => {
     const getValidImageUrl = (rawUrl) => {
         if (!rawUrl || rawUrl === 'null' || rawUrl === 'undefined') return 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1920&q=80';
@@ -812,7 +932,7 @@ const galleryImages = computed(() => {
         }
         if (typeof url !== 'string') return 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1920&q=80';
         if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) return url;
-        return `http://localhost:8000${url.startsWith('/') ? '' : '/'}${url}`;
+        return `http://127.0.0.1:8000${url.startsWith('/') ? '' : '/'}${url}`;
     }
 
     const imgs = [];
@@ -962,13 +1082,13 @@ const getCommentCountText = (pl) => {
 const getImageUrl = (url) => {
     if (!url) return '';
     if (url.startsWith('http') || url.startsWith('data:')) return url;
-    return `http://localhost:8000/${url.startsWith('/') ? url.slice(1) : url}`;
+    return `http://127.0.0.1:8000/${url.startsWith('/') ? url.slice(1) : url}`;
 }
 
 const getSectionImageUrl = (url) => {
     if (!url) return '';
     if (url.startsWith('http') || url.startsWith('data:')) return url;
-    return `http://localhost:8000${url.startsWith('/') ? '' : '/'}${url}`;
+    return `http://127.0.0.1:8000${url.startsWith('/') ? '' : '/'}${url}`;
 }
 
 const stickyNavRef = ref(null);
@@ -1014,7 +1134,7 @@ const getRecCoverImage = (p) => {
         } catch (e) { url = p.image_url; }
     }
     if (!url) return 'https://via.placeholder.com/300x200?text=No+Image';
-    return url.startsWith('http') ? url : `http://localhost:8000/${url.replace(/^\//, '')}`;
+    return url.startsWith('http') ? url : `http://127.0.0.1:8000/${url.replace(/^\//, '')}`;
 };
 
 const goToRecDetail = (id) => {
@@ -1734,6 +1854,77 @@ const placeSummary = computed(() => {
     font-weight: 400;
     max-width: 800px;
 }
+
+.btn-premium-translate {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #1e293b;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+.btn-premium-translate:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+.btn-premium-translate.active {
+    background: #eef2ff;
+    border-color: #c7d2fe;
+    color: #4338ca;
+}
+
+.custom-context-menu {
+    position: fixed;
+    z-index: 9999;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    border: 1px solid #e2e8f0;
+    min-width: 180px;
+    padding: 8px;
+    font-family: 'Inter', sans-serif;
+    animation: fadeIn 0.2s ease-out;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+.context-menu-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #64748b;
+    padding: 6px 12px;
+    border-bottom: 1px solid #f1f5f9;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.context-menu-item {
+    padding: 8px 12px;
+    font-size: 0.95rem;
+    color: #334155;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.context-menu-item:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
 
 /* Stats Bar */
 .stats-bar {

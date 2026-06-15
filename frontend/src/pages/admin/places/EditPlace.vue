@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <div class="edit-page-container">
         <div class="header-section">
             <div class="header-content">
@@ -243,7 +243,14 @@
                             </div>
 
                             <div class="input-group">
-                                <label>Best For (Tags)</label>
+                                <label>Best For / Best Season (Tags)</label>
+                                <div class="preset-tags-container" v-if="!form.is_published">
+                                    <span v-for="tag in predefinedBestFor" :key="tag" 
+                                          class="preset-tag" :class="{'active': form.best_for.includes(tag)}"
+                                          @click="toggleTag('best_for', tag)">
+                                        <i :class="form.best_for.includes(tag) ? 'fas fa-check' : 'fas fa-plus'"></i> {{ tag }}
+                                    </span>
+                                </div>
                                 <div class="tag-input-container" :class="{ disabled: form.is_published }">
                                     <div class="tag-pills">
                                         <span v-for="(tag, idx) in form.best_for" :key="idx" class="tag-pill">
@@ -258,6 +265,13 @@
 
                             <div class="input-group">
                                 <label>Avoid If (Tags)</label>
+                                <div class="preset-tags-container" v-if="!form.is_published">
+                                    <span v-for="tag in predefinedAvoidIf" :key="tag" 
+                                          class="preset-tag alert" :class="{'active': form.avoid_if.includes(tag)}"
+                                          @click="toggleTag('avoid_if', tag)">
+                                        <i :class="form.avoid_if.includes(tag) ? 'fas fa-times-circle' : 'fas fa-plus'"></i> {{ tag }}
+                                    </span>
+                                </div>
                                 <div class="tag-input-container" :class="{ disabled: form.is_published }">
                                     <div class="tag-pills">
                                         <span v-for="(tag, idx) in form.avoid_if" :key="idx" class="tag-pill alert">
@@ -429,6 +443,16 @@ import { categoryRepository } from '@/repositories/categoryRepository'
 const route = useRoute()
 const router = useRouter()
 const categories = ref([])
+const removingUrl = ref(null)
+
+const predefinedBestFor = [
+    'Hot Season', 'Rainy Season', 'Cool Season', 'All Seasons',
+    'Photography', 'Nature', 'Spirituality', 'Relaxation', 'Family', 'Couples', 'Adventure', 'Food'
+]
+const predefinedAvoidIf = [
+    'Rainy Season', 'Hot Season', 'Crowds', 'Inappropriate Attire', 'Mobility Issues', 'Noisy'
+]
+
 const map = ref(null)
 const marker = ref(null)
 const addressPaste = ref('')
@@ -474,8 +498,12 @@ const copyMondayToAll = () => {
     })
 }
 
-const images = ref([]) // เก็บ Base64 หรือ URL สำหรับโชว์ในหน้าเว็บ
-const rawFiles = ref([]) // เก็บก้อนไฟล์จริง (File object) เตรียมส่งให้ Backend
+// images = array ของ URL (เก่า) หรือ base64 (ใหม่) สำหรับโชว์เท่านั้น
+const images = ref([])
+// existingUrls = URL ของรูปเก่าที่อยู่บน server (string)
+const existingUrls = ref([])
+// newFiles = File object ที่เพิ่งเลือกใหม่ (File) พร้อม preview base64
+const newFiles = ref([]) // [{ file: File, preview: string }]
 
 const form = ref({
     name: '',
@@ -515,7 +543,18 @@ const addTag = (field, event) => {
 }
 
 const removeTag = (field, index) => {
+    if (form.value.is_published) return
     form.value[field].splice(index, 1)
+}
+
+const toggleTag = (field, tag) => {
+    if (form.value.is_published) return
+    const idx = form.value[field].indexOf(tag)
+    if (idx === -1) {
+        form.value[field].push(tag)
+    } else {
+        form.value[field].splice(idx, 1)
+    }
 }
 
 // --- Parse image_url: ดึงข้อมูลจาก DB แล้วเติม localhost:8000 ให้อัตโนมัติ ---
@@ -538,7 +577,7 @@ const parseImages = (imageUrl) => {
         if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
             return url;
         }
-        return `http://localhost:8000${url.startsWith('/') ? '' : '/'}${url}`;
+        return `http://127.0.0.1:8000${url.startsWith('/') ? '' : '/'}${url}`;
     }).filter(Boolean);
 }
 
@@ -626,6 +665,14 @@ const updateMarkerPosition = (lat, lng) => {
 }
 
 // --- Multi-image handlers ---
+// images = existingUrls + newFiles preview (ใช้โชว์ใน UI)
+const rebuildImages = () => {
+    images.value = [
+        ...existingUrls.value,
+        ...newFiles.value.map(f => f.preview)
+    ]
+}
+
 const onFileChange = (e) => {
     const files = Array.from(e.target.files)
     files.forEach(file => {
@@ -637,13 +684,10 @@ const onFileChange = (e) => {
             return
         }
 
-        // 1. เก็บไฟล์จริงไว้เตรียมส่ง
-        rawFiles.value.push(file)
-
-        // 2. แปลงเป็น Base64 ไว้โชว์หน้าเว็บ
         const reader = new FileReader()
         reader.onload = (ev) => {
-            images.value.push(ev.target.result)
+            newFiles.value.push({ file, preview: ev.target.result })
+            rebuildImages()
         }
         reader.readAsDataURL(file)
     })
@@ -651,24 +695,30 @@ const onFileChange = (e) => {
 }
 
 const removeImage = (index) => {
-    images.value.splice(index, 1)
-    
-    // ลบไฟล์จริงออกด้วย ถ้าหากเป็นรูปใหม่ที่เพิ่งเพิ่มเข้ามา
-    if (rawFiles.value[index]) {
-        rawFiles.value.splice(index, 1)
+    const oldCount = existingUrls.value.length
+    if (index < oldCount) {
+        // ลบรูปเก่า (URL บน server)
+        existingUrls.value.splice(index, 1)
+    } else {
+        // ลบรูปใหม่ (File ที่เพิ่งเลือก)
+        newFiles.value.splice(index - oldCount, 1)
     }
+    rebuildImages()
 }
 
 const setCover = (index) => {
-    // เลื่อนรูปพรีวิวมาเป็นปก
-    const [img] = images.value.splice(index, 1)
-    images.value.unshift(img) 
-
-    // เลื่อนไฟล์จริงมาเป็นปกด้วย (เพื่อส่งให้ API ตามลำดับ)
-    if (rawFiles.value[index]) {
-        const [file] = rawFiles.value.splice(index, 1)
-        rawFiles.value.unshift(file)
+    const oldCount = existingUrls.value.length
+    if (index < oldCount) {
+        // รูปเก่า: เลื่อน URL มาหน้า
+        const [url] = existingUrls.value.splice(index, 1)
+        existingUrls.value.unshift(url)
+    } else {
+        // รูปใหม่: เลื่อน File มาหน้า newFiles ก่อน
+        const newIdx = index - oldCount
+        const [entry] = newFiles.value.splice(newIdx, 1)
+        newFiles.value.unshift(entry)
     }
+    rebuildImages()
 }
 
 const fetchDetails = async () => {
@@ -736,10 +786,9 @@ const fetchDetails = async () => {
         }
 
         // โหลดรูปเก่ามาแสดง
-        images.value = parseImages(data.image_url)
-        // สำหรับรูปเก่า เราไม่รู้ว่าเป็นไฟล์อะไร (เพราะมันอยู่บนเซิร์ฟเวอร์แล้ว) 
-        // เราเลยเอาค่า URL ไปใส่ใน rawFiles ไว้ชั่วคราว เพื่อรักษาจำนวน index ให้เท่ากันกับ images
-        rawFiles.value = [...images.value] 
+        existingUrls.value = parseImages(data.image_url)
+        newFiles.value = []
+        rebuildImages() 
 
         categories.value = resCats.data
         await nextTick()
@@ -785,18 +834,16 @@ const updatePlace = async () => {
         formData.append('booking_url', form.value.booking_url || '')
         formData.append('agoda_url', form.value.agoda_url || '')
 
-        // ตรวจสอบรูปภาพ
-        let hasNewImage = false;
-        rawFiles.value.forEach((fileOrUrl) => {
-            if (fileOrUrl instanceof File) {
-                // ถ้าเป็น File แสดงว่าเพิ่งอัปโหลดใหม่
-                formData.append('images', fileOrUrl)
-                hasNewImage = true;
-            }
+        // ส่ง URL ของรูปเก่าที่ยังเหลืออยู่ให้ Backend รู้ว่าต้องเก็บรูปไหนไว้
+        formData.append('existing_image_urls', JSON.stringify(existingUrls.value))
+
+        // ส่งเฉพาะ File ใหม่ที่เพิ่งเลือก
+        newFiles.value.forEach(({ file }) => {
+            formData.append('images', file)
         })
 
         // ถ้าไม่มีรูปใหม่เลย จะส่งแค่ข้อมูลทั่วไป (FastAPI จะรู้ว่าไม่ต้องอัปเดตไฟล์)
-        if (!hasNewImage) {
+        if (newFiles.value.length === 0) {
             // เราอาจจะต้องทำระบบส่งรูปเก่าไปบอก FastAPI ด้วย แต่ในเบื้องต้นส่งแค่นี้ก่อน
         }
 
@@ -844,7 +891,7 @@ const toggleExpandSection = (id) => {
 const getSectionImageUrl = (url) => {
     if (!url) return ''
     if (url.startsWith('http')) return url
-    return `http://localhost:8000${url.startsWith('/') ? '' : '/'}${url}`
+    return `http://127.0.0.1:8000${url.startsWith('/') ? '' : '/'}${url}`
 }
 
 const fetchSections = async () => {
@@ -1080,6 +1127,31 @@ label {
     margin-bottom: 5px;
     color: #475569;
 }
+
+.preset-tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.preset-tag {
+    font-size: 0.8rem;
+    background: #f1f5f9;
+    color: #64748b;
+    border: 1px solid #cbd5e1;
+    padding: 4px 10px;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: 0.2s;
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+.preset-tag:hover { background: #e2e8f0; }
+.preset-tag.active { background: #dcfce7; color: #15803d; border-color: #22c55e; }
+.preset-tag.alert.active { background: #fee2e2; color: #b91c1c; border-color: #ef4444; }
 
 input, select, textarea {
     width: 100%;

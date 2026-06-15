@@ -1,10 +1,10 @@
-<template>
+﻿<template>
     <div class="explore-page">
         <Navbar />
 
         <div class="explore-container">
-            <button @click="router.push('/explore')" class="btn-back-link">
-                <i class="fas fa-chevron-left"></i> Back to Explore
+            <button @click="router.back()" class="btn-back-link">
+                <i class="fas fa-chevron-left"></i> Back
             </button>
 
             <div class="page-tabs">
@@ -241,7 +241,7 @@ const getCoverImage = (imgData) => {
     const url = urls[0]
     if (!url) return noImageUrl
     if (url.startsWith('http') || url.startsWith('data:')) return url
-    return `http://localhost:8000${url.startsWith('/') ? '' : '/'}${url}`
+    return `http://127.0.0.1:8000${url.startsWith('/') ? '' : '/'}${url}`
 }
 
 const handleImgError = (e) => {

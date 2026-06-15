@@ -22,6 +22,7 @@ export default {
     postPhoto: 'Đăng ảnh',
     addPlace: 'Thêm địa điểm',
     myTrips: 'Chuyến đi của tôi',
+    myReviews: 'Đánh giá của tôi',
     planYourTrip: 'Lập kế hoạch chuyến đi',
     exploreAll: 'Khám phá tất cả địa điểm',
     story: 'Câu chuyện Savannakhet',
@@ -124,8 +125,13 @@ export default {
     save_success: 'Đã lưu địa điểm thành công!',
     save_success_desc: 'Bạn cũng có thể thích những địa điểm được đề xuất này',
     year_round: 'Quanh năm',
+    save: 'Lưu',
+    saved: 'Đã lưu',
     free: 'Miễn phí',
     freeEntry: 'Vào cửa miễn phí',
+    seeTranslation: 'Dịch',
+    showOriginal: 'Nguyên bản',
+    translateGuide: 'Dịch',
   },
 
   recommend: {
@@ -161,6 +167,8 @@ export default {
     create_account: 'Tạo tài khoản miễn phí để lưu các địa điểm yêu thích và nhận đề xuất cá nhân.',
     get_started: "Bắt đầu — Hoàn toàn Miễn phí",
     top_rated_badge: 'Được đánh giá cao',
+    show_more: 'Xem thêm',
+    show_less: 'Thu gọn',
   },
 
   // --- Hotels Page ---
@@ -670,5 +678,57 @@ export default {
     card_oldtown_desc: 'Đi bộ qua những tòa nhà Pháp cổ điển và nếm thử món ăn địa phương quanh Talat Yen.',
     cta_title: 'Sẵn sàng khám phá Savannakhet theo cách của riêng bạn?',
     cta_btn: 'Bắt đầu khám phá'
+  },
+  about: {
+    devRole: 'NHÀ PHÁT TRIỂN',
+    devName: 'Jo Xaysongkham',
+    quote: '"Technology to elevate local tourism."',
+    p1: 'Xin chào! Tôi là người thiết kế và phát triển hệ thống Savannakhet Smart Travel. Nền tảng này ra đời từ mong muốn ứng dụng các công nghệ mới để giúp việc du lịch tại tỉnh Savannakhet trở nên thú vị và thuận tiện hơn.',
+    p2: 'Điểm xuất phát của dự án này đến từ việc tôi nhận thấy đôi khi rất khó để tìm được những địa điểm du lịch ưng ý. Vì vậy, tôi quyết định áp dụng AI, đặc biệt là mô hình Graph Neural Network (GNN), để tìm hiểu hành vi và sở thích của từng cá nhân, giúp hệ thống có thể đề xuất các địa điểm được cá nhân hóa phù hợp nhất với người dùng.',
+    p3: 'Về phần phát triển, tôi phụ trách Frontend bằng Vue.js 3 để tạo ra giao diện đẹp mắt và dễ sử dụng. Đối với Backend, tôi sử dụng FastAPI cùng với MySQL để quản lý cơ sở dữ liệu và xử lý mô hình AI nhằm mang lại hiệu suất nhanh chóng và hiệu quả.',
+    p4: 'Tôi hy vọng hệ thống này sẽ giúp tất cả khách du lịch có một trải nghiệm tuyệt vời và đóng góp một phần nhỏ vào việc thúc đẩy nền kinh tế và du lịch của Savannakhet phát triển bền vững.',
+    watermark: 'Nhà phát triển'
+  },
+  features: {
+    title: 'Mục tiêu & Tính năng cốt lõi của dự án',
+    desc: 'Dự án này được phát triển để hỗ trợ và nâng tầm du lịch tại tỉnh Savannakhet. Bằng cách tích hợp Trí tuệ nhân tạo (AI), chúng tôi phân tích sở thích của người dùng để đề xuất các điểm đến phù hợp và cá nhân hóa nhất cho mỗi khách du lịch.',
+    f1Title: 'Tích hợp GNN',
+    f1Desc: 'Phát triển một nền tảng du lịch thông minh cho Savannakhet, tích hợp Mạng lưới thần kinh đồ thị (GNN) để cung cấp các đề xuất du lịch được cá nhân hóa cao dựa trên sở thích của người dùng.',
+    f2Title: 'Giao diện thân thiện',
+    f2Desc: 'Được thiết kế và triển khai giao diện người dùng trực quan, cho phép người dùng khám phá liền mạch các điểm đến, đọc bài đánh giá và nhận hành trình du lịch được thiết kế riêng.',
+    f3Title: 'Học hỏi mối quan hệ đồ thị',
+    f3Desc: 'Thiết kế và đào tạo mô hình GNN để lập bản đồ và phân tích các mối quan hệ đồ thị phức tạp giữa người dùng, địa điểm và sở thích, giúp cải thiện đáng kể độ chính xác của đề xuất.',
+    f4Title: 'Hệ thống quản lý',
+    f4Desc: 'Xây dựng Bảng điều khiển quản trị toàn diện để quản lý các điểm du lịch, kiểm duyệt các bài đánh giá của người dùng và giám sát số liệu thống kê chung của hệ thống.',
+    f5Title: 'Bảo mật & Khả năng mở rộng',
+    f5Desc: 'Đảm bảo kiến trúc hệ thống mạnh mẽ với trọng tâm là tính sẵn sàng cao, bảo mật dữ liệu tuyệt vời và khả năng mở rộng trong tương lai.'
+  },
+  timeline: {
+    title: 'Dòng thời gian phát triển dự án',
+    subtitle: 'Dòng thời gian phát triển dự án từ khi bắt đầu đến khi hoàn thành (Tháng 2 - Tháng 6 năm 2026)',
+    watermark: 'Timeline',
+    periods: {
+      feb: 'Tháng 2 năm 2026',
+      mar: 'Tháng 3 năm 2026',
+      apr: 'Tháng 4 năm 2026',
+      may: 'Tháng 5 năm 2026',
+      jun: 'Tháng 6 năm 2026'
+    },
+    items: [
+      { periodId: 'feb', week: 'Tuần 1', label: 'Nghiên cứu', title: 'Nghiên cứu & Kiến trúc hệ thống', desc: 'Nghiên cứu các công nghệ GNN, FastAPI, Vue.js, MySQL, thu thập dữ liệu về điểm du lịch ở Savannakhet và xác định kiến trúc hệ thống.' },
+      { periodId: 'feb', week: 'Tuần 2-3', label: 'Cơ sở dữ liệu', title: 'Thiết kế cơ sở dữ liệu & Mô hình hóa đồ thị', desc: 'Thiết kế cơ sở dữ liệu MySQL và tạo cấu trúc đồ thị Người dùng-Địa điểm-Sở thích để chuẩn bị cho mô hình GNN.' },
+      { periodId: 'mar', week: 'Tuần 4', label: 'Backend', title: 'Cốt lõi Backend FastAPI', desc: 'Phát triển hệ thống Backend bằng FastAPI, bao gồm hệ thống xác thực (JWT) và các API để quản lý địa điểm, người dùng và sở thích.' },
+      { periodId: 'mar', week: 'Tuần 4-6', label: 'Mô hình AI', title: 'Đào tạo mô hình GNN', desc: 'Xây dựng và đào tạo mô hình AI bằng PyTorch Geometric với các bộ dữ liệu về mối quan hệ giữa người dùng và địa điểm ở Savannakhet.' },
+      { periodId: 'apr', week: 'Tuần 6-7', label: 'Tích hợp', title: 'Tích hợp AI & Endpoints', desc: 'Tích hợp mô hình GNN với FastAPI để tạo các API Endpoint phục vụ việc lấy các đề xuất địa điểm được cá nhân hóa.' },
+      { periodId: 'may', week: 'Tuần 8-9', label: 'Frontend', title: 'Phát triển giao diện Vue.js', desc: 'Phát triển giao diện người dùng bằng Vue.js 3 (Trang chủ, Tìm kiếm, Đề xuất GNN, Đánh giá, Hồ sơ) và kết nối các API.' },
+      { periodId: 'jun', week: 'Tuần 10', label: 'Bảng điều khiển', title: 'Bảng điều khiển quản trị', desc: 'Tạo hệ thống Quản trị viên để quản lý địa điểm, người dùng, số liệu thống kê và theo dõi hiệu suất của Mô hình GNN (Độ chính xác, Độ bao phủ, NDCG).' },
+      { periodId: 'jun', week: 'Tuần 11', label: 'Kiểm thử', title: 'Kiểm thử & Báo cáo cuối kỳ', desc: 'Kiểm thử toàn bộ hệ thống (End-to-End Testing), cải thiện tốc độ API và độ chính xác của mô hình, đồng thời viết báo cáo cuối cùng của dự án.' }
+    ]
+  },
+  faq: {
+    title: 'Câu hỏi thường gặp',
+    subtitle: 'Tìm câu trả lời cho các câu hỏi phổ biến về Savannakhet Smart Travel',
+    stillNeedHelp: 'Vẫn cần trợ giúp?',
+    contactUs: 'Nếu bạn không thể tìm thấy câu trả lời cho câu hỏi của mình, vui lòng liên hệ với chúng tôi.'
   }
 }

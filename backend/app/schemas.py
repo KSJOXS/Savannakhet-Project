@@ -49,6 +49,17 @@ class UserResponse(UserBase):
         
     class Config: from_attributes = True
 
+# --- Category & Review ---
+class CategoryCreate(BaseModel):
+    name: str
+    parent_type: str = 'other'
+
+class CategoryResponse(BaseModel):
+    id: int
+    name: str
+    parent_type: str
+    class Config: from_attributes = True
+
 # --- Place ---
 class PlaceBase(BaseModel):
     name: str
@@ -81,9 +92,10 @@ class PlaceResponse(PlaceBase):
     rating_avg: float
     review_count: int = 0
     opening_hours: Optional[dict] = None
-    class Config: from_attributes = True
     location_lat: Optional[float] = None
     location_lng: Optional[float] = None
+    category: Optional[CategoryResponse] = None
+    class Config: from_attributes = True
 
 class PlaceSectionResponse(BaseModel):
     id: int
@@ -91,17 +103,6 @@ class PlaceSectionResponse(BaseModel):
     image_url: Optional[str] = None
     description: Optional[str] = None
     order_index: int = 0
-    class Config: from_attributes = True
-
-# --- Category & Review ---
-class CategoryCreate(BaseModel):
-    name: str
-    parent_type: str = 'other'
-
-class CategoryResponse(BaseModel):
-    id: int
-    name: str
-    parent_type: str
     class Config: from_attributes = True
 
 class ReviewCreate(BaseModel):
@@ -197,6 +198,8 @@ class ContactMessageResponse(BaseModel):
     message: str
     is_read: bool
     is_replied: bool
+    reply_text: Optional[str] = None
+    replied_at: Optional[datetime] = None
     created_at: datetime
     class Config: from_attributes = True
 

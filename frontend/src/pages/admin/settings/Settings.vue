@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <div class="admin-page">
         <transition name="toast">
             <div v-if="toast.show" :class="['toast', toast.type]">
@@ -61,9 +61,6 @@
                         </button>
                         <button :class="['tab-btn', { active: activeTab === 'recommend' }]" @click="activeTab = 'recommend'">
                             <i class="fas fa-star"></i> Recommend List
-                        </button>
-                        <button :class="['tab-btn', { active: activeTab === 'admin' }]" @click="activeTab = 'admin'">
-                            <i class="fas fa-user-shield"></i> Admin Login
                         </button>
                     </div>
 
@@ -138,7 +135,6 @@ const settings = reactive({
 const activeTab = ref('home'); // 'home' | 'recommend' | 'admin'
 const imagesHome = ref([]);
 const imagesRecommend = ref([]);
-const imagesAdmin = ref([]);
 
 // UI States
 const isSaving = ref(false);
@@ -159,13 +155,13 @@ const showToast = (message, type = 'success') => {
 const activeTabName = computed(() => {
     if (activeTab.value === 'home') return 'Homepage (Explore)';
     if (activeTab.value === 'recommend') return 'Recommend List Page';
-    return 'Admin Login Portal';
+    return '';
 });
 
 const activeSettingKey = computed(() => {
     if (activeTab.value === 'home') return 'hero_images_public';
     if (activeTab.value === 'recommend') return 'hero_images_recommend';
-    return 'hero_images_admin';
+    return '';
 });
 
 // Dynamic List based on active tab
@@ -173,19 +169,18 @@ const activeImagesList = computed({
     get: () => {
         if (activeTab.value === 'home') return imagesHome.value;
         if (activeTab.value === 'recommend') return imagesRecommend.value;
-        return imagesAdmin.value;
+        return [];
     },
     set: (val) => {
         if (activeTab.value === 'home') imagesHome.value = val;
         else if (activeTab.value === 'recommend') imagesRecommend.value = val;
-        else imagesAdmin.value = val;
     }
 });
 
 const getFullImageUrl = (url) => {
     if (!url) return '';
     if (url.startsWith('http') || url.startsWith('data:')) return url;
-    return `http://localhost:8000/${url.startsWith('/') ? url.slice(1) : url}`;
+    return `http://127.0.0.1:8000/${url.startsWith('/') ? url.slice(1) : url}`;
 };
 
 // Load all configurations
@@ -206,7 +201,6 @@ const loadSettings = async () => {
                     
                     if (s.key_name === 'hero_images_public' || s.key_name === 'hero_images') imagesHome.value = fullUrls;
                     if (s.key_name === 'hero_images_recommend') imagesRecommend.value = fullUrls;
-                    if (s.key_name === 'hero_images_admin') imagesAdmin.value = fullUrls;
                 } catch (e) { console.error(e) }
             }
         });
@@ -269,7 +263,7 @@ const onFilesSelected = async (e) => {
 const removeImage = async (url) => {
     removingUrl.value = url;
     try {
-        const pathOnly = url.replace('http://localhost:8000', '');
+        const pathOnly = url.replace('http://127.0.0.1:8000', '');
         // 🚨 ลบรูป พร้อมส่งชื่อ Tab (Key) ไปด้วย
         const res = await settingRepository.removeHeroImage(pathOnly, activeSettingKey.value);
         if (res.data && res.data.all_images) {

@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="auth-page">
     <div class="auth-card">
       <div class="auth-header">
@@ -60,7 +60,7 @@ const handleForgotPassword = async () => {
   error.value = ''
   
   try {
-    const res = await axios.post('http://localhost:8000/forgot-password', {
+    const res = await axios.post('http://127.0.0.1:8000/forgot-password', {
       email: email.value
     })
     // เมื่อส่งสำเร็จ Backend จะตอบกลับมาเป็น { status: 'success' }
