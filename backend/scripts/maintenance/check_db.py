@@ -4,7 +4,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL", "mysql+pymysql://root:@localhost/savannakhet_db")
+DATABASE_URL = os.getenv(
+    "DATABASE_URL", "mysql+pymysql://root:@localhost/savannakhet_db")
 engine = create_engine(DATABASE_URL)
 
 inspector = inspect(engine)

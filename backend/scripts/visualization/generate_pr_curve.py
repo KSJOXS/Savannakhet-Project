@@ -1,3 +1,13 @@
+from app.services.recommendation import SavannakhetRecommender
+from app.services.gnn_service import build_gnn_graph
+from app.database import SessionLocal
+from torch_geometric.utils import negative_sampling
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import precision_recall_curve, average_precision_score
+import matplotlib as mpl
+import matplotlib.pyplot as plt
 import os
 import sys
 import torch
@@ -5,13 +15,6 @@ import torch.nn.functional as F
 import numpy as np
 import matplotlib
 matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-import matplotlib as mpl
-from sklearn.metrics import precision_recall_curve, average_precision_score
-from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split
-from torch_geometric.utils import negative_sampling
 
 # Set font
 mpl.rcParams['font.family'] = 'Tahoma'
@@ -21,9 +24,6 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 backend_dir = os.path.dirname(os.path.dirname(current_dir))
 sys.path.append(backend_dir)
 
-from app.database import SessionLocal
-from app.services.gnn_service import build_gnn_graph
-from app.services.recommendation import SavannakhetRecommender
 
 # ============================================================
 # Step 1: Load real data from database
@@ -37,7 +37,8 @@ edge_index = data['user', 'interacts_with', 'place'].edge_index
 num_edges = edge_index.size(1)
 
 if num_edges < 10:
-    print(f"Error: Not enough interaction data (found only {num_edges} edges). Please add more user interactions first.")
+    print(
+        f"Error: Not enough interaction data (found only {num_edges} edges). Please add more user interactions first.")
     sys.exit(1)
 
 print(f"Found {num_edges} real interactions (edges) in the database.")
@@ -49,7 +50,7 @@ print(f"  - Places: {data['place'].x.size(0)}")
 # ============================================================
 # Combine user and place embeddings as flat features for sklearn
 user_feats = data['user'].x.numpy()   # shape: (num_users, user_feat_dim)
-place_feats = data['place'].x.numpy() # shape: (num_places, place_feat_dim)
+place_feats = data['place'].x.numpy()  # shape: (num_places, place_feat_dim)
 
 # Build positive samples (real interactions from DB)
 pos_u = edge_index[0].numpy()
@@ -85,7 +86,8 @@ neg_y = np.zeros(len(neg_u))
 X_all = np.vstack([pos_X, neg_X])
 y_all = np.concatenate([pos_y, neg_y])
 
-X_train, X_test, y_train, y_test = train_test_split(X_all, y_all, test_size=0.3, random_state=42, stratify=y_all)
+X_train, X_test, y_train, y_test = train_test_split(
+    X_all, y_all, test_size=0.3, random_state=42, stratify=y_all)
 print(f"\nData split: Train={len(y_train)}, Test={len(y_test)}")
 print(f"  Positive rate in test set: {y_test.mean():.1%}")
 
@@ -98,9 +100,10 @@ print("\nTraining GNN model on real data...")
 perm = torch.randperm(num_edges)
 train_size = int(0.7 * num_edges)
 train_edges = edge_index[:, perm[:train_size]]
-test_edges  = edge_index[:, perm[train_size:]]
+test_edges = edge_index[:, perm[train_size:]]
 
-gnn_model = SavannakhetRecommender(hidden_channels=64, data_metadata=data.metadata())
+gnn_model = SavannakhetRecommender(
+    hidden_channels=64, data_metadata=data.metadata())
 optimizer = torch.optim.Adam(gnn_model.parameters(), lr=0.01)
 
 best_val_auc = -1
@@ -112,14 +115,16 @@ for epoch in range(150):
     optimizer.zero_grad()
 
     out_dict = gnn_model(data.x_dict, data.edge_index_dict)
-    pos_out = (out_dict['user'][train_edges[0]] * out_dict['place'][train_edges[1]]).sum(dim=-1)
+    pos_out = (out_dict['user'][train_edges[0]] *
+               out_dict['place'][train_edges[1]]).sum(dim=-1)
 
     neg_train_edges = negative_sampling(
         edge_index=train_edges,
         num_nodes=(data['user'].num_nodes, data['place'].num_nodes),
         num_neg_samples=train_edges.size(1)
     )
-    neg_out = (out_dict['user'][neg_train_edges[0]] * out_dict['place'][neg_train_edges[1]]).sum(dim=-1)
+    neg_out = (out_dict['user'][neg_train_edges[0]] *
+               out_dict['place'][neg_train_edges[1]]).sum(dim=-1)
 
     loss = F.binary_cross_entropy_with_logits(
         torch.cat([pos_out, neg_out]),
@@ -135,17 +140,21 @@ for epoch in range(150):
 gnn_model.eval()
 with torch.no_grad():
     out_dict = gnn_model(data.x_dict, data.edge_index_dict)
-    pos_test_out = (out_dict['user'][test_edges[0]] * out_dict['place'][test_edges[1]]).sum(dim=-1)
+    pos_test_out = (out_dict['user'][test_edges[0]] *
+                    out_dict['place'][test_edges[1]]).sum(dim=-1)
 
     neg_test_edges = negative_sampling(
         edge_index=test_edges,
         num_nodes=(data['user'].num_nodes, data['place'].num_nodes),
         num_neg_samples=test_edges.size(1)
     )
-    neg_test_out = (out_dict['user'][neg_test_edges[0]] * out_dict['place'][neg_test_edges[1]]).sum(dim=-1)
+    neg_test_out = (out_dict['user'][neg_test_edges[0]]
+                    * out_dict['place'][neg_test_edges[1]]).sum(dim=-1)
 
-    gnn_y_true  = torch.cat([torch.ones(pos_test_out.size(0)), torch.zeros(neg_test_out.size(0))]).cpu().numpy()
-    gnn_y_score = torch.sigmoid(torch.cat([pos_test_out, neg_test_out])).cpu().numpy()
+    gnn_y_true = torch.cat([torch.ones(pos_test_out.size(
+        0)), torch.zeros(neg_test_out.size(0))]).cpu().numpy()
+    gnn_y_score = torch.sigmoid(
+        torch.cat([pos_test_out, neg_test_out])).cpu().numpy()
 
 gnn_precision, gnn_recall, _ = precision_recall_curve(gnn_y_true, gnn_y_score)
 gnn_ap = average_precision_score(gnn_y_true, gnn_y_score)
@@ -196,7 +205,8 @@ ax.set_xlabel('Recall', fontsize=12)
 ax.set_ylabel('Precision', fontsize=12)
 
 # ---- Title (same style as in the document) ----
-ax.set_title('Precision-Recall Curve', fontsize=13, fontweight='normal', pad=10)
+ax.set_title('Precision-Recall Curve', fontsize=13,
+             fontweight='normal', pad=10)
 
 # ---- Axis range ----
 ax.set_xlim([0.0, 1.0])
@@ -240,8 +250,7 @@ print("-"*55)
 print(f"  Logistic Regression AP     : {lr_ap:.4f}")
 print(f"  Random Forest AP           : {rf_ap:.4f}")
 print(f"  GNN (our model) AP         : {gnn_ap:.4f}")
-best_model = max([("Logistic Regression", lr_ap), ("Random Forest", rf_ap), ("GNN", gnn_ap)], key=lambda x: x[1])
+best_model = max([("Logistic Regression", lr_ap),
+                 ("Random Forest", rf_ap), ("GNN", gnn_ap)], key=lambda x: x[1])
 print(f"\n  Best model: {best_model[0]} (AP = {best_model[1]:.4f})")
 print("="*55)
-
-

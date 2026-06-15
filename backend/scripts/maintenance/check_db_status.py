@@ -2,6 +2,7 @@ from app.database import engine
 from sqlalchemy import text
 import json
 
+
 def check():
     with engine.connect() as con:
         # 1. Check Categories
@@ -10,7 +11,7 @@ def check():
         rows = res.fetchall()
         for row in rows:
             print(f"ID: {row[0]}, Name: {row[1]}, Parent: {row[2]}")
-            
+
         # 2. Check Places count by parent_type
         print("\n--- Place Counts by Parent Type ---")
         res = con.execute(text("""
@@ -34,7 +35,9 @@ def check():
             LIMIT 5
         """))
         for row in res.fetchall():
-            print(f"ID: {row[0]}, Name: {row[1]}, Cat: {row[2]}, Parent: {row[3]}")
+            print(
+                f"ID: {row[0]}, Name: {row[1]}, Cat: {row[2]}, Parent: {row[3]}")
+
 
 if __name__ == "__main__":
     try:

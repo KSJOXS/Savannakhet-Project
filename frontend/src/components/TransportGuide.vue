@@ -27,8 +27,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import utilityRepository from '@/repositories/utilityRepository';
+import { ref, onMounted } from "vue";
+import utilityRepository from "@/repositories/utilityRepository";
 
 const transports = ref([]);
 
@@ -47,7 +47,7 @@ onMounted(async () => {
   background: white;
   padding: 20px;
   border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   margin-bottom: 20px;
 }
 .card-header {
@@ -56,8 +56,14 @@ onMounted(async () => {
   gap: 10px;
   margin-bottom: 20px;
 }
-.card-header h3 { margin: 0; color: #2c3e50; font-size: 1.2rem; }
-.icon { font-size: 1.5rem; }
+.card-header h3 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1.2rem;
+}
+.icon {
+  font-size: 1.5rem;
+}
 
 .transport-grid {
   display: flex;
@@ -73,7 +79,7 @@ onMounted(async () => {
   justify-content: space-between;
   align-items: flex-start;
   transition: all 0.3s;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
 }
 .transport-card:hover {
   border-color: #2ecc71;
@@ -94,7 +100,8 @@ onMounted(async () => {
   gap: 8px;
   font-size: 0.9rem;
 }
-.price-label, .contact-label {
+.price-label,
+.contact-label {
   color: #95a5a6;
   min-width: 80px;
 }

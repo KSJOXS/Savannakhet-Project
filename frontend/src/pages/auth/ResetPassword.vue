@@ -2,20 +2,24 @@
   <div class="auth-page">
     <div class="auth-card">
       <div class="auth-header">
-        <h1>{{ t('auth.reset_title') }}</h1>
-        <p>{{ t('auth.reset_subtitle') }}</p>
+        <h1>{{ t("auth.reset_title") }}</h1>
+        <p>{{ t("auth.reset_subtitle") }}</p>
       </div>
 
-      <form @submit.prevent="handleResetPassword" class="auth-form" v-if="!success">
+      <form
+        @submit.prevent="handleResetPassword"
+        class="auth-form"
+        v-if="!success"
+      >
         <div class="form-group">
-          <label>{{ t('auth.new_password') }}</label>
+          <label>{{ t("auth.new_password") }}</label>
           <div class="input-wrapper">
             <i class="fas fa-lock"></i>
-            <input 
-              v-model="password" 
-              type="password" 
-              placeholder="Minimum 6 characters" 
-              required 
+            <input
+              v-model="password"
+              type="password"
+              placeholder="Minimum 6 characters"
+              required
               minlength="6"
               :disabled="loading"
             />
@@ -23,27 +27,27 @@
         </div>
 
         <div class="form-group">
-          <label>{{ t('auth.confirm_password') }}</label>
+          <label>{{ t("auth.confirm_password") }}</label>
           <div class="input-wrapper">
             <i class="fas fa-shield-alt"></i>
-            <input 
-              v-model="confirmPassword" 
-              type="password" 
-              :placeholder="t('auth.confirm_placeholder')" 
-              required 
+            <input
+              v-model="confirmPassword"
+              type="password"
+              :placeholder="t('auth.confirm_placeholder')"
+              required
               :disabled="loading"
             />
           </div>
         </div>
 
         <button type="submit" class="btn-primary" :disabled="loading">
-          <span v-if="!loading">{{ t('auth.update_btn') }}</span>
+          <span v-if="!loading">{{ t("auth.update_btn") }}</span>
           <i v-else class="fas fa-spinner fa-spin"></i>
         </button>
       </form>
 
       <div v-if="message" class="alert success">
-        <i class="fas fa-check-circle"></i> {{ t('auth.update_success') }}
+        <i class="fas fa-check-circle"></i> {{ t("auth.update_success") }}
       </div>
       <div v-if="error" class="alert error">
         <i class="fas fa-exclamation-circle"></i> {{ error }}
@@ -51,7 +55,7 @@
 
       <div class="auth-footer" v-if="success">
         <router-link to="/login" class="btn-secondary">
-          {{ t('nav.signIn') }}
+          {{ t("nav.signIn") }}
         </router-link>
       </div>
     </div>
@@ -59,58 +63,58 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import axios from 'axios'
-import { useI18n } from '@/composables/useI18n'
+import { ref, onMounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import axios from "axios";
+import { useI18n } from "@/composables/useI18n";
 
-const { t } = useI18n()
-const route = useRoute()
-const router = useRouter()
+const { t } = useI18n();
+const route = useRoute();
+const router = useRouter();
 
-const token = ref('')
-const password = ref('')
-const confirmPassword = ref('')
-const loading = ref(false)
-const message = ref('')
-const error = ref('')
-const success = ref(false)
+const token = ref("");
+const password = ref("");
+const confirmPassword = ref("");
+const loading = ref(false);
+const message = ref("");
+const error = ref("");
+const success = ref(false);
 
 onMounted(() => {
   // ดึง token จาก URL query
-  token.value = route.query.token
+  token.value = route.query.token;
   if (!token.value) {
-    error.value = 'Invalid or missing token.'
+    error.value = "Invalid or missing token.";
   }
-})
+});
 
 const handleResetPassword = async () => {
   if (password.value !== confirmPassword.value) {
-    error.value = 'Passwords do not match.'
-    return
+    error.value = "Passwords do not match.";
+    return;
   }
 
-  loading.value = true
-  message.value = ''
-  error.value = ''
-  
+  loading.value = true;
+  message.value = "";
+  error.value = "";
+
   try {
-    const res = await axios.post('http://127.0.0.1:8000/reset-password', {
+    const res = await axios.post("http://127.0.0.1:8000/reset-password", {
       token: token.value,
-      new_password: password.value
-    })
-    message.value = 'SUCCESS'
-    success.value = true
+      new_password: password.value,
+    });
+    message.value = "SUCCESS";
+    success.value = true;
     // ไปหน้า Login หลังจาก 3 วินาที
     setTimeout(() => {
-        if (success.value) router.push('/login')
-    }, 3000)
+      if (success.value) router.push("/login");
+    }, 3000);
   } catch (err) {
-    error.value = err.response?.data?.detail || 'Something went wrong.'
+    error.value = err.response?.data?.detail || "Something went wrong.";
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 </script>
 
 <style scoped>
@@ -128,7 +132,7 @@ const handleResetPassword = async () => {
   background: white;
   padding: 40px;
   border-radius: 24px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
   width: 100%;
   max-width: 450px;
   text-align: center;
@@ -227,18 +231,18 @@ const handleResetPassword = async () => {
 }
 
 .btn-secondary {
-    display: block;
-    text-decoration: none;
-    color: #00aa6c;
-    font-weight: 700;
-    padding: 12px;
-    border: 2px solid #00aa6c;
-    border-radius: 14px;
-    transition: all 0.2s;
+  display: block;
+  text-decoration: none;
+  color: #00aa6c;
+  font-weight: 700;
+  padding: 12px;
+  border: 2px solid #00aa6c;
+  border-radius: 14px;
+  transition: all 0.2s;
 }
 
 .btn-secondary:hover {
-    background: #00aa6c;
-    color: white;
+  background: #00aa6c;
+  color: white;
 }
 </style>

@@ -11,7 +11,11 @@
           <span class="lao">{{ phrase.lao_text }}</span>
           <span class="pronunciation">{{ phrase.pronunciation }}</span>
         </div>
-        <button @click="speak(phrase.lao_text)" class="speak-btn" title="ฟังเสียง">
+        <button
+          @click="speak(phrase.lao_text)"
+          class="speak-btn"
+          title="ฟังเสียง"
+        >
           <span class="btn-icon">🔊</span>
         </button>
       </div>
@@ -20,8 +24,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import utilityRepository from '@/repositories/utilityRepository';
+import { ref, onMounted } from "vue";
+import utilityRepository from "@/repositories/utilityRepository";
 
 const phrases = ref([]);
 
@@ -35,19 +39,19 @@ onMounted(async () => {
 });
 
 const speak = (text) => {
-  if ('speechSynthesis' in window) {
+  if ("speechSynthesis" in window) {
     const utterance = new SpeechSynthesisUtterance(text);
     // พยายามหาเสียงภาษาไทยถ้าภาษาลาวไม่มี เพราะสำเนียงใกล้กัน
-    utterance.lang = 'lo-LA';
-    
+    utterance.lang = "lo-LA";
+
     // ตรวจสอบว่ามีเสียงโหลดมาหรือยัง
     const voices = window.speechSynthesis.getVoices();
-    const laoVoice = voices.find(v => v.lang.includes('lo'));
-    const thaiVoice = voices.find(v => v.lang.includes('th'));
-    
+    const laoVoice = voices.find((v) => v.lang.includes("lo"));
+    const thaiVoice = voices.find((v) => v.lang.includes("th"));
+
     if (laoVoice) utterance.voice = laoVoice;
     else if (thaiVoice) utterance.voice = thaiVoice;
-    
+
     window.speechSynthesis.speak(utterance);
   } else {
     alert("ขออภัย เบราว์เซอร์ของคุณไม่รองรับการอ่านออกเสียง");
@@ -60,7 +64,7 @@ const speak = (text) => {
   background: white;
   padding: 20px;
   border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   margin-bottom: 20px;
 }
 .card-header {
@@ -69,8 +73,14 @@ const speak = (text) => {
   gap: 10px;
   margin-bottom: 20px;
 }
-.card-header h3 { margin: 0; color: #2c3e50; font-size: 1.2rem; }
-.icon { font-size: 1.5rem; }
+.card-header h3 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1.2rem;
+}
+.icon {
+  font-size: 1.5rem;
+}
 
 .phrase-list {
   display: flex;
@@ -113,7 +123,7 @@ const speak = (text) => {
 .speak-btn {
   background: white;
   border: none;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   border-radius: 50%;
   width: 45px;
   height: 45px;

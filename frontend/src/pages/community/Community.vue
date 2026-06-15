@@ -6,154 +6,259 @@
       <!-- Left Sidebar (Facebook Style) -->
       <aside class="fb-left-sidebar" v-if="user">
         <router-link to="/profile" class="fb-sidebar-item">
-          <img :src="getUserAvatar(user.profile_image)" alt="avatar" class="sidebar-avatar" />
+          <img
+            :src="getUserAvatar(user.profile_image)"
+            alt="avatar"
+            class="sidebar-avatar"
+          />
           <span class="sidebar-text">{{ user.username }}</span>
         </router-link>
-        
+
         <router-link to="/profile?tab=trips" class="fb-sidebar-item">
-          <div class="sidebar-icon-wrap" style="background: #e6f7f0; color: #00aa6c;">
+          <div
+            class="sidebar-icon-wrap"
+            style="background: #e6f7f0; color: #00aa6c"
+          >
             <i class="fas fa-bookmark"></i>
           </div>
-          <span class="sidebar-text">{{ t('nav.myTrips', 'Saved Places') }}</span>
+          <span class="sidebar-text">{{
+            t("nav.myTrips", "Saved Places")
+          }}</span>
         </router-link>
-        
+
         <router-link to="/profile?tab=reviews" class="fb-sidebar-item">
-          <div class="sidebar-icon-wrap" style="background: #e0f2fe; color: #0284c7;">
+          <div
+            class="sidebar-icon-wrap"
+            style="background: #e0f2fe; color: #0284c7"
+          >
             <i class="fas fa-history"></i>
           </div>
-          <span class="sidebar-text">{{ t('nav.myReviews', 'My Reviews') }}</span>
+          <span class="sidebar-text">{{
+            t("nav.myReviews", "My Reviews")
+          }}</span>
         </router-link>
-        
+
         <router-link to="/explore" class="fb-sidebar-item">
-          <div class="sidebar-icon-wrap" style="background: #fdf4ff; color: #c026d3;">
+          <div
+            class="sidebar-icon-wrap"
+            style="background: #fdf4ff; color: #c026d3"
+          >
             <i class="fas fa-compass"></i>
           </div>
-          <span class="sidebar-text">{{ t('nav.exploreAll', 'Explore Places') }}</span>
+          <span class="sidebar-text">{{
+            t("nav.exploreAll", "Explore Places")
+          }}</span>
         </router-link>
       </aside>
 
       <div class="community-container">
-
-      <div v-if="user" class="write-post-card">
-        <div class="write-post-header">
-          <img :src="getUserAvatar(user.profile_image)" alt="avatar" class="mini-avatar" />
-          <div class="fake-input" @click="goToWriteReview">
-            {{ t('place.writeReviewPlaceholder') || "What's on your mind? Share your experience..." }}
-          </div>
-        </div>
-        <div class="write-post-footer">
-          <button class="btn-action" @click="goToWriteReview">
-            <i class="fas fa-camera text-success"></i> Photo/Video
-          </button>
-          <button class="btn-action" @click="goToWriteReview">
-            <i class="fas fa-map-marker-alt text-danger"></i> Check In Place
-          </button>
-        </div>
-      </div>
-
-      <div v-if="loading" class="loading-state">
-        <div class="spinner"></div>
-        <p>Loading the latest stories...</p>
-      </div>
-
-      <div v-else-if="feed.length === 0" class="empty-feed">
-        <i class="fas fa-users"></i>
-        <p>No posts yet. Be the first to share your experience!</p>
-      </div>
-
-      <div v-else class="feed-list">
-        <div v-for="post in feed" :key="post.id" class="post-card">
-          <div class="post-header">
-            <div class="user-meta">
-              <img :src="getUserAvatar(post.profile_image)" alt="avatar" class="user-avatar" />
-              <div class="user-info">
-                <span class="username">{{ post.username }}</span>
-                <span class="post-date">{{ formatDate(post.visited_at) }}</span>
-              </div>
-            </div>
-            <div class="header-right">
-              <div class="place-badge" v-if="post.place_id">
-                <router-link :to="`/places/${post.place_id}`">
-                  <i class="fas fa-map-marker-alt"></i> {{ post.place_name }}
-                </router-link>
-              </div>
-              <div v-if="user && user.id === post.user_id" class="post-options">
-                <button @click.stop="togglePostMenu(post.id)" class="btn-dots">
-                  <i class="fas fa-ellipsis-h"></i>
-                </button>
-                <div v-if="activePostMenu === post.id" class="options-dropdown" v-click-outside="() => activePostMenu = null">
-                  <button @click.stop="openEditModal(post)"><i class="fas fa-edit"></i> Edit</button>
-                  <button @click.stop="handleDeletePost(post.id)" class="text-danger"><i class="fas fa-trash"></i> Delete</button>
-                </div>
-              </div>
+        <div v-if="user" class="write-post-card">
+          <div class="write-post-header">
+            <img
+              :src="getUserAvatar(user.profile_image)"
+              alt="avatar"
+              class="mini-avatar"
+            />
+            <div class="fake-input" @click="goToWriteReview">
+              {{
+                t("place.writeReviewPlaceholder") ||
+                "What's on your mind? Share your experience..."
+              }}
             </div>
           </div>
-
-          <div class="post-content">
-            <div class="rating-stars" v-if="post.place_id && post.rating">
-              <i v-for="s in 5" :key="s" :class="[post.rating >= s ? 'fas' : 'far', 'fa-star']"></i>
-            </div>
-            <p class="comment-text" v-html="formatComment(post.comment)"></p>
-          </div>
-
-          <div v-if="post.images && post.images.length > 0" class="post-images">
-            <div class="image-grid" :class="`images-${Math.min(post.images.length, 3)}`">
-              <div v-for="(img, idx) in post.images.slice(0, 3)" :key="idx" class="img-wrapper"
-                @click="openLightbox(post.images, idx)">
-                <img :src="getImageUrl(img)" alt="post image" />
-                <div v-if="idx === 2 && post.images.length > 3" class="more-overlay">
-                  +{{ post.images.length - 3 }}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="post-footer">
-            <button class="btn-like" :class="{ 'liked': isLiked(post) }" @click="handleLike(post)">
-              <i :class="[isLiked(post) ? 'fas' : 'far', 'fa-heart']"></i>
-              {{ post.liked_by.length }}
+          <div class="write-post-footer">
+            <button class="btn-action" @click="goToWriteReview">
+              <i class="fas fa-camera text-success"></i> Photo/Video
             </button>
-            <button class="btn-share" @click="toggleComments(post.id)">
-              <i class="far fa-comment"></i> Comment {{ post.post_comments?.length || '' }}
+            <button class="btn-action" @click="goToWriteReview">
+              <i class="fas fa-map-marker-alt text-danger"></i> Check In Place
             </button>
           </div>
+        </div>
 
-          <div v-if="showCommentsFor === post.id" class="comments-section">
-            <div class="comments-list">
-              <div v-for="c in post.post_comments" :key="c.id" class="comment-item">
-                <img :src="getUserAvatar(c.profile_image)" alt="avatar" class="comment-avatar" />
-                <div class="comment-body">
-                  <div class="comment-bubble">
-                    <span class="comment-username">{{ c.username }}</span>
-                    <span class="comment-text-inline">{{ c.comment_text }}</span>
-                  </div>
-                  <div class="comment-meta">
-                    <span class="comment-time">{{ formatTimeAgo(c.created_at) }}</span>
-                    <button v-if="user && user.username === c.username" @click="deleteComment(post.id, c.id)"
-                      class="btn-delete-comment">Delete</button>
+        <div v-if="loading" class="loading-state">
+          <div class="spinner"></div>
+          <p>Loading the latest stories...</p>
+        </div>
+
+        <div v-else-if="feed.length === 0" class="empty-feed">
+          <i class="fas fa-users"></i>
+          <p>No posts yet. Be the first to share your experience!</p>
+        </div>
+
+        <div v-else class="feed-list">
+          <div v-for="post in feed" :key="post.id" class="post-card">
+            <div class="post-header">
+              <div class="user-meta">
+                <img
+                  :src="getUserAvatar(post.profile_image)"
+                  alt="avatar"
+                  class="user-avatar"
+                />
+                <div class="user-info">
+                  <span class="username">{{ post.username }}</span>
+                  <span class="post-date">{{
+                    formatDate(post.visited_at)
+                  }}</span>
+                </div>
+              </div>
+              <div class="header-right">
+                <div class="place-badge" v-if="post.place_id">
+                  <router-link :to="`/places/${post.place_id}`">
+                    <i class="fas fa-map-marker-alt"></i> {{ post.place_name }}
+                  </router-link>
+                </div>
+                <div
+                  v-if="user && user.id === post.user_id"
+                  class="post-options"
+                >
+                  <button
+                    @click.stop="togglePostMenu(post.id)"
+                    class="btn-dots"
+                  >
+                    <i class="fas fa-ellipsis-h"></i>
+                  </button>
+                  <div
+                    v-if="activePostMenu === post.id"
+                    class="options-dropdown"
+                    v-click-outside="() => (activePostMenu = null)"
+                  >
+                    <button @click.stop="openEditModal(post)">
+                      <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <button
+                      @click.stop="handleDeletePost(post.id)"
+                      class="text-danger"
+                    >
+                      <i class="fas fa-trash"></i> Delete
+                    </button>
                   </div>
                 </div>
               </div>
             </div>
-            <div v-if="user" class="comment-input-area">
-              <img :src="getUserAvatar(user.profile_image)" alt="avatar" class="comment-avatar" />
-              <div class="comment-input-wrapper">
-                <input type="text" v-model="newCommentTexts[post.id]" placeholder="Write a comment..."
-                  @keyup.enter="submitComment(post)" />
-                <button @click="submitComment(post)" :disabled="!newCommentTexts[post.id]?.trim()"><i
-                    class="fas fa-paper-plane"></i></button>
+
+            <div class="post-content">
+              <div class="rating-stars" v-if="post.place_id && post.rating">
+                <i
+                  v-for="s in 5"
+                  :key="s"
+                  :class="[post.rating >= s ? 'fas' : 'far', 'fa-star']"
+                ></i>
+              </div>
+              <p class="comment-text" v-html="formatComment(post.comment)"></p>
+            </div>
+
+            <div
+              v-if="post.images && post.images.length > 0"
+              class="post-images"
+            >
+              <div
+                class="image-grid"
+                :class="`images-${Math.min(post.images.length, 3)}`"
+              >
+                <div
+                  v-for="(img, idx) in post.images.slice(0, 3)"
+                  :key="idx"
+                  class="img-wrapper"
+                  @click="openLightbox(post.images, idx)"
+                >
+                  <img :src="getImageUrl(img)" alt="post image" />
+                  <div
+                    v-if="idx === 2 && post.images.length > 3"
+                    class="more-overlay"
+                  >
+                    +{{ post.images.length - 3 }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="post-footer">
+              <button
+                class="btn-like"
+                :class="{ liked: isLiked(post) }"
+                @click="handleLike(post)"
+              >
+                <i :class="[isLiked(post) ? 'fas' : 'far', 'fa-heart']"></i>
+                {{ post.liked_by.length }}
+              </button>
+              <button class="btn-share" @click="toggleComments(post.id)">
+                <i class="far fa-comment"></i> Comment
+                {{ post.post_comments?.length || "" }}
+              </button>
+            </div>
+
+            <div v-if="showCommentsFor === post.id" class="comments-section">
+              <div class="comments-list">
+                <div
+                  v-for="c in post.post_comments"
+                  :key="c.id"
+                  class="comment-item"
+                >
+                  <img
+                    :src="getUserAvatar(c.profile_image)"
+                    alt="avatar"
+                    class="comment-avatar"
+                  />
+                  <div class="comment-body">
+                    <div class="comment-bubble">
+                      <span class="comment-username">{{ c.username }}</span>
+                      <span class="comment-text-inline">{{
+                        c.comment_text
+                      }}</span>
+                    </div>
+                    <div class="comment-meta">
+                      <span class="comment-time">{{
+                        formatTimeAgo(c.created_at)
+                      }}</span>
+                      <button
+                        v-if="user && user.username === c.username"
+                        @click="deleteComment(post.id, c.id)"
+                        class="btn-delete-comment"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div v-if="user" class="comment-input-area">
+                <img
+                  :src="getUserAvatar(user.profile_image)"
+                  alt="avatar"
+                  class="comment-avatar"
+                />
+                <div class="comment-input-wrapper">
+                  <input
+                    type="text"
+                    v-model="newCommentTexts[post.id]"
+                    placeholder="Write a comment..."
+                    @keyup.enter="submitComment(post)"
+                  />
+                  <button
+                    @click="submitComment(post)"
+                    :disabled="!newCommentTexts[post.id]?.trim()"
+                  >
+                    <i class="fas fa-paper-plane"></i>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
     </div>
 
     <!-- Lightbox -->
-    <div v-if="lightbox.show" class="lightbox-overlay" @click="lightbox.show = false">
+    <div
+      v-if="lightbox.show"
+      class="lightbox-overlay"
+      @click="lightbox.show = false"
+    >
       <div class="lightbox-content" @click.stop>
-        <button class="close-btn" @click="lightbox.show = false">&times;</button>
+        <button class="close-btn" @click="lightbox.show = false">
+          &times;
+        </button>
         <img :src="getImageUrl(lightbox.images[lightbox.index])" />
         <div v-if="lightbox.images.length > 1" class="nav-btns">
           <button @click="prevImg">❮</button>
@@ -167,18 +272,24 @@
       <div class="edit-modal fb-style" @click.stop>
         <div class="modal-header">
           <h3>Edit Post</h3>
-          <button class="close-btn-circle" @click="closeEditModal">&times;</button>
+          <button class="close-btn-circle" @click="closeEditModal">
+            &times;
+          </button>
         </div>
-        
+
         <div class="modal-body">
           <div class="modal-body-content">
             <!-- User Profile Info -->
             <div class="modal-user-header">
-              <img :src="getUserAvatar(user?.profile_image)" class="modal-avatar" />
+              <img
+                :src="getUserAvatar(user?.profile_image)"
+                class="modal-avatar"
+              />
               <div class="modal-user-info">
                 <span class="modal-username">{{ user?.username }}</span>
                 <div class="modal-privacy">
-                  <i class="fas fa-globe-asia"></i> Public <i class="fas fa-caret-down"></i>
+                  <i class="fas fa-globe-asia"></i> Public
+                  <i class="fas fa-caret-down"></i>
                 </div>
               </div>
             </div>
@@ -187,37 +298,81 @@
             <div class="modal-rating-section" v-if="editModal.post.place_id">
               <label>Rating:</label>
               <div class="ta-circle-rating">
-                <i v-for="s in 5" :key="s" @click="editModal.form.rating = s"
-                   :class="[editModal.form.rating >= s ? 'fas' : 'far', 'fa-circle']">
+                <i
+                  v-for="s in 5"
+                  :key="s"
+                  @click="editModal.form.rating = s"
+                  :class="[
+                    editModal.form.rating >= s ? 'fas' : 'far',
+                    'fa-circle',
+                  ]"
+                >
                 </i>
               </div>
             </div>
 
             <!-- Comment Textarea -->
             <div class="modal-content-area">
-              <textarea v-model="editModal.form.comment" class="fb-textarea" 
-                        :placeholder="`What's on your mind, ${user?.username}?`"></textarea>
+              <textarea
+                v-model="editModal.form.comment"
+                class="fb-textarea"
+                :placeholder="`What's on your mind, ${user?.username}?`"
+              ></textarea>
             </div>
 
             <!-- Image Management Area -->
             <div class="modal-image-area">
               <!-- Combined Image List -->
-              <div v-if="editModal.form.existingImages.length > 0 || editModal.form.newImages.length > 0" class="modal-image-grid">
-                  <!-- Old Images -->
-                  <div v-for="(img, idx) in editModal.form.existingImages" :key="'old-'+idx" class="modal-img-wrap">
-                    <img :src="getImageUrl(img)" />
-                    <button class="btn-remove-img" @click="removeExistingImg(idx)">&times;</button>
-                  </div>
-                  <!-- New Images -->
-                  <div v-for="(img, idx) in editModal.form.newPreviews" :key="'new-'+idx" class="modal-img-wrap">
-                    <img :src="img" />
-                    <button class="btn-remove-img" @click="removeNewImg(idx)">&times;</button>
-                  </div>
+              <div
+                v-if="
+                  editModal.form.existingImages.length > 0 ||
+                  editModal.form.newImages.length > 0
+                "
+                class="modal-image-grid"
+              >
+                <!-- Old Images -->
+                <div
+                  v-for="(img, idx) in editModal.form.existingImages"
+                  :key="'old-' + idx"
+                  class="modal-img-wrap"
+                >
+                  <img :src="getImageUrl(img)" />
+                  <button
+                    class="btn-remove-img"
+                    @click="removeExistingImg(idx)"
+                  >
+                    &times;
+                  </button>
+                </div>
+                <!-- New Images -->
+                <div
+                  v-for="(img, idx) in editModal.form.newPreviews"
+                  :key="'new-' + idx"
+                  class="modal-img-wrap"
+                >
+                  <img :src="img" />
+                  <button class="btn-remove-img" @click="removeNewImg(idx)">
+                    &times;
+                  </button>
+                </div>
               </div>
 
               <!-- Add Images Button -->
-              <label class="modal-add-img-btn" v-if="editModal.form.existingImages.length + editModal.form.newImages.length < 5">
-                <input type="file" multiple accept="image/*" @change="handleEditImageUpload" hidden />
+              <label
+                class="modal-add-img-btn"
+                v-if="
+                  editModal.form.existingImages.length +
+                    editModal.form.newImages.length <
+                  5
+                "
+              >
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  @change="handleEditImageUpload"
+                  hidden
+                />
                 <div class="add-img-content">
                   <i class="fas fa-images"></i>
                   <span>Add Photos/Videos</span>
@@ -228,158 +383,178 @@
         </div>
 
         <div class="modal-footer fb-footer">
-          <button class="btn-fb-save" @click="saveEdit" :disabled="saving || !editModal.form.comment.trim()">
-            {{ saving ? 'Updating...' : 'Save Changes' }}
+          <button
+            class="btn-fb-save"
+            @click="saveEdit"
+            :disabled="saving || !editModal.form.comment.trim()"
+          >
+            {{ saving ? "Updating..." : "Save Changes" }}
           </button>
         </div>
       </div>
     </div>
-
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import Navbar from '@/components/Navbar.vue'
-import { placeRepository } from '@/repositories/placeRepository'
-import { useI18n } from '@/composables/useI18n'
-import { useAuth } from '@/composables/useAuth'
+import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import Navbar from "@/components/Navbar.vue";
+import { placeRepository } from "@/repositories/placeRepository";
+import { useI18n } from "@/composables/useI18n";
+import { useAuth } from "@/composables/useAuth";
 
-const router = useRouter()
-const { t } = useI18n()
-const { user } = useAuth()
-const loading = ref(true)
-const feed = ref([])
-const saving = ref(false)
+const router = useRouter();
+const { t } = useI18n();
+const { user } = useAuth();
+const loading = ref(true);
+const feed = ref([]);
+const saving = ref(false);
 
 // Edit Modal State
-const editModal = ref({ 
-  show: false, 
-  post: {}, 
-  form: { 
-    rating: 0, 
-    comment: '',
+const editModal = ref({
+  show: false,
+  post: {},
+  form: {
+    rating: 0,
+    comment: "",
     existingImages: [],
     newImages: [],
-    newPreviews: []
-  } 
-})
+    newPreviews: [],
+  },
+});
 
 const closeEditModal = () => {
-  editModal.value.show = false
-}
+  editModal.value.show = false;
+};
 
 const goToWriteReview = () => {
-  router.push('/write-review')
-}
+  router.push("/write-review");
+};
 
 // Format Comment
 const formatComment = (text) => {
-  if (!text) return '';
-  let formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-  return formatted.replace(/\n/g, '<br>');
-}
+  if (!text) return "";
+  let formatted = text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+  return formatted.replace(/\n/g, "<br>");
+};
 
-const lightbox = ref({ show: false, images: [], index: 0 })
+const lightbox = ref({ show: false, images: [], index: 0 });
 
 const fetchFeed = async () => {
-  loading.value = true
+  loading.value = true;
   try {
-    const res = await placeRepository.getCommunityFeed()
-    feed.value = res.data
+    const res = await placeRepository.getCommunityFeed();
+    feed.value = res.data;
   } catch (err) {
-    console.error("Failed to fetch feed:", err)
+    console.error("Failed to fetch feed:", err);
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
 const getImageUrl = (url) => {
-  if (!url) return '';
-  if (url.startsWith('http') || url.startsWith('data:')) return url;
-  return `http://127.0.0.1:8000/${url.startsWith('/') ? url.slice(1) : url}`;
-}
+  if (!url) return "";
+  if (url.startsWith("http") || url.startsWith("data:")) return url;
+  return `http://127.0.0.1:8000/${url.startsWith("/") ? url.slice(1) : url}`;
+};
 
 const getUserAvatar = (url) => {
   if (url) return getImageUrl(url);
   return 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ccc"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>';
-}
+};
 
 const formatDate = (date) => {
-  return new Date(date).toLocaleDateString('en-US', {
-    year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-  })
-}
+  return new Date(date).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
 
-const isLiked = (post) => user.value && post.liked_by.includes(user.value.id)
+const isLiked = (post) => user.value && post.liked_by.includes(user.value.id);
 
 const handleLike = async (post) => {
-  if (!user.value) return alert('Please login to like posts')
+  if (!user.value) return alert("Please login to like posts");
   try {
-    const res = await placeRepository.toggleLike(post.id, user.value.id)
-    if (res.data.status === 'liked') post.liked_by.push(user.value.id)
-    else post.liked_by = post.liked_by.filter(id => id !== user.value.id)
-  } catch (err) { console.error("Like failed:", err) }
-}
+    const res = await placeRepository.toggleLike(post.id, user.value.id);
+    if (res.data.status === "liked") post.liked_by.push(user.value.id);
+    else post.liked_by = post.liked_by.filter((id) => id !== user.value.id);
+  } catch (err) {
+    console.error("Like failed:", err);
+  }
+};
 
-const showCommentsFor = ref(null)
-const newCommentTexts = ref({})
+const showCommentsFor = ref(null);
+const newCommentTexts = ref({});
 
-const toggleComments = (postId) => showCommentsFor.value = showCommentsFor.value === postId ? null : postId
+const toggleComments = (postId) =>
+  (showCommentsFor.value = showCommentsFor.value === postId ? null : postId);
 
 const submitComment = async (post) => {
-  const text = newCommentTexts.value[post.id]?.trim()
-  if (!text || !user.value) return
+  const text = newCommentTexts.value[post.id]?.trim();
+  if (!text || !user.value) return;
   try {
-    const fd = new FormData()
-    fd.append('user_id', user.value.id)
-    fd.append('comment_text', text)
-    await placeRepository.addPostComment(post.id, fd)
-    newCommentTexts.value[post.id] = ''
-    fetchFeed()
-  } catch (err) { console.error("Failed to post comment", err) }
-}
+    const fd = new FormData();
+    fd.append("user_id", user.value.id);
+    fd.append("comment_text", text);
+    await placeRepository.addPostComment(post.id, fd);
+    newCommentTexts.value[post.id] = "";
+    fetchFeed();
+  } catch (err) {
+    console.error("Failed to post comment", err);
+  }
+};
 
 const deleteComment = async (postId, commentId) => {
-  if (!confirm('Delete this comment?')) return
+  if (!confirm("Delete this comment?")) return;
   try {
-    await placeRepository.deletePostComment(commentId, user.value.id)
-    fetchFeed()
-  } catch (err) { console.error("Failed to delete comment", err) }
-}
+    await placeRepository.deletePostComment(commentId, user.value.id);
+    fetchFeed();
+  } catch (err) {
+    console.error("Failed to delete comment", err);
+  }
+};
 
 const formatTimeAgo = (dateStr) => {
-  const diff = new Date() - new Date(dateStr)
-  const minutes = Math.floor(diff / 60000)
-  if (minutes < 1) return 'Just now'
-  if (minutes < 60) return `${minutes}m`
-  const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours}h`
-  const days = Math.floor(hours / 24)
-  return `${days}d`
-}
+  const diff = new Date() - new Date(dateStr);
+  const minutes = Math.floor(diff / 60000);
+  if (minutes < 1) return "Just now";
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h`;
+  const days = Math.floor(hours / 24);
+  return `${days}d`;
+};
 
-const openLightbox = (images, index) => lightbox.value = { show: true, images, index }
-const nextImg = () => lightbox.value.index = (lightbox.value.index + 1) % lightbox.value.images.length
-const prevImg = () => lightbox.value.index = (lightbox.value.index - 1 + lightbox.value.images.length) % lightbox.value.images.length
+const openLightbox = (images, index) =>
+  (lightbox.value = { show: true, images, index });
+const nextImg = () =>
+  (lightbox.value.index =
+    (lightbox.value.index + 1) % lightbox.value.images.length);
+const prevImg = () =>
+  (lightbox.value.index =
+    (lightbox.value.index - 1 + lightbox.value.images.length) %
+    lightbox.value.images.length);
 
 // Post Menu (Edit/Delete)
-const activePostMenu = ref(null)
+const activePostMenu = ref(null);
 const togglePostMenu = (postId) => {
-  activePostMenu.value = activePostMenu.value === postId ? null : postId
-}
+  activePostMenu.value = activePostMenu.value === postId ? null : postId;
+};
 
 const handleDeletePost = async (postId) => {
-  if (!confirm('Are you sure you want to delete this post?')) return
+  if (!confirm("Are you sure you want to delete this post?")) return;
   try {
-    await placeRepository.deleteUserReview(postId, user.value.id)
-    fetchFeed()
+    await placeRepository.deleteUserReview(postId, user.value.id);
+    fetchFeed();
   } catch (err) {
-    console.error("Delete failed:", err)
-    alert("Failed to delete post")
+    console.error("Delete failed:", err);
+    alert("Failed to delete post");
   }
-}
+};
 
 const openEditModal = (post) => {
   editModal.value = {
@@ -387,57 +562,60 @@ const openEditModal = (post) => {
     post: post,
     form: {
       rating: post.rating || 0,
-      comment: post.comment || '',
+      comment: post.comment || "",
       existingImages: [...(post.images || [])],
       newImages: [],
-      newPreviews: []
-    }
-  }
-  activePostMenu.value = null
-}
+      newPreviews: [],
+    },
+  };
+  activePostMenu.value = null;
+};
 
 const handleEditImageUpload = (e) => {
-  const files = Array.from(e.target.files)
-  files.forEach(file => {
-    editModal.value.form.newImages.push(file)
-    editModal.value.form.newPreviews.push(URL.createObjectURL(file))
-  })
-}
+  const files = Array.from(e.target.files);
+  files.forEach((file) => {
+    editModal.value.form.newImages.push(file);
+    editModal.value.form.newPreviews.push(URL.createObjectURL(file));
+  });
+};
 
 const removeExistingImg = (idx) => {
-  editModal.value.form.existingImages.splice(idx, 1)
-}
+  editModal.value.form.existingImages.splice(idx, 1);
+};
 
 const removeNewImg = (idx) => {
-  editModal.value.form.newImages.splice(idx, 1)
-  editModal.value.form.newPreviews.splice(idx, 1)
-}
+  editModal.value.form.newImages.splice(idx, 1);
+  editModal.value.form.newPreviews.splice(idx, 1);
+};
 
 const saveEdit = async () => {
-  if (!editModal.value.form.comment.trim()) return
-  saving.value = true
+  if (!editModal.value.form.comment.trim()) return;
+  saving.value = true;
   try {
-    const fd = new FormData()
-    fd.append('user_id', user.value.id)
-    fd.append('rating', editModal.value.form.rating)
-    fd.append('comment_text', editModal.value.form.comment)
-    fd.append('existing_images', JSON.stringify(editModal.value.form.existingImages))
-    
+    const fd = new FormData();
+    fd.append("user_id", user.value.id);
+    fd.append("rating", editModal.value.form.rating);
+    fd.append("comment_text", editModal.value.form.comment);
+    fd.append(
+      "existing_images",
+      JSON.stringify(editModal.value.form.existingImages),
+    );
+
     // Append new images
-    editModal.value.form.newImages.forEach(img => {
-      fd.append('new_images', img)
-    })
-    
-    await placeRepository.updateUserReview(editModal.value.post.id, fd)
-    editModal.value.show = false
-    fetchFeed()
+    editModal.value.form.newImages.forEach((img) => {
+      fd.append("new_images", img);
+    });
+
+    await placeRepository.updateUserReview(editModal.value.post.id, fd);
+    editModal.value.show = false;
+    fetchFeed();
   } catch (err) {
-    console.error("Edit failed:", err)
-    alert("Failed to update post")
+    console.error("Edit failed:", err);
+    alert("Failed to update post");
   } finally {
-    saving.value = false
+    saving.value = false;
   }
-}
+};
 
 // Custom directive for clicking outside
 const vClickOutside = {
@@ -447,23 +625,23 @@ const vClickOutside = {
         binding.value(event);
       }
     };
-    document.addEventListener('click', el.clickOutsideEvent);
+    document.addEventListener("click", el.clickOutsideEvent);
   },
   unmounted(el) {
-    document.removeEventListener('click', el.clickOutsideEvent);
+    document.removeEventListener("click", el.clickOutsideEvent);
   },
-}
+};
 
-onMounted(fetchFeed)
+onMounted(fetchFeed);
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap");
 
 .community-page {
   background: #f0f2f5;
   min-height: 100vh;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
 }
 
 .community-layout {
@@ -1077,7 +1255,9 @@ onMounted(fetchFeed)
   max-width: 600px;
   background: white;
   border-radius: 12px;
-  box-shadow: 0 12px 28px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 12px 28px 0 rgba(0, 0, 0, 0.2),
+    0 2px 4px 0 rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
   max-height: 90vh;
@@ -1232,7 +1412,7 @@ onMounted(fetchFeed)
   aspect-ratio: 1;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 }
 
 .modal-img-wrap img {
@@ -1255,7 +1435,7 @@ onMounted(fetchFeed)
   justify-content: center;
   font-size: 1.3rem;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   transition: 0.2s;
 }
 
@@ -1326,10 +1506,18 @@ onMounted(fetchFeed)
   cursor: not-allowed;
 }
 
-.text-primary { color: #1877f2; }
-.text-warning { color: #f7b928; }
-.text-danger { color: #f02849; }
-.text-success { color: #45bd62; }
+.text-primary {
+  color: #1877f2;
+}
+.text-warning {
+  color: #f7b928;
+}
+.text-danger {
+  color: #f02849;
+}
+.text-success {
+  color: #45bd62;
+}
 
 @media (max-width: 600px) {
   .edit-modal.fb-style {

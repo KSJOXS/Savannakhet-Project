@@ -1,18 +1,18 @@
+from app.models import Place
+from app.database import SessionLocal
 import sys
 import os
 import json
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from app.database import SessionLocal
-from app.models import Place
 
 db = SessionLocal()
 
 restaurants = [
     {
         "name": "Lin's Cafe",
-        "category_id": 7, # Coffee & Tea
+        "category_id": 7,  # Coffee & Tea
         "description": "A popular cafe in Savannakhet known for its excellent locally sourced coffee and cozy atmosphere.",
         "latitude": 16.559, "longitude": 104.750,
         "address": "Ban Xayaphoum, Kaisone Phomvihane, Savannakhet",
@@ -21,7 +21,7 @@ restaurants = [
     },
     {
         "name": "Pilgrim's Kitchen & Inn",
-        "category_id": 6, # Restaurants
+        "category_id": 6,  # Restaurants
         "description": "Offering a diverse menu of Western, Asian and local Lao food. Great place to chill with friends.",
         "latitude": 16.558, "longitude": 104.752,
         "address": "Kaisone Phomvihane, Savannakhet",
@@ -48,7 +48,7 @@ restaurants = [
     },
     {
         "name": "Mekong River Night Market",
-        "category_id": 9, # Street Food
+        "category_id": 9,  # Street Food
         "description": "Bustling night market along the Mekong river offering delicious and affordable local street food.",
         "latitude": 16.561, "longitude": 104.745,
         "address": "Mekong Riverfront, Savannakhet",
@@ -66,7 +66,7 @@ restaurants = [
     },
     {
         "name": "Nang Lin Bar",
-        "category_id": 8, # Bars & Pubs
+        "category_id": 8,  # Bars & Pubs
         "description": "Modern bar offering craft cocktails, cold local beers, and great music.",
         "latitude": 16.555, "longitude": 104.753,
         "address": "Downtown Savannakhet",
@@ -123,7 +123,7 @@ restaurants = [
 nature_spots = [
     {
         "name": "Bung Va Lake",
-        "category_id": 2, # Nature
+        "category_id": 2,  # Nature
         "description": "A scenic natural lake outside the city, perfect for a relaxing afternoon walk or a local picnic.",
         "latitude": 16.580, "longitude": 104.800,
         "address": "Outskirts of Savannakhet",
@@ -159,7 +159,7 @@ nature_spots = [
     },
     {
         "name": "Mekong River Bank Gardens",
-        "category_id": 10, # Nature & Parks
+        "category_id": 10,  # Nature & Parks
         "description": "A nicely paved and green riverfront park ideal for jogging, cycling, or enjoying the evening breeze.",
         "latitude": 16.550, "longitude": 104.745,
         "address": "Riverside Road, Savannakhet",
@@ -213,7 +213,7 @@ for data in restaurants:
         db.add(place)
         db.commit()
         db.refresh(place)
-        
+
 print("Adding Nature Spots...")
 for data in nature_spots:
     # Check if exists
@@ -232,6 +232,6 @@ for data in nature_spots:
         db.add(place)
         db.commit()
         db.refresh(place)
-        
+
 db.close()
 print("Done seeding Nature and Restaurants!")

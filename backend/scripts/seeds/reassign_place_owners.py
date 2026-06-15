@@ -1,8 +1,11 @@
-import sys, os, random
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
-
-from app.database import SessionLocal
 from app.models import Place, User
+from app.database import SessionLocal
+import sys
+import os
+import random
+sys.path.append(os.path.abspath(
+    os.path.join(os.path.dirname(__file__), '../../')))
+
 
 def reassign_owners():
     db = SessionLocal()
@@ -25,12 +28,14 @@ def reassign_owners():
             place.owner_id = chosen_user.id
 
         db.commit()
-        print(f"\nSuccessfully reassigned {len(places)} places to random regular users.")
+        print(
+            f"\nSuccessfully reassigned {len(places)} places to random regular users.")
     except Exception as e:
         print(f"Error: {e}")
         db.rollback()
     finally:
         db.close()
+
 
 if __name__ == "__main__":
     reassign_owners()

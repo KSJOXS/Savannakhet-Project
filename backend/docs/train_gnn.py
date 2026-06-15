@@ -10,13 +10,17 @@
 #   3. Open Colab → Mount Drive → Run: !python train_gnn.py
 # ================================================================
 
-import sys, os, json, time, random
+import matplotlib.pyplot as plt
+import sys
+import os
+import json
+import time
+import random
 import numpy as np
 import torch
 import torch.nn.functional as F
 import matplotlib
 matplotlib.use('Agg')  # Disable display for Colab server mode
-import matplotlib.pyplot as plt
 
 # ── Check PyTorch Geometric ──
 try:
@@ -26,7 +30,8 @@ try:
 except ImportError:
     print("[!] torch_geometric not found — installing...")
     import subprocess
-    subprocess.run([sys.executable, "-m", "pip", "install", "torch_geometric", "-q"], check=True)
+    subprocess.run([sys.executable, "-m", "pip", "install",
+                   "torch_geometric", "-q"], check=True)
     from torch_geometric.nn import SAGEConv, to_hetero
     from torch_geometric.data import HeteroData
     from torch_geometric.utils import negative_sampling
@@ -34,11 +39,12 @@ except ImportError:
 # ════════════════════════════════════════════════════════════════
 # CONFIGURATION
 # ════════════════════════════════════════════════════════════════
-EPOCHS      = 100
-HIDDEN_DIM  = 64
-LR          = 0.01
-SEED        = 42
-SAVE_DIR    = os.path.dirname(os.path.abspath(__file__))   # Save in the same folder as the script
+EPOCHS = 100
+HIDDEN_DIM = 64
+LR = 0.01
+SEED = 42
+# Save in the same folder as the script
+SAVE_DIR = os.path.dirname(os.path.abspath(__file__))
 # ════════════════════════════════════════════════════════════════
 
 torch.manual_seed(SEED)
@@ -73,12 +79,12 @@ if not os.path.exists(DATA_FILE):
 with open(DATA_FILE, "r", encoding="utf-8") as f:
     DB = json.load(f)
 
-CATEGORIES   = DB["categories"]
-USERS_DATA   = DB["users"]
-PLACES_DATA  = DB["places"]
+CATEGORIES = DB["categories"]
+USERS_DATA = DB["users"]
+PLACES_DATA = DB["places"]
 INTERACTIONS = DB["interactions"]
-NUM_USERS    = len(USERS_DATA)
-NUM_PLACES   = len(PLACES_DATA)
+NUM_USERS = len(USERS_DATA)
+NUM_PLACES = len(PLACES_DATA)
 
 # compatibility: real data uses 'username'
 for u in USERS_DATA:
@@ -91,7 +97,7 @@ print(f"  Places       : {NUM_PLACES}")
 print(f"  Interactions : {len(INTERACTIONS)}")
 
 # Index Mapping: DB id → tensor index
-user_id2idx  = {u["id"]: i for i, u in enumerate(USERS_DATA)}
+user_id2idx = {u["id"]: i for i, u in enumerate(USERS_DATA)}
 place_id2idx = {p["id"]: i for i, p in enumerate(PLACES_DATA)}
 place_idx2id = {i: p["id"] for i, p in enumerate(PLACES_DATA)}
 
@@ -130,7 +136,8 @@ for intr in INTERACTIONS:
 
 # Fallback: add preference-based edges if interactions are too few
 if len(edge_src) < NUM_USERS * 2:
-    print(f"  [!] Too few interactions ({len(edge_src)}) — adding preference edges")
+    print(
+        f"  [!] Too few interactions ({len(edge_src)}) — adding preference edges")
     for u_idx, u in enumerate(USERS_DATA):
         prefs = u.get("preferences", [])
         for p_idx, p in enumerate(PLACES_DATA):
@@ -154,18 +161,23 @@ data = data.to(device)
 
 print(f"  User nodes  : {data['user'].x.shape}")
 print(f"  Place nodes : {data['place'].x.shape}")
-print(f"  Forward edges (user->place) : {data['user', 'interacts_with', 'place'].edge_index.shape[1]}")
-print(f"  Reverse edges (place->user) : {data['place', 'rev_interacts', 'user'].edge_index.shape[1]}")
+print(
+    f"  Forward edges (user->place) : {data['user', 'interacts_with', 'place'].edge_index.shape[1]}")
+print(
+    f"  Reverse edges (place->user) : {data['place', 'rev_interacts', 'user'].edge_index.shape[1]}")
 
 # ────────────────────────────────────────────────────────────────
 # 3. Define HeteroGraphSAGE Model
 # ────────────────────────────────────────────────────────────────
+
+
 class BaseGNN(torch.nn.Module):
     """
     2-Layer GraphSAGE
     Layer 1: MEAN Aggregation → ReLU
     Layer 2: CONCAT + Linear → Embedding
     """
+
     def __init__(self, hidden_channels):
         super().__init__()
         self.conv1 = SAGEConv((-1, -1), hidden_channels)
@@ -176,7 +188,8 @@ class BaseGNN(torch.nn.Module):
         x = self.conv2(x, edge_index)
         return x
 
-model     = to_hetero(BaseGNN(HIDDEN_DIM), metadata=data.metadata()).to(device)
+
+model = to_hetero(BaseGNN(HIDDEN_DIM), metadata=data.metadata()).to(device)
 
 # ── Lazy Initialization (Fix Error: uninitialized parameter) ──
 with torch.no_grad():
@@ -202,32 +215,33 @@ for epoch in range(1, EPOCHS + 1):
     t0 = time.time()
     optimizer.zero_grad()
 
-    out     = model(data.x_dict, data.edge_index_dict)
-    ps, pd  = pos_edge_index[0], pos_edge_index[1]
+    out = model(data.x_dict, data.edge_index_dict)
+    ps, pd = pos_edge_index[0], pos_edge_index[1]
     pos_out = (out["user"][ps] * out["place"][pd]).sum(dim=-1)
 
-    neg_ei  = negative_sampling(
+    neg_ei = negative_sampling(
         edge_index=pos_edge_index,
         num_nodes=(data["user"].num_nodes, data["place"].num_nodes),
         num_neg_samples=pos_edge_index.size(1),
     )
     neg_out = (out["user"][neg_ei[0]] * out["place"][neg_ei[1]]).sum(dim=-1)
 
-    labels  = torch.cat([torch.ones(pos_out.size(0)),
-                         torch.zeros(neg_out.size(0))]).to(device)
-    loss    = F.binary_cross_entropy_with_logits(torch.cat([pos_out, neg_out]), labels)
+    labels = torch.cat([torch.ones(pos_out.size(0)),
+                        torch.zeros(neg_out.size(0))]).to(device)
+    loss = F.binary_cross_entropy_with_logits(
+        torch.cat([pos_out, neg_out]), labels)
     loss.backward()
     optimizer.step()
     losses.append(loss.item())
 
     with torch.no_grad():
         correct = (pos_out >= 0).float().sum() + (neg_out < 0).float().sum()
-        acc     = correct.item() / (pos_out.size(0) + neg_out.size(0))
+        acc = correct.item() / (pos_out.size(0) + neg_out.size(0))
         accuracies.append(acc)
 
     # Display progress every 5 epochs
     if epoch % 5 == 0 or epoch == 1:
-        ms  = int((time.time() - t0) * 1000 / max(1, n_steps))
+        ms = int((time.time() - t0) * 1000 / max(1, n_steps))
         print(f"Epoch {epoch:>3}/{EPOCHS}  "
               f"{n_steps}/{n_steps} "
               f"━━━━━━━━━━━━━━━━━━━━  "
@@ -253,14 +267,17 @@ ep = range(1, EPOCHS + 1)
 ax1.plot(ep, accuracies, color="#2563EB", lw=2, label="accuracy")
 ax1.fill_between(ep, accuracies, alpha=0.15, color="#2563EB")
 ax1.axhline(0.85, color="#059669", ls="--", lw=1.5, label="target 85%")
-ax1.set(title="Model Accuracy", xlabel="Epochs", ylabel="Accuracy", ylim=(0.4, 1.05))
+ax1.set(title="Model Accuracy", xlabel="Epochs",
+        ylabel="Accuracy", ylim=(0.4, 1.05))
 ax1.yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: f"{y*100:.0f}%"))
-ax1.legend(); ax1.grid(alpha=0.3)
+ax1.legend()
+ax1.grid(alpha=0.3)
 
 ax2.plot(ep, losses, color="#DC2626", lw=2, label="loss")
 ax2.fill_between(ep, losses, alpha=0.12, color="#DC2626")
 ax2.set(title="Model Loss", xlabel="Epochs", ylabel="Loss", ylim=(0, None))
-ax2.legend(); ax2.grid(alpha=0.3)
+ax2.legend()
+ax2.grid(alpha=0.3)
 
 plt.tight_layout()
 chart_path = os.path.join(SAVE_DIR, "training_results.png")
@@ -273,19 +290,19 @@ print(f"  [OK] Chart saved: {chart_path}")
 # ────────────────────────────────────────────────────────────────
 model_path = os.path.join(SAVE_DIR, "gnn_model.pt")
 torch.save({
-    "epoch"        : EPOCHS,
-    "model_state"  : model.state_dict(),
-    "final_acc"    : accuracies[-1],
-    "final_loss"   : losses[-1],
-    "user_id2idx"  : user_id2idx,
-    "place_id2idx" : place_id2idx,
-    "place_idx2id" : place_idx2id,
+    "epoch": EPOCHS,
+    "model_state": model.state_dict(),
+    "final_acc": accuracies[-1],
+    "final_loss": losses[-1],
+    "user_id2idx": user_id2idx,
+    "place_id2idx": place_id2idx,
+    "place_idx2id": place_idx2id,
     "metadata": {
-        "hidden_dim" : HIDDEN_DIM,
-        "categories" : CATEGORIES,
-        "num_users"  : NUM_USERS,
-        "num_places" : NUM_PLACES,
-        "source"     : "real_database",
+        "hidden_dim": HIDDEN_DIM,
+        "categories": CATEGORIES,
+        "num_users": NUM_USERS,
+        "num_places": NUM_PLACES,
+        "source": "real_database",
     },
 }, model_path)
 print(f"  [OK] Model saved: {model_path}")
@@ -298,7 +315,8 @@ print("  Training Summary")
 print(f"{'='*65}")
 print(f"  Architecture : HeteroGraphSAGE (K=2, hidden={HIDDEN_DIM})")
 print(f"  Dataset      : {NUM_USERS} users x {NUM_PLACES} places (Real Data)")
-print(f"  Edges        : {data['user', 'interacts_with', 'place'].edge_index.shape[1]}")
+print(
+    f"  Edges        : {data['user', 'interacts_with', 'place'].edge_index.shape[1]}")
 print(f"  Epochs       : {EPOCHS}")
 print(f"  Best Acc     : {max(accuracies)*100:.2f}%")
 print(f"  Final Acc    : {accuracies[-1]*100:.2f}%")

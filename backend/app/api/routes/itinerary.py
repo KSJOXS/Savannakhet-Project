@@ -7,10 +7,12 @@ import random
 import json
 import re
 
+
 def parse_budget_to_thb(budget_str):
     if not budget_str:
         return 0
-    numbers = [int(n.replace(',', '')) for n in re.findall(r'\d+[,]?\d*', budget_str)]
+    numbers = [int(n.replace(',', ''))
+               for n in re.findall(r'\d+[,]?\d*', budget_str)]
     if not numbers:
         return 0
     avg_val = sum(numbers) / len(numbers)
@@ -21,6 +23,7 @@ def parse_budget_to_thb(budget_str):
         return avg_val * 35
     else:
         return avg_val
+
 
 def get_budget_tier(budget_str):
     thb = parse_budget_to_thb(budget_str)
@@ -33,7 +36,9 @@ def get_budget_tier(budget_str):
     else:
         return 'luxury'
 
+
 router = APIRouter()
+
 
 def parse_preferences(pref_data):
     if not pref_data:
@@ -45,23 +50,26 @@ def parse_preferences(pref_data):
             return []
     return pref_data
 
+
 def get_season_boosts(month: int):
     if not month:
         return []
-    if month in [11, 12, 1, 2]: # Cool & Dry
+    if month in [11, 12, 1, 2]:  # Cool & Dry
         return ['nature', 'landmark']
-    elif month in [3, 4, 5]: # Hot
+    elif month in [3, 4, 5]:  # Hot
         return ['cafe', 'nightlife', 'chill', 'restaurant']
-    elif month in [6, 7, 8, 9, 10]: # Rainy
+    elif month in [6, 7, 8, 9, 10]:  # Rainy
         return ['cafe', 'culture', 'shopping']
     return []
+
 
 @router.post("/generate", response_model=Dict[str, List[Dict[str, Any]]])
 def generate_itinerary(request: schemas.ItineraryRequest, db: Session = Depends(get_db)):
     user_prefs = request.preferences or []
-    
+
     if not user_prefs and request.user_id:
-        user = db.query(models.User).filter(models.User.id == request.user_id).first()
+        user = db.query(models.User).filter(
+            models.User.id == request.user_id).first()
         if user:
             user_prefs = parse_preferences(user.preferences)
 
@@ -95,10 +103,10 @@ def generate_itinerary(request: schemas.ItineraryRequest, db: Session = Depends(
 
         if ptype in ['nature', 'culture', 'landmark']:
             morning_spots.append(place_data)
-            
+
         if ptype in ['cafe', 'landmark', 'culture', 'shopping']:
             afternoon_spots.append(place_data)
-            
+
         if ptype in ['local_food', 'restaurant', 'chill', 'nightlife']:
             evening_spots.append(place_data)
 
@@ -116,9 +124,10 @@ def generate_itinerary(request: schemas.ItineraryRequest, db: Session = Depends(
 
     for day in range(1, request.days + 1):
         day_plan = []
-        
+
         # 1. Select Morning Spot
-        morning_pick = next((s for s in morning_spots if s['place'].id not in used_place_ids), None)
+        morning_pick = next(
+            (s for s in morning_spots if s['place'].id not in used_place_ids), None)
         if morning_pick:
             used_place_ids.add(morning_pick['place'].id)
             day_plan.append({
@@ -140,7 +149,8 @@ def generate_itinerary(request: schemas.ItineraryRequest, db: Session = Depends(
             })
 
         # 2. Select Afternoon Spot
-        afternoon_pick = next((s for s in afternoon_spots if s['place'].id not in used_place_ids), None)
+        afternoon_pick = next(
+            (s for s in afternoon_spots if s['place'].id not in used_place_ids), None)
         if afternoon_pick:
             used_place_ids.add(afternoon_pick['place'].id)
             day_plan.append({
@@ -161,7 +171,8 @@ def generate_itinerary(request: schemas.ItineraryRequest, db: Session = Depends(
             })
 
         # 3. Select Evening Spot
-        evening_pick = next((s for s in evening_spots if s['place'].id not in used_place_ids), None)
+        evening_pick = next(
+            (s for s in evening_spots if s['place'].id not in used_place_ids), None)
         if evening_pick:
             used_place_ids.add(evening_pick['place'].id)
             day_plan.append({
@@ -185,6 +196,7 @@ def generate_itinerary(request: schemas.ItineraryRequest, db: Session = Depends(
 
     return itinerary
 
+
 @router.post("/save", response_model=schemas.ItineraryResponse)
 def save_itinerary(request: schemas.ItineraryCreate, db: Session = Depends(get_db)):
     try:
@@ -205,7 +217,7 @@ def save_itinerary(request: schemas.ItineraryCreate, db: Session = Depends(get_d
                 place_id=item.place_id
             )
             db.add(new_item)
-        
+
         db.commit()
         db.refresh(new_itinerary)
         return new_itinerary
@@ -213,39 +225,43 @@ def save_itinerary(request: schemas.ItineraryCreate, db: Session = Depends(get_d
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @router.get("/user/{user_id}", response_model=List[schemas.ItineraryResponse])
 def get_user_itineraries(user_id: int, db: Session = Depends(get_db)):
     return db.query(models.Itinerary).filter(models.Itinerary.user_id == user_id).order_by(models.Itinerary.created_at.desc()).all()
 
+
 @router.delete("/{itinerary_id}")
 def delete_itinerary(itinerary_id: int, db: Session = Depends(get_db)):
-    itinerary = db.query(models.Itinerary).filter(models.Itinerary.id == itinerary_id).first()
+    itinerary = db.query(models.Itinerary).filter(
+        models.Itinerary.id == itinerary_id).first()
     if not itinerary:
         raise HTTPException(status_code=404, detail="Itinerary not found")
-    
+
     db.delete(itinerary)
     db.commit()
     return {"message": "Itinerary deleted successfully"}
+
 
 @router.post("/swap", response_model=Dict[str, Any])
 def swap_itinerary_place(request: schemas.SwapPlaceRequest, db: Session = Depends(get_db)):
     user_prefs = request.preferences or []
     season_boosts = get_season_boosts(request.month)
-    
+
     # Fetch all active places with their categories
     places_query = db.query(models.Place, models.Category).join(
         models.Category, models.Place.category_id == models.Category.id
     ).filter(models.Place.status == "approved").all()
-    
+
     candidates = []
-    
+
     for place, cat in places_query:
         # Skip if it's already used or it's the current place
         if place.id in request.used_place_ids or (request.current_place_id is not None and place.id == request.current_place_id):
             continue
-            
+
         ptype = cat.parent_type
-        
+
         # Check if it fits the time slot
         if request.time_slot == "Morning" and ptype not in ['nature', 'culture', 'landmark']:
             continue
@@ -253,10 +269,10 @@ def swap_itinerary_place(request: schemas.SwapPlaceRequest, db: Session = Depend
             continue
         if request.time_slot == "Evening" and ptype not in ['local_food', 'restaurant', 'chill', 'nightlife']:
             continue
-            
+
         is_preferred = ptype in user_prefs
         season_boost = ptype in season_boosts
-        
+
         candidates.append({
             "place": place,
             "category_name": cat.name,
@@ -265,17 +281,19 @@ def swap_itinerary_place(request: schemas.SwapPlaceRequest, db: Session = Depend
             "budget_match": request.budget == get_budget_tier(place.daily_budget) if request.budget and request.budget != 'any' else True,
             "rating": float(place.rating_avg or 0.0)
         })
-        
+
     if not candidates:
-        raise HTTPException(status_code=404, detail="No suitable alternative places found")
-        
+        raise HTTPException(
+            status_code=404, detail="No suitable alternative places found")
+
     random.shuffle(candidates)
-    candidates.sort(key=lambda x: (x['budget_match'], x['is_preferred'], x['season_boost'], x['rating'] + random.uniform(-1.0, 1.0)), reverse=True)
-    
+    candidates.sort(key=lambda x: (x['budget_match'], x['is_preferred'],
+                    x['season_boost'], x['rating'] + random.uniform(-1.0, 1.0)), reverse=True)
+
     best_match = candidates[0]
-    
+
     time_map = {"Morning": "09:00", "Afternoon": "14:00", "Evening": "19:00"}
-    
+
     return {
         "time_slot": request.time_slot,
         "time": time_map.get(request.time_slot, "12:00"),

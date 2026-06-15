@@ -3,7 +3,8 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app import models, schemas
 from typing import List, Optional
-import shutil, os
+import shutil
+import os
 
 router = APIRouter(tags=["Place Sections"])
 UPLOAD_DIR = "static/sections"

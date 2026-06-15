@@ -2,33 +2,33 @@
   <div class="auth-page">
     <div class="auth-card">
       <div class="auth-header">
-        <h1>{{ t('auth.forgot_title') }}</h1>
-        <p>{{ t('auth.forgot_subtitle') }}</p>
+        <h1>{{ t("auth.forgot_title") }}</h1>
+        <p>{{ t("auth.forgot_subtitle") }}</p>
       </div>
 
       <form @submit.prevent="handleForgotPassword" class="auth-form">
         <div class="form-group">
-          <label>{{ t('auth.email_label') }}</label>
+          <label>{{ t("auth.email_label") }}</label>
           <div class="input-wrapper">
             <i class="fas fa-envelope"></i>
-            <input 
-              v-model="email" 
-              type="email" 
-              :placeholder="t('auth.email_placeholder')" 
-              required 
+            <input
+              v-model="email"
+              type="email"
+              :placeholder="t('auth.email_placeholder')"
+              required
               :disabled="loading"
             />
           </div>
         </div>
 
         <button type="submit" class="btn-primary" :disabled="loading">
-          <span v-if="!loading">{{ t('auth.send_link') }}</span>
+          <span v-if="!loading">{{ t("auth.send_link") }}</span>
           <i v-else class="fas fa-spinner fa-spin"></i>
         </button>
       </form>
 
       <div v-if="message" class="alert success">
-        <i class="fas fa-check-circle"></i> {{ t('auth.reset_sent_msg') }}
+        <i class="fas fa-check-circle"></i> {{ t("auth.reset_sent_msg") }}
       </div>
       <div v-if="error" class="alert error">
         <i class="fas fa-exclamation-circle"></i> {{ error }}
@@ -36,7 +36,7 @@
 
       <div class="auth-footer">
         <router-link to="/login" class="back-link">
-          <i class="fas fa-arrow-left"></i> {{ t('auth.back_to_login') }}
+          <i class="fas fa-arrow-left"></i> {{ t("auth.back_to_login") }}
         </router-link>
       </div>
     </div>
@@ -44,36 +44,36 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import axios from 'axios'
-import { useI18n } from '@/composables/useI18n'
+import { ref } from "vue";
+import axios from "axios";
+import { useI18n } from "@/composables/useI18n";
 
-const { t } = useI18n()
-const email = ref('')
-const loading = ref(false)
-const message = ref('')
-const error = ref('')
+const { t } = useI18n();
+const email = ref("");
+const loading = ref(false);
+const message = ref("");
+const error = ref("");
 
 const handleForgotPassword = async () => {
-  loading.value = true
-  message.value = ''
-  error.value = ''
-  
+  loading.value = true;
+  message.value = "";
+  error.value = "";
+
   try {
-    const res = await axios.post('http://127.0.0.1:8000/forgot-password', {
-      email: email.value
-    })
+    const res = await axios.post("http://127.0.0.1:8000/forgot-password", {
+      email: email.value,
+    });
     // เมื่อส่งสำเร็จ Backend จะตอบกลับมาเป็น { status: 'success' }
-    if (res.data.status === 'success') {
-      message.value = 'SUCCESS'
-      email.value = ''
+    if (res.data.status === "success") {
+      message.value = "SUCCESS";
+      email.value = "";
     }
   } catch (err) {
-    error.value = err.response?.data?.detail || 'Something went wrong.'
+    error.value = err.response?.data?.detail || "Something went wrong.";
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 </script>
 
 <style scoped>
@@ -91,7 +91,7 @@ const handleForgotPassword = async () => {
   background: white;
   padding: 40px;
   border-radius: 24px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
   width: 100%;
   max-width: 450px;
   text-align: center;

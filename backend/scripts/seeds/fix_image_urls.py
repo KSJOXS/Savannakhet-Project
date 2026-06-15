@@ -1,11 +1,12 @@
+from app.models import Place
+from app.database import SessionLocal
 import sys
 import os
 import json
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+sys.path.append(os.path.abspath(
+    os.path.join(os.path.dirname(__file__), '../../')))
 
-from app.database import SessionLocal
-from app.models import Place
 
 # Map place names to working image URLs (using picsum.photos for reliability)
 IMAGE_MAP = {
@@ -22,6 +23,7 @@ IMAGE_MAP = {
     "Wat Sainyaphum": "https://images.unsplash.com/photo-1583417319070-4a69db38a482?w=800",
 }
 
+
 def fix_image_urls():
     db = SessionLocal()
     try:
@@ -35,7 +37,8 @@ def fix_image_urls():
                     try:
                         imgs = json.loads(img)
                         if imgs and imgs[0].startswith('https://images.unsplash.com'):
-                            print(f"Updating '{name}': {imgs[0][:50]}... -> {new_url}")
+                            print(
+                                f"Updating '{name}': {imgs[0][:50]}... -> {new_url}")
                             place.image_url = new_url
                             updated += 1
                     except:
@@ -44,7 +47,7 @@ def fix_image_urls():
                     print(f"Updating '{name}': {img[:50]}... -> {new_url}")
                     place.image_url = new_url
                     updated += 1
-        
+
         db.commit()
         print(f"\nSuccessfully updated {updated} place images.")
     except Exception as e:
@@ -52,6 +55,7 @@ def fix_image_urls():
         db.rollback()
     finally:
         db.close()
+
 
 if __name__ == "__main__":
     fix_image_urls()

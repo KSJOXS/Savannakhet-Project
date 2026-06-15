@@ -8,7 +8,12 @@
       <div class="input-group">
         <label>LAK (กีบ)</label>
         <div class="input-wrapper">
-          <input type="number" v-model="lakAmount" @input="convertFromLak" placeholder="ระบุเงินกีบ">
+          <input
+            type="number"
+            v-model="lakAmount"
+            @input="convertFromLak"
+            placeholder="ระบุเงินกีบ"
+          />
           <span class="unit">LAK</span>
         </div>
       </div>
@@ -16,18 +21,25 @@
       <div class="input-group">
         <label>THB (บาท)</label>
         <div class="input-wrapper">
-          <input type="number" v-model="thbAmount" @input="convertFromThb" placeholder="ระบุเงินบาท">
+          <input
+            type="number"
+            v-model="thbAmount"
+            @input="convertFromThb"
+            placeholder="ระบุเงินบาท"
+          />
           <span class="unit">THB</span>
         </div>
       </div>
     </div>
-    <p class="rate-info">เรทโดยประมาณ: 1 THB ≈ {{ Math.round(1/rates.THB) || 650 }} LAK</p>
+    <p class="rate-info">
+      เรทโดยประมาณ: 1 THB ≈ {{ Math.round(1 / rates.THB) || 650 }} LAK
+    </p>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import utilityRepository from '@/repositories/utilityRepository';
+import { ref, onMounted } from "vue";
+import utilityRepository from "@/repositories/utilityRepository";
 
 const lakAmount = ref(0);
 const thbAmount = ref(0);
@@ -56,7 +68,7 @@ const convertFromThb = () => {
   background: white;
   padding: 20px;
   border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   margin-bottom: 20px;
 }
 .card-header {
@@ -65,8 +77,14 @@ const convertFromThb = () => {
   gap: 10px;
   margin-bottom: 20px;
 }
-.card-header h3 { margin: 0; color: #2c3e50; font-size: 1.2rem; }
-.icon { font-size: 1.5rem; }
+.card-header h3 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1.2rem;
+}
+.icon {
+  font-size: 1.5rem;
+}
 
 .converter-grid {
   display: flex;

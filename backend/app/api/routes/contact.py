@@ -20,6 +20,7 @@ SMTP_USER = os.getenv("SMTP_USER", "")       # your Gmail address
 SMTP_PASS = os.getenv("SMTP_PASS", "")       # your Gmail App Password
 SITE_NAME = os.getenv("SITE_NAME", "Savannakhet Tourism")
 
+
 def send_email_reply(to_email: str, to_name: str, subject: str, reply_text: str):
     """ส่ง email จริงไปหา user ที่ส่ง contact form"""
     if not SMTP_USER or not SMTP_PASS:
@@ -116,6 +117,8 @@ def submit_contact(payload: schemas.ContactMessageCreate, db: Session = Depends(
     return msg
 
 # --- ADMIN: Get all messages (unread first, then newest) ---
+
+
 @router.get("/api/admin/messages", response_model=List[schemas.ContactMessageResponse])
 def get_all_messages(db: Session = Depends(get_db)):
     return db.query(models.ContactMessage).order_by(
@@ -124,15 +127,21 @@ def get_all_messages(db: Session = Depends(get_db)):
     ).all()
 
 # --- ADMIN: Get unread count ---
+
+
 @router.get("/api/admin/messages/unread-count")
 def get_unread_count(db: Session = Depends(get_db)):
-    count = db.query(models.ContactMessage).filter(models.ContactMessage.is_read == False).count()
+    count = db.query(models.ContactMessage).filter(
+        models.ContactMessage.is_read == False).count()
     return {"unread_count": count}
 
 # --- ADMIN: Mark as read ---
+
+
 @router.put("/api/admin/messages/{msg_id}/read")
 def mark_as_read(msg_id: int, db: Session = Depends(get_db)):
-    msg = db.query(models.ContactMessage).filter(models.ContactMessage.id == msg_id).first()
+    msg = db.query(models.ContactMessage).filter(
+        models.ContactMessage.id == msg_id).first()
     if not msg:
         raise HTTPException(status_code=404, detail="Message not found.")
     msg.is_read = True
@@ -140,10 +149,13 @@ def mark_as_read(msg_id: int, db: Session = Depends(get_db)):
     return {"message": "Marked as read."}
 
 # --- ADMIN: Reply — ส่ง email จริงไปหา user ---
+
+
 @router.post("/api/admin/messages/{msg_id}/reply")
 def reply_to_message(msg_id: int, reply_text: str = Form(...), db: Session = Depends(get_db)):
     from datetime import datetime, timezone
-    msg = db.query(models.ContactMessage).filter(models.ContactMessage.id == msg_id).first()
+    msg = db.query(models.ContactMessage).filter(
+        models.ContactMessage.id == msg_id).first()
     if not msg:
         raise HTTPException(status_code=404, detail="Message not found.")
 
@@ -161,7 +173,8 @@ def reply_to_message(msg_id: int, reply_text: str = Form(...), db: Session = Dep
         msg.reply_text = reply_text
         msg.replied_at = datetime.now(timezone.utc)
         db.commit()
-        raise HTTPException(status_code=500, detail=f"Failed to send email: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to send email: {str(e)}")
 
     msg.is_replied = True
     msg.reply_text = reply_text

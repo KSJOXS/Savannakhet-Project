@@ -1,12 +1,12 @@
 # seed_hotels.py - เพิ่มข้อมูลโรงแรม 20 แห่ง สำหรับแขวงสะหวันนะเขต
+from app.models import Place
+from app.database import SessionLocal
 import sys
 import os
 import json
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from app.database import SessionLocal
-from app.models import Place
 
 HOTEL_CATEGORY_ID = 11  # Hotel & Resort
 
@@ -46,7 +46,7 @@ hotels = [
         "avoid_if": ["Those needing luxury amenities"],
         "booking_url": None, "agoda_url": None,
         "rating_avg": 4.0,
-        "opening_hours": {k: {"open": "00:00", "close": "23:59", "closed": False} for k in ["mon","tue","wed","thu","fri","sat","sun"]},
+        "opening_hours": {k: {"open": "00:00", "close": "23:59", "closed": False} for k in ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]},
         "image_url": json.dumps(["/static/places/R.jpg"]),
     },
     {
@@ -59,7 +59,7 @@ hotels = [
         "avoid_if": ["Party seekers"],
         "booking_url": None, "agoda_url": None,
         "rating_avg": 3.8,
-        "opening_hours": {k: {"open": "00:00", "close": "23:59", "closed": False} for k in ["mon","tue","wed","thu","fri","sat","sun"]},
+        "opening_hours": {k: {"open": "00:00", "close": "23:59", "closed": False} for k in ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]},
         "image_url": json.dumps(["/static/places/sl-2.jpg"]),
     },
     {
@@ -72,7 +72,7 @@ hotels = [
         "avoid_if": ["City-center seekers", "Luxury travelers"],
         "booking_url": None, "agoda_url": None,
         "rating_avg": 4.3,
-        "opening_hours": {k: {"open": "00:00", "close": "23:59", "closed": False} for k in ["mon","tue","wed","thu","fri","sat","sun"]},
+        "opening_hours": {k: {"open": "00:00", "close": "23:59", "closed": False} for k in ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]},
         "image_url": json.dumps(["/static/places/sl-3.jpg"]),
     },
     {
@@ -85,7 +85,7 @@ hotels = [
         "avoid_if": ["Those sensitive to noise from the port"],
         "booking_url": None, "agoda_url": None,
         "rating_avg": 4.1,
-        "opening_hours": {k: {"open": "00:00", "close": "23:59", "closed": False} for k in ["mon","tue","wed","thu","fri","sat","sun"]},
+        "opening_hours": {k: {"open": "00:00", "close": "23:59", "closed": False} for k in ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]},
         "image_url": json.dumps(["/static/places/thumb-0.jpg"]),
     },
     {
@@ -99,7 +99,7 @@ hotels = [
         "booking_url": "https://www.booking.com/hotel/la/inthira-savannakhet.html",
         "agoda_url": None,
         "rating_avg": 4.6,
-        "opening_hours": {k: {"open": "00:00", "close": "23:59", "closed": False} for k in ["mon","tue","wed","thu","fri","sat","sun"]},
+        "opening_hours": {k: {"open": "00:00", "close": "23:59", "closed": False} for k in ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]},
         "image_url": json.dumps([
             "/static/places/laos-savannakhet-former-lao-chaleun-complex-built-in-the-1960s-included-a-cinema-bars-and-dance-floors-3AB01C6.jpg",
         ]),
@@ -114,7 +114,7 @@ hotels = [
         "avoid_if": ["Long-term stays"],
         "booking_url": None, "agoda_url": None,
         "rating_avg": 3.9,
-        "opening_hours": {k: {"open": "00:00", "close": "23:59", "closed": False} for k in ["mon","tue","wed","thu","fri","sat","sun"]},
+        "opening_hours": {k: {"open": "00:00", "close": "23:59", "closed": False} for k in ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]},
         "image_url": json.dumps(["/static/places/S__17817771-1.jpg"]),
     },
     {
@@ -127,7 +127,7 @@ hotels = [
         "avoid_if": ["Families with young children", "Luxury seekers"],
         "booking_url": None, "agoda_url": None,
         "rating_avg": 4.2,
-        "opening_hours": {k: {"open": "00:00", "close": "23:59", "closed": False} for k in ["mon","tue","wed","thu","fri","sat","sun"]},
+        "opening_hours": {k: {"open": "00:00", "close": "23:59", "closed": False} for k in ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]},
         "image_url": json.dumps(["/static/places/images.jpg"]),
     },
     {
@@ -141,7 +141,7 @@ hotels = [
         "booking_url": "https://www.booking.com/hotel/la/savan-vegas.html",
         "agoda_url": "https://www.agoda.com/savan-vegas",
         "rating_avg": 4.4,
-        "opening_hours": {k: {"open": "00:00", "close": "23:59", "closed": False} for k in ["mon","tue","wed","thu","fri","sat","sun"]},
+        "opening_hours": {k: {"open": "00:00", "close": "23:59", "closed": False} for k in ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]},
         "image_url": json.dumps(["/static/places/DATN4.png"]),
     },
     {
@@ -154,7 +154,7 @@ hotels = [
         "avoid_if": ["Tourists wanting city-center access"],
         "booking_url": None, "agoda_url": None,
         "rating_avg": 3.7,
-        "opening_hours": {k: {"open": "00:00", "close": "23:59", "closed": False} for k in ["mon","tue","wed","thu","fri","sat","sun"]},
+        "opening_hours": {k: {"open": "00:00", "close": "23:59", "closed": False} for k in ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]},
         "image_url": json.dumps(["/static/places/lao-lao-bao-savannakhet-vieng-chan-5n4d-62b433cc4c943.jpg"]),
     },
     {
@@ -167,7 +167,7 @@ hotels = [
         "avoid_if": ["City-center activities seekers"],
         "booking_url": None, "agoda_url": None,
         "rating_avg": 4.2,
-        "opening_hours": {k: {"open": "00:00", "close": "23:59", "closed": False} for k in ["mon","tue","wed","thu","fri","sat","sun"]},
+        "opening_hours": {k: {"open": "00:00", "close": "23:59", "closed": False} for k in ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]},
         "image_url": json.dumps(["/static/places/savannakhet-laos-travel-photo-20250720095434486-photo-thumb.jpg"]),
     },
     {
@@ -180,7 +180,7 @@ hotels = [
         "avoid_if": ["Business travelers needing high-speed wifi"],
         "booking_url": None, "agoda_url": None,
         "rating_avg": 3.6,
-        "opening_hours": {k: {"open": "00:00", "close": "23:59", "closed": False} for k in ["mon","tue","wed","thu","fri","sat","sun"]},
+        "opening_hours": {k: {"open": "00:00", "close": "23:59", "closed": False} for k in ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]},
         "image_url": json.dumps(["/static/places/caption.jpg"]),
     },
     {
@@ -193,7 +193,7 @@ hotels = [
         "avoid_if": ["Large groups"],
         "booking_url": None, "agoda_url": None,
         "rating_avg": 4.0,
-        "opening_hours": {k: {"open": "00:00", "close": "23:59", "closed": False} for k in ["mon","tue","wed","thu","fri","sat","sun"]},
+        "opening_hours": {k: {"open": "00:00", "close": "23:59", "closed": False} for k in ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]},
         "image_url": json.dumps(["/static/places/doi-net-Chua-that-ing-hang-lao.jpg"]),
     },
     {
@@ -206,7 +206,7 @@ hotels = [
         "avoid_if": ["Party seekers", "Late-night entertainment seekers"],
         "booking_url": None, "agoda_url": None,
         "rating_avg": 4.4,
-        "opening_hours": {k: {"open": "00:00", "close": "23:59", "closed": False} for k in ["mon","tue","wed","thu","fri","sat","sun"]},
+        "opening_hours": {k: {"open": "00:00", "close": "23:59", "closed": False} for k in ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]},
         "image_url": json.dumps(["/static/places/unnamed.webp"]),
     },
     {
@@ -219,7 +219,7 @@ hotels = [
         "avoid_if": ["Leisure travelers", "Budget travelers"],
         "booking_url": None, "agoda_url": None,
         "rating_avg": 3.9,
-        "opening_hours": {k: {"open": "00:00", "close": "23:59", "closed": False} for k in ["mon","tue","wed","thu","fri","sat","sun"]},
+        "opening_hours": {k: {"open": "00:00", "close": "23:59", "closed": False} for k in ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]},
         "image_url": json.dumps(["/static/places/unnamed (1).webp"]),
     },
     {
@@ -232,7 +232,7 @@ hotels = [
         "avoid_if": ["Budget travelers", "Those needing modern amenities"],
         "booking_url": None, "agoda_url": None,
         "rating_avg": 4.7,
-        "opening_hours": {k: {"open": "00:00", "close": "23:59", "closed": False} for k in ["mon","tue","wed","thu","fri","sat","sun"]},
+        "opening_hours": {k: {"open": "00:00", "close": "23:59", "closed": False} for k in ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]},
         "image_url": json.dumps([
             "/static/places/laos-savannakhet-lao-chaleun-square-night-market-located-within-the-grounds-of-the-former-lao-chaleun-complex-built-in-the-1960s-3AB00X1.jpg",
         ]),
@@ -247,7 +247,7 @@ hotels = [
         "avoid_if": ["Budget travelers", "Group tours"],
         "booking_url": None, "agoda_url": None,
         "rating_avg": 4.9,
-        "opening_hours": {k: {"open": "00:00", "close": "23:59", "closed": False} for k in ["mon","tue","wed","thu","fri","sat","sun"]},
+        "opening_hours": {k: {"open": "00:00", "close": "23:59", "closed": False} for k in ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]},
         "image_url": json.dumps(["/static/places/unnamed (2).webp"]),
     },
     {
@@ -260,7 +260,7 @@ hotels = [
         "avoid_if": ["Long-stay guests", "Luxury seekers"],
         "booking_url": None, "agoda_url": None,
         "rating_avg": 3.5,
-        "opening_hours": {k: {"open": "00:00", "close": "23:59", "closed": False} for k in ["mon","tue","wed","thu","fri","sat","sun"]},
+        "opening_hours": {k: {"open": "00:00", "close": "23:59", "closed": False} for k in ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]},
         "image_url": json.dumps(["/static/places/iStock-1152768728.jpg"]),
     },
     {
@@ -273,7 +273,7 @@ hotels = [
         "avoid_if": ["Budget travelers"],
         "booking_url": None, "agoda_url": None,
         "rating_avg": 4.3,
-        "opening_hours": {k: {"open": "00:00", "close": "23:59", "closed": False} for k in ["mon","tue","wed","thu","fri","sat","sun"]},
+        "opening_hours": {k: {"open": "00:00", "close": "23:59", "closed": False} for k in ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]},
         "image_url": json.dumps(["/static/places/place-talat-yen-savannakhet-laos-900x600.webp"]),
     },
     {
@@ -286,10 +286,11 @@ hotels = [
         "avoid_if": ["Budget travelers", "Solo travelers"],
         "booking_url": None, "agoda_url": None,
         "rating_avg": 4.6,
-        "opening_hours": {k: {"open": "00:00", "close": "23:59", "closed": False} for k in ["mon","tue","wed","thu","fri","sat","sun"]},
+        "opening_hours": {k: {"open": "00:00", "close": "23:59", "closed": False} for k in ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]},
         "image_url": json.dumps(["/static/places/16a1ac436d864c2c360d1ef7fa857492.jpg"]),
     },
 ]
+
 
 def seed():
     db = SessionLocal()
@@ -297,24 +298,24 @@ def seed():
         added = 0
         for h in hotels:
             place = Place(
-                category_id   = HOTEL_CATEGORY_ID,
-                name          = h["name"],
-                description   = h["description"],
-                location_lat  = h["location_lat"],
-                location_lng  = h["location_lng"],
-                image_url     = h["image_url"],
-                opening_hours = h["opening_hours"],
-                is_published  = True,
-                status        = "approved",
-                rating_avg    = h["rating_avg"],
-                best_months   = h["best_months"],
-                ideal_stay    = h["ideal_stay"],
-                daily_budget  = h["daily_budget"],
-                location_name = h["location_name"],
-                best_for      = h["best_for"],
-                avoid_if      = h["avoid_if"],
-                booking_url   = h["booking_url"],
-                agoda_url     = h["agoda_url"],
+                category_id=HOTEL_CATEGORY_ID,
+                name=h["name"],
+                description=h["description"],
+                location_lat=h["location_lat"],
+                location_lng=h["location_lng"],
+                image_url=h["image_url"],
+                opening_hours=h["opening_hours"],
+                is_published=True,
+                status="approved",
+                rating_avg=h["rating_avg"],
+                best_months=h["best_months"],
+                ideal_stay=h["ideal_stay"],
+                daily_budget=h["daily_budget"],
+                location_name=h["location_name"],
+                best_for=h["best_for"],
+                avoid_if=h["avoid_if"],
+                booking_url=h["booking_url"],
+                agoda_url=h["agoda_url"],
             )
             db.add(place)
             added += 1
@@ -329,7 +330,10 @@ def seed():
     finally:
         db.close()
 
+
 if __name__ == "__main__":
-    import sys; sys.stdout.reconfigure(encoding='utf-8', errors='replace') if hasattr(sys.stdout, 'reconfigure') else None
+    import sys
+    sys.stdout.reconfigure(
+        encoding='utf-8', errors='replace') if hasattr(sys.stdout, 'reconfigure') else None
     print("Seeding hotel data for Savannakhet...\n")
     seed()

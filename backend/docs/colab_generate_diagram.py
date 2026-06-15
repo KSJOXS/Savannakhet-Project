@@ -17,33 +17,33 @@ print("matplotlib version:", matplotlib.__version__)
 OUTPUT_PATH = "/content/model_architecture.png"   # <-- บันทึกใน Colab
 
 # ── 3. สีทั้งหมด
-C_BG        = "#FAFBFF"
-C_INPUT_BD  = "#4A90D9"
-C_INPUT_BG  = "#EEF4FF"
-C_USER_BG   = "#DBEAFE"
-C_USER_BD   = "#2563EB"
-C_PLACE_BG  = "#D1FAE5"
-C_PLACE_BD  = "#059669"
-C_GRAPH_BG  = "#EDE9FE"
-C_GRAPH_BD  = "#7C3AED"
-C_GNN_BG    = "#F3E8FF"
-C_GNN_BD    = "#9333EA"
-C_LAYER_BG  = "#FAF5FF"
-C_EMB_BG    = "#EDE9FE"
-C_SGNN_BG   = "#DBEAFE"
-C_SGNN_BD   = "#1D4ED8"
-C_SCB_BG    = "#D1FAE5"
-C_SCB_BD    = "#047857"
-C_FUSE_BG   = "#FEF3C7"
-C_FUSE_BD   = "#D97706"
-C_OUT_BG    = "#FEE2E2"
-C_OUT_BD    = "#DC2626"
-C_XAI1_BG  = "#E0F2FE"
-C_XAI2_BG  = "#ECFDF5"
-C_ARROW     = "#475569"
+C_BG = "#FAFBFF"
+C_INPUT_BD = "#4A90D9"
+C_INPUT_BG = "#EEF4FF"
+C_USER_BG = "#DBEAFE"
+C_USER_BD = "#2563EB"
+C_PLACE_BG = "#D1FAE5"
+C_PLACE_BD = "#059669"
+C_GRAPH_BG = "#EDE9FE"
+C_GRAPH_BD = "#7C3AED"
+C_GNN_BG = "#F3E8FF"
+C_GNN_BD = "#9333EA"
+C_LAYER_BG = "#FAF5FF"
+C_EMB_BG = "#EDE9FE"
+C_SGNN_BG = "#DBEAFE"
+C_SGNN_BD = "#1D4ED8"
+C_SCB_BG = "#D1FAE5"
+C_SCB_BD = "#047857"
+C_FUSE_BG = "#FEF3C7"
+C_FUSE_BD = "#D97706"
+C_OUT_BG = "#FEE2E2"
+C_OUT_BD = "#DC2626"
+C_XAI1_BG = "#E0F2FE"
+C_XAI2_BG = "#ECFDF5"
+C_ARROW = "#475569"
 C_TEXT_DARK = "#1E293B"
-C_TEXT_MID  = "#334155"
-C_TEXT_LIGHT= "#64748B"
+C_TEXT_MID = "#334155"
+C_TEXT_LIGHT = "#64748B"
 
 # ── 4. Helper functions
 fig, ax = plt.subplots(figsize=(14, 20))
@@ -53,6 +53,7 @@ ax.set_xlim(0, 14)
 ax.set_ylim(0, 20)
 ax.axis("off")
 
+
 def draw_box(ax, x, y, w, h, fc, ec, radius=0.25, lw=1.8):
     box = FancyBboxPatch((x, y), w, h,
                          boxstyle=f"round,pad=0,rounding_size={radius}",
@@ -60,15 +61,18 @@ def draw_box(ax, x, y, w, h, fc, ec, radius=0.25, lw=1.8):
                          linewidth=lw, zorder=3)
     ax.add_patch(box)
 
+
 def txt(ax, x, y, s, fs=9, fw="normal", color=C_TEXT_DARK,
         ha="center", va="center", style="normal"):
     ax.text(x, y, s, fontsize=fs, fontweight=fw, color=color,
             ha=ha, va=va, fontstyle=style, zorder=5)
 
+
 def arrow(ax, x1, y1, x2, y2, color=C_ARROW, lw=1.6):
     ax.annotate("", xy=(x2, y2), xytext=(x1, y1),
                 arrowprops=dict(arrowstyle="->", color=color, lw=lw,
                                 connectionstyle="arc3,rad=0"))
+
 
 # ── 5. TITLE
 txt(ax, 7, 19.55,
@@ -81,13 +85,15 @@ ax.plot([1, 13], [18.88, 18.88], color="#C4B5FD", lw=1.5, zorder=4)
 
 # ── 6. SECTION 1 — INPUT DATA
 draw_box(ax, 0.8, 15.6, 12.4, 3.1, C_INPUT_BG, C_INPUT_BD, radius=0.3, lw=2)
-txt(ax, 7, 18.55, "(1) DU LIEU DAU VAO  (Input Data)", fs=10, fw="bold", color=C_USER_BD)
+txt(ax, 7, 18.55, "(1) DU LIEU DAU VAO  (Input Data)",
+    fs=10, fw="bold", color=C_USER_BD)
 
 # User box
 draw_box(ax, 1.1, 15.9, 3.6, 2.45, C_USER_BG, C_USER_BD, lw=1.8)
 txt(ax, 2.9, 18.05, "Nguoi Dung (User)", fs=9.5, fw="bold", color=C_USER_BD)
 txt(ax, 2.9, 17.65, r"$x_u \in \mathbb{R}^{10}$", fs=9, color=C_TEXT_DARK)
-txt(ax, 2.9, 17.30, "Multi-hot Encoding", fs=8, color=C_TEXT_LIGHT, style="italic")
+txt(ax, 2.9, 17.30, "Multi-hot Encoding",
+    fs=8, color=C_TEXT_LIGHT, style="italic")
 txt(ax, 2.9, 16.95, "10 danh muc so thich", fs=8, color=C_TEXT_LIGHT)
 txt(ax, 2.9, 16.58,
     "[■ ■ ■ □ □ □ □ □ □ □]",
@@ -112,14 +118,17 @@ txt(ax, 10.95, 17.30, "Canh duong: View, Like, Review", fs=7.8, color=C_TEXT_LIG
 txt(ax, 10.95, 16.97, "Canh am: Negative Sampling", fs=7.8, color=C_TEXT_LIGHT)
 
 # Mini bipartite graph inside Graph box
-ux = [9.55, 9.55, 9.55]; uy = [16.65, 16.40, 16.15]
-px = [11.55, 11.55];     py = [16.55, 16.25]
+ux = [9.55, 9.55, 9.55]
+uy = [16.65, 16.40, 16.15]
+px = [11.55, 11.55]
+py = [16.55, 16.25]
 for xi, yi in zip(ux, uy):
     ax.plot(xi, yi, 'o', color=C_USER_BD, ms=6, zorder=6)
 for xi, yi in zip(px, py):
     ax.plot(xi, yi, 's', color=C_PLACE_BD, ms=6, zorder=6)
-for ui, pi in [(0,0),(0,1),(1,0),(2,1)]:
-    ax.plot([ux[ui], px[pi]], [uy[ui], py[pi]], color="#94A3B8", lw=1, zorder=5)
+for ui, pi in [(0, 0), (0, 1), (1, 0), (2, 1)]:
+    ax.plot([ux[ui], px[pi]], [uy[ui], py[pi]],
+            color="#94A3B8", lw=1, zorder=5)
 
 # Arrows input -> GNN
 for xc in [2.9, 7.1, 10.95]:
@@ -133,7 +142,8 @@ txt(ax, 7, 15.07,
 
 # Layer 1
 draw_box(ax, 1.1, 13.6, 5.5, 1.3, C_LAYER_BG, "#A78BFA", lw=1.5)
-txt(ax, 3.85, 14.60, "Tang 1 - Sample & Aggregate", fs=9, fw="bold", color="#5B21B6")
+txt(ax, 3.85, 14.60, "Tang 1 - Sample & Aggregate",
+    fs=9, fw="bold", color="#5B21B6")
 txt(ax, 3.85, 14.18,
     r"$h^{(1)}_{\mathrm{agg}} = \mathrm{MEAN}(\{h^{(0)}_u \mid u \in \mathcal{S}(v)\})$",
     fs=9, color=C_TEXT_DARK)
@@ -173,7 +183,8 @@ txt(ax, 3.45, 10.77,
 
 # Content-Based Score
 draw_box(ax, 7.9, 10.45, 5.3, 1.0, C_SCB_BG, C_SCB_BD, lw=1.8)
-txt(ax, 10.55, 11.18, "Content-Based Score  (trong so 40%)", fs=9, fw="bold", color=C_SCB_BD)
+txt(ax, 10.55, 11.18, "Content-Based Score  (trong so 40%)",
+    fs=9, fw="bold", color=C_SCB_BD)
 txt(ax, 10.55, 10.77,
     r"$S_{\mathrm{CB}} = \mathrm{cosine}(x_u, x_p)$",
     fs=9, color=C_TEXT_DARK)
@@ -193,7 +204,8 @@ arrow(ax, 7.0, 8.85, 7.0, 8.37, color=C_FUSE_BD, lw=2)
 
 # ── 11. SECTION 5 — OUTPUT
 draw_box(ax, 2.5, 7.35, 9.0, 1.0, C_OUT_BG, C_OUT_BD, radius=0.3, lw=2)
-txt(ax, 7.0, 8.10, "(5) Sap xep & Tra ve  Top-K = 10 Dia Diem", fs=10, fw="bold", color=C_OUT_BD)
+txt(ax, 7.0, 8.10, "(5) Sap xep & Tra ve  Top-K = 10 Dia Diem",
+    fs=10, fw="bold", color=C_OUT_BD)
 txt(ax, 7.0, 7.65,
     r"sort $\downarrow$ $S_{\mathrm{final}}$  -->  Loai tru da Review  -->  Top-10 ket qua",
     fs=8.5, color=C_TEXT_DARK)

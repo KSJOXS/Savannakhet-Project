@@ -1,3 +1,4 @@
+from fastapi import Form
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func, desc
@@ -9,6 +10,7 @@ router = APIRouter(tags=["Admin Dashboard"])
 
 # --- 0. Places Approval Management ---
 
+
 @router.get("/admin/places/pending")
 def get_pending_places(db: Session = Depends(get_db)):
     from sqlalchemy.orm import selectinload
@@ -16,7 +18,7 @@ def get_pending_places(db: Session = Depends(get_db)):
         selectinload(models.Place.category),
         selectinload(models.Place.owner)
     ).filter(models.Place.status == "pending").all()
-    
+
     result = []
     for p in places:
         result.append({
@@ -37,60 +39,67 @@ def get_pending_places(db: Session = Depends(get_db)):
         })
     return result
 
-from fastapi import Form
+
 @router.put("/admin/places/{place_id}/status")
 def update_place_status(place_id: int, status: str = Form(...), db: Session = Depends(get_db)):
     place = db.query(models.Place).filter(models.Place.id == place_id).first()
     if not place:
         raise HTTPException(status_code=404, detail="Place not found.")
-    
+
     place.status = status
     if status == 'approved':
         place.is_published = True
     elif status == 'rejected':
         place.is_published = False
-        
+
     db.commit()
     return {"message": f"Place status updated to {status}"}
 
 # --- 0.5 User Permissions Management ---
 
+
 @router.get("/admin/users/pending-permissions", response_model=List[schemas.UserResponse])
 def get_pending_user_permissions(db: Session = Depends(get_db)):
     return db.query(models.User).filter(models.User.post_permission_status == "pending").all()
+
 
 @router.put("/admin/users/{user_id}/post-permission-status")
 def update_user_post_permission(user_id: int, status: str = Form(...), db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found.")
-    
+
     user.post_permission_status = status
     db.commit()
     return {"message": f"User post permission updated to {status}"}
 
 # --- 1. Category Management ---
 
+
 @router.get("/categories", response_model=List[schemas.CategoryResponse])
 def get_categories(db: Session = Depends(get_db)):
     return db.query(models.Category).all()
 
+
 @router.post("/admin/categories")
 def create_category(cat: schemas.CategoryCreate, db: Session = Depends(get_db)):
     # เพิ่มการเช็คชื่อซ้ำเบื้องต้น
-    existing = db.query(models.Category).filter(models.Category.name == cat.name).first()
+    existing = db.query(models.Category).filter(
+        models.Category.name == cat.name).first()
     if existing:
         raise HTTPException(status_code=400, detail="Category already exists.")
-    
+
     new_cat = models.Category(name=cat.name, parent_type=cat.parent_type)
     db.add(new_cat)
     db.commit()
     db.refresh(new_cat)
     return {"message": "Category created successfully.", "id": new_cat.id}
 
+
 @router.delete("/admin/categories/{cat_id}")
 def delete_category(cat_id: int, db: Session = Depends(get_db)):
-    cat = db.query(models.Category).filter(models.Category.id == cat_id).first()
+    cat = db.query(models.Category).filter(
+        models.Category.id == cat_id).first()
     if not cat:
         raise HTTPException(status_code=404, detail="Category not found.")
     db.delete(cat)
@@ -98,6 +107,7 @@ def delete_category(cat_id: int, db: Session = Depends(get_db)):
     return {"message": "Category deleted successfully."}
 
 # --- 2. Review / Comment Management (สำหรับตาราง Admin) ---
+
 
 @router.get("/admin/all-comments")
 def get_all_reviews_admin(db: Session = Depends(get_db)):
@@ -109,14 +119,17 @@ def get_all_reviews_admin(db: Session = Depends(get_db)):
         models.User.username,
         models.Place.id.label("place_id"),
         models.Place.name.label("place_name"),
-        models.Place.image_url.label("place_image") # ดึงรูปมาโชว์ในตารางด้วย
+        models.Place.image_url.label("place_image")  # ดึงรูปมาโชว์ในตารางด้วย
     ).join(models.User).join(models.Place).all()
-    
+
     return results
 
-@router.delete("/admin/comments/{comment_id}") # เปลี่ยน path ให้เป็น /admin/ ตามมาตรฐาน
+
+# เปลี่ยน path ให้เป็น /admin/ ตามมาตรฐาน
+@router.delete("/admin/comments/{comment_id}")
 def delete_comment(comment_id: int, db: Session = Depends(get_db)):
-    comment = db.query(models.Interaction).filter(models.Interaction.id == comment_id).first()
+    comment = db.query(models.Interaction).filter(
+        models.Interaction.id == comment_id).first()
     if not comment:
         raise HTTPException(status_code=404, detail="Review not found.")
     db.delete(comment)
@@ -125,6 +138,7 @@ def delete_comment(comment_id: int, db: Session = Depends(get_db)):
 
 # --- 3. System Statistics (สำหรับหน้า Dashboard) ---
 
+
 @router.get("/admin/stats")
 def get_system_stats(db: Session = Depends(get_db)):
     try:
@@ -132,7 +146,8 @@ def get_system_stats(db: Session = Depends(get_db)):
         total_users = db.query(models.User).count()
         total_places = db.query(models.Place).count()
         # นับจากตาราง user_interactions ตามรูป DB ของคุณ
-        total_reviews = db.query(models.Interaction).filter(models.Interaction.comment != None).count()
+        total_reviews = db.query(models.Interaction).filter(
+            models.Interaction.comment != None).count()
 
         # 2. ดึงสถิติหมวดหมู่ (ดึงมาโชว์ในกราฟ Progress Bar)
         cat_stats = db.query(
@@ -160,6 +175,7 @@ def get_system_stats(db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail="Database Query Error")
 
 # --- 4. AI / GNN Management ---
+
 
 @router.post("/admin/gnn/train")
 def trigger_gnn_training(db: Session = Depends(get_db)):

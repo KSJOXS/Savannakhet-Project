@@ -15,6 +15,8 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
 # ฟังก์ชันสำหรับเปิด/ปิด Database Session
+
+
 def get_db():
     db = SessionLocal()
     try:

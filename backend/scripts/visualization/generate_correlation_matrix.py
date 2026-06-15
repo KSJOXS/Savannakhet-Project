@@ -1,11 +1,13 @@
+from app.models import Place, Category, InteractionLog
+from app.database import SessionLocal
+import matplotlib as mpl
+import matplotlib.pyplot as plt
 import os
 import sys
 import pandas as pd
 import seaborn as sns
 import matplotlib
 matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-import matplotlib as mpl
 
 mpl.rcParams['font.family'] = 'Arial'
 
@@ -15,21 +17,19 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 backend_dir = os.path.dirname(os.path.dirname(current_dir))
 sys.path.append(backend_dir)
 
-from app.database import SessionLocal
-from app.models import Place, Category, InteractionLog
 
 def generate_corr_matrix():
     db = SessionLocal()
-    
+
     places = db.query(Place).all()
-    
+
     # We want to build a dataset of places to see feature correlations
     data = []
-    
+
     for p in places:
         # Get category parent_type
         cat_type = p.category.parent_type if p.category else 'other'
-        
+
         row = {
             'Latitude': float(p.location_lat) if p.location_lat else 0.0,
             'Longitude': float(p.location_lng) if p.location_lng else 0.0,
@@ -41,19 +41,20 @@ def generate_corr_matrix():
             'Is Landmark': 1 if cat_type == 'landmark' else 0,
             'Is Chill': 1 if cat_type == 'chill' else 0,
         }
-        
+
         # Also let's get interaction count for popularity
-        interaction_count = db.query(InteractionLog).filter(InteractionLog.place_id == p.id).count()
+        interaction_count = db.query(InteractionLog).filter(
+            InteractionLog.place_id == p.id).count()
         row['Popularity (Interactions)'] = interaction_count
-        
+
         data.append(row)
-        
+
     db.close()
-    
+
     if not data:
         print("No data available to generate correlation matrix.")
         return
-        
+
     df = pd.DataFrame(data)
 
     # Compute the correlation matrix
@@ -86,11 +87,13 @@ def generate_corr_matrix():
     plt.xticks(ha='right')
 
     plt.tight_layout()
-    plots_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'plots')
+    plots_dir = os.path.join(os.path.dirname(
+        os.path.abspath(__file__)), 'plots')
     os.makedirs(plots_dir, exist_ok=True)
     output_path = os.path.join(plots_dir, 'place_correlation_matrix.png')
     plt.savefig(output_path, dpi=300, bbox_inches='tight', facecolor='white')
     print(f"Successfully saved: {output_path}")
+
 
 if __name__ == '__main__':
     generate_corr_matrix()

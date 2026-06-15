@@ -1,10 +1,10 @@
+from app.models import Place
+from app.database import SessionLocal
 import sys
 import os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from app.database import SessionLocal
-from app.models import Place
 
 updates = {
     "Daosavanh Resort & Spa": "A 4-star hotel located along the Mekong River, featuring a spa and outdoor pool with stunning river views. Ideal for couples and families.",
@@ -29,6 +29,7 @@ updates = {
     "Golden Palace Hotel Savannakhet": "A palace-style hotel with luxurious rooms. Features large gardens, a tennis court, a fitness center, and a full-service spa. Perfect for weddings."
 }
 
+
 def update():
     db = SessionLocal()
     try:
@@ -46,6 +47,7 @@ def update():
         print(f"Error: {e}")
     finally:
         db.close()
+
 
 if __name__ == "__main__":
     update()

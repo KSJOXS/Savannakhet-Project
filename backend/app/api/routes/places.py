@@ -20,6 +20,8 @@ router = APIRouter(tags=["Places Management"])
 UPLOAD_DIR = "static/places"
 
 # --- Public: Get all places ---
+
+
 @router.get("/places", response_model=List[schemas.PlaceResponse])
 def get_places(
     category_id: Optional[int] = None,
@@ -27,16 +29,19 @@ def get_places(
     db: Session = Depends(get_db)
 ):
     from sqlalchemy.orm import selectinload
-    query = db.query(models.Place).options(selectinload(models.Place.interactions))
+    query = db.query(models.Place).options(
+        selectinload(models.Place.interactions))
     if not include_drafts:
-        query = query.filter(models.Place.is_published == True, models.Place.status == 'approved')
+        query = query.filter(models.Place.is_published ==
+                             True, models.Place.status == 'approved')
     if category_id:
         query = query.filter(models.Place.category_id == category_id)
-    
+
     places = query.all()
     for p in places:
         p.review_count = len([i for i in p.interactions if i.comment])
     return places
+
 
 @router.get("/places/trending", response_model=List[schemas.PlaceResponse])
 def get_trending_places(limit: int = 10, db: Session = Depends(get_db)):
@@ -45,43 +50,47 @@ def get_trending_places(limit: int = 10, db: Session = Depends(get_db)):
     """
     from sqlalchemy import func
     from sqlalchemy.orm import selectinload
-    
+
     # คำนวณหา Place ID ที่มี Interaction Weight รวมสูงสุด
     popular_ids = db.query(
         models.InteractionLog.place_id,
-        func.sum(models.InteractionLog.interaction_weight).label('total_weight')
+        func.sum(models.InteractionLog.interaction_weight).label(
+            'total_weight')
     ).group_by(models.InteractionLog.place_id)\
      .order_by(func.sum(models.InteractionLog.interaction_weight).desc())\
      .limit(limit).all()
-    
+
     if not popular_ids:
         # Fallback to top rating if no logs
         return db.query(models.Place).filter(models.Place.is_published == True, models.Place.status == 'approved').order_by(models.Place.rating_avg.desc()).limit(limit).all()
-        
+
     ids = [p[0] for p in popular_ids]
-    
+
     # ดึงข้อมูล Place ตาม ID ที่ได้
     places = db.query(models.Place)\
         .options(selectinload(models.Place.interactions))\
         .filter(models.Place.id.in_(ids))\
         .all()
-    
+
     # เรียงลำดับตามความนิยมเดิม
     places_sorted = sorted(places, key=lambda x: ids.index(x.id))
-    
+
     for p in places_sorted:
         p.review_count = len([i for i in p.interactions if i.comment])
-        
+
     return places_sorted
+
 
 @router.get("/places/{place_id}", response_model=schemas.PlaceResponse)
 def get_place_detail(place_id: int, db: Session = Depends(get_db)):
     from sqlalchemy.orm import selectinload
-    place = db.query(models.Place).options(selectinload(models.Place.interactions)).filter(models.Place.id == place_id).first()
+    place = db.query(models.Place).options(selectinload(
+        models.Place.interactions)).filter(models.Place.id == place_id).first()
     if not place:
         raise HTTPException(status_code=404, detail="Place not found.")
     place.review_count = len([i for i in place.interactions if i.comment])
     return place
+
 
 @router.get("/places/{place_id}/fans", response_model=List[schemas.UserResponse])
 def get_place_fans(place_id: int, limit: int = 5, db: Session = Depends(get_db)):
@@ -97,6 +106,8 @@ def get_place_fans(place_id: int, limit: int = 5, db: Session = Depends(get_db))
     return fans
 
 # --- User: Submit place ---
+
+
 @router.post("/places/submit")
 async def submit_place(
     name: str = Form(...),
@@ -110,8 +121,8 @@ async def submit_place(
     ideal_stay: Optional[str] = Form(None),
     daily_budget: Optional[str] = Form(None),
     location_name: Optional[str] = Form(None),
-    best_for: Optional[str] = Form(None), # JSON string
-    avoid_if: Optional[str] = Form(None), # JSON string
+    best_for: Optional[str] = Form(None),  # JSON string
+    avoid_if: Optional[str] = Form(None),  # JSON string
     booking_url: Optional[str] = Form(None),
     agoda_url: Optional[str] = Form(None),
     is_published: int = Form(1),
@@ -165,6 +176,8 @@ async def submit_place(
     return {"message": "Place submitted successfully. Waiting for admin approval.", "id": new_place.id}
 
 # --- Admin: Create place ---
+
+
 @router.post("/admin/places")
 async def create_place(
     name: str = Form(...),
@@ -178,8 +191,8 @@ async def create_place(
     ideal_stay: Optional[str] = Form(None),
     daily_budget: Optional[str] = Form(None),
     location_name: Optional[str] = Form(None),
-    best_for: Optional[str] = Form(None), # JSON string
-    avoid_if: Optional[str] = Form(None), # JSON string
+    best_for: Optional[str] = Form(None),  # JSON string
+    avoid_if: Optional[str] = Form(None),  # JSON string
     booking_url: Optional[str] = Form(None),
     agoda_url: Optional[str] = Form(None),
     images: Optional[List[UploadFile]] = File(None),
@@ -231,9 +244,11 @@ async def create_place(
     return {"message": "Place created successfully.", "id": new_place.id}
 
 # --- Admin: Update place ---
+
+
 @router.put("/admin/places/{place_id}")
 async def update_place(
-    place_id: int, 
+    place_id: int,
     name: str = Form(...),
     description: str = Form(...),
     category_id: int = Form(...),
@@ -245,16 +260,18 @@ async def update_place(
     ideal_stay: Optional[str] = Form(None),
     daily_budget: Optional[str] = Form(None),
     location_name: Optional[str] = Form(None),
-    best_for: Optional[str] = Form(None), # JSON string
-    avoid_if: Optional[str] = Form(None), # JSON string
+    best_for: Optional[str] = Form(None),  # JSON string
+    avoid_if: Optional[str] = Form(None),  # JSON string
     booking_url: Optional[str] = Form(None),
     agoda_url: Optional[str] = Form(None),
-    existing_image_urls: Optional[str] = Form(None),  # JSON array of old URLs to keep
+    existing_image_urls: Optional[str] = Form(
+        None),  # JSON array of old URLs to keep
     images: Optional[List[UploadFile]] = File(None),
     db: Session = Depends(get_db)
 ):
     try:
-        db_place = db.query(models.Place).filter(models.Place.id == place_id).first()
+        db_place = db.query(models.Place).filter(
+            models.Place.id == place_id).first()
         if not db_place:
             raise HTTPException(status_code=404, detail="Place not found.")
 
@@ -270,7 +287,7 @@ async def update_place(
                 db_place.opening_hours = json.loads(opening_hours)
             except Exception:
                 pass
-                
+
         # Update Premium Details
         db_place.best_months = best_months
         db_place.ideal_stay = ideal_stay
@@ -333,10 +350,13 @@ async def update_place(
         db.commit()
         return {"message": "Place updated successfully."}
     except Exception as e:
-        logging.error(f"Error updating place {place_id}: {str(e)}", exc_info=True)
+        logging.error(
+            f"Error updating place {place_id}: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 # --- Admin: Delete place ---
+
+
 @router.delete("/admin/places/{place_id}")
 def delete_place(place_id: int, db: Session = Depends(get_db)):
     place = db.query(models.Place).filter(models.Place.id == place_id).first()

@@ -1,11 +1,13 @@
 from app.database import SessionLocal
 from app.models import Category, Place
 
+
 def seed_hotel():
     db = SessionLocal()
     try:
         # 1. Create Hotel Category
-        hotel_cat = db.query(Category).filter(Category.name == "Hotel & Resort").first()
+        hotel_cat = db.query(Category).filter(
+            Category.name == "Hotel & Resort").first()
         if not hotel_cat:
             hotel_cat = Category(
                 name="Hotel & Resort",
@@ -22,7 +24,8 @@ def seed_hotel():
             print(f"Updated category: {hotel_cat.name} to type 'hotel'")
 
         # 2. Create a Sample Hotel
-        sample_hotel = db.query(Place).filter(Place.name == "Daosavanh Resort & Spa").first()
+        sample_hotel = db.query(Place).filter(
+            Place.name == "Daosavanh Resort & Spa").first()
         if not sample_hotel:
             sample_hotel = Place(
                 name="Daosavanh Resort & Spa",
@@ -45,6 +48,7 @@ def seed_hotel():
         db.rollback()
     finally:
         db.close()
+
 
 if __name__ == "__main__":
     seed_hotel()

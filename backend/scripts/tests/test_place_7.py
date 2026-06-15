@@ -11,7 +11,7 @@ try:
         print(f"Name: {place.name}")
         print(f"Best For: {place.best_for}")
         print(f"Avoid If: {place.avoid_if}")
-        
+
         # Test serialization
         from app import schemas
         p_res = schemas.PlaceResponse.from_orm(place)

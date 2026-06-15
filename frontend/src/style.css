@@ -1,6 +1,6 @@
 /* src/style.css */
 :root {
-  font-family: 'Prompt', sans-serif;
+  font-family: "Prompt", sans-serif;
   /* แนะนำให้หา FontPrompt มาใส่ครับ ดูทันสมัย */
   --primary-color: #2c3e50;
   --accent-color: #42b983;

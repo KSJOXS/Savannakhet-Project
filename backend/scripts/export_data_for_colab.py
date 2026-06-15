@@ -11,7 +11,11 @@ export_data_for_colab.py
   backend/docs/savannakhet_real_data.json   ← Upload นี้ขึ้น Colab
 """
 
-import sys, os, json
+from app.models import User, Place, Interaction, InteractionLog, Category
+from app.database import SessionLocal
+import sys
+import os
+import json
 
 # Force UTF-8 output on Windows
 if hasattr(sys.stdout, 'reconfigure'):
@@ -20,11 +24,10 @@ if hasattr(sys.stdout, 'reconfigure'):
 # ── เพิ่ม path ──
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from app.database import SessionLocal
-from app.models import User, Place, Interaction, InteractionLog, Category
 
 CATEGORIES = ['nature', 'culture', 'restaurant', 'hotel',
               'shopping', 'nightlife', 'cafe', 'local_food', 'chill', 'landmark']
+
 
 def export():
     db = SessionLocal()
@@ -40,8 +43,8 @@ def export():
                 except:
                     prefs = []
             users.append({
-                "id"         : u.id,
-                "username"   : u.username,
+                "id": u.id,
+                "username": u.username,
                 "preferences": prefs if isinstance(prefs, list) else [],
             })
 
@@ -51,10 +54,10 @@ def export():
         for p in places_raw:
             cat_type = p.category.parent_type if p.category else "other"
             places.append({
-                "id"           : p.id,
-                "name"         : p.name,
-                "category"     : cat_type,
-                "rating"       : float(p.rating_avg) if p.rating_avg else 0.0,
+                "id": p.id,
+                "name": p.name,
+                "category": cat_type,
+                "rating": float(p.rating_avg) if p.rating_avg else 0.0,
                 "location_name": p.location_name or "Savannakhet",
             })
 
@@ -62,12 +65,13 @@ def export():
         logs_raw = db.query(InteractionLog).all()
         interactions = []
         for log in logs_raw:
-            weight = float(log.interaction_weight) if log.interaction_weight else 1.0
+            weight = float(
+                log.interaction_weight) if log.interaction_weight else 1.0
             interactions.append({
-                "user_id"   : log.user_id,
-                "place_id"  : log.place_id,
-                "action"    : log.action_type,
-                "weight"    : weight,
+                "user_id": log.user_id,
+                "place_id": log.place_id,
+                "action": log.action_type,
+                "weight": weight,
             })
 
         # ── เพิ่ม interactions จากตาราง user_interactions (reviews) ──
@@ -78,22 +82,22 @@ def export():
             if not any(i["user_id"] == r.user_id and i["place_id"] == r.place_id
                        and i["action"] == "review" for i in interactions):
                 interactions.append({
-                    "user_id" : r.user_id,
+                    "user_id": r.user_id,
                     "place_id": r.place_id,
-                    "action"  : "review",
-                    "weight"  : 3.0,
+                    "action": "review",
+                    "weight": 3.0,
                 })
 
         # ── สรุป ──
         output = {
-            "categories"   : CATEGORIES,
-            "users"        : users,
-            "places"       : places,
-            "interactions" : interactions,
+            "categories": CATEGORIES,
+            "users": users,
+            "places": places,
+            "interactions": interactions,
             "stats": {
-                "num_users"        : len(users),
-                "num_places"       : len(places),
-                "num_interactions" : len(interactions),
+                "num_users": len(users),
+                "num_places": len(places),
+                "num_interactions": len(interactions),
             }
         }
 
@@ -120,6 +124,7 @@ def export():
 
     finally:
         db.close()
+
 
 if __name__ == "__main__":
     export()

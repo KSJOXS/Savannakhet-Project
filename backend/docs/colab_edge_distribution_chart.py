@@ -12,9 +12,9 @@ import numpy as np
 OUTPUT_PATH = "/content/edge_distribution_piechart.png"
 
 # ── ข้อมูล ──
-sizes    = [60, 25, 15]
-colors   = ['#3B82F6', '#10B981', '#F59E0B']   # Blue, Green, Amber
-explode  = (0.04, 0.04, 0.08)
+sizes = [60, 25, 15]
+colors = ['#3B82F6', '#10B981', '#F59E0B']   # Blue, Green, Amber
+explode = (0.04, 0.04, 0.08)
 
 fig, ax = plt.subplots(figsize=(8, 6.5))
 fig.patch.set_facecolor('#FAFBFF')
@@ -39,7 +39,8 @@ for at in autotexts:
     at.set_color('white')
 
 # ── วงกลมตรงกลาง (Donut style) ──
-centre_circle = plt.Circle((0, 0), 0.42, fc='#FAFBFF', linewidth=1.5, edgecolor='#E2E8F0')
+centre_circle = plt.Circle((0, 0), 0.42, fc='#FAFBFF',
+                           linewidth=1.5, edgecolor='#E2E8F0')
 ax.add_artist(centre_circle)
 
 # ── ข้อความตรงกลาง ──
@@ -50,9 +51,12 @@ ax.text(0, -0.12, '~500-1,500', ha='center', va='center',
 
 # ── Legend ──
 legend_elements = [
-    mpatches.Patch(facecolor=colors[0], edgecolor='white', label='View   - (w = 1.0)  ~60%'),
-    mpatches.Patch(facecolor=colors[1], edgecolor='white', label='Like   - (w = 2.0)  ~25%'),
-    mpatches.Patch(facecolor=colors[2], edgecolor='white', label='Review - (w = 3.0)  ~15%'),
+    mpatches.Patch(
+        facecolor=colors[0], edgecolor='white', label='View   - (w = 1.0)  ~60%'),
+    mpatches.Patch(
+        facecolor=colors[1], edgecolor='white', label='Like   - (w = 2.0)  ~25%'),
+    mpatches.Patch(
+        facecolor=colors[2], edgecolor='white', label='Review - (w = 3.0)  ~15%'),
 ]
 ax.legend(handles=legend_elements, loc='lower center',
           bbox_to_anchor=(0.5, -0.15), ncol=1,

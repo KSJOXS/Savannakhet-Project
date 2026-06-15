@@ -15,6 +15,7 @@ router = APIRouter(tags=["Reviews & Recommendations"])
 # POST /reviews — submit a review with multiple images
 UPLOAD_DIR_REVIEWS = "static/reviews"
 
+
 @router.post("/reviews")
 async def add_review(
     user_id: int = Form(...),
@@ -29,7 +30,8 @@ async def add_review(
     if images:
         os.makedirs(UPLOAD_DIR_REVIEWS, exist_ok=True)
         for img in images:
-            if not img.filename: continue
+            if not img.filename:
+                continue
             file_path = f"{UPLOAD_DIR_REVIEWS}/{datetime.now().timestamp()}_{img.filename}"
             with open(file_path, "wb") as buffer:
                 shutil.copyfileobj(img.file, buffer)
@@ -52,21 +54,25 @@ async def add_review(
             models.Interaction.place_id == place_id,
             models.Interaction.rating.isnot(None)
         ).scalar()
-        place = db.query(models.Place).filter(models.Place.id == place_id).first()
+        place = db.query(models.Place).filter(
+            models.Place.id == place_id).first()
         if place:
             place.rating_avg = round(float(avg_rating or 0), 1)
             db.commit()
-    
+
     return {"message": "Review submitted successfully", "review_id": new_review.id}
 
+
 def safe_json_load(data, default=[]):
-    if not data: return default
-    if isinstance(data, (list, dict)): return data
+    if not data:
+        return default
+    if isinstance(data, (list, dict)):
+        return data
     try:
         if isinstance(data, str):
             # บางครั้งข้อมูลใน DB อาจถูกครอบด้วย double quotes ซ้ำ (เช่น ""[]"")
             loaded = json.loads(data)
-            if isinstance(loaded, str): # ถ้าโหลดแล้วยังเป็น string ให้โหลดอีกรอบ
+            if isinstance(loaded, str):  # ถ้าโหลดแล้วยังเป็น string ให้โหลดอีกรอบ
                 return json.loads(loaded)
             return loaded
         return data
@@ -74,6 +80,8 @@ def safe_json_load(data, default=[]):
         return default
 
 # GET /places/{place_id}/comments — fetch reviews for a place
+
+
 @router.get("/places/{place_id}/comments")
 def get_place_comments(place_id: int, db: Session = Depends(get_db)):
     results = db.query(
@@ -105,6 +113,8 @@ def get_place_comments(place_id: int, db: Session = Depends(get_db)):
     return output
 
 # GET /community/feed — fetch all reviews for community feed
+
+
 @router.get("/community/feed")
 def get_community_feed(db: Session = Depends(get_db)):
     results = db.query(
@@ -121,7 +131,8 @@ def get_community_feed(db: Session = Depends(get_db)):
     output = []
     for r in results:
         try:
-            db_comments = db.query(models.PostComment).filter(models.PostComment.post_id == r.Interaction.id).order_by(models.PostComment.created_at.asc()).all()
+            db_comments = db.query(models.PostComment).filter(
+                models.PostComment.post_id == r.Interaction.id).order_by(models.PostComment.created_at.asc()).all()
             comments_list = []
             for c in db_comments:
                 comments_list.append({
@@ -153,6 +164,8 @@ def get_community_feed(db: Session = Depends(get_db)):
     return output
 
 # POST /reviews/{review_id}/comments — add comment to post
+
+
 @router.post("/reviews/{review_id}/comments")
 def add_post_comment(
     review_id: int,
@@ -160,10 +173,11 @@ def add_post_comment(
     comment_text: str = Form(...),
     db: Session = Depends(get_db)
 ):
-    post = db.query(models.Interaction).filter(models.Interaction.id == review_id).first()
+    post = db.query(models.Interaction).filter(
+        models.Interaction.id == review_id).first()
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
-    
+
     new_comment = models.PostComment(
         post_id=review_id,
         user_id=user_id,
@@ -175,22 +189,29 @@ def add_post_comment(
     return {"message": "Comment added successfully", "comment_id": new_comment.id}
 
 # DELETE /reviews/comments/{comment_id} — delete a comment
+
+
 @router.delete("/reviews/comments/{comment_id}")
 def delete_post_comment(comment_id: int, user_id: int, db: Session = Depends(get_db)):
-    comment = db.query(models.PostComment).filter(models.PostComment.id == comment_id, models.PostComment.user_id == user_id).first()
+    comment = db.query(models.PostComment).filter(
+        models.PostComment.id == comment_id, models.PostComment.user_id == user_id).first()
     if not comment:
-        raise HTTPException(status_code=404, detail="Comment not found or unauthorized")
+        raise HTTPException(
+            status_code=404, detail="Comment not found or unauthorized")
     db.delete(comment)
     db.commit()
     return {"message": "Comment deleted successfully"}
 
 # POST /reviews/{review_id}/like — toggle like
+
+
 @router.post("/reviews/{review_id}/like")
 def toggle_like(review_id: int, user_id: int, db: Session = Depends(get_db)):
-    review = db.query(models.Interaction).filter(models.Interaction.id == review_id).first()
+    review = db.query(models.Interaction).filter(
+        models.Interaction.id == review_id).first()
     if not review:
         raise HTTPException(status_code=404, detail="Review not found")
-    
+
     liked_by = review.liked_by if review.liked_by else []
     if isinstance(liked_by, str):
         liked_by = json.loads(liked_by)
@@ -200,12 +221,14 @@ def toggle_like(review_id: int, user_id: int, db: Session = Depends(get_db)):
     else:
         liked_by.append(user_id)
         status = "liked"
-    
+
     review.liked_by = liked_by
     db.commit()
     return {"status": status, "likes_count": len(liked_by)}
 
 # GET /recommendations/{user_id}
+
+
 @router.get("/recommendations/{user_id}")
 def get_recommendations(user_id: int, db: Session = Depends(get_db)):
     user_reviewed_ids = db.query(models.Interaction.place_id).filter(
@@ -256,31 +279,38 @@ def get_admin_all_comments(db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=str(e))
 
 # DELETE /admin/comments/{comment_id} — สำหรับปุ่มลบในหน้า Admin
+
+
 @router.delete("/admin/comments/{comment_id}")
 def delete_review(comment_id: int, db: Session = Depends(get_db)):
-    review = db.query(models.Interaction).filter(models.Interaction.id == comment_id).first()
+    review = db.query(models.Interaction).filter(
+        models.Interaction.id == comment_id).first()
     if not review:
         raise HTTPException(status_code=404, detail="Review not found")
-    
+
     db.delete(review)
     db.commit()
     return {"message": "Review deleted successfully"}
 
 # PUT /reviews/{review_id} — สำหรับ User แก้ไขคอมเมนต์ตัวเอง
+
+
 @router.put("/reviews/{review_id}")
 async def update_user_review(
     review_id: int,
     user_id: int = Form(...),
     rating: Optional[int] = Form(None),
     comment_text: Optional[str] = Form(None),
-    existing_images: str = Form("[]"), # JSON list of URLs to keep
+    existing_images: str = Form("[]"),  # JSON list of URLs to keep
     new_images: List[UploadFile] = File([]),
     db: Session = Depends(get_db)
 ):
-    review = db.query(models.Interaction).filter(models.Interaction.id == review_id, models.Interaction.user_id == user_id).first()
+    review = db.query(models.Interaction).filter(
+        models.Interaction.id == review_id, models.Interaction.user_id == user_id).first()
     if not review:
-        raise HTTPException(status_code=404, detail="Review not found or unauthorized")
-    
+        raise HTTPException(
+            status_code=404, detail="Review not found or unauthorized")
+
     # 1. Start with existing images to keep
     try:
         keep_images = json.loads(existing_images)
@@ -291,7 +321,8 @@ async def update_user_review(
     if new_images:
         os.makedirs(UPLOAD_DIR_REVIEWS, exist_ok=True)
         for img in new_images:
-            if not img.filename: continue
+            if not img.filename:
+                continue
             file_path = f"{UPLOAD_DIR_REVIEWS}/{datetime.now().timestamp()}_{img.filename}"
             with open(file_path, "wb") as buffer:
                 shutil.copyfileobj(img.file, buffer)
@@ -308,7 +339,8 @@ async def update_user_review(
             models.Interaction.place_id == review.place_id,
             models.Interaction.rating.isnot(None)
         ).scalar()
-        place = db.query(models.Place).filter(models.Place.id == review.place_id).first()
+        place = db.query(models.Place).filter(
+            models.Place.id == review.place_id).first()
         if place:
             place.rating_avg = round(float(avg_rating or 0), 1)
             db.commit()
@@ -316,12 +348,16 @@ async def update_user_review(
     return {"message": "Review updated successfully"}
 
 # DELETE /reviews/{review_id} — สำหรับ User ลบคอมเมนต์ตัวเอง
+
+
 @router.delete("/reviews/{review_id}")
 def delete_user_review(review_id: int, user_id: int, db: Session = Depends(get_db)):
-    review = db.query(models.Interaction).filter(models.Interaction.id == review_id, models.Interaction.user_id == user_id).first()
+    review = db.query(models.Interaction).filter(
+        models.Interaction.id == review_id, models.Interaction.user_id == user_id).first()
     if not review:
-        raise HTTPException(status_code=404, detail="Review not found or unauthorized")
-    
+        raise HTTPException(
+            status_code=404, detail="Review not found or unauthorized")
+
     place_id = review.place_id
     db.delete(review)
     db.commit()
@@ -332,7 +368,8 @@ def delete_user_review(review_id: int, user_id: int, db: Session = Depends(get_d
             models.Interaction.place_id == place_id,
             models.Interaction.rating.isnot(None)
         ).scalar()
-        place = db.query(models.Place).filter(models.Place.id == place_id).first()
+        place = db.query(models.Place).filter(
+            models.Place.id == place_id).first()
         if place:
             place.rating_avg = round(float(avg_rating or 0), 1)
             db.commit()

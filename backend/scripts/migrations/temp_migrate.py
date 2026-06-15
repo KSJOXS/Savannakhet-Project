@@ -1,8 +1,9 @@
+from sqlalchemy import text
+from app.database import engine
 import sys
 import os
 sys.path.append(os.getcwd())
-from app.database import engine
-from sqlalchemy import text
+
 
 def run_update():
     with engine.connect() as con:
@@ -15,6 +16,7 @@ def run_update():
         con.execute(text("UPDATE categories SET parent_type = 'nightlife' WHERE name LIKE '%bar%' OR name LIKE '%pub%' OR name LIKE '%night%' OR name LIKE '%club%' OR name LIKE '%เหล้า%' OR name LIKE '%บาร์%'"))
         con.commit()
         print("Success!")
+
 
 if __name__ == "__main__":
     run_update()

@@ -5,9 +5,11 @@ from app import models, schemas
 
 router = APIRouter(tags=["Favorites"])
 
+
 @router.post("/favorites/toggle")
 def toggle_favorite(data: schemas.FavoriteToggle, db: Session = Depends(get_db)):
-    place = db.query(models.Place).filter(models.Place.id == data.place_id).first()
+    place = db.query(models.Place).filter(
+        models.Place.id == data.place_id).first()
     if not place:
         raise HTTPException(status_code=404, detail="Place not found.")
 
@@ -25,6 +27,7 @@ def toggle_favorite(data: schemas.FavoriteToggle, db: Session = Depends(get_db))
         db.add(new_fav)
         db.commit()
         return {"status": "added", "place_id": data.place_id}
+
 
 @router.get("/users/{user_id}/favorites", response_model=list[schemas.FavoriteResponse])
 def get_user_favorites(user_id: int, db: Session = Depends(get_db)):

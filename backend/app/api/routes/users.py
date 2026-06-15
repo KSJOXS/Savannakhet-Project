@@ -1,3 +1,7 @@
+from typing import Optional
+import shutil
+import os
+from fastapi import UploadFile, File, Form, APIRouter, Depends, HTTPException, status
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
@@ -12,70 +16,83 @@ import secrets
 
 router = APIRouter(tags=["Users Management"])
 
+
 @router.post("/forgot-password")
 def forgot_password(request: schemas.ForgotPasswordRequest, db: Session = Depends(get_db)):
     """
     ขอกู้คืนรหัสผ่าน โดยส่ง Email เพื่อรับ Token
     """
-    user = db.query(models.User).filter(models.User.email == request.email).first()
+    user = db.query(models.User).filter(
+        models.User.email == request.email).first()
     # ส่งข้อความเดียวกันเสมอเพื่อความปลอดภัย (Prevent User Enumeration)
     # ส่งสถานะสำเร็จเสมอเพื่อความปลอดภัย
     msg = {"status": "success", "message": "RESET_LINK_SENT"}
-    
+
     if not user:
         return msg
-    
+
     # สร้าง Token แบบสุ่ม
     token = secrets.token_urlsafe(32)
-    
+
     # บันทึก Token ลง DB
     new_reset = models.PasswordReset(email=request.email, token=token)
     db.add(new_reset)
     db.commit()
-    
+
     # 📧 ส่งอีเมลจริง
     success = send_reset_password_email(request.email, token)
-    
+
     if success:
         print(f"✅ Email sent successfully to {request.email}")
     else:
-        print(f"❌ Failed to send email to {request.email} (Check SMTP settings)")
-    
+        print(
+            f"❌ Failed to send email to {request.email} (Check SMTP settings)")
+
     return msg
+
 
 @router.post("/reset-password")
 def reset_password(data: schemas.PasswordResetConfirm, db: Session = Depends(get_db)):
     """
     ยืนยันการตั้งรหัสผ่านใหม่ด้วย Token
     """
-    reset_entry = db.query(models.PasswordReset).filter(models.PasswordReset.token == data.token).first()
+    reset_entry = db.query(models.PasswordReset).filter(
+        models.PasswordReset.token == data.token).first()
     if not reset_entry:
-        raise HTTPException(status_code=400, detail="Token ไม่ถูกต้อง หรือหมดอายุแล้ว")
-    
-    user = db.query(models.User).filter(models.User.email == reset_entry.email).first()
+        raise HTTPException(
+            status_code=400, detail="Token ไม่ถูกต้อง หรือหมดอายุแล้ว")
+
+    user = db.query(models.User).filter(
+        models.User.email == reset_entry.email).first()
     if not user:
-        raise HTTPException(status_code=404, detail="ไม่พบผู้ใช้งานที่เกี่ยวข้องกับ Token นี้")
-    
+        raise HTTPException(
+            status_code=404, detail="ไม่พบผู้ใช้งานที่เกี่ยวข้องกับ Token นี้")
+
     # อัปเดตรหัสผ่านใหม่ (Hash ด้วย bcrypt)
     user.password_hash = auth.get_password_hash(data.new_password)
-    
+
     # ลบ Token ที่ใช้แล้วทิ้ง
     db.delete(reset_entry)
     db.commit()
-    
+
     return {"message": "ตั้งรหัสผ่านใหม่สำเร็จแล้ว! คุณสามารถเข้าสู่ระบบด้วยรหัสผ่านใหม่ได้ทันที"}
+
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)
 def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    db_user = db.query(models.User).filter(models.User.username == user.username).first()
+    db_user = db.query(models.User).filter(
+        models.User.username == user.username).first()
     if db_user:
-        raise HTTPException(status_code=400, detail="This username is already taken.")
-    existing_email = db.query(models.User).filter(models.User.email == user.email).first()
+        raise HTTPException(
+            status_code=400, detail="This username is already taken.")
+    existing_email = db.query(models.User).filter(
+        models.User.email == user.email).first()
     if existing_email:
-        raise HTTPException(status_code=400, detail="This email is already registered.")
+        raise HTTPException(
+            status_code=400, detail="This email is already registered.")
     new_user = models.User(
         username=user.username, email=user.email,
-        password_hash=auth.get_password_hash(user.password), 
+        password_hash=auth.get_password_hash(user.password),
         preferences=user.preferences,
         role="user"
     )
@@ -83,29 +100,36 @@ def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db.commit()
     return {"message": "Registration successful."}
 
+
 @router.post("/login")
 def login(user_data: schemas.UserLogin, db: Session = Depends(get_db)):
-    user = db.query(models.User).filter(models.User.username == user_data.username).first()
+    user = db.query(models.User).filter(
+        models.User.username == user_data.username).first()
     if not user or user.deleted_at is not None:
-        raise HTTPException(status_code=401, detail="Account is suspended or does not exist.")
+        raise HTTPException(
+            status_code=401, detail="Account is suspended or does not exist.")
     if not auth.verify_password(user_data.password, user.password_hash):
-        raise HTTPException(status_code=401, detail="Invalid username or password.")
+        raise HTTPException(
+            status_code=401, detail="Invalid username or password.")
 
-    token = auth.create_access_token(data={"sub": user.username, "id": user.id, "role": user.role})
+    token = auth.create_access_token(
+        data={"sub": user.username, "id": user.id, "role": user.role})
     return {
-        "access_token": token, 
+        "access_token": token,
         "user": {
-            "id": user.id, 
-            "username": user.username, 
-            "role": user.role, 
+            "id": user.id,
+            "username": user.username,
+            "role": user.role,
             "profile_image": user.profile_image,
             "preferences": user.preferences
         }
     }
 
+
 @router.get("/users", response_model=list[schemas.UserResponse])
 def get_all_users(db: Session = Depends(get_db)):
     return db.query(models.User).all()
+
 
 @router.get("/users/{user_id}", response_model=schemas.UserResponse)
 def get_user_profile(user_id: int, db: Session = Depends(get_db)):
@@ -114,16 +138,13 @@ def get_user_profile(user_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="User not found.")
     return user
 
-from typing import Optional
-from fastapi import UploadFile, File, Form, APIRouter, Depends, HTTPException, status
-import os
-import shutil
 
 UPLOAD_DIR_USERS = "static/users"
 
+
 @router.patch("/users/{user_id}", response_model=schemas.UserResponse)
 async def update_user_profile(
-    user_id: int, 
+    user_id: int,
     username: Optional[str] = Form(None),
     email: Optional[str] = Form(None),
     password: Optional[str] = Form(None),
@@ -132,7 +153,7 @@ async def update_user_profile(
     db: Session = Depends(get_db)
 ):
     db_user = db.query(models.User).filter(models.User.id == user_id).first()
-    
+
     # 📝 DEBUG LOGGING
     try:
         with open("debug.log", "a", encoding="utf-8") as f:
@@ -141,7 +162,8 @@ async def update_user_profile(
             f.write(f"  - Received Username: {username}\n")
             f.write(f"  - Received Email: {email}\n")
             f.write(f"  - Received Preferences: {preferences}\n")
-            f.write(f"  - DB User Found: {db_user.username if db_user else 'NOT FOUND'}\n")
+            f.write(
+                f"  - DB User Found: {db_user.username if db_user else 'NOT FOUND'}\n")
     except:
         pass
 
@@ -154,7 +176,8 @@ async def update_user_profile(
             models.User.id != user_id
         ).first()
         if existing:
-            raise HTTPException(status_code=400, detail="This username is already taken.")
+            raise HTTPException(
+                status_code=400, detail="This username is already taken.")
         db_user.username = username
 
     if email is not None:
@@ -163,7 +186,8 @@ async def update_user_profile(
             models.User.id != user_id
         ).first()
         if existing:
-            raise HTTPException(status_code=400, detail="This email is already registered.")
+            raise HTTPException(
+                status_code=400, detail="This email is already registered.")
         db_user.email = email
 
     if password is not None and len(password) > 0:
@@ -176,7 +200,7 @@ async def update_user_profile(
             prefs_list = json.loads(preferences)
             if not isinstance(prefs_list, list):
                 prefs_list = [str(prefs_list)]
-            
+
             db_user.preferences = prefs_list
             # Force SQLAlchemy to detect change in JSON column
             flag_modified(db_user, "preferences")
@@ -194,6 +218,7 @@ async def update_user_profile(
     db.refresh(db_user)
     return db_user
 
+
 @router.patch("/users/{user_id}/soft-delete")
 def soft_delete(user_id: int, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.id == user_id).first()
@@ -203,20 +228,23 @@ def soft_delete(user_id: int, db: Session = Depends(get_db)):
     db.commit()
     return {"message": "User suspended successfully."}
 
+
 @router.patch("/users/{user_id}/restore")
 def restore(user_id: int, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found.")
-    
+
     if user.deleted_at:
         delta = datetime.utcnow() - user.deleted_at
         if delta.days >= 3:
-            raise HTTPException(status_code=400, detail="Cannot restore account after 3 days of suspension.")
-            
+            raise HTTPException(
+                status_code=400, detail="Cannot restore account after 3 days of suspension.")
+
     user.deleted_at = None
     db.commit()
     return {"message": "User restored successfully."}
+
 
 @router.post("/users/{user_id}/request-post-permission")
 def request_post_permission(user_id: int, db: Session = Depends(get_db)):
@@ -227,9 +255,12 @@ def request_post_permission(user_id: int, db: Session = Depends(get_db)):
     db.commit()
     return {"message": "Permission requested successfully."}
 
+
 def safe_json_load(data, default=[]):
-    if not data: return default
-    if isinstance(data, (list, dict)): return data
+    if not data:
+        return default
+    if isinstance(data, (list, dict)):
+        return data
     try:
         if isinstance(data, str):
             loaded = json.loads(data)
@@ -239,6 +270,7 @@ def safe_json_load(data, default=[]):
         return data
     except:
         return default
+
 
 @router.get("/users/{user_id}/reviews")
 def get_user_reviews(user_id: int, db: Session = Depends(get_db)):
@@ -257,7 +289,7 @@ def get_user_reviews(user_id: int, db: Session = Depends(get_db)):
     ).filter(
         models.Interaction.user_id == user_id
     ).order_by(desc(models.Interaction.visited_at)).all()
-    
+
     output = []
     for r in results:
         try:
@@ -275,6 +307,7 @@ def get_user_reviews(user_id: int, db: Session = Depends(get_db)):
         except:
             continue
     return output
+
 
 @router.get("/users/{user_id}/places", response_model=list[schemas.PlaceResponse])
 def get_user_places(user_id: int, db: Session = Depends(get_db)):

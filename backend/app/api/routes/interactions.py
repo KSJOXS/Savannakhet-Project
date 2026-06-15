@@ -10,6 +10,7 @@ import logging
 
 router = APIRouter()
 
+
 def run_gnn_training_background():
     db = SessionLocal()
     try:
@@ -21,6 +22,7 @@ def run_gnn_training_background():
     finally:
         db.close()
 
+
 @router.post("/log")
 def log_interaction(payload: schemas.InteractionLogCreate, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     """
@@ -30,11 +32,16 @@ def log_interaction(payload: schemas.InteractionLogCreate, background_tasks: Bac
     if payload.action_type == 'like':
         weight = 5.0
     elif payload.action_type == 'review' and payload.score is not None:
-        if payload.score == 1: weight = -5.0
-        elif payload.score == 2: weight = -2.0
-        elif payload.score == 3: weight = 1.0
-        elif payload.score == 4: weight = 3.0
-        elif payload.score == 5: weight = 5.0
+        if payload.score == 1:
+            weight = -5.0
+        elif payload.score == 2:
+            weight = -2.0
+        elif payload.score == 3:
+            weight = 1.0
+        elif payload.score == 4:
+            weight = 3.0
+        elif payload.score == 5:
+            weight = 5.0
 
     new_log = models.InteractionLog(
         user_id=payload.user_id,
@@ -44,19 +51,20 @@ def log_interaction(payload: schemas.InteractionLogCreate, background_tasks: Bac
     )
     db.add(new_log)
     db.commit()
-    
+
     # Trigger Auto-Train in background if it's a significant action
     if payload.action_type in ['like', 'review']:
         background_tasks.add_task(run_gnn_training_background)
 
     return {"status": "success", "message": "Interaction logged successfully", "weight_assigned": weight}
 
+
 @router.get("/test-graph-data")
 def test_build_graph(db: Session = Depends(get_db)):
     try:
         # เรียกใช้งาน Service
         data, user_map, place_map = build_gnn_graph(db)
-        
+
         # คืนค่าเป็นสรุปผลให้เราดูง่ายๆ บนเบราว์เซอร์
         return {
             "status": "success",
@@ -71,6 +79,7 @@ def test_build_graph(db: Session = Depends(get_db)):
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
+
 @router.get("/user/{user_id}/frequent")
 def get_frequent_interactions(user_id: int, limit: int = 5, db: Session = Depends(get_db)):
     """
@@ -79,7 +88,7 @@ def get_frequent_interactions(user_id: int, limit: int = 5, db: Session = Depend
     """
     from sqlalchemy import func
     from app.models import InteractionLog, Place
-    
+
     results = db.query(
         InteractionLog.place_id,
         func.count(InteractionLog.id).label('view_count')
@@ -87,7 +96,7 @@ def get_frequent_interactions(user_id: int, limit: int = 5, db: Session = Depend
      .group_by(InteractionLog.place_id)\
      .order_by(func.count(InteractionLog.id).desc())\
      .limit(limit).all()
-     
+
     frequent_places = []
     for r in results:
         place = db.query(Place).filter(Place.id == r.place_id).first()
@@ -96,5 +105,5 @@ def get_frequent_interactions(user_id: int, limit: int = 5, db: Session = Depend
                 "place": place,
                 "view_count": r.view_count
             })
-            
+
     return frequent_places

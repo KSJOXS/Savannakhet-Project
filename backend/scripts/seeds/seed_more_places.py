@@ -1,13 +1,14 @@
+from app.models import Category, Place
+from app.database import SessionLocal
 import sys
 import os
 import random
 import json
 
 # Ensure we can import app modules
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+sys.path.append(os.path.abspath(
+    os.path.join(os.path.dirname(__file__), '../../')))
 
-from app.database import SessionLocal
-from app.models import Category, Place
 
 places_data = [
     {
@@ -87,6 +88,7 @@ places_data = [
     }
 ]
 
+
 def seed_15_places():
     db = SessionLocal()
     try:
@@ -98,9 +100,11 @@ def seed_15_places():
         places_added = 0
         for p in places_data:
             # Check or create category
-            category = db.query(Category).filter(Category.name == p["cat_name"]).first()
+            category = db.query(Category).filter(
+                Category.name == p["cat_name"]).first()
             if not category:
-                category = Category(name=p["cat_name"], parent_type=p["parent_type"])
+                category = Category(
+                    name=p["cat_name"], parent_type=p["parent_type"])
                 db.add(category)
                 db.commit()
                 db.refresh(category)
@@ -123,7 +127,7 @@ def seed_15_places():
                 db.add(new_place)
                 places_added += 1
                 print(f"Added place: {new_place.name}")
-        
+
         db.commit()
         print(f"Successfully added {places_added} places.")
     except Exception as e:
@@ -131,6 +135,7 @@ def seed_15_places():
         db.rollback()
     finally:
         db.close()
+
 
 if __name__ == "__main__":
     seed_15_places()

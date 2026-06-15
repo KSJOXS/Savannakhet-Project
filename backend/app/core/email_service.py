@@ -7,13 +7,14 @@ import os
 # สำหรับทดสอบ คุณสามารถเปลี่ยนข้อมูลตรงนี้ได้เลย
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
-SMTP_USERNAME = "jo.xaysongkham99@gmail.com" # 👈 อีเมลของคุณ
+SMTP_USERNAME = "jo.xaysongkham99@gmail.com"  # 👈 อีเมลของคุณ
 SMTP_PASSWORD = "aqcq nuby tdii ziup"    # 👈 App Password จาก Google
+
 
 def send_reset_password_email(target_email: str, token: str):
     # ลิงก์ที่ถูกต้องสำหรับโปรเจกต์ของคุณ
     reset_link = f"http://localhost:5173/Savannakhet-Project/#/reset-password?token={token}"
-    
+
     # สร้างเนื้อหาอีเมล
     message = MIMEMultipart("alternative")
     message["Subject"] = "Savannakhet Smart Travel - Reset Your Password"
@@ -22,7 +23,7 @@ def send_reset_password_email(target_email: str, token: str):
 
     # แบบข้อความธรรมดา
     text = f"Hello,\n\nPlease use the following link to reset your password:\n{reset_link}\n\nIf you did not request this, please ignore this email."
-    
+
     # แบบ HTML (ให้ดูสวยงาม)
     html = f"""
     <html>
@@ -54,7 +55,7 @@ def send_reset_password_email(target_email: str, token: str):
     try:
         # เชื่อมต่อและส่งอีเมล
         with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
-            server.starttls() # เข้ารหัสข้อมูล
+            server.starttls()  # เข้ารหัสข้อมูล
             server.login(SMTP_USERNAME, SMTP_PASSWORD)
             server.sendmail(SMTP_USERNAME, target_email, message.as_string())
         return True

@@ -28,10 +28,12 @@ app.include_router(places.router)
 app.include_router(reviews.router)
 app.include_router(admin.router)
 app.include_router(favorites.router)
-app.include_router(recommendations.router, prefix="/api/recommendations", tags=["AI Recommendations"])
+app.include_router(recommendations.router,
+                   prefix="/api/recommendations", tags=["AI Recommendations"])
 
 # ✅ แก้ไขจุดที่ 2: จดทะเบียน interactions router
-app.include_router(interactions.router, prefix="/api/interactions", tags=["Interactions"])
+app.include_router(interactions.router,
+                   prefix="/api/interactions", tags=["Interactions"])
 
 # ✅ จดทะเบียน Settings Router
 app.include_router(settings.router, prefix="/api/settings", tags=["Settings"])
@@ -40,9 +42,12 @@ app.include_router(settings.router, prefix="/api/settings", tags=["Settings"])
 app.include_router(contact.router)
 
 # ✅ จดทะเบียน Utilities & Itinerary Router
-app.include_router(utilities.router, prefix="/api/utilities", tags=["Utilities"])
-app.include_router(itinerary.router, prefix="/api/itinerary", tags=["Itinerary"])
+app.include_router(
+    utilities.router, prefix="/api/utilities", tags=["Utilities"])
+app.include_router(
+    itinerary.router, prefix="/api/itinerary", tags=["Itinerary"])
 app.include_router(sections.router)
+
 
 @app.get("/")
 def home():

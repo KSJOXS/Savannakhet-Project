@@ -3,12 +3,12 @@ seed_landmarks.py
 รัน script นี้เพื่อเพิ่มข้อมูล Landmark categories และสถานที่ท่องเที่ยวลงฐานข้อมูล
 Command: python seed_landmarks.py
 """
+from app.models import Category, Place
+from app.database import SessionLocal
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from app.database import SessionLocal
-from app.models import Category, Place
 
 db = SessionLocal()
 
@@ -16,11 +16,16 @@ db = SessionLocal()
 # 1. LANDMARK CATEGORIES
 # ============================================================
 landmark_categories_data = [
-    {"name": "Temple & Pagoda",    "description": "Buddhist temples, pagodas, and religious sites", "parent_type": "landmark"},
-    {"name": "Museum",             "description": "Historical museums and cultural exhibitions",     "parent_type": "landmark"},
-    {"name": "Colonial Building",  "description": "French colonial era architecture",               "parent_type": "landmark"},
-    {"name": "Monument",           "description": "War memorials and commemorative monuments",      "parent_type": "landmark"},
-    {"name": "Market & Street",    "description": "Traditional markets and historic streets",       "parent_type": "landmark"},
+    {"name": "Temple & Pagoda",
+        "description": "Buddhist temples, pagodas, and religious sites", "parent_type": "landmark"},
+    {"name": "Museum",             "description": "Historical museums and cultural exhibitions",
+        "parent_type": "landmark"},
+    {"name": "Colonial Building",  "description": "French colonial era architecture",
+        "parent_type": "landmark"},
+    {"name": "Monument",           "description": "War memorials and commemorative monuments",
+        "parent_type": "landmark"},
+    {"name": "Market & Street",    "description": "Traditional markets and historic streets",
+        "parent_type": "landmark"},
 ]
 
 print("=== Creating Landmark Categories ===")
@@ -33,7 +38,8 @@ for cat_data in landmark_categories_data:
     ).first()
 
     if existing:
-        print(f"  [SKIP] Category already exists: {cat_data['name']} (id={existing.id})")
+        print(
+            f"  [SKIP] Category already exists: {cat_data['name']} (id={existing.id})")
         created_cats[cat_data["name"]] = existing.id
     else:
         cat = Category(**cat_data)
@@ -151,7 +157,8 @@ for place_data in landmark_places_data:
 
     existing = db.query(Place).filter(Place.name == place_data["name"]).first()
     if existing:
-        print(f"  [UPDATE] Place exists, setting status to approved: {place_data['name']}")
+        print(
+            f"  [UPDATE] Place exists, setting status to approved: {place_data['name']}")
         existing.status = "approved"
         continue
 
