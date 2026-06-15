@@ -477,7 +477,7 @@
       "id": 1,
       "name": "That Ing Hangs",
       "category": "culture",
-      "rating": 5.0,
+      "rating": 4.5,
       "location_name": "That Ing Hangs"
     },
     {
@@ -491,14 +491,14 @@
       "id": 3,
       "name": "Dong Tao",
       "category": "nature",
-      "rating": 4.0,
+      "rating": 4.7,
       "location_name": "Savannakhet"
     },
     {
       "id": 4,
       "name": "nang lin bar",
       "category": "chill",
-      "rating": 0.0,
+      "rating": 5.0,
       "location_name": "nang lin bar"
     },
     {
@@ -512,28 +512,28 @@
       "id": 7,
       "name": "Bueng Va",
       "category": "nature",
-      "rating": 0.0,
+      "rating": 5.0,
       "location_name": "That Ing Hang"
     },
     {
       "id": 8,
       "name": "Savan Holiday",
       "category": "nature",
-      "rating": 0.0,
+      "rating": 5.0,
       "location_name": "Savannakhet"
     },
     {
       "id": 9,
       "name": "Phu pha ",
       "category": "nature",
-      "rating": 0.0,
+      "rating": 4.0,
       "location_name": "thakhek"
     },
     {
       "id": 10,
       "name": "thung nang an",
       "category": "nature",
-      "rating": 0.0,
+      "rating": 5.0,
       "location_name": "thakhek"
     },
     {
@@ -659,7 +659,7 @@
       "id": 29,
       "name": "Dao hung 1",
       "category": "local_food",
-      "rating": 0.0,
+      "rating": 5.0,
       "location_name": "Savannakhet"
     },
     {
@@ -673,7 +673,7 @@
       "id": 31,
       "name": "ຕາດເຍືອງ",
       "category": "nature",
-      "rating": 5.0,
+      "rating": 3.5,
       "location_name": "thakhek"
     },
     {
@@ -883,7 +883,7 @@
       "id": 61,
       "name": "Long Pizza Laos",
       "category": "local_food",
-      "rating": 0.0,
+      "rating": 4.0,
       "location_name": "Talat Yen Plaza, Savannakhet"
     },
     {
@@ -911,7 +911,7 @@
       "id": 65,
       "name": "Sala Thai Restaurant",
       "category": "local_food",
-      "rating": 0.0,
+      "rating": 3.0,
       "location_name": "Center, Savannakhet"
     },
     {
@@ -6553,6 +6553,438 @@
       "weight": 1.0
     },
     {
+      "user_id": 29,
+      "place_id": 6,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 29,
+      "place_id": 6,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 29,
+      "place_id": 29,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 29,
+      "place_id": 29,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 29,
+      "place_id": 27,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 29,
+      "place_id": 27,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 29,
+      "place_id": 29,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 29,
+      "place_id": 29,
+      "action": "review",
+      "weight": 5.0
+    },
+    {
+      "user_id": 29,
+      "place_id": 29,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 29,
+      "place_id": 61,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 29,
+      "place_id": 61,
+      "action": "review",
+      "weight": 3.0
+    },
+    {
+      "user_id": 29,
+      "place_id": 61,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 28,
+      "place_id": 4,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 28,
+      "place_id": 4,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 28,
+      "place_id": 4,
+      "action": "review",
+      "weight": 5.0
+    },
+    {
+      "user_id": 28,
+      "place_id": 4,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 28,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 28,
+      "place_id": 3,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 28,
+      "place_id": 3,
+      "action": "review",
+      "weight": 5.0
+    },
+    {
+      "user_id": 28,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 28,
+      "place_id": 10,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 28,
+      "place_id": 10,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 28,
+      "place_id": 10,
+      "action": "review",
+      "weight": 5.0
+    },
+    {
+      "user_id": 28,
+      "place_id": 10,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 28,
+      "place_id": 31,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 28,
+      "place_id": 31,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 28,
+      "place_id": 16,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 28,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 28,
+      "place_id": 7,
+      "action": "review",
+      "weight": 5.0
+    },
+    {
+      "user_id": 28,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 24,
+      "place_id": 17,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 24,
+      "place_id": 17,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 24,
+      "place_id": 29,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 24,
+      "place_id": 29,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 24,
+      "place_id": 29,
+      "action": "review",
+      "weight": 5.0
+    },
+    {
+      "user_id": 24,
+      "place_id": 29,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 24,
+      "place_id": 32,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 24,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 24,
+      "place_id": 1,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 24,
+      "place_id": 1,
+      "action": "review",
+      "weight": 3.0
+    },
+    {
+      "user_id": 24,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 24,
+      "place_id": 65,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 24,
+      "place_id": 65,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 24,
+      "place_id": 65,
+      "action": "review",
+      "weight": 1.0
+    },
+    {
+      "user_id": 24,
+      "place_id": 65,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 22,
+      "place_id": 1,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 22,
+      "place_id": 1,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 22,
+      "place_id": 4,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 22,
+      "place_id": 4,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 22,
+      "place_id": 4,
+      "action": "review",
+      "weight": 5.0
+    },
+    {
+      "user_id": 22,
+      "place_id": 4,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 22,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 22,
+      "place_id": 3,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 22,
+      "place_id": 3,
+      "action": "review",
+      "weight": 5.0
+    },
+    {
+      "user_id": 22,
+      "place_id": 3,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 22,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 22,
+      "place_id": 7,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 22,
+      "place_id": 7,
+      "action": "review",
+      "weight": 5.0
+    },
+    {
+      "user_id": 22,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 22,
+      "place_id": 67,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 22,
+      "place_id": 67,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 22,
+      "place_id": 67,
+      "action": "review",
+      "weight": 5.0
+    },
+    {
+      "user_id": 22,
+      "place_id": 67,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 28,
+      "place_id": 7,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 25,
+      "place_id": 31,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 25,
+      "place_id": 31,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
+      "user_id": 25,
+      "place_id": 31,
+      "action": "review",
+      "weight": -2.0
+    },
+    {
+      "user_id": 25,
+      "place_id": 31,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 25,
+      "place_id": 9,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 25,
+      "place_id": 9,
+      "action": "review",
+      "weight": 3.0
+    },
+    {
+      "user_id": 25,
+      "place_id": 9,
+      "action": "view",
+      "weight": 1.0
+    },
+    {
+      "user_id": 25,
+      "place_id": 9,
+      "action": "like",
+      "weight": 5.0
+    },
+    {
       "user_id": 4,
       "place_id": 2,
       "action": "review",
@@ -6575,11 +7007,17 @@
       "place_id": null,
       "action": "review",
       "weight": 3.0
+    },
+    {
+      "user_id": 22,
+      "place_id": 8,
+      "action": "review",
+      "weight": 3.0
     }
   ],
   "stats": {
     "num_users": 58,
     "num_places": 71,
-    "num_interactions": 934
+    "num_interactions": 1007
   }
 }

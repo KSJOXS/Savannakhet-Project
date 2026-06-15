@@ -323,7 +323,7 @@ export default {
     day: 'ມື້',
     days: 'ມື້',
     generate: 'ສ້າງແຜນ',
-    yourItinerary: 'ແຜນການເດີນທາງ {days} ມື້ ໃນສະຫວັນນະເຂດຂອງທ່ານ',
+    yourItinerary: 'ແຜນການເດີນທາງໃນສະຫວັນນະເຂດຂອງທ່ານ',
     saveToTrips: 'ບັນທຶກໄວ້ໃນທຣິບຂອງຂ້ອຍ',
     saving: 'ກຳລັງບັນທຶກ...',
     planAnother: 'ວາງແຜນໃໝ່',

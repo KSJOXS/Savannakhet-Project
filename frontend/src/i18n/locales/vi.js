@@ -320,7 +320,7 @@ export default {
     day: 'Ngày',
     days: 'Ngày',
     generate: 'Tạo hành trình',
-    yourItinerary: 'Hành trình Savannakhet {days} ngày của bạn',
+    yourItinerary: 'Hành trình Savannakhet của bạn',
     saveToTrips: 'Lưu vào Chuyến đi của tôi',
     saving: 'Đang lưu...',
     planAnother: 'Lập kế hoạch khác',

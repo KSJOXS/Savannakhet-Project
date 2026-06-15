@@ -340,7 +340,7 @@ export default {
     day: 'Day',
     days: 'Days',
     generate: 'Generate',
-    yourItinerary: 'Your {days}-Day Savannakhet Itinerary',
+    yourItinerary: 'Your Savannakhet Itinerary',
     saveToTrips: 'Save to My Trips',
     saving: 'Saving...',
     planAnother: 'Plan Another Trip',

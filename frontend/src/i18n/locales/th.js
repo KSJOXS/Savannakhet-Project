@@ -348,7 +348,7 @@ export default {
     day: 'วัน',
     days: 'วัน',
     generate: 'สร้างแผน',
-    yourItinerary: 'แผนการเดินทาง {days} วัน ในสะหวันนะเขดของคุณ',
+    yourItinerary: 'แผนการเดินทางในสะหวันนะเขดของคุณ',
     saveToTrips: 'บันทึกในทริปของฉัน',
     saving: 'กำลังบันทึก...',
     planAnother: 'วางแผนใหม่',
