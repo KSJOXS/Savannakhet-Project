@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="ta-detail-page">
     <!-- Removed standard Navbar for immersive experience -->
 
@@ -1757,6 +1757,10 @@ const galleryImages = computed(() => {
       url.startsWith("data:")
     )
       return url;
+    // ถ้าเป็น base64 raw string (ไม่มี data: prefix)
+    if (url.length > 200 && !url.includes("/") && !url.includes("\\")) {
+      return `data:image/jpeg;base64,${url}`;
+    }
     return `http://127.0.0.1:8000${url.startsWith("/") ? "" : "/"}${url}`;
   };
 
@@ -2017,16 +2021,28 @@ const getRecCoverImage = (p) => {
     url = p.images[0].image_url || p.images[0].url || p.images[0];
   } else if (p.image_url) {
     try {
-      if (p.image_url.startsWith("[")) url = JSON.parse(p.image_url)[0];
-      else url = p.image_url;
+      if (p.image_url.startsWith("[")) {
+        const parsed = JSON.parse(p.image_url);
+        url = Array.isArray(parsed) && parsed.length > 0 ? parsed[0] : "";
+      } else {
+        url = p.image_url;
+      }
     } catch (e) {
       url = p.image_url;
     }
   }
-  if (!url) return "https://via.placeholder.com/300x200?text=No+Image";
-  return url.startsWith("http")
-    ? url
-    : `http://127.0.0.1:8000/${url.replace(/^\//, "")}`;
+  if (!url)
+    return "https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=800&q=80";
+  // รองรับ data: URI
+  if (url.startsWith("data:")) return url;
+  // รองรับ base64 raw string (ไม่มี slash, ยาวมาก)
+  if (url.length > 200 && !url.includes("/") && !url.includes("\\")) {
+    return `data:image/jpeg;base64,${url}`;
+  }
+  // รองรับ http absolute URL
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  // Relative path → prepend backend URL
+  return `http://127.0.0.1:8000/${url.replace(/^\//, "")}`;
 };
 
 const goToRecDetail = (id) => {

@@ -100,7 +100,7 @@ class PlaceBase(BaseModel):
 
 
 class PlaceUpdate(PlaceBase):
-    """ใช้สำหรับ PUT request ตอนแก้ไขข้อมูล"""
+    """Used for PUT request when editing data"""
     pass
 
 
@@ -175,7 +175,7 @@ class UserInteractionCreate(BaseModel):
     place_id: int
     rating: Optional[float] = None
     comment: Optional[str] = None
-    interaction_type: str  # เช่น 'click', 'like', 'visit'
+    interaction_type: str  # e.g. 'click', 'like', 'visit'
 
 # --- Site Settings ---
 
@@ -208,7 +208,7 @@ class InteractionLogCreate(BaseModel):
     user_id: int
     place_id: int
     action_type: str  # 'view', 'like', 'review'
-    score: Optional[int] = None  # ใช้กรณี review (1-5)
+    score: Optional[int] = None  # Used for reviews (1-5)
 
 # --- Recommendation ---
 

@@ -83,7 +83,7 @@ def get_categories(db: Session = Depends(get_db)):
 
 @router.post("/admin/categories")
 def create_category(cat: schemas.CategoryCreate, db: Session = Depends(get_db)):
-    # เพิ่มการเช็คชื่อซ้ำเบื้องต้น
+    # Add basic duplicate name check
     existing = db.query(models.Category).filter(
         models.Category.name == cat.name).first()
     if existing:
@@ -106,12 +106,12 @@ def delete_category(cat_id: int, db: Session = Depends(get_db)):
     db.commit()
     return {"message": "Category deleted successfully."}
 
-# --- 2. Review / Comment Management (สำหรับตาราง Admin) ---
+# --- 2. Review / Comment Management (For Admin table) ---
 
 
 @router.get("/admin/all-comments")
 def get_all_reviews_admin(db: Session = Depends(get_db)):
-    """ดึงรีวิวพร้อมข้อมูลสถานที่และรูปภาพ เพื่อแสดงในตาราง Admin"""
+    """Get reviews with place info and images for Admin table"""
     results = db.query(
         models.Interaction.id,
         models.Interaction.rating,
@@ -119,13 +119,13 @@ def get_all_reviews_admin(db: Session = Depends(get_db)):
         models.User.username,
         models.Place.id.label("place_id"),
         models.Place.name.label("place_name"),
-        models.Place.image_url.label("place_image")  # ดึงรูปมาโชว์ในตารางด้วย
+        models.Place.image_url.label("place_image")  # Fetch image to show in table
     ).join(models.User).join(models.Place).all()
 
     return results
 
 
-# เปลี่ยน path ให้เป็น /admin/ ตามมาตรฐาน
+# Change path to /admin/ as standard
 @router.delete("/admin/comments/{comment_id}")
 def delete_comment(comment_id: int, db: Session = Depends(get_db)):
     comment = db.query(models.Interaction).filter(
@@ -136,33 +136,33 @@ def delete_comment(comment_id: int, db: Session = Depends(get_db)):
     db.commit()
     return {"message": "Review deleted successfully."}
 
-# --- 3. System Statistics (สำหรับหน้า Dashboard) ---
+# --- 3. System Statistics (For Dashboard) ---
 
 
 @router.get("/admin/stats")
 def get_system_stats(db: Session = Depends(get_db)):
     try:
-        # 1. นับจำนวนพื้นฐาน
+        # 1. Count basic metrics
         total_users = db.query(models.User).count()
         total_places = db.query(models.Place).count()
-        # นับจากตาราง user_interactions ตามรูป DB ของคุณ
+        # Count from user_interactions table based on your DB schema
         total_reviews = db.query(models.Interaction).filter(
             models.Interaction.comment != None).count()
 
-        # 2. ดึงสถิติหมวดหมู่ (ดึงมาโชว์ในกราฟ Progress Bar)
+        # 2. Get category stats (For Progress Bar chart)
         cat_stats = db.query(
             models.Category.name,
             func.count(models.Place.id).label('count')
         ).join(models.Place, models.Place.category_id == models.Category.id).group_by(models.Category.name).all()
 
-        # 3. ดึงสถานที่เรตติ้งสูงสุด 5 อันดับ
+        # 3. Get top 5 highest rated places
         top_places = db.query(
             models.Place.id,
             models.Place.name,
             models.Place.rating_avg.label("rating")
         ).order_by(desc(models.Place.rating_avg)).limit(5).all()
 
-        # ส่งข้อมูลกลับไปในรูปแบบที่ Frontend เข้าใจง่าย
+        # Return data in a format easily understood by the Frontend
         return {
             "total_users": total_users,
             "total_places": total_places,

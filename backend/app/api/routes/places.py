@@ -46,12 +46,12 @@ def get_places(
 @router.get("/places/trending", response_model=List[schemas.PlaceResponse])
 def get_trending_places(limit: int = 10, db: Session = Depends(get_db)):
     """
-    ดึงสถานที่ที่เป็นที่นิยม (Trending) โดยคำนวณจาก InteractionLog
+    ดึงสถานที่ที่เป็นที่นิยม (Trending) calculated from InteractionLog
     """
     from sqlalchemy import func
     from sqlalchemy.orm import selectinload
 
-    # คำนวณหา Place ID ที่มี Interaction Weight รวมสูงสุด
+    # Calculate Place ID with highest total Interaction Weight
     popular_ids = db.query(
         models.InteractionLog.place_id,
         func.sum(models.InteractionLog.interaction_weight).label(
@@ -66,13 +66,13 @@ def get_trending_places(limit: int = 10, db: Session = Depends(get_db)):
 
     ids = [p[0] for p in popular_ids]
 
-    # ดึงข้อมูล Place ตาม ID ที่ได้
+    # Fetch Place data by ID
     places = db.query(models.Place)\
         .options(selectinload(models.Place.interactions))\
         .filter(models.Place.id.in_(ids))\
         .all()
 
-    # เรียงลำดับตามความนิยมเดิม
+    # Sort by original popularity
     places_sorted = sorted(places, key=lambda x: ids.index(x.id))
 
     for p in places_sorted:
@@ -95,7 +95,7 @@ def get_place_detail(place_id: int, db: Session = Depends(get_db)):
 @router.get("/places/{place_id}/fans", response_model=List[schemas.UserResponse])
 def get_place_fans(place_id: int, limit: int = 5, db: Session = Depends(get_db)):
     """
-    ดึงข้อมูลผู้ใช้ที่เคยมี Interaction กับสถานที่นี้ (Social Proof)
+    Get users who interacted with this place (Social Proof)
     """
     from sqlalchemy import desc
     fans = db.query(models.User).join(models.InteractionLog)\
@@ -309,8 +309,8 @@ async def update_place(
         if agoda_url is not None:
             db_place.agoda_url = agoda_url
 
-        # อัปเดตรูปภาพ:
-        # 1. โหลด existing_image_urls ที่ frontend บอกว่ายังต้องการเก็บไว้
+        # Update images:
+        # 1. Load existing_image_urls that frontend wants to keep
         kept_urls = []
         if existing_image_urls:
             try:
@@ -320,7 +320,7 @@ async def update_place(
             except Exception:
                 kept_urls = []
 
-        # 2. อัปโหลดรูปใหม่
+        # 2. Upload new images
         new_image_urls = []
         if images and images[0].filename:
             os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -331,19 +331,19 @@ async def update_place(
                         shutil.copyfileobj(file.file, buffer)
                     new_image_urls.append(f"/{file_path}")
 
-        # 3. รวม kept_urls + new_image_urls และ cap ที่ 10
-        # แปลง http://localhost:8000/path → /path เพื่อเก็บเป็น relative path ใน DB
+        # 3. Combine kept_urls + new_image_urls and cap at 10
+        # Convert http://localhost:8000/path → /path to store as relative path in DB
         normalized_kept = []
         for url in kept_urls:
             if url.startswith('http://localhost:8000'):
                 url = url[len('http://localhost:8000'):]
             elif url.startswith('http://') or url.startswith('https://'):
-                url = url  # เก็บ external URL ไว้เหมือนเดิม
+                url = url  # Keep external URL as is
             normalized_kept.append(url)
 
         final_urls = (normalized_kept + new_image_urls)[:10]
 
-        # 4. อัปเดต DB เฉพาะเมื่อมีการเปลี่ยนแปลง (มีรูปใหม่ หรือมีการลบรูปเก่า)
+        # 4. Update DB only if changed (new image added or old deleted)
         if new_image_urls or existing_image_urls is not None:
             db_place.image_url = json.dumps(final_urls)
 

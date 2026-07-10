@@ -6,7 +6,7 @@ router = APIRouter()
 EXCHANGE_RATES = {
     "base": "LAK",
     "rates": {
-        "THB": 0.0015,  # 1 LAK ≈ 0.0015 THB (หรือ 1 THB ≈ 650 LAK)
+        "THB": 0.0015,  # 1 LAK ≈ 0.0015 THB (or 1 THB ≈ 650 LAK)
         "USD": 0.000045  # 1 LAK ≈ 0.000045 USD
     },
     "last_updated": "2024-04-27"

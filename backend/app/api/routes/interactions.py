@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends, BackgroundTasks
 from sqlalchemy.orm import Session
 from app.database import get_db, SessionLocal
 
-# ดึงฟังก์ชันที่เราเพิ่งเขียนมาใช้
 from app.services.gnn_service import build_gnn_graph
 from app.services.recommendation import train_gnn_link_prediction
 from app import models, schemas
@@ -25,9 +24,7 @@ def run_gnn_training_background():
 
 @router.post("/log")
 def log_interaction(payload: schemas.InteractionLogCreate, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
-    """
-    เก็บ Log การใช้งาน (view, like, review) และคำนวณเป็น weight
-    """
+ 
     weight = 1.0
     if payload.action_type == 'like':
         weight = 5.0
@@ -62,13 +59,13 @@ def log_interaction(payload: schemas.InteractionLogCreate, background_tasks: Bac
 @router.get("/test-graph-data")
 def test_build_graph(db: Session = Depends(get_db)):
     try:
-        # เรียกใช้งาน Service
+        # Call Service
         data, user_map, place_map = build_gnn_graph(db)
 
-        # คืนค่าเป็นสรุปผลให้เราดูง่ายๆ บนเบราว์เซอร์
+        # Return a simple summary for easy viewing on browser
         return {
             "status": "success",
-            "message": "สร้าง Graph สำเร็จ!",
+            "message": "Graph created successfully!",
             "graph_summary": {
                 "total_users": data['user'].num_nodes,
                 "total_places": data['place'].num_nodes,
@@ -83,8 +80,8 @@ def test_build_graph(db: Session = Depends(get_db)):
 @router.get("/user/{user_id}/frequent")
 def get_frequent_interactions(user_id: int, limit: int = 5, db: Session = Depends(get_db)):
     """
-    ดึงข้อมูลสถานที่ที่ผู้ใช้คนนี้ เข้าดูบ่อยที่สุด (Frequently Viewed)
-    โดยคำนวณจาก InteractionLog
+    Get frequently viewed places for this user
+    calculated from InteractionLog
     """
     from sqlalchemy import func
     from app.models import InteractionLog, Place

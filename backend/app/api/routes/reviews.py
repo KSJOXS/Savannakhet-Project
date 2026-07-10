@@ -70,9 +70,9 @@ def safe_json_load(data, default=[]):
         return data
     try:
         if isinstance(data, str):
-            # บางครั้งข้อมูลใน DB อาจถูกครอบด้วย double quotes ซ้ำ (เช่น ""[]"")
+            # Sometimes DB data might be double-quoted (e.g. ""[]"")
             loaded = json.loads(data)
-            if isinstance(loaded, str):  # ถ้าโหลดแล้วยังเป็น string ให้โหลดอีกรอบ
+            if isinstance(loaded, str):  # If loaded as string, load again
                 return json.loads(loaded)
             return loaded
         return data
@@ -242,11 +242,11 @@ def get_recommendations(user_id: int, db: Session = Depends(get_db)):
     ).order_by(desc(models.Place.rating_avg)).limit(5).all()
 
 
-# GET /admin/all-comments — ดึงรีวิวทั้งหมดสำหรับหน้า Admin (JOIN ครบทั้งคนรีวิวและชื่อสถานที่)
+# GET /admin/all-comments — Get all reviews for Admin page (JOIN reviewer and place name)
 @router.get("/admin/all-comments")
 def get_admin_all_comments(db: Session = Depends(get_db)):
     try:
-        # ใช้ JOIN เพื่อดึงข้อมูลจาก 3 ตาราง: Interaction, User, และ Place
+        # Use JOIN to fetch data from 3 tables: Interaction, User, and Place
         results = db.query(
             models.Interaction.id,
             models.Interaction.rating,
@@ -274,11 +274,11 @@ def get_admin_all_comments(db: Session = Depends(get_db)):
             for r in results
         ]
     except Exception as e:
-        # ถ้าพัง จะแจ้งรายละเอียด Error ใน Terminal ของ FastAPI
+        # If fails, log error details in FastAPI terminal
         print(f"Error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-# DELETE /admin/comments/{comment_id} — สำหรับปุ่มลบในหน้า Admin
+# DELETE /admin/comments/{comment_id} — For delete button in Admin page
 
 
 @router.delete("/admin/comments/{comment_id}")
@@ -292,7 +292,7 @@ def delete_review(comment_id: int, db: Session = Depends(get_db)):
     db.commit()
     return {"message": "Review deleted successfully"}
 
-# PUT /reviews/{review_id} — สำหรับ User แก้ไขคอมเมนต์ตัวเอง
+# PUT /reviews/{review_id} — For User editing own comment
 
 
 @router.put("/reviews/{review_id}")
@@ -347,7 +347,7 @@ async def update_user_review(
 
     return {"message": "Review updated successfully"}
 
-# DELETE /reviews/{review_id} — สำหรับ User ลบคอมเมนต์ตัวเอง
+# DELETE /reviews/{review_id} — For User deleting own comment
 
 
 @router.delete("/reviews/{review_id}")

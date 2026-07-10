@@ -138,6 +138,275 @@
                   required
                 ></textarea>
               </div>
+
+              <!-- ✨ Travel Guide Sections — inline below Description -->
+              <div class="guide-sections-editor">
+                <div class="gse-header">
+                  <span class="gse-title">
+                    <i class="fas fa-book-open"></i>
+                    Travel Guide Sections
+                  </span>
+                  <span class="gse-count" v-if="sections.length > 0"
+                    >{{ sections.length }} section{{
+                      sections.length !== 1 ? "s" : ""
+                    }}</span
+                  >
+                </div>
+
+                <!-- Accordion list -->
+                <div class="gse-list" v-if="sections.length > 0">
+                  <div
+                    v-for="(sec, idx) in sections"
+                    :key="sec.id || idx"
+                    class="gse-item"
+                    :class="{
+                      'is-expanded': expandedSection === sec.id,
+                      'is-editing': editingSectionId === sec.id,
+                    }"
+                  >
+                    <!-- Accordion header row -->
+                    <div
+                      class="gse-item-bar"
+                      @click="toggleExpandSection(sec.id)"
+                    >
+                      <div class="gse-item-left">
+                        <div class="gse-thumb-wrap">
+                          <img
+                            v-if="sec.preview"
+                            :src="sec.preview"
+                            class="gse-thumb"
+                          />
+                          <div v-else class="gse-thumb-placeholder">
+                            <i class="fas fa-image"></i>
+                          </div>
+                        </div>
+                        <div class="gse-item-info">
+                          <span class="gse-item-label"
+                            >Section {{ idx + 1 }}</span
+                          >
+                          <span class="gse-item-desc-preview"
+                            >{{
+                              (sec.description || "").substring(0, 60) ||
+                              "No description"
+                            }}{{
+                              (sec.description || "").length > 60 ? "..." : ""
+                            }}</span
+                          >
+                        </div>
+                      </div>
+                      <div class="gse-item-right" @click.stop>
+                        <button
+                          type="button"
+                          class="gse-btn"
+                          @click="moveSectionUp(idx)"
+                          :disabled="idx === 0"
+                          title="Move Up"
+                        >
+                          <i class="fas fa-arrow-up"></i>
+                        </button>
+                        <button
+                          type="button"
+                          class="gse-btn"
+                          @click="moveSectionDown(idx)"
+                          :disabled="
+                            idx === sections.length - 1
+                          "
+                          title="Move Down"
+                        >
+                          <i class="fas fa-arrow-down"></i>
+                        </button>
+                        <button
+                          type="button"
+                          class="gse-btn edit"
+                          @click="startEditSection(sec)"
+                          title="Edit"
+                        >
+                          <i class="fas fa-pen"></i>
+                        </button>
+                        <button
+                          type="button"
+                          class="gse-btn danger"
+                          @click="deleteSection(idx)"
+                          title="Delete"
+                        >
+                          <i class="fas fa-trash"></i>
+                        </button>
+                        <button
+                          type="button"
+                          class="gse-btn chevron"
+                          @click="toggleExpandSection(sec.id)"
+                        >
+                          <i
+                            class="fas"
+                            :class="
+                              expandedSection === sec.id
+                                ? 'fa-chevron-up'
+                                : 'fa-chevron-down'
+                            "
+                          ></i>
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Expanded: view mode -->
+                    <div
+                      v-if="
+                        expandedSection === sec.id &&
+                        editingSectionId !== sec.id
+                      "
+                      class="gse-expand-body"
+                    >
+                      <img
+                        v-if="sec.preview"
+                        :src="sec.preview"
+                        class="gse-full-img"
+                      />
+                      <div v-if="!sec.preview" class="gse-no-img">
+                        <i class="fas fa-image"></i> No image yet
+                      </div>
+                      <p class="gse-desc-text">
+                        {{ sec.description || "(No description)" }}
+                      </p>
+                    </div>
+
+                    <!-- Expanded: edit mode -->
+                    <div
+                      v-if="editingSectionId === sec.id"
+                      class="gse-edit-body"
+                    >
+                      <label
+                        class="gse-upload-area"
+                        :class="{
+                          'has-img': editSectionPreview || sec.preview,
+                        }"
+                      >
+                        <img
+                          v-if="editSectionPreview"
+                          :src="editSectionPreview"
+                          class="gse-upload-img"
+                        />
+                        <div
+                          v-else-if="sec.preview"
+                          class="gse-upload-existing-wrap"
+                        >
+                          <img
+                            :src="sec.preview"
+                            class="gse-upload-img"
+                          />
+                          <span class="gse-change-hint"
+                            ><i class="fas fa-camera"></i> Click to change
+                            image</span
+                          >
+                        </div>
+                        <div v-else class="gse-upload-ph">
+                          <i class="fas fa-cloud-upload-alt"></i>
+                          <span>Click to upload image</span>
+                          <small>JPG / PNG / WebP</small>
+                        </div>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          @change="onEditSectionImage"
+                          hidden
+                        />
+                      </label>
+                      <textarea
+                        v-model="editSectionDesc"
+                        rows="5"
+                        placeholder="Write a detailed description for this section..."
+                        class="gse-textarea"
+                      ></textarea>
+                      <div class="gse-action-row">
+                        <button
+                          type="button"
+                          class="gse-save-btn"
+                          @click="saveEditSection(idx)"
+                        >
+                          <i class="fas fa-check"></i>
+                          Save Section
+                        </button>
+                        <button
+                          type="button"
+                          class="gse-cancel-btn"
+                          @click="cancelEditSection"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Add new section inline form -->
+                <div v-if="showAddSection" class="gse-add-form">
+                  <div class="gse-add-title">
+                    <i class="fas fa-plus-circle"></i> New Section
+                  </div>
+                  <label
+                    class="gse-upload-area"
+                    :class="{ 'has-img': newSectionPreview }"
+                  >
+                    <img
+                      v-if="newSectionPreview"
+                      :src="newSectionPreview"
+                      class="gse-upload-img"
+                    />
+                    <div v-else class="gse-upload-ph">
+                      <i class="fas fa-cloud-upload-alt"></i>
+                      <span>Click to upload image</span>
+                      <small>JPG / PNG / WebP · Max 5MB</small>
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      @change="onNewSectionImage"
+                      hidden
+                    />
+                  </label>
+                  <textarea
+                    v-model="newSectionDesc"
+                    rows="5"
+                    placeholder="Write a detailed description for this section (travel article style)..."
+                    class="gse-textarea"
+                  ></textarea>
+                  <div class="gse-action-row">
+                    <button
+                      type="button"
+                      class="gse-save-btn"
+                      @click="addSection"
+                    >
+                      <i class="fas fa-check"></i>
+                      Add Section
+                    </button>
+                    <button
+                      type="button"
+                      class="gse-cancel-btn"
+                      @click="
+                        showAddSection = false;
+                        newSectionPreview = null;
+                        newSectionDesc = '';
+                        newSectionFile = null;
+                      "
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+
+                <!-- + Add Section trigger button -->
+                <button
+                  v-if="!showAddSection"
+                  type="button"
+                  class="gse-add-trigger"
+                  @click="
+                    showAddSection = true;
+                    expandedSection = null;
+                  "
+                >
+                  <i class="fas fa-plus"></i>
+                  <span>Add Section</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -627,7 +896,7 @@ const form = ref({
   description: "",
   location_lat: 16.5662, // พิกัดเริ่มต้นที่สะหวันนะเขต
   location_lng: 104.7525,
-  is_published: true,
+  is_published: false,
   best_months: "",
   best_months_start: "Nov",
   best_months_end: "Feb",
@@ -890,16 +1159,128 @@ const savePlace = async () => {
       formData.append("images", file);
     });
 
-    await placeRepository.create(formData);
+    const res = await placeRepository.create(formData);
+    const newPlaceId = res.data.id;
 
-    alert("✅ Place added successfully!");
-    router.push("/admin/places"); // กลับไปหน้าตาราง
+    // Upload sections sequentially
+    for (let i = 0; i < sections.value.length; i++) {
+      const sec = sections.value[i];
+      const secFd = new FormData();
+      secFd.append("description", sec.description);
+      secFd.append("order_index", i);
+      if (sec.file) {
+        secFd.append("image", sec.file);
+      }
+      try {
+        await placeRepository.addSection(newPlaceId, secFd);
+      } catch (err) {
+        console.error("Failed to upload section", i, err);
+      }
+    }
+
+    alert("✅ Created successfully");
+    router.push("/admin/places");
   } catch (error) {
     console.error("Save Error:", error);
-    alert("❌ Failed to save place. " + (error.response?.data?.detail || ""));
+    alert("❌ Failed to create. " + (error.response?.data?.detail || ""));
   } finally {
     isSaving.value = false;
   }
+};
+
+// ══════════════════════════════════════════════
+// 📖 TRAVEL GUIDE SECTIONS (Local State)
+// ══════════════════════════════════════════════
+const sections = ref([]);
+const showAddSection = ref(false);
+
+const newSectionDesc = ref("");
+const newSectionFile = ref(null);
+const newSectionPreview = ref(null);
+
+const editingSectionId = ref(null);
+const editSectionDesc = ref("");
+const editSectionFile = ref(null);
+const editSectionPreview = ref(null);
+
+const expandedSection = ref(null);
+
+const toggleExpandSection = (id) => {
+  expandedSection.value = expandedSection.value === id ? null : id;
+};
+
+const onNewSectionImage = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  newSectionFile.value = file;
+  newSectionPreview.value = URL.createObjectURL(file);
+  e.target.value = "";
+};
+
+const onEditSectionImage = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  editSectionFile.value = file;
+  editSectionPreview.value = URL.createObjectURL(file);
+  e.target.value = "";
+};
+
+const addSection = () => {
+  sections.value.push({
+    id: Date.now().toString(),
+    description: newSectionDesc.value,
+    file: newSectionFile.value,
+    preview: newSectionPreview.value,
+  });
+  newSectionDesc.value = "";
+  newSectionFile.value = null;
+  newSectionPreview.value = null;
+  showAddSection.value = false;
+};
+
+const startEditSection = (sec) => {
+  editingSectionId.value = sec.id;
+  expandedSection.value = sec.id;
+  editSectionDesc.value = sec.description || "";
+  editSectionFile.value = null;
+  editSectionPreview.value = null;
+};
+
+const cancelEditSection = () => {
+  editingSectionId.value = null;
+  editSectionDesc.value = "";
+  editSectionFile.value = null;
+  editSectionPreview.value = null;
+};
+
+const saveEditSection = (idx) => {
+  const sec = sections.value[idx];
+  sec.description = editSectionDesc.value;
+  if (editSectionFile.value) {
+    sec.file = editSectionFile.value;
+    sec.preview = editSectionPreview.value;
+  }
+  cancelEditSection();
+};
+
+const deleteSection = (idx) => {
+  if (confirm("Delete this section?")) {
+    sections.value.splice(idx, 1);
+  }
+};
+
+const moveSectionUp = (idx) => {
+  if (idx === 0) return;
+  const temp = sections.value[idx];
+  sections.value[idx] = sections.value[idx - 1];
+  sections.value[idx - 1] = temp;
+};
+
+const moveSectionDown = (idx) => {
+  if (idx === sections.value.length - 1) return;
+  const temp = sections.value[idx];
+  sections.value[idx] = sections.value[idx + 1];
+  sections.value[idx + 1] = temp;
 };
 
 onMounted(async () => {
@@ -1639,5 +2020,436 @@ input:checked + .slider:before {
 
 .tag-input-container input:focus {
   outline: none !important;
+}
+/* ══════════════════════════════════════
+   NEW: GUIDE SECTIONS EDITOR (GSE)
+   Inline professional accordion look
+══════════════════════════════════════ */
+.guide-sections-editor {
+  margin-top: 25px;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  background: #ffffff;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.gse-header {
+  background: #f8fafc;
+  padding: 14px 20px;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.gse-title {
+  font-weight: 700;
+  color: #1e293b;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.gse-title i {
+  color: #6366f1;
+}
+
+.gse-count {
+  font-size: 0.75rem;
+  background: #e0e7ff;
+  color: #4338ca;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.gse-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.gse-item {
+  border-bottom: 1px solid #f1f5f9;
+  transition: all 0.2s;
+}
+
+.gse-item:last-child {
+  border-bottom: none;
+}
+
+.gse-item.is-expanded {
+  background: #fcfdfe;
+}
+
+.gse-item.is-editing {
+  background: #f5f7ff;
+}
+
+/* Item Bar (Accordion Header) */
+.gse-item-bar {
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.gse-item-bar:hover {
+  background: #f8fafc;
+}
+
+.gse-item-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex: 1;
+  min-width: 0;
+}
+
+.gse-thumb-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f1f5f9;
+  flex-shrink: 0;
+  border: 1px solid #e2e8f0;
+}
+
+.gse-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gse-thumb-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #cbd5e1;
+}
+
+.gse-item-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.gse-item-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #475569;
+}
+
+.gse-item-desc-preview {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gse-item-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.gse-btn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: #64748b;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.15s;
+}
+
+.gse-btn:hover:not(:disabled) {
+  background: #f1f5f9;
+  color: #1e293b;
+  border-color: #cbd5e1;
+}
+
+.gse-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.gse-btn.edit:hover {
+  background: #eff6ff;
+  color: #3b82f6;
+  border-color: #93c5fd;
+}
+
+.gse-btn.danger:hover {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #fca5a5;
+}
+
+.gse-btn.chevron {
+  border: none;
+  background: transparent;
+}
+
+/* Expanded Bodies */
+.gse-expand-body,
+.gse-edit-body {
+  padding: 0 20px 20px 20px;
+  animation: fadeInDown 0.3s ease-out;
+}
+
+.gse-full-img {
+  width: 100%;
+  max-height: 250px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 15px;
+  border: 1px solid #e2e8f0;
+}
+
+.gse-no-img {
+  width: 100%;
+  height: 120px;
+  background: #f8fafc;
+  border: 2px dashed #e2e8f0;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  font-size: 0.9rem;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.gse-desc-text {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #334155;
+  white-space: pre-line;
+  margin: 0;
+}
+
+/* Edit Body / Forms */
+.gse-edit-body {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.gse-upload-area {
+  display: block;
+  width: 100%;
+  height: 180px;
+  border: 2px dashed #cbd5e1;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s;
+}
+
+.gse-upload-area:hover {
+  border-color: #6366f1;
+  background: #f5f7ff;
+}
+
+.gse-upload-area.has-img {
+  border-style: solid;
+  border-color: #6366f1;
+}
+
+.gse-upload-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gse-upload-existing-wrap {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.gse-change-hint {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 600;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.gse-upload-area:hover .gse-change-hint {
+  opacity: 1;
+}
+
+.gse-upload-ph {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #94a3b8;
+}
+
+.gse-upload-ph i {
+  font-size: 2rem;
+  color: #cbd5e1;
+}
+
+.gse-upload-ph small {
+  font-size: 0.75rem;
+  opacity: 0.8;
+}
+
+.gse-textarea {
+  width: 100%;
+  padding: 15px;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #1e293b;
+  resize: vertical;
+  min-height: 120px;
+  box-sizing: border-box;
+}
+
+.gse-textarea:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.gse-action-row {
+  display: flex;
+  gap: 12px;
+}
+
+.gse-save-btn {
+  flex: 1;
+  background: #6366f1;
+  color: #fff;
+  border: none;
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: background 0.2s;
+}
+
+.gse-save-btn:hover:not(:disabled) {
+  background: #4f46e5;
+}
+
+.gse-save-btn:disabled {
+  opacity: 0.7;
+}
+
+.gse-cancel-btn {
+  padding: 12px 20px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.gse-cancel-btn:hover {
+  background: #f8fafc;
+  color: #1e293b;
+}
+
+/* Add Form Specifics */
+.gse-add-form {
+  padding: 20px;
+  background: #fafafe;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.gse-add-title {
+  font-weight: 700;
+  color: #6366f1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Add Trigger Button */
+.gse-add-trigger {
+  width: 100%;
+  padding: 15px;
+  background: #fff;
+  border: none;
+  color: #6366f1;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-top: 1px solid #f1f5f9;
+  transition: all 0.2s;
+}
+
+.gse-add-trigger:hover {
+  background: #f5f7ff;
+  color: #4f46e5;
+}
+
+input:checked + .slider:before,
+input:checked + .oh-slider:before {
+  transform: translateX(18px);
+}
+
+.label-with-action {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.year-round-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #6366f1;
+  font-size: 0.8rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.year-round-toggle input {
+  width: auto;
+  cursor: pointer;
 }
 </style>

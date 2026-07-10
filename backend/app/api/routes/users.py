@@ -20,26 +20,26 @@ router = APIRouter(tags=["Users Management"])
 @router.post("/forgot-password")
 def forgot_password(request: schemas.ForgotPasswordRequest, db: Session = Depends(get_db)):
     """
-    ขอกู้คืนรหัสผ่าน โดยส่ง Email เพื่อรับ Token
+    Request password reset by sending Email to get Token
     """
     user = db.query(models.User).filter(
         models.User.email == request.email).first()
-    # ส่งข้อความเดียวกันเสมอเพื่อความปลอดภัย (Prevent User Enumeration)
-    # ส่งสถานะสำเร็จเสมอเพื่อความปลอดภัย
+    # Always send same message for safety (Prevent User Enumeration)
+    # Always send success status for safety
     msg = {"status": "success", "message": "RESET_LINK_SENT"}
 
     if not user:
         return msg
 
-    # สร้าง Token แบบสุ่ม
+    # Generate random Token
     token = secrets.token_urlsafe(32)
 
-    # บันทึก Token ลง DB
+    # Save Token to DB
     new_reset = models.PasswordReset(email=request.email, token=token)
     db.add(new_reset)
     db.commit()
 
-    # 📧 ส่งอีเมลจริง
+    # 📧 Send actual email
     success = send_reset_password_email(request.email, token)
 
     if success:
@@ -54,28 +54,28 @@ def forgot_password(request: schemas.ForgotPasswordRequest, db: Session = Depend
 @router.post("/reset-password")
 def reset_password(data: schemas.PasswordResetConfirm, db: Session = Depends(get_db)):
     """
-    ยืนยันการตั้งรหัสผ่านใหม่ด้วย Token
+    Confirm new password with Token
     """
     reset_entry = db.query(models.PasswordReset).filter(
         models.PasswordReset.token == data.token).first()
     if not reset_entry:
         raise HTTPException(
-            status_code=400, detail="Token ไม่ถูกต้อง หรือหมดอายุแล้ว")
+            status_code=400, detail="Invalid or expired Token")
 
     user = db.query(models.User).filter(
         models.User.email == reset_entry.email).first()
     if not user:
         raise HTTPException(
-            status_code=404, detail="ไม่พบผู้ใช้งานที่เกี่ยวข้องกับ Token นี้")
+            status_code=404, detail="User not found for this Token")
 
-    # อัปเดตรหัสผ่านใหม่ (Hash ด้วย bcrypt)
+    # Update new password (Hash with bcrypt)
     user.password_hash = auth.get_password_hash(data.new_password)
 
-    # ลบ Token ที่ใช้แล้วทิ้ง
+    # Delete used Token
     db.delete(reset_entry)
     db.commit()
 
-    return {"message": "ตั้งรหัสผ่านใหม่สำเร็จแล้ว! คุณสามารถเข้าสู่ระบบด้วยรหัสผ่านใหม่ได้ทันที"}
+    return {"message": "Password reset successful! You can now log in."}
 
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)

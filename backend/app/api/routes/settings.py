@@ -11,19 +11,19 @@ from app.database import get_db
 router = APIRouter()
 
 HERO_IMAGES_DIR = "static/hero_images"
-# แนะนำให้เซฟเป็น Path สั้นลง DB จะปลอดภัยกว่าเวลาเปลี่ยน Domain
+# Recommend saving as short Path in DB, safer for Domain changes
 # STATIC_BASE_URL = "http://127.0.0.1:8000/static/hero_images"
 
 
 @router.get("/", response_model=List[schemas.SiteSettingResponse])
 def get_all_settings(db: Session = Depends(get_db)):
-    """ดึงข้อมูลการตั้งค่าทั้งหมด"""
+    """Get all settings"""
     return db.query(models.SiteSetting).all()
 
 
 @router.get("/{key_name}", response_model=schemas.SiteSettingResponse)
 def get_setting(key_name: str, db: Session = Depends(get_db)):
-    """ดึงข้อมูลการตั้งค่าตาม key_name"""
+    """Get setting by key_name"""
     setting = db.query(models.SiteSetting).filter(
         models.SiteSetting.key_name == key_name).first()
     if not setting:
@@ -33,7 +33,7 @@ def get_setting(key_name: str, db: Session = Depends(get_db)):
 
 @router.put("/{key_name}", response_model=schemas.SiteSettingResponse)
 def upsert_setting(key_name: str, setting_data: schemas.SiteSettingUpdate, db: Session = Depends(get_db)):
-    """เพิ่มหรืออัปเดตการตั้งค่า"""
+    """Add or update setting"""
     setting = db.query(models.SiteSetting).filter(
         models.SiteSetting.key_name == key_name).first()
     if setting:
@@ -52,26 +52,26 @@ def upsert_setting(key_name: str, setting_data: schemas.SiteSettingUpdate, db: S
     db.refresh(setting)
     return setting
 
-# 🚨 แก้ไข: รับค่า key_name แบบ Form Data จาก Vue
+# 🚨 Fix: Receive key_name as Form Data from Vue
 
 
 @router.post("/hero-images/upload")
 async def upload_hero_image(
     file: UploadFile = File(...),
-    key_name: str = Form("hero_images_public"),  # <- ค่าเริ่มต้นถ้าไม่ส่งมา
+    key_name: str = Form("hero_images_public"),  # <- Default if not sent
     db: Session = Depends(get_db)
 ):
     """
-    อัปโหลดรูปภาพ Hero ใหม่และบันทึก URL ลงในฐานข้อมูลแยกตามแท็บ (สูงสุด 10 รูป)
+    Upload new Hero images and save URL in DB by tab (max 10 images)
     """
     # Validate file type
     if not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="File must be an image")
 
-    # สร้างโฟลเดอร์ถ้าย้อนยังไม่มี
+    # Create folder if not exists
     os.makedirs(HERO_IMAGES_DIR, exist_ok=True)
 
-    # Load current list of hero images ตาม key_name ที่ส่งมา
+    # Load current list of hero images based on key_name
     setting = db.query(models.SiteSetting).filter(
         models.SiteSetting.key_name == key_name).first()
 
@@ -94,7 +94,7 @@ async def upload_hero_image(
     with open(filepath, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    # เซฟเป็น Relative Path ป้องกันบั๊กเรื่องโดเมน (Vue จะเอาไปเติม http://localhost:8000 ให้เอง)
+    # Save as Relative Path to prevent domain bugs (Vue will append http://localhost:8000)
     image_url = f"/static/hero_images/{filename}"
     current_images.append(image_url)
 
@@ -103,7 +103,7 @@ async def upload_hero_image(
         setting.value = json.dumps(current_images)
     else:
         setting = models.SiteSetting(
-            key_name=key_name,  # ใช้ key_name ที่รับมา
+            key_name=key_name,  # Use received key_name
             value=json.dumps(current_images),
             description=f"Hero images for {key_name}"
         )
@@ -113,18 +113,18 @@ async def upload_hero_image(
     return {"url": image_url, "all_images": current_images}
 
 
-# 🚨 แก้ไข: รับค่า key_name แบบ Query Parameter ตอนลบรูปด้วย
+# 🚨 Fix: Receive key_name as Query Parameter when deleting image
 @router.delete("/hero-images/remove")
 def remove_hero_image(
     image_url: str,
     key_name: str = "hero_images_public",
     db: Session = Depends(get_db)
 ):
-    # 1. ค้นหา Setting ตามคีย์ที่ส่งมา
+    # 1. Find Setting by key
     setting = db.query(models.SiteSetting).filter(
         models.SiteSetting.key_name == key_name).first()
 
-    # 2. 🚨 Fallback: ถ้าหาไม่เจอ ให้ลองหาจากคีย์เก่า (hero_images) เผื่อเป็นรูปสมัยก่อน
+    # 2. 🚨 Fallback: If not found, try old key (hero_images)
     if not setting and key_name == "hero_images_public":
         setting = db.query(models.SiteSetting).filter(
             models.SiteSetting.key_name == "hero_images").first()
@@ -138,19 +138,19 @@ def remove_hero_image(
     except:
         current_images = []
 
-    # 3. 🚨 พยายามเทียบ URL (เช็คแค่ส่วนท้ายของชื่อไฟล์ก็พอ ป้องกันปัญหาเรื่องโดเมน)
+    # 3. 🚨 Compare URL (check only end of filename to prevent domain issues)
     target_image = next(
         (img for img in current_images if image_url in img), None)
 
     if not target_image:
         raise HTTPException(status_code=404, detail="Image URL not in list")
 
-    # ลบออกจากลิสต์ใน DB
+    # Remove from list in DB
     current_images.remove(target_image)
     setting.value = json.dumps(current_images)
     db.commit()
 
-    # ลบไฟล์ออกจากโฟลเดอร์จริงๆ
+    # Delete actual file from folder
     try:
         filename = target_image.split("/")[-1]
         filepath = os.path.join(HERO_IMAGES_DIR, filename)

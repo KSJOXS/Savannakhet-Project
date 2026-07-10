@@ -277,4 +277,42 @@ router.beforeEach((to, from, next) => {
   }
 });
 
+// 📄 Dynamic Page Title
+router.afterEach((to) => {
+  const user = JSON.parse(localStorage.getItem("user"));
+  const isAdmin = user && user.role === "admin";
+
+  const pageTitles = {
+    Home: "Savannakhet Smart Travel",
+    Explore: "Explore Places - Savannakhet Smart Travel",
+    PlaceDetail: "Place Detail - Savannakhet Smart Travel",
+    Hotels: "Hotels - Savannakhet Smart Travel",
+    HotelDetail: "Hotel Detail - Savannakhet Smart Travel",
+    Restaurants: "Restaurants - Savannakhet Smart Travel",
+    Nature: "Nature - Savannakhet Smart Travel",
+    Landmarks: "Landmarks - Savannakhet Smart Travel",
+    TripPlanner: "Trip Planner - Savannakhet Smart Travel",
+    Favorites: "Favorites - Savannakhet Smart Travel",
+    Profile: "Profile - Savannakhet Smart Travel",
+    Community: "Community - Savannakhet Smart Travel",
+    About: "About Us - Savannakhet Smart Travel",
+    Contact: "Contact Us - Savannakhet Smart Travel",
+    FAQ: "FAQ - Savannakhet Smart Travel",
+    UserGuide: "User Guide - Savannakhet Smart Travel",
+    Login: "Login - Savannakhet Smart Travel",
+    Register: "Register - Savannakhet Smart Travel",
+    // Admin routes
+    AdminPlaces: "Manage Places - Admin",
+    AdminCategories: "Manage Categories - Admin",
+    AdminComments: "Manage Reviews - Admin",
+    AdminManageUsers: "Manage Users - Admin",
+    AdminDashboard: "Dashboard - Admin",
+    AdminSettings: "Settings - Admin",
+    AdminPendingPlaces: "Pending Approvals - Admin",
+    AdminMessages: "Messages - Admin",
+  };
+
+  document.title = pageTitles[to.name] || "Savannakhet Smart Travel";
+});
+
 export default router;

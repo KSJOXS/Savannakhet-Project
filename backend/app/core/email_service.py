@@ -3,28 +3,28 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import os
 
-# 🔧 การตั้งค่า SMTP (แนะนำให้ใช้ Environment Variables ในภายหลัง)
-# สำหรับทดสอบ คุณสามารถเปลี่ยนข้อมูลตรงนี้ได้เลย
+# 🔧 SMTP Settings (Recommend using Environment Variables later)
+# For testing, you can change these values directly
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
-SMTP_USERNAME = "jo.xaysongkham99@gmail.com"  # 👈 อีเมลของคุณ
-SMTP_PASSWORD = "aqcq nuby tdii ziup"    # 👈 App Password จาก Google
+SMTP_USERNAME = "jo.xaysongkham99@gmail.com"  # 👈 Your email
+SMTP_PASSWORD = "aqcq nuby tdii ziup"    # 👈 App Password from Google
 
 
 def send_reset_password_email(target_email: str, token: str):
-    # ลิงก์ที่ถูกต้องสำหรับโปรเจกต์ของคุณ
+    # Correct link for your project
     reset_link = f"http://localhost:5173/Savannakhet-Project/#/reset-password?token={token}"
 
-    # สร้างเนื้อหาอีเมล
+    # Create email content
     message = MIMEMultipart("alternative")
     message["Subject"] = "Savannakhet Smart Travel - Reset Your Password"
     message["From"] = f"Savannakhet Support <{SMTP_USERNAME}>"
     message["To"] = target_email
 
-    # แบบข้อความธรรมดา
+    # Plain text
     text = f"Hello,\n\nPlease use the following link to reset your password:\n{reset_link}\n\nIf you did not request this, please ignore this email."
 
-    # แบบ HTML (ให้ดูสวยงาม)
+    # HTML (for better looks)
     html = f"""
     <html>
     <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
@@ -53,9 +53,9 @@ def send_reset_password_email(target_email: str, token: str):
     message.attach(part2)
 
     try:
-        # เชื่อมต่อและส่งอีเมล
+        # Connect and send email
         with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
-            server.starttls()  # เข้ารหัสข้อมูล
+            server.starttls()  # Encrypt data
             server.login(SMTP_USERNAME, SMTP_PASSWORD)
             server.sendmail(SMTP_USERNAME, target_email, message.as_string())
         return True

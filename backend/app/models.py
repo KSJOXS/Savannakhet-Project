@@ -14,7 +14,7 @@ class Category(Base):
     # 'nature', 'restaurant', 'hotel', 'other'
     parent_type = Column(String(50), default='other')
 
-    # ความสัมพันธ์: หนึ่งหมวดหมู่มีได้หลายสถานที่
+    # Relationship: One category can have multiple places
     places = relationship("Place", back_populates="category")
 
 
@@ -29,7 +29,7 @@ class Place(Base):
     location_lng = Column(Numeric(11, 8))
     is_published = Column(Boolean, default=True)
 
-    # แก้ไข: เปลี่ยนจาก String(255) เป็น LONGTEXT เพื่อแก้ Error 1406 (Data too long)
+    # Fix: Changed from String(255) to LONGTEXT to resolve Error 1406 (Data too long)
     image_url = Column(LONGTEXT)
 
     # {"mon":{"open":"08:00","close":"17:00","closed":false}, ...}
@@ -56,7 +56,7 @@ class Place(Base):
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    # ความสัมพันธ์
+    # Relationship
     category = relationship("Category", back_populates="places")
     interactions = relationship("Interaction", back_populates="place")
     favorites = relationship(
@@ -73,7 +73,7 @@ class User(Base):
     username = Column(String(50), unique=True, nullable=False, index=True)
     email = Column(String(100), unique=True, nullable=False, index=True)
     password_hash = Column(String(255), nullable=False)
-    preferences = Column(JSON)  # เก็บความชอบ เช่น ["culture", "food"]
+    preferences = Column(JSON)  # Store preferences e.g. ["culture", "food"]
     role = Column(String(20), default="user")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     deleted_at = Column(DateTime, nullable=True)
@@ -81,7 +81,7 @@ class User(Base):
     # 'none', 'pending', 'approved'
     post_permission_status = Column(String(20), default="none")
 
-    # เชื่อมไปที่ Interactions
+    # Link to Interactions
     interactions = relationship(
         "Interaction", back_populates="user", cascade="all, delete")
     favorites = relationship(
@@ -101,7 +101,7 @@ class Interaction(Base):
     liked_by = Column(JSON, nullable=True)  # JSON array of user IDs
     visited_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    # เชื่อมกลับ
+    # Link back
     user = relationship("User", back_populates="interactions")
     place = relationship("Place", back_populates="interactions")
     post_comments = relationship(
@@ -130,7 +130,7 @@ class Favorite(Base):
     place_id = Column(Integer, ForeignKey("places.id"))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    # เชื่อมกลับ
+    # Link back
     user = relationship("User", back_populates="favorites")
     place = relationship("Place", back_populates="favorites")
 
@@ -145,8 +145,8 @@ class ContactMessage(Base):
     message = Column(Text, nullable=False)
     is_read = Column(Boolean, default=False)
     is_replied = Column(Boolean, default=False)
-    reply_text = Column(Text, nullable=True)   # เก็บข้อความที่ admin ตอบกลับ
-    replied_at = Column(DateTime(timezone=True), nullable=True)  # เวลาที่ตอบ
+    reply_text = Column(Text, nullable=True)   # Store admin reply message
+    replied_at = Column(DateTime(timezone=True), nullable=True)  # Reply timestamp
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 
@@ -168,7 +168,7 @@ class InteractionLog(Base):
     interaction_weight = Column(Numeric(5, 2), default=1.0)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    # เชื่อมกลับ
+    # Link back
     user = relationship("User", backref="interaction_logs")
     place = relationship("Place", backref="interaction_logs")
 

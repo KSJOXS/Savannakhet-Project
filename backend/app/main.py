@@ -5,7 +5,7 @@ from app import models
 from app.database import engine
 from app.api.routes import users, places, reviews, admin, favorites, interactions, recommendations, settings, contact, utilities, itinerary, sections
 
-# สร้างตารางใน DB
+# Create tables in DB
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Savannakhet Smart Travel API")
@@ -19,10 +19,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ติดตั้ง Static Files สำหรับเรียกดูรูปภาพ
+# Mount Static Files for images
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-# --- จดทะเบียน Route (เรียกใช้จากไฟล์ที่เราแยกไว้) ---
+# --- Register Routes (import from separate files) ---
 app.include_router(users.router)
 app.include_router(places.router)
 app.include_router(reviews.router)
@@ -31,17 +31,17 @@ app.include_router(favorites.router)
 app.include_router(recommendations.router,
                    prefix="/api/recommendations", tags=["AI Recommendations"])
 
-# ✅ แก้ไขจุดที่ 2: จดทะเบียน interactions router
+# ✅ Register interactions router
 app.include_router(interactions.router,
                    prefix="/api/interactions", tags=["Interactions"])
 
-# ✅ จดทะเบียน Settings Router
+# ✅ Register Settings Router
 app.include_router(settings.router, prefix="/api/settings", tags=["Settings"])
 
-# ✅ จดทะเบียน Contact Router
+# ✅ Register Contact Router
 app.include_router(contact.router)
 
-# ✅ จดทะเบียน Utilities & Itinerary Router
+# ✅ Register Utilities & Itinerary Router
 app.include_router(
     utilities.router, prefix="/api/utilities", tags=["Utilities"])
 app.include_router(

@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="submit-page-container">
     <div class="header-section">
       <div class="header-content">
@@ -203,8 +203,8 @@
                 ></textarea>
               </div>
 
-              <!-- ✨ Travel Guide Sections (Only in Edit Mode) -->
-              <div v-if="isEditMode" class="guide-sections-editor">
+              <!-- ✨ Travel Guide Sections -->
+              <div class="guide-sections-editor">
                 <div class="gse-header">
                   <span class="gse-title">
                     <i class="fas fa-book-open"></i>
@@ -234,8 +234,8 @@
                       <div class="gse-item-left">
                         <div class="gse-thumb-wrap">
                           <img
-                            v-if="sec.image_url"
-                            :src="getSectionImageUrl(sec.image_url)"
+                            v-if="sec.image_url || sec.preview"
+                            :src="sec.image_url ? getSectionImageUrl(sec.image_url) : sec.preview"
                             class="gse-thumb"
                           />
                           <div v-else class="gse-thumb-placeholder">
@@ -315,11 +315,11 @@
                       class="gse-expand-body"
                     >
                       <img
-                        v-if="sec.image_url"
-                        :src="getSectionImageUrl(sec.image_url)"
+                        v-if="sec.image_url || sec.preview"
+                        :src="sec.image_url ? getSectionImageUrl(sec.image_url) : sec.preview"
                         class="gse-full-img"
                       />
-                      <div v-if="!sec.image_url" class="gse-no-img">
+                      <div v-if="!sec.image_url && !sec.preview" class="gse-no-img">
                         <i class="fas fa-image"></i>
                         {{ t("submit.noImageYet") }}
                       </div>
@@ -336,7 +336,7 @@
                       <label
                         class="gse-upload-area"
                         :class="{
-                          'has-img': editSectionPreview || sec.image_url,
+                          'has-img': editSectionPreview || sec.image_url || sec.preview,
                         }"
                       >
                         <img
@@ -345,11 +345,11 @@
                           class="gse-upload-img"
                         />
                         <div
-                          v-else-if="sec.image_url"
+                          v-else-if="sec.image_url || sec.preview"
                           class="gse-upload-existing-wrap"
                         >
                           <img
-                            :src="getSectionImageUrl(sec.image_url)"
+                            :src="sec.image_url ? getSectionImageUrl(sec.image_url) : sec.preview"
                             class="gse-upload-img"
                           />
                           <span class="gse-change-hint"
@@ -488,10 +488,7 @@
                   <span>{{ t("submit.addSection") }}</span>
                 </button>
               </div>
-              <div v-else class="sections-placeholder">
-                <i class="fas fa-book-open"></i>
-                <p>{{ t("submit.sectionsPlaceholder") }}</p>
-              </div>
+
             </div>
           </div>
 
@@ -1267,7 +1264,25 @@ const submitPlace = async () => {
       await placeRepository.update(route.params.id, formData);
       alert(t("submit.successUpdate", "✅ Place updated successfully!"));
     } else {
-      await placeRepository.submit(formData);
+      const res = await placeRepository.submit(formData);
+      const newPlaceId = res.data.id;
+      
+      // Upload sections sequentially
+      for (let i = 0; i < sections.value.length; i++) {
+        const sec = sections.value[i];
+        const secFd = new FormData();
+        secFd.append("description", sec.description);
+        secFd.append("order_index", i);
+        if (sec.file) {
+          secFd.append("image", sec.file);
+        }
+        try {
+          await placeRepository.addSection(newPlaceId, secFd);
+        } catch (err) {
+          console.error("Failed to upload section", i, err);
+        }
+      }
+
       alert(
         t(
           "submit.successSubmit",
@@ -1470,24 +1485,37 @@ const onEditSectionImage = (e) => {
 };
 
 const addSection = async () => {
-  const id = route.params.id;
-  if (!id) return;
-  isSavingSection.value = true;
-  try {
-    const fd = new FormData();
-    fd.append("description", newSectionDesc.value);
-    fd.append("order_index", sections.value.length);
-    if (newSectionFile.value) fd.append("image", newSectionFile.value);
-    await placeRepository.addSection(id, fd);
+  if (isEditMode.value) {
+    const id = route.params.id;
+    if (!id) return;
+    isSavingSection.value = true;
+    try {
+      const fd = new FormData();
+      fd.append("description", newSectionDesc.value);
+      fd.append("order_index", sections.value.length);
+      if (newSectionFile.value) fd.append("image", newSectionFile.value);
+      await placeRepository.addSection(id, fd);
+      newSectionDesc.value = "";
+      newSectionFile.value = null;
+      newSectionPreview.value = null;
+      showAddSection.value = false;
+      await fetchSections();
+    } catch (e) {
+      alert("❌ Failed to add section.");
+    } finally {
+      isSavingSection.value = false;
+    }
+  } else {
+    sections.value.push({
+      id: Date.now().toString(),
+      description: newSectionDesc.value,
+      file: newSectionFile.value,
+      preview: newSectionPreview.value,
+    });
     newSectionDesc.value = "";
     newSectionFile.value = null;
     newSectionPreview.value = null;
     showAddSection.value = false;
-    await fetchSections();
-  } catch (e) {
-    alert("❌ Failed to add section.");
-  } finally {
-    isSavingSection.value = false;
   }
 };
 
@@ -1507,70 +1535,99 @@ const cancelEditSection = () => {
 };
 
 const saveEditSection = async (sectionId) => {
-  const id = route.params.id;
-  isSavingSection.value = true;
-  try {
-    const fd = new FormData();
-    fd.append("description", editSectionDesc.value);
-    if (editSectionFile.value) fd.append("image", editSectionFile.value);
-    await placeRepository.updateSection(id, sectionId, fd);
+  if (isEditMode.value) {
+    const id = route.params.id;
+    isSavingSection.value = true;
+    try {
+      const fd = new FormData();
+      fd.append("description", editSectionDesc.value);
+      if (editSectionFile.value) fd.append("image", editSectionFile.value);
+      await placeRepository.updateSection(id, sectionId, fd);
+      cancelEditSection();
+      await fetchSections();
+    } catch (e) {
+      alert("❌ Failed to update section.");
+    } finally {
+      isSavingSection.value = false;
+    }
+  } else {
+    const sec = sections.value.find((s) => s.id === sectionId);
+    if (sec) {
+      sec.description = editSectionDesc.value;
+      if (editSectionFile.value) {
+        sec.file = editSectionFile.value;
+        sec.preview = editSectionPreview.value;
+      }
+    }
     cancelEditSection();
-    await fetchSections();
-  } catch (e) {
-    alert("❌ Failed to update section.");
-  } finally {
-    isSavingSection.value = false;
   }
 };
 
 const deleteSection = async (sectionId) => {
-  if (!confirm("Delete this section?")) return;
-  const id = route.params.id;
-  try {
-    await placeRepository.deleteSection(id, sectionId);
-    await fetchSections();
-  } catch (e) {
-    alert("❌ Failed to delete section.");
+  if (!confirm(t("submit.deleteSection", "Delete this section?"))) return;
+  
+  if (isEditMode.value) {
+    const id = route.params.id;
+    try {
+      await placeRepository.deleteSection(id, sectionId);
+      await fetchSections();
+    } catch (e) {
+      alert("❌ Failed to delete section.");
+    }
+  } else {
+    sections.value = sections.value.filter((s) => s.id !== sectionId);
   }
 };
 
 const moveSectionUp = async (idx) => {
   if (idx === 0) return;
-  const id = route.params.id;
-  const sec = sections.value[idx];
-  const prev = sections.value[idx - 1];
-  try {
-    const fd1 = new FormData();
-    fd1.append("order_index", idx - 1);
-    const fd2 = new FormData();
-    fd2.append("order_index", idx);
-    await Promise.all([
-      placeRepository.updateSection(id, sec.id, fd1),
-      placeRepository.updateSection(id, prev.id, fd2),
-    ]);
-    await fetchSections();
-  } catch (e) {
-    console.error(e);
+  if (isEditMode.value) {
+    const id = route.params.id;
+    const sec = sections.value[idx];
+    const prev = sections.value[idx - 1];
+    try {
+      const fd1 = new FormData();
+      fd1.append("order_index", idx - 1);
+      const fd2 = new FormData();
+      fd2.append("order_index", idx);
+      await Promise.all([
+        placeRepository.updateSection(id, sec.id, fd1),
+        placeRepository.updateSection(id, prev.id, fd2),
+      ]);
+      await fetchSections();
+    } catch (e) {
+      console.error(e);
+    }
+  } else {
+    const temp = sections.value[idx];
+    sections.value[idx] = sections.value[idx - 1];
+    sections.value[idx - 1] = temp;
   }
 };
 
 const moveSectionDown = async (idx) => {
   if (idx === sections.value.length - 1) return;
-  const id = route.params.id;
-  const sec = sections.value[idx];
-  const next = sections.value[idx + 1];
-  try {
-    const fd1 = new FormData();
-    fd1.append("order_index", idx + 1);
-    const fd2 = new FormData();
-    fd2.append("order_index", idx);
-    await Promise.all([
-      placeRepository.updateSection(id, sec.id, fd1),
-      placeRepository.updateSection(id, next.id, fd2),
-    ]);
-    await fetchSections();
-  } catch (e) {
-    console.error(e);
+  if (isEditMode.value) {
+    const id = route.params.id;
+    const sec = sections.value[idx];
+    const next = sections.value[idx + 1];
+    try {
+      const fd1 = new FormData();
+      fd1.append("order_index", idx + 1);
+      const fd2 = new FormData();
+      fd2.append("order_index", idx);
+      await Promise.all([
+        placeRepository.updateSection(id, sec.id, fd1),
+        placeRepository.updateSection(id, next.id, fd2),
+      ]);
+      await fetchSections();
+    } catch (e) {
+      console.error(e);
+    }
+  } else {
+    const temp = sections.value[idx];
+    sections.value[idx] = sections.value[idx + 1];
+    sections.value[idx + 1] = temp;
   }
 };
 </script>

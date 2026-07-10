@@ -10,8 +10,8 @@ router = APIRouter()
 @router.get("/{user_id}")
 def get_user_recommendations(user_id: int, top_k: int = 5, db: Session = Depends(get_db)):
     """
-    ดึงข้อมูลสถานที่แนะนำสำหรับ User ID ที่ระบุ โดยใช้ AI (GNN Model)
-    - top_k: จำนวนสถานที่ที่ต้องการให้แนะนำ (ค่าเริ่มต้นคือ 5)
+    Get recommended places for specified User ID using AI (GNN Model)
+    - top_k: Number of places to recommend (default 5)
     """
     result = get_recommendations_for_user(
         db, user_id_from_db=user_id, top_k=top_k)
@@ -25,7 +25,7 @@ def get_user_recommendations(user_id: int, top_k: int = 5, db: Session = Depends
 @router.get("/place/{place_id}/similar")
 def get_similar_places_api(place_id: int, top_k: int = 3, db: Session = Depends(get_db)):
     """
-    ดึงข้อมูลสถานที่ใกล้เคียง/คล้ายคลึงกับสถานที่ปัจจุบัน โดยใช้ GNN Embeddings
+    Get similar/nearby places using GNN Embeddings
     """
     result = get_similar_places(db, target_place_id=place_id, top_k=top_k)
 

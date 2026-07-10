@@ -11,7 +11,7 @@ UPLOAD_DIR = "static/sections"
 
 
 # ──────────────────────────────────────────────
-# PUBLIC: ดึง sections ทั้งหมดของสถานที่
+# PUBLIC: Get all sections of a place
 # ──────────────────────────────────────────────
 @router.get("/places/{place_id}/sections", response_model=List[schemas.PlaceSectionResponse])
 def get_sections(place_id: int, db: Session = Depends(get_db)):
@@ -24,7 +24,7 @@ def get_sections(place_id: int, db: Session = Depends(get_db)):
 
 
 # ──────────────────────────────────────────────
-# ADMIN: เพิ่ม section ใหม่
+# ADMIN: Add new section
 # ──────────────────────────────────────────────
 @router.post("/admin/places/{place_id}/sections", response_model=schemas.PlaceSectionResponse)
 async def add_section(
@@ -60,7 +60,7 @@ async def add_section(
 
 
 # ──────────────────────────────────────────────
-# ADMIN: แก้ไข section
+# ADMIN: Edit section
 # ──────────────────────────────────────────────
 @router.put("/admin/places/{place_id}/sections/{section_id}", response_model=schemas.PlaceSectionResponse)
 async def update_section(
@@ -97,7 +97,7 @@ async def update_section(
 
 
 # ──────────────────────────────────────────────
-# ADMIN: ลบ section
+# ADMIN: Delete section
 # ──────────────────────────────────────────────
 @router.delete("/admin/places/{place_id}/sections/{section_id}")
 def delete_section(place_id: int, section_id: int, db: Session = Depends(get_db)):

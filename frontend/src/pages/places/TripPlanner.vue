@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="trip-planner-page">
     <!-- Back Button -->
     <button class="btn-back-floating" @click="goBack">
@@ -759,6 +759,20 @@ const removePlace = (dayLabel, index) => {
 const isAddingPlace = ref(false);
 const addingSlot = ref("");
 
+// Compute an auto-incremented time so places in the same slot never share the same time.
+// Each additional place in the same slot gets +90 minutes from the base time.
+const getNextTimeForSlot = (dayLabel, timeSlot) => {
+  const baseMinutes = { Morning: 9 * 60, Afternoon: 14 * 60, Evening: 19 * 60 };
+  const base = baseMinutes[timeSlot] ?? 9 * 60;
+  const count = (itinerary.value[dayLabel] || []).filter(
+    (p) => p.time_slot === timeSlot,
+  ).length;
+  const totalMinutes = base + count * 90;
+  const h = Math.floor(totalMinutes / 60) % 24;
+  const m = totalMinutes % 60;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+};
+
 const addPlace = async (dayLabel, timeSlot) => {
   if (isAddingPlace.value) return;
   isAddingPlace.value = true;
@@ -782,6 +796,9 @@ const addPlace = async (dayLabel, timeSlot) => {
 
     const response = await api.post("/api/itinerary/swap", payload);
     const newPlace = response.data;
+
+    // Override the time returned by the server with a unique incremented time
+    newPlace.time = getNextTimeForSlot(dayLabel, timeSlot);
 
     if (timeSlot === "Morning") {
       const lastMorningIdx = itinerary.value[dayLabel].findLastIndex(

@@ -92,8 +92,8 @@ def get_explainability(db: Session, user_id: int, recommended_place_id: int):
         .first()
 
     if liked:
-        return f"เพราะคุณเคยชอบ {liked[0]}"
-    return "ยอดนิยมในสะหวันนะเขต"
+        return f"Because you liked {liked[0]}"
+    return "Popular in Savannakhet"
 
 # --- Main logic ---
 
@@ -152,7 +152,7 @@ def get_recommendations_for_user(db: Session, user_id_from_db: int, top_k=5):
     data, user_map, place_map = build_gnn_graph(db)
 
     if user_id_from_db not in user_map:
-        return {"status": "error", "message": "ไม่พบผู้ใช้งานนี้ หรือยังไม่มีข้อมูลเพียงพอ (Cold Start)"}
+        return {"status": "error", "message": "User not found or insufficient data (Cold Start)"}
 
     mapped_user_id = user_map[user_id_from_db]
 
@@ -261,7 +261,7 @@ def get_similar_places(db: Session, target_place_id: int, top_k=3):
     data, user_map, place_map = build_gnn_graph(db)
 
     if target_place_id not in place_map:
-        return {"status": "error", "message": "ยังไม่มีข้อมูล Interaction ของสถานที่นี้มากพอ"}
+        return {"status": "error", "message": "Not enough interaction data for this place"}
 
     mapped_target_id = place_map[target_place_id]
 
@@ -298,7 +298,7 @@ def get_similar_places(db: Session, target_place_id: int, top_k=3):
         if place_obj:
             recommended_details.append({
                 "place": place_obj,
-                "reason": "สถานที่นี้มีสไตล์และผู้เยี่ยมชมคล้ายคลึงกัน",
+                "reason": "This place has similar style and visitors",
                 "score": round(score, 4)
             })
 

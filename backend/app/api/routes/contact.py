@@ -22,7 +22,7 @@ SITE_NAME = os.getenv("SITE_NAME", "Savannakhet Tourism")
 
 
 def send_email_reply(to_email: str, to_name: str, subject: str, reply_text: str):
-    """ส่ง email จริงไปหา user ที่ส่ง contact form"""
+    """Send actual email to user who submitted contact form"""
     if not SMTP_USER or not SMTP_PASS:
         print("⚠️  SMTP_USER or SMTP_PASS not set in .env — skipping real email send.")
         return False
@@ -148,7 +148,7 @@ def mark_as_read(msg_id: int, db: Session = Depends(get_db)):
     db.commit()
     return {"message": "Marked as read."}
 
-# --- ADMIN: Reply — ส่ง email จริงไปหา user ---
+# --- ADMIN: Reply — Send actual email to user ---
 
 
 @router.post("/api/admin/messages/{msg_id}/reply")
@@ -168,7 +168,7 @@ def reply_to_message(msg_id: int, reply_text: str = Form(...), db: Session = Dep
             reply_text=reply_text
         )
     except Exception as e:
-        # ยังคง mark ว่า replied แต่แจ้ง warning
+        # Still mark as replied but log warning
         msg.is_replied = True
         msg.reply_text = reply_text
         msg.replied_at = datetime.now(timezone.utc)

@@ -1,0 +1,774 @@
+<!-- ✨ Travel Guide Sections -->
+<div class="guide-sections-editor">
+  <div class="gse-header">
+    <span class="gse-title">
+      <i class="fas fa-book-open"></i>
+      {{ t("submit.guideSections") }}
+    </span>
+    <span class="gse-count" v-if="sections.length > 0">{{
+      t("submit.sectionCount", { count: sections.length })
+      }}</span>
+  </div>
+
+  <!-- Accordion list -->
+  <div class="gse-list" v-if="sections.length > 0">
+    <div v-for="(sec, idx) in sections" :key="sec.id || idx" class="gse-item" :class="{
+                      'is-expanded': expandedSection === sec.id,
+                      'is-editing': editingSectionId === sec.id,
+                    }">
+      <!-- Accordion header row -->
+      <div class="gse-item-bar" @click="toggleExpandSection(sec.id)">
+        <div class="gse-item-left">
+          <div class="gse-thumb-wrap">
+            <img v-if="sec.image_url" :src="getSectionImageUrl(sec.image_url)" class="gse-thumb" />
+            <div v-else class="gse-thumb-placeholder">
+              <i class="fas fa-image"></i>
+            </div>
+          </div>
+          <div class="gse-item-info">
+            <span class="gse-item-label">{{ t("submit.section") }} {{ idx + 1 }}</span>
+            <span class="gse-item-desc-preview">{{
+              (sec.description || "").substring(0, 60) ||
+              t("submit.noDescription")
+              }}{{
+              (sec.description || "").length > 60 ? "..." : ""
+              }}</span>
+          </div>
+        </div>
+        <div class="gse-item-right" @click.stop>
+          <button type="button" class="gse-btn" @click="moveSectionUp(idx)" :title="t('submit.moveUp')">
+            <i class="fas fa-arrow-up"></i>
+          </button>
+          <button type="button" class="gse-btn" @click="moveSectionDown(idx)" :title="t('submit.moveDown')">
+            <i class="fas fa-arrow-down"></i>
+          </button>
+          <button type="button" class="gse-btn edit" @click="startEditSection(sec)" :title="t('submit.edit')">
+            <i class="fas fa-pen"></i>
+          </button>
+          <button type="button" class="gse-btn danger" @click="deleteSection(sec.id)" :title="t('submit.delete')">
+            <i class="fas fa-trash"></i>
+          </button>
+          <button type="button" class="gse-btn chevron" @click="toggleExpandSection(sec.id)">
+            <i class="fas" :class="
+                              expandedSection === sec.id
+                                ? 'fa-chevron-up'
+                                : 'fa-chevron-down'
+                            "></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Expanded: view mode -->
+      <div v-if="
+                        expandedSection === sec.id &&
+                        editingSectionId !== sec.id
+                      " class="gse-expand-body">
+        <img v-if="sec.image_url" :src="getSectionImageUrl(sec.image_url)" class="gse-full-img" />
+        <div v-if="!sec.image_url" class="gse-no-img">
+          <i class="fas fa-image"></i>
+          {{ t("submit.noImageYet") }}
+        </div>
+        <p class="gse-desc-text">
+          {{ sec.description || t("submit.noDescription") }}
+        </p>
+      </div>
+
+      <!-- Expanded: edit mode -->
+      <div v-if="editingSectionId === sec.id" class="gse-edit-body">
+        <label class="gse-upload-area" :class="{
+                          'has-img': editSectionPreview || sec.image_url,
+                        }">
+          <img v-if="editSectionPreview" :src="editSectionPreview" class="gse-upload-img" />
+          <div v-else-if="sec.image_url" class="gse-upload-existing-wrap">
+            <img :src="getSectionImageUrl(sec.image_url)" class="gse-upload-img" />
+            <span class="gse-change-hint"><i class="fas fa-camera"></i>
+              {{ t("submit.changeImage") }}</span>
+          </div>
+          <div v-else class="gse-upload-ph">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <span>{{ t("submit.uploadImage") }}</span>
+            <small>{{ t("submit.imgFormatHint") }}</small>
+          </div>
+          <input type="file" accept="image/*" @change="onEditSectionImage" hidden />
+        </label>
+        <textarea v-model="editSectionDesc" rows="5" :placeholder="t('submit.sectionPlaceholder')"
+          class="gse-textarea"></textarea>
+        <div class="gse-action-row">
+          <button type="button" class="gse-save-btn" @click="saveEditSection(sec.id)" :disabled="isSavingSection">
+            <i class="fas" :class="
+                              isSavingSection
+                                ? 'fa-spinner fa-spin'
+                                : 'fa-check'
+                            "></i>
+            {{
+            isSavingSection
+            ? t("submit.saving")
+            : t("submit.saveSection")
+            }}
+          </button>
+          <button type="button" class="gse-cancel-btn" @click="cancelEditSection">
+            {{ t("submit.cancel") }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add new section inline form -->
+  <div v-if="showAddSection" class="gse-add-form">
+    <div class="gse-add-title">
+      <i class="fas fa-plus-circle"></i>
+      {{ t("submit.newSection") }}
+    </div>
+    <label class="gse-upload-area" :class="{ 'has-img': newSectionPreview }">
+      <img v-if="newSectionPreview" :src="newSectionPreview" class="gse-upload-img" />
+      <div v-else class="gse-upload-ph">
+        <i class="fas fa-cloud-upload-alt"></i>
+        <span>{{ t("submit.uploadImage") }}</span>
+        <small>{{ t("submit.imgFormatHint") }}</small>
+      </div>
+      <input type="file" accept="image/*" @change="onNewSectionImage" hidden />
+    </label>
+    <textarea v-model="newSectionDesc" rows="5" :placeholder="t('submit.sectionPlaceholder')"
+      class="gse-textarea"></textarea>
+    <div class="gse-action-row">
+      <button type="button" class="gse-save-btn" @click="addSection" :disabled="isSavingSection">
+        <i class="fas" :class="
+                          isSavingSection ? 'fa-spinner fa-spin' : 'fa-check'
+                        "></i>
+        {{
+        isSavingSection
+        ? t("submit.adding")
+        : t("submit.addSection")
+        }}
+      </button>
+      <button type="button" class="gse-cancel-btn" @click="
+                        showAddSection = false;
+                        newSectionPreview = null;
+                        newSectionDesc = '';
+                      ">
+        {{ t("submit.cancel") }}
+      </button>
+    </div>
+  </div>
+
+  <!-- + Add Section trigger button -->
+  <button v-if="!showAddSection" type="button" class="gse-add-trigger" @click="
+                    showAddSection = true;
+                    expandedSection = null;
+                  ">
+    <i class="fas fa-plus"></i>
+    <span>{{ t("submit.addSection") }}</span>
+  </button>
+</div>
+<div v-else class="sections-placeholder">
+  <i class="fas fa-book-open"></i>
+  <p>{{ t("submit.sectionsPlaceholder") }}</p>
+</div>
+</div>
+</div>
+
+<div class="card premium-details-card">
+  <div class="card-header">
+    <i class="fas fa-star"></i>
+    <span>{{ t("submit.premiumDetails") }}</span>
+  </div>
+  <div class="card-body">
+    <div class="input-row">
+      <div class="input-group">
+        <label class="label-with-action">
+          <span>{{ t("submit.bestMonths") }}</span>
+          <label class="year-round-toggle">
+            <input type="checkbox" v-model="form.is_year_round" />
+            <span>{{ t("submit.yearRound") }}</span>
+          </label>
+        </label>
+        <div v-if="!form.is_year_round" class="month-range fade-in"
+          style="display: flex; gap: 10px; align-items: center">
+          <select v-model="form.best_months_start" style="
+                        flex: 1;
+                        padding: 10px;
+                        border-radius: 8px;
+                        border: 1px solid #cbd5e1;
+                      ">
+            <option v-for="m in months" :key="m" :value="m">
+              {{ t("common." + m) }}
+            </option>
+          </select>
+          <span style="color: #94a3b8; font-weight: 600">{{
+            t("submit.to")
+            }}</span>
+          <select v-model="form.best_months_end" style="
+                        flex: 1;
+                        padding: 10px;
+                        border-radius: 8px;
+                        border: 1px solid #cbd5e1;
+                      ">
+            <option v-for="m in months" :key="m" :value="m">
+              {{ t("common." + m) }}
+            </option>
+          </select>
+        </div>
+        <div v-else style="
+                      padding: 10px;
+                      background: #f8fafc;
+                      border: 1px dashed #cbd5e1;
+                      border-radius: 8px;
+                      color: #64748b;
+                      font-weight: 600;
+                      text-align: center;
+                    ">
+          <i class="fas fa-calendar-check" style="margin-right: 8px"></i>
+          {{ t("submit.yearRound") }}
+        </div>
+      </div>
+      <div class="input-group">
+        <label>{{ t("submit.idealStay") }}</label>
+        <input v-model="form.ideal_stay" :placeholder="t('submit.idealStayPlaceholder')" />
+      </div>
+    </div>
+    <div class="input-row">
+      <div class="input-group">
+        <label class="label-with-action">
+          <span>{{ t("submit.dailyBudget") }}</span>
+          <label class="year-round-toggle">
+            <input type="checkbox" v-model="form.is_free" />
+            <span>{{ t("submit.free") }}</span>
+          </label>
+        </label>
+        <div v-if="!form.is_free" style="display: flex; gap: 10px; align-items: center">
+          <input type="number" v-model="form.budget_min" :placeholder="t('submit.min')" />
+          <span>-</span>
+          <input type="number" v-model="form.budget_max" :placeholder="t('submit.max')" />
+        </div>
+        <div v-else style="
+                      padding: 10px;
+                      background: #ecfdf5;
+                      border: 1px dashed #10b981;
+                      border-radius: 8px;
+                      color: #047857;
+                      font-weight: 700;
+                      text-align: center;
+                    ">
+          <i class="fas fa-gift" style="margin-right: 8px"></i>
+          {{ t("submit.freeEntry") }}
+        </div>
+      </div>
+      <div class="input-group">
+        <label>{{ t("submit.locationName") }}</label>
+        <input v-model="form.location_name" :placeholder="t('submit.locationPlaceholder')" />
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label>{{ t("submit.bestFor") }}</label>
+      <div class="tag-input-container">
+        <div class="tag-pills">
+          <span v-for="(tag, idx) in form.best_for" :key="idx" class="tag-pill">
+            {{ tag }}
+            <i class="fas fa-times" @click="removeTag('best_for', idx)"></i>
+          </span>
+        </div>
+        <input @keydown.enter.prevent="addTag('best_for', $event)" :placeholder="t('submit.tagPlaceholder')" />
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label>{{ t("submit.avoidIf") }}</label>
+      <div class="tag-input-container">
+        <div class="tag-pills">
+          <span v-for="(tag, idx) in form.avoid_if" :key="idx" class="tag-pill alert">
+            {{ tag }}
+            <i class="fas fa-times" @click="removeTag('avoid_if', idx)"></i>
+          </span>
+        </div>
+        <input @keydown.enter.prevent="addTag('avoid_if', $event)" :placeholder="t('submit.tagPlaceholder')" />
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card map-card">
+  <div class="card-header">
+    <i class="fas fa-map-marked-alt"></i>
+    <span>{{ t("submit.mapLocation") }}</span>
+    <div class="coords-display">
+      <span>LAT: {{ form.location_lat }}</span>
+      <span>LNG: {{ form.location_lng }}</span>
+    </div>
+  </div>
+  <div class="card-body p-0">
+    <div class="map-wrapper-large">
+      <div id="map-container"></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="right-column">
+  <div class="card upload-card">
+    <div class="card-header">
+      <i class="fas fa-images"></i>
+      <span>{{ t("submit.placeImages") }}</span>
+      <span class="img-count-badge">{{ images.length }} / 10</span>
+    </div>
+    <div class="card-body">
+      <div class="gallery-grid" v-if="images.length > 0">
+        <div v-for="(img, index) in images" :key="index" class="gallery-item" :class="{ 'is-cover': index === 0 }">
+          <img :src="img" class="gallery-img" alt="Place image" />
+
+          <div v-if="index === 0" class="cover-badge">
+            <i class="fas fa-star"></i> {{ t("submit.cover") }}
+          </div>
+
+          <div class="gallery-overlay">
+            <button v-if="index !== 0" type="button" class="img-action-btn set-cover-btn" @click="setCover(index)"
+              :title="t('submit.setCover')">
+              <i class="fas fa-star"></i>
+            </button>
+            <button type="button" class="img-action-btn delete-img-btn" @click="removeImage(index)"
+              :title="t('submit.delete')">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+
+        <label v-if="images.length < 10" class="gallery-add-btn">
+          <i class="fas fa-plus"></i>
+          <span>{{ t("submit.add") }}</span>
+          <input type="file" @change="onFileChange" accept="image/*" multiple hidden />
+        </label>
+      </div>
+
+      <div v-else class="upload-empty-state">
+        <i class="fas fa-cloud-upload-alt"></i>
+        <p>{{ t("submit.noImages") }}</p>
+        <label class="upload-first-btn">
+          <i class="fas fa-plus"></i> {{ t("submit.uploadImages") }}
+          <input type="file" @change="onFileChange" accept="image/*" multiple hidden />
+        </label>
+      </div>
+
+      <p class="upload-hint">
+        <i class="fas fa-info-circle"></i>
+        {{ t("submit.uploadHint") }}
+      </p>
+    </div>
+  </div>
+
+  <div class="card opening-hours-card">
+    <div class="card-header">
+      <i class="fas fa-clock"></i>
+      <span>{{ t("submit.openingHours") }}</span>
+      <div class="oh-actions">
+        <button type="button" @click="setAllClosed(false)" class="btn-oh-action">
+          {{ t("submit.open") }}
+        </button>
+        <button type="button" @click="setAllClosed(true)" class="btn-oh-action">
+          {{ t("submit.close") }}
+        </button>
+        <button type="button" @click="copyMondayToAll" class="btn-oh-action highlight">
+          {{ t("submit.copyMon") }}
+        </button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div v-for="day in weekDays" :key="day.key" class="oh-row" :class="{ 'is-closed': openingHours[day.key].closed }">
+        <div class="oh-day">
+          <label class="oh-switch">
+            <input type="checkbox" v-model="openingHours[day.key].closed" :true-value="false" :false-value="true" />
+            <span class="oh-slider"></span>
+          </label>
+          <span class="oh-label">{{ t("common." + day.key) }}</span>
+        </div>
+        <div class="oh-times" v-if="!openingHours[day.key].closed">
+          <div class="time-box">
+            <input type="time" v-model="openingHours[day.key].open" class="time-input" />
+          </div>
+          <span class="oh-dash"><i class="fas fa-arrow-right"></i></span>
+          <div class="time-box">
+            <input type="time" v-model="openingHours[day.key].close" class="time-input" />
+          </div>
+        </div>
+        <div class="oh-closed-container" v-else>
+          <span class="oh-closed-badge">{{ t("submit.closed") }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div v-if="isEditMode" class="card status-card">
+    <div class="card-header">
+      <i class="fas fa-cog"></i> {{ t("submit.statusCard") }}
+    </div>
+    <div class="card-body">
+      <div class="status-toggle-box" :class="form.is_published ? 'active' : 'draft'">
+        <div class="toggle-info">
+          <strong>{{ t("submit.statusLabel") }}</strong>
+          <span>{{
+            form.is_published
+            ? t("submit.statusPublic")
+            : t("submit.statusDraft")
+            }}</span>
+        </div>
+        <label class="switch">
+          <input type="checkbox" v-model="form.is_published" />
+          <span class="slider round"></span>
+        </label>
+      </div>
+
+      <div v-if="isEditMode && form.status === 'pending'" class="status-note-pending">
+        <i class="fas fa-clock"></i> {{ t("submit.pendingNote") }}
+      </div>
+
+      <p class="info-note" v-if="!isEditMode">
+        <i class="fas fa-shield-alt"></i> {{ t("submit.approvalNote") }}
+      </p>
+
+      <div class="btn-group-vertical">
+        <button type="submit" class="btn-submit-full" :disabled="isSaving">
+          <i class="fas" :class="
+                      isSaving
+                        ? 'fa-spinner fa-spin'
+                        : isEditMode
+                          ? 'fa-save'
+                          : 'fa-paper-plane'
+                    "></i>
+          {{
+          isSaving
+          ? isEditMode
+          ? t("submit.updating")
+          : t("submit.submitting")
+          : isEditMode
+          ? t("submit.updateBtn")
+          : t("submit.submitBtn")
+          }}
+        </button>
+        <button type="button" class="btn-cancel-full" @click="$router.push('/')">
+          {{ t("submit.cancel") }}
+        </button>
+      </div>
+    </div>
+  </div>
+  <div v-else class="card status-card">
+    <div class="card-body">
+      <div class="btn-group-vertical">
+        <button type="submit" class="btn-submit-full" :disabled="isSaving">
+          <i class="fas" :class="isSaving ? 'fa-spinner fa-spin' : 'fa-paper-plane'"></i>
+          {{
+          isSaving ? t("submit.submitting") : t("submit.submitBtn")
+          }}
+        </button>
+        <button type="button" class="btn-cancel-full" @click="$router.push('/')">
+          {{ t("submit.cancel") }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+</form>
+</div>
+</div>
+</template>
+
+<script setup>
+  /* global L */
+  import { ref, onMounted, nextTick, computed } from "vue";
+  import { useRouter, useRoute } from "vue-router";
+  import { placeRepository } from "@/repositories/placeRepository";
+  import { categoryRepository } from "@/repositories/categoryRepository";
+  import { userRepository } from "@/repositories/userRepository";
+  import { useAuth } from "@/composables/useAuth";
+  import { useI18n } from "@/composables/useI18n";
+
+  const { t } = useI18n();
+  const router = useRouter();
+  const route = useRoute();
+  const { user, login } = useAuth();
+  const categories = ref([]);
+  const map = ref(null);
+  const marker = ref(null);
+  const addressPaste = ref("");
+  const isSaving = ref(false);
+  const isSavingSection = ref(false);
+
+  const permissionStatus = ref("loading");
+  const isRequesting = ref(false);
+
+  const sections = ref([]);
+  const showAddSection = ref(false);
+  const editingSectionId = ref(null);
+  const expandedSection = ref(null);
+
+  const newSectionDesc = ref("");
+  const newSectionFile = ref(null);
+  const newSectionPreview = ref(null);
+
+  const editSectionDesc = ref("");
+  const editSectionFile = ref(null);
+  const editSectionPreview = ref(null);
+
+  const images = ref([]);
+  const rawFiles = ref([]);
+
+  const isEditMode = computed(() => !!route.params.id);
+  const showBookingLinks = ref(false);
+
+  const months = [
+    "jan",
+    "feb",
+    "mar",
+    "apr",
+    "may",
+    "jun",
+    "jul",
+    "aug",
+    "sep",
+    "oct",
+    "nov",
+    "dec",
+  ];
+
+  const form = ref({
+    name: "",
+    category_id: "",
+    description: "",
+    location_lat: 16.5662, // Savannakhet starting coordinates
+    location_lng: 104.7525,
+    best_months: "",
+    best_months_start: "Nov",
+    best_months_end: "Feb",
+    is_year_round: false,
+    ideal_stay: "",
+    budget_min: 150000,
+    budget_max: 500000,
+    is_free: false,
+    location_name: "",
+    best_for: [],
+    avoid_if: [],
+    booking_url: "",
+    agoda_url: "",
+    is_published: true,
+    status: "pending",
+  });
+
+  const isHotelCategory = computed(() => {
+    if (!form.value.category_id || !categories.value.length) return false;
+    const cat = categories.value.find((c) => c.id === form.value.category_id);
+    return (
+      cat &&
+      (cat.parent_type?.toLowerCase() === "hotel" ||
+        cat.name.toLowerCase().includes("hotel"))
+    );
+  });
+
+  const addTag = (field, event) => {
+    const val = event.target.value.trim();
+    if (val && !form.value[field].includes(val)) {
+      form.value[field].push(val);
+      event.target.value = "";
+    }
+  };
+
+  const removeTag = (field, index) => {
+    form.value[field].splice(index, 1);
+  };
+
+  const weekDays = [
+    { key: "mon", label: "mon" },
+    { key: "tue", label: "tue" },
+    { key: "wed", label: "wed" },
+    { key: "thu", label: "thu" },
+    { key: "fri", label: "fri" },
+    { key: "sat", label: "sat" },
+    { key: "sun", label: "sun" },
+  ];
+
+  const defaultDayHours = () => ({
+    open: "08:00",
+    close: "17:00",
+    closed: false,
+  });
+
+  const openingHours = ref({
+    mon: defaultDayHours(),
+    tue: defaultDayHours(),
+    wed: defaultDayHours(),
+    thu: defaultDayHours(),
+    fri: defaultDayHours(),
+    sat: defaultDayHours(),
+    sun: defaultDayHours(),
+  });
+
+  const setAllClosed = (isClosed) => {
+    weekDays.forEach((day) => {
+      openingHours.value[day.key].closed = isClosed;
+    });
+  };
+
+  const copyMondayToAll = () => {
+    const mon = openingHours.value.mon;
+    weekDays.forEach((day) => {
+      if (day.key !== "mon") {
+        openingHours.value[day.key] = { ...mon };
+      }
+    });
+  };
+
+  const initMap = () => {
+    if (map.value) return;
+    const lat = parseFloat(form.value.location_lat);
+    const lng = parseFloat(form.value.location_lng);
+
+    map.value = L.map("map-container", { zoomControl: false }).setView(
+      [lat, lng],
+      15,
+    );
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(
+      map.value,
+    );
+    L.control.zoom({ position: "bottomright" }).addTo(map.value);
+
+    marker.value = L.marker([lat, lng], { draggable: true }).addTo(map.value);
+
+    map.value.on("click", (e) => {
+      updateMarkerPosition(e.latlng.lat, e.latlng.lng);
+    });
+
+    marker.value.on("dragend", () => {
+      const pos = marker.value.getLatLng();
+      updateMarkerPosition(pos.lat, pos.lng);
+    });
+  };
+
+  const handlePasteAddress = (e) => {
+    const pasteData = e.clipboardData.getData("text");
+    addressPaste.value = pasteData;
+    setTimeout(() => searchFromAddress(), 100);
+  };
+
+  const searchFromAddress = () => {
+    if (!addressPaste.value) return;
+    const input = addressPaste.value.trim();
+    const urlMatch = input.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+    const coordMatch = input.match(/^(-?\d+\.\d+)[\s,]+(-?\d+\.\d+)$/);
+
+    let lat = null;
+    let lng = null;
+
+    if (urlMatch) {
+      lat = parseFloat(urlMatch[1]);
+      lng = parseFloat(urlMatch[2]);
+    } else if (coordMatch) {
+      lat = parseFloat(coordMatch[1]);
+      lng = parseFloat(coordMatch[2]);
+    }
+
+    if (lat !== null && lng !== null) {
+      map.value.setView([lat, lng], 17);
+      updateMarkerPosition(lat, lng);
+      return;
+    }
+
+    const geocoder = L.Control.Geocoder.nominatim();
+    geocoder.geocode(input, (results) => {
+      if (results && results.length > 0) {
+        const { center } = results[0];
+        map.value.setView(center, 17);
+        updateMarkerPosition(center.lat, center.lng);
+      } else {
+        alert(
+          t(
+            "submit.errLocationNotFound",
+            "Location not found. Try copying exact coordinates.",
+          ),
+        );
+      }
+    });
+  };
+
+  const updateMarkerPosition = (lat, lng) => {
+    const fixedLat = isNaN(lat)
+      ? 16.5662
+      : parseFloat(parseFloat(lat).toFixed(6));
+    const fixedLng = isNaN(lng)
+      ? 104.7525
+      : parseFloat(parseFloat(lng).toFixed(6));
+    if (marker.value) marker.value.setLatLng([fixedLat, fixedLng]);
+    form.value.location_lat = fixedLat;
+    form.value.location_lng = fixedLng;
+  };
+
+  const onFileChange = (e) => {
+    const files = Array.from(e.target.files);
+    files.forEach((file) => {
+      if (images.value.length >= 10) return;
+
+      if (file.size > 5 * 1024 * 1024) {
+        alert(
+          t(
+            "submit.errFileTooLarge",
+            `File ${file.name} is too large (Max 5MB).`,
+          ).replace("{name}", file.name),
+        );
+        return;
+      }
+
+      rawFiles.value.push(file);
+
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        images.value.push(ev.target.result);
+      };
+      reader.readAsDataURL(file);
+    });
+    e.target.value = "";
+  };
+
+  const removeImage = (index) => {
+    images.value.splice(index, 1);
+    rawFiles.value.splice(index, 1);
+  };
+
+  const setCover = (index) => {
+    const [img] = images.value.splice(index, 1);
+    images.value.unshift(img);
+
+    const [file] = rawFiles.value.splice(index, 1);
+    rawFiles.value.unshift(file);
+  };
+
+  const submitPlace = async () => {
+    if (!form.value.name || !form.value.category_id || !form.value.description) {
+      alert(
+        t(
+          "submit.errFillRequired",
+          "Please fill in Name, Category, and Description.",
+        ),
+      );
+      return;
+    }
+
+    if (!user.value || !user.value.id) {
+      alert(
+        t("submit.errMustBeLoggedIn", "You must be logged in to submit a place."),
+      );
+      router.push("/login");
+      return;
+    }
+
+    isSaving.value = true;
+    try {
+      const formData = new FormData();
+      formData.append("name", form.value.name);
+      formData.append("description", form.value.description);
+      formData.append("category_id", form.value.category_id);
+      formData.append("location_lat", form.value.location_lat);
+      formData.append("location_lng", form.value.location_lng);
+      formData.append("user_id", user.value.id);
+    } catch (error) {
+      console.error("Failed to save place:", error);
+    } finally {
+      isSaving.value = false;
+    }
+  }
